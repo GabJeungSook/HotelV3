@@ -5,6 +5,7 @@ use Livewire\Component;
 
 use App\Models\Frontdesk;
 use App\Models\Transaction;
+use Illuminate\Support\Facades\DB;
 
 class SalesReport extends Component
 {
@@ -52,17 +53,41 @@ class SalesReport extends Component
 
     public function generateReport()
     {
+        // $transactions = Transaction::query()
+        // ->whereHas('guest.checkInDetail', function ($q) {
+        //     $q->when($this->date_from, fn($q, $d) => $q->whereDate('check_in_at', '>=', $d))
+        //     ->when($this->date_to, fn($q, $d) => $q->whereDate('check_in_at', '<=', $d))
+        //     ->when($this->frontdesk, fn($q, $f) => $q->where('frontdesk_id', $f));
+        // })
+        // ->when($this->shift, function ($q, $shift) {
+        //     $q->whereHas('room.checkOutGuestReports', function ($q2) use ($shift) {
+        //         $q2->where('shift', $shift);
+        //     });
+        // });
+
         $transactions = Transaction::query()
-        ->whereHas('room.latestCheckInDetail', function ($q) {
-            $q->when($this->date_from, fn($q, $d) => $q->whereDate('check_in_at', '>=', $d))
-            ->when($this->date_to, fn($q, $d) => $q->whereDate('check_in_at', '<=', $d))
-            ->when($this->frontdesk, fn($q, $f) => $q->where('frontdesk_id', $f));
-        })
-        ->when($this->shift, function ($q, $shift) {
-            $q->whereHas('room.checkOutGuestReports', function ($q2) use ($shift) {
-                $q2->where('shift', $shift);
+            ->whereHas('room.latestCheckInDetail', function ($q) {
+                $q->when($this->date_from, fn($q, $d) => $q->whereDate('check_out_at', '>=', $d))
+                ->when($this->date_to, fn($q, $d) => $q->whereDate('check_out_at', '<=', $d))
+                ->when($this->frontdesk, fn($q, $f) => $q->where('frontdesk_id', $f));
+            })
+            ->when($this->shift, function ($q, $shift) {
+                $q->whereHas('room.latestCheckInDetail', function ($q2) use ($shift) {
+
+                    if ($shift === 'AM') {
+                        $q2->whereTime(DB::raw('TIME(check_out_at)'), '>=', '08:00:00')
+                            ->whereTime(DB::raw('TIME(check_out_at)'), '<', '20:00:00');
+                    }
+
+                    if ($shift === 'PM') {
+                        $q2->where(function ($sub) {
+                            $sub->whereTime(DB::raw('TIME(check_out_at)'), '>=', '20:00:00')
+                                ->orWhereTime(DB::raw('TIME(check_out_at)'), '<', '08:00:00');
+                        });
+                    }
+
+                });
             });
-        });
 
         switch ($this->type) {
             case 'Daily':

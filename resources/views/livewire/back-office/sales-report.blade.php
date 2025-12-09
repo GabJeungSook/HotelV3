@@ -253,18 +253,27 @@
                 @endif
                 <td class="px-3 border-gray-700 py-1 border uppercase">
                     @if($item->room->checkOutGuestReports())
-                    {{ $item->room->checkOutGuestReports()->first()?->checkinDetail->frontdesk->name }}
+                    {{ $item->room->latestCheckInDetail->frontdesk->name }}
                         {{-- {{ ($item->room->latestCheckInDetail?->frontdesk_id !=  $item->room->checkOutGuestReports()->first()?->frontdesk->id) ? 'FWD: '.$item->room->checkOutGuestReports()->first()?->frontdesk->name : $item->room->checkOutGuestReports()->first()?->frontdesk->name }} --}}
                     @endif
                 </td>
                 <td class="px-3 border-gray-700 py-1 border uppercase">
                     @if($item->room->checkOutGuestReports())
-                        {{ ($item->room->checkOutGuestReports()->first()?->checkinDetail->frontdesk->id !=  $item->room->checkOutGuestReports()->first()?->frontdesk->id) ? 'FWD: '.$item->room->checkOutGuestReports()->first()?->frontdesk->name : $item->room->checkOutGuestReports()->first()?->frontdesk->name }}
+                        {{ ($item->room->latestCheckInDetail->frontdesk->id !=  $item->room->checkOutGuestReports()->first()?->frontdesk->id) ? 'FWD: '.$item->room->checkOutGuestReports()->first()?->frontdesk->name : $item->room->latestCheckInDetail->frontdesk->name }}
                     @endif
                 </td>
                 <td class="px-3 border-gray-700 py-1 border">
                     @if($item->room->checkOutGuestReports())
-                     {{ $item->room->checkOutGuestReports()->first()?->shift  }}
+                        @if($item->room->checkOutGuestReports()->first()?->checkinDetail->check_out_at)
+                            @php
+                                $checkOutTime = \Carbon\Carbon::parse($item->room->latestCheckInDetail?->check_out_at);
+                                $hour = $checkOutTime->hour;
+                                $shift = ($hour >= 8 && $hour < 20) ? 'AM' : 'PM';
+                            @endphp
+                            {{ $shift}}
+                        @endif
+
+                     {{-- {{ $item->room->checkOutGuestReports()->first()?->shift  }} --}}
                     @endif
                 </td>
                 <td class="px-3 border-gray-700 py-1 border">
