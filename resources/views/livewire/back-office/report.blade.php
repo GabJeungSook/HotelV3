@@ -2,174 +2,191 @@
   <div>
     <h2 class="text-sm font-medium text-gray-500">Select Reports</h2>
     <ul role="list" class="mt-3 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
-      <li class="col-span-1 flex rounded-md overflow-auto shadow-sm">
-        <div
-          class="flex w-16 flex-shrink-0 items-center justify-center bg-pink-600 rounded-l-md text-sm font-medium text-white">
-          <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="currentColor" stroke="none" viewBox="0 0 24 24">
-            <path
-              d="m20 8-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM9 19H7v-9h2v9zm4 0h-2v-6h2v6zm4 0h-2v-3h2v3zM14 9h-1V4l5 5h-4z">
-            </path>
-          </svg>
-        </div>
-        <div
-          class="flex flex-1 items-center justify-between truncate rounded-r-md border-t border-r border-b border-gray-200 bg-white">
-          <div class="flex-1 truncate px-4 py-4 text-sm">
-            <a href="#" class="font-medium text-gray-700 text-lg uppercase hover:text-gray-600">NEW GUEST
-              REPORT</a>
-          </div>
-          <div class="flex-shrink-0 pr-2">
-            <x-button.circle gray icon="arrow-right" wire:click="openReport(1)" spinner="openReport(1)" />
-          </div>
-        </div>
+        <li>
+            <div
+                wire:click="openReport(1)"
+                class="col-span-1 flex rounded-md overflow-hidden shadow-sm cursor-pointer
+                    transform transition duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            >
+                <div class="flex w-16 flex-shrink-0 items-center justify-center
+                            bg-pink-600 rounded-l-md text-sm font-medium text-white">
+                    <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="currentColor" stroke="none" viewBox="0 0 24 24">
+                        <path d="m20 8-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM9 19H7v-9h2v9zm4 0h-2v-6h2v6zm4 0h-2v-3h2v3zM14 9h-1V4l5 5h-4z"></path>
+                    </svg>
+                </div>
+
+                <div class="flex flex-1 items-center justify-between truncate rounded-r-md
+                            border border-gray-200 bg-white">
+                    <div class="flex-1 truncate px-4 py-4 text-sm">
+                        <span class="font-medium text-gray-700 text-lg uppercase">
+                            NEW GUEST REPORT
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </li>
+
+      <li>
+         <div
+                wire:click="openReport(2)"
+                class="col-span-1 flex rounded-md overflow-hidden shadow-sm cursor-pointer
+                    transform transition duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            >
+                <div class="flex w-16 flex-shrink-0 items-center justify-center
+                            bg-blue-600 rounded-l-md text-sm font-medium text-white">
+                    <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="currentColor" stroke="none" viewBox="0 0 24 24">
+                        <path d="m20 8-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM9 19H7v-9h2v9zm4 0h-2v-6h2v6zm4 0h-2v-3h2v3zM14 9h-1V4l5 5h-4z"></path>
+                    </svg>
+                </div>
+
+                <div class="flex flex-1 items-center justify-between truncate rounded-r-md
+                            border border-gray-200 bg-white">
+                    <div class="flex-1 truncate px-4 py-4 text-sm">
+                        <span class="font-medium text-gray-700 text-lg uppercase">
+                            CHECK-OUT GUEST REPORT
+                        </span>
+                    </div>
+                </div>
+            </div>
       </li>
-      <li class="col-span-1 flex rounded-md overflow-auto shadow-sm">
-        <div
-          class="flex w-16 flex-shrink-0 items-center justify-center bg-blue-600 rounded-l-md text-sm font-medium text-white">
-          <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="currentColor" stroke="none"
-            viewBox="0 0 24 24">
-            <path
-              d="m20 8-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM9 19H7v-9h2v9zm4 0h-2v-6h2v6zm4 0h-2v-3h2v3zM14 9h-1V4l5 5h-4z">
-            </path>
-          </svg>
-        </div>
-        <div
-          class="flex flex-1 items-center justify-between truncate rounded-r-md border-t border-r border-b border-gray-200 bg-white">
-          <div class="flex-1 truncate px-4 py-4 text-sm">
-            <a href="#" class="font-medium text-gray-700 text-lg uppercase hover:text-gray-600">CHECK-OUT GUEST
-              REPORT</a>
-          </div>
-          <div class="flex-shrink-0 pr-2">
-            <x-button.circle gray icon="arrow-right" wire:click="openReport(2)" spinner="openReport(2)" />
-          </div>
-        </div>
+      <li>
+            <div
+                wire:click="openReport(3)"
+                class="col-span-1 flex rounded-md overflow-hidden shadow-sm cursor-pointer
+                    transform transition duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            >
+                <div class="flex w-16 flex-shrink-0 items-center justify-center
+                            bg-green-600 rounded-l-md text-sm font-medium text-white">
+                    <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="currentColor" stroke="none" viewBox="0 0 24 24">
+                        <path d="m20 8-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM9 19H7v-9h2v9zm4 0h-2v-6h2v6zm4 0h-2v-3h2v3zM14 9h-1V4l5 5h-4z"></path>
+                    </svg>
+                </div>
+
+                <div class="flex flex-1 items-center justify-between truncate rounded-r-md
+                            border border-gray-200 bg-white">
+                    <div class="flex-1 truncate px-4 py-4 text-sm">
+                        <span class="font-medium text-gray-700 text-lg uppercase">
+                            GUEST PER ROOM TYPE REPORT
+                        </span>
+                    </div>
+                </div>
+            </div>
       </li>
-      <li class="col-span-1 flex rounded-md overflow-auto shadow-sm">
-        <div
-          class="flex w-16 flex-shrink-0 items-center justify-center bg-green-600 rounded-l-md text-sm font-medium text-white">
-          <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="currentColor" stroke="none"
-            viewBox="0 0 24 24">
-            <path
-              d="m20 8-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM9 19H7v-9h2v9zm4 0h-2v-6h2v6zm4 0h-2v-3h2v3zM14 9h-1V4l5 5h-4z">
-            </path>
-          </svg>
-        </div>
-        <div
-          class="flex flex-1 items-center justify-between truncate rounded-r-md border-t border-r border-b border-gray-200 bg-white">
-          <div class="flex-1 truncate px-4 py-4 text-sm">
-            <a href="#" class="font-medium text-gray-700 text-md uppercase hover:text-gray-600">GUEST PER ROOM
-              TYPE
-              REPORT</a>
-          </div>
-          <div class="flex-shrink-0 pr-2">
-            <x-button.circle gray icon="arrow-right" wire:click="openReport(3)" spinner="openReport(3)" />
-          </div>
-        </div>
-      </li>
-      <li class="col-span-1 flex rounded-md overflow-auto shadow-sm">
-        <div
-          class="flex w-16 flex-shrink-0 items-center justify-center bg-yellow-500 rounded-l-md text-sm font-medium text-white">
-          <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="currentColor" stroke="none"
-            viewBox="0 0 24 24">
-            <path
-              d="m20 8-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM9 19H7v-9h2v9zm4 0h-2v-6h2v6zm4 0h-2v-3h2v3zM14 9h-1V4l5 5h-4z">
-            </path>
-          </svg>
-        </div>
-        <div
-          class="flex flex-1 items-center justify-between truncate rounded-r-md border-t border-r border-b border-gray-200 bg-white">
-          <div class="flex-1 truncate px-4 py-4 text-sm">
-            <a href="#" class="font-medium text-gray-700 text-lg uppercase hover:text-gray-600">ROOM BOY
-              REPORT</a>
-          </div>
-          <div class="flex-shrink-0 pr-2">
-            <x-button.circle gray icon="arrow-right" wire:click="openReport(4)" spinner="openReport(4)" />
-          </div>
-        </div>
-      </li>
-      <li class="col-span-1 flex rounded-md overflow-auto shadow-sm">
-        <div
-          class="flex w-16 flex-shrink-0 items-center justify-center bg-red-500 rounded-l-md text-sm font-medium text-white">
-          <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="currentColor" stroke="none"
-            viewBox="0 0 24 24">
-            <path
-              d="m20 8-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM9 19H7v-9h2v9zm4 0h-2v-6h2v6zm4 0h-2v-3h2v3zM14 9h-1V4l5 5h-4z">
-            </path>
-          </svg>
-        </div>
-        <div
-          class="flex flex-1 items-center justify-between truncate rounded-r-md border-t border-r border-b border-gray-200 bg-white">
-          <div class="flex-1 truncate px-4 py-4 text-sm">
-            <a href="#" class="font-medium text-gray-700 text-lg uppercase hover:text-gray-600">UNOCCUPIED ROOM
-              REPORT</a>
-          </div>
-          <div class="flex-shrink-0 pr-2">
-            <x-button.circle gray icon="arrow-right" wire:click="openReport(5)" spinner="openReport(5)" />
-          </div>
-        </div>
-      </li>
-      <li class="col-span-1 flex rounded-md overflow-auto shadow-sm">
-        <div
-          class="flex w-16 flex-shrink-0 items-center justify-center bg-indigo-500 rounded-l-md text-sm font-medium text-white">
-          <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="currentColor" stroke="none"
-            viewBox="0 0 24 24">
-            <path
-              d="m20 8-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM9 19H7v-9h2v9zm4 0h-2v-6h2v6zm4 0h-2v-3h2v3zM14 9h-1V4l5 5h-4z">
-            </path>
-          </svg>
-        </div>
-        <div
-          class="flex flex-1 items-center justify-between truncate rounded-r-md border-t border-r border-b border-gray-200 bg-white">
-          <div class="flex-1 truncate px-4 py-4 text-sm">
-            <a href="#" class="font-medium text-gray-700 text-lg uppercase hover:text-gray-600">EXTENDED GUEST
-              REPORT</a>
-          </div>
-          <div class="flex-shrink-0 pr-2">
-            <x-button.circle gray icon="arrow-right" wire:click="openReport(6)" spinner="openReport(6)" />
-          </div>
-        </div>
-      </li>
-      <li class="col-span-1 flex rounded-md overflow-auto shadow-sm">
-        <div
-          class="flex w-16 flex-shrink-0 items-center justify-center bg-pink-400 rounded-l-md text-sm font-medium text-white">
-          <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="currentColor" stroke="none" viewBox="0 0 24 24">
-            <path
-              d="m20 8-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM9 19H7v-9h2v9zm4 0h-2v-6h2v6zm4 0h-2v-3h2v3zM14 9h-1V4l5 5h-4z">
-            </path>
-          </svg>
-        </div>
-        <div
-          class="flex flex-1 items-center justify-between truncate rounded-r-md border-t border-r border-b border-gray-200 bg-white">
-          <div class="flex-1 truncate px-4 py-4 text-sm">
-            <a href="#" class="font-medium text-gray-700 text-lg uppercase hover:text-gray-600">SALES
-              REPORT</a>
-          </div>
-          <div class="flex-shrink-0 pr-2">
-            <x-button.circle gray icon="arrow-right" wire:click="redirectSalesReport" spinner="redirectSalesReport" />
-            {{-- <x-button.circle gray icon="arrow-right" wire:click="openReport(7)" spinner="openReport(7)" /> --}}
-          </div>
-        </div>
-      </li>
-      <li class="col-span-1 flex rounded-md overflow-auto shadow-sm">
-        <div
-          class="flex w-16 flex-shrink-0 items-center justify-center bg-orange-400 rounded-l-md text-sm font-medium text-white">
-          <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="currentColor" stroke="none" viewBox="0 0 24 24">
-            <path
-              d="m20 8-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM9 19H7v-9h2v9zm4 0h-2v-6h2v6zm4 0h-2v-3h2v3zM14 9h-1V4l5 5h-4z">
-            </path>
-          </svg>
-        </div>
-        <div
-          class="flex flex-1 items-center justify-between truncate rounded-r-md border-t border-r border-b border-gray-200 bg-white">
-          <div class="flex-1 truncate px-4 py-4 text-sm">
-            <a href="#" class="font-medium text-gray-700 text-lg uppercase hover:text-gray-600">INVENTORY
-              REPORT</a>
-          </div>
-          <div class="flex-shrink-0 pr-2">
-            <x-button.circle gray icon="arrow-right" wire:click="redirectInventoryReport" spinner="redirectInventoryReport" />
-            {{-- <x-button.circle gray icon="arrow-right" wire:click="openReport(7)" spinner="openReport(7)" /> --}}
-          </div>
-        </div>
-      </li>
+        <li>
+            <div
+                wire:click="openReport(4)"
+                class="col-span-1 flex rounded-md overflow-hidden shadow-sm cursor-pointer
+                    transform transition duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            >
+                <div class="flex w-16 flex-shrink-0 items-center justify-center
+                            bg-yellow-500 rounded-l-md text-sm font-medium text-white">
+                    <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="currentColor" stroke="none" viewBox="0 0 24 24">
+                        <path d="m20 8-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM9 19H7v-9h2v9zm4 0h-2v-6h2v6zm4 0h-2v-3h2v3zM14 9h-1V4l5 5h-4z"></path>
+                    </svg>
+                </div>
+
+                <div class="flex flex-1 items-center justify-between truncate rounded-r-md
+                            border border-gray-200 bg-white">
+                    <div class="flex-1 truncate px-4 py-4 text-sm">
+                        <span class="font-medium text-gray-700 text-lg uppercase">
+                            ROOM BOY REPORT
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </li>
+        <li>
+            <div
+                wire:click="openReport(5)"
+                class="col-span-1 flex rounded-md overflow-hidden shadow-sm cursor-pointer
+                    transform transition duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            >
+                <div class="flex w-16 flex-shrink-0 items-center justify-center
+                            bg-red-500 rounded-l-md text-sm font-medium text-white">
+                    <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="currentColor" stroke="none" viewBox="0 0 24 24">
+                        <path d="m20 8-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM9 19H7v-9h2v9zm4 0h-2v-6h2v6zm4 0h-2v-3h2v3zM14 9h-1V4l5 5h-4z"></path>
+                    </svg>
+                </div>
+
+                <div class="flex flex-1 items-center justify-between truncate rounded-r-md
+                            border border-gray-200 bg-white">
+                    <div class="flex-1 truncate px-4 py-4 text-sm">
+                        <span class="font-medium text-gray-700 text-lg uppercase">
+                            UNOCCUPIED ROOM REPORT
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </li>
+        <li>
+            <div
+                wire:click="openReport(6)"
+                class="col-span-1 flex rounded-md overflow-hidden shadow-sm cursor-pointer
+                    transform transition duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            >
+                <div class="flex w-16 flex-shrink-0 items-center justify-center
+                            bg-indigo-500 rounded-l-md text-sm font-medium text-white">
+                    <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="currentColor" stroke="none" viewBox="0 0 24 24">
+                        <path d="m20 8-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM9 19H7v-9h2v9zm4 0h-2v-6h2v6zm4 0h-2v-3h2v3zM14 9h-1V4l5 5h-4z"></path>
+                    </svg>
+                </div>
+
+                <div class="flex flex-1 items-center justify-between truncate rounded-r-md
+                            border border-gray-200 bg-white">
+                    <div class="flex-1 truncate px-4 py-4 text-sm">
+                        <span class="font-medium text-gray-700 text-lg uppercase">
+                            EXTENDED GUEST REPORT
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </li>
+        <li>
+            <div
+                wire:click="redirectSalesReport"
+                class="col-span-1 flex rounded-md overflow-hidden shadow-sm cursor-pointer
+                    transform transition duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            >
+                <div class="flex w-16 flex-shrink-0 items-center justify-center
+                            bg-pink-400 rounded-l-md text-sm font-medium text-white">
+                    <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="currentColor" stroke="none" viewBox="0 0 24 24">
+                        <path d="m20 8-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM9 19H7v-9h2v9zm4 0h-2v-6h2v6zm4 0h-2v-3h2v3zM14 9h-1V4l5 5h-4z"></path>
+                    </svg>
+                </div>
+
+                <div class="flex flex-1 items-center justify-between truncate rounded-r-md
+                            border border-gray-200 bg-white">
+                    <div class="flex-1 truncate px-4 py-4 text-sm">
+                        <span class="font-medium text-gray-700 text-lg uppercase">
+                            SALES REPORT
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </li>
+         <li>
+            <div
+                wire:click="redirectInventoryReport"
+                class="col-span-1 flex rounded-md overflow-hidden shadow-sm cursor-pointer
+                    transform transition duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            >
+                <div class="flex w-16 flex-shrink-0 items-center justify-center
+                            bg-orange-400 rounded-l-md text-sm font-medium text-white">
+                    <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="currentColor" stroke="none" viewBox="0 0 24 24">
+                        <path d="m20 8-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM9 19H7v-9h2v9zm4 0h-2v-6h2v6zm4 0h-2v-3h2v3zM14 9h-1V4l5 5h-4z"></path>
+                    </svg>
+                </div>
+
+                <div class="flex flex-1 items-center justify-between truncate rounded-r-md
+                            border border-gray-200 bg-white">
+                    <div class="flex-1 truncate px-4 py-4 text-sm">
+                        <span class="font-medium text-gray-700 text-lg uppercase">
+                            INVENTORY REPORT
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </li>
     </ul>
   </div>
 

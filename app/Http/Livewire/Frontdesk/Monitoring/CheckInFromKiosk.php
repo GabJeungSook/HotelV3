@@ -80,6 +80,9 @@ class CheckInFromKiosk extends Component
 
     public function cancelCheckIn()
     {
+        $this->temporary_checkIn->update([
+            'is_opened' => false,
+        ]);
         return redirect()->route('frontdesk.room-monitoring');
     }
 

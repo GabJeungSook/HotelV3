@@ -100,6 +100,11 @@ class RoomMonitoring extends Component
 
     public function redirectToCheckinFromKiosk($id)
     {
+          $temp = TemporaryCheckInKiosk::where('id', $id)
+            ->first();
+          $temp->update([
+            'is_opened' => true,
+          ]);
           return redirect()->route('frontdesk.check-in-from-kiosk', $id);
     }
 
@@ -315,6 +320,7 @@ class RoomMonitoring extends Component
 
         return TemporaryCheckInKiosk::with('guest')
             ->where('branch_id', auth()->user()->branch_id)
+            ->where('is_opened', false)
             ->where(function ($query) {
                 $query->whereHas('guest', function ($query) {
                     $query
