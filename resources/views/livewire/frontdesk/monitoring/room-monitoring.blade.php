@@ -309,7 +309,7 @@
       <div class="overflow-auto h-64 bg-white shadow sm:rounded-md mt-4">
         <ul role="list" class="divide-y divide-gray-200 " x-animate>
           @forelse($kiosks as $kiosk)
-            @if ($loop->first)
+            {{-- @if ($loop->first) --}}
             <li x-animate class="transition duration-300 ease-in-out" >
                 <a href="#" class="block hover:bg-red-50" >
                   <div class="flex items-center px-4 py-4 sm:px-6 bg-gray-50">
@@ -360,8 +360,8 @@
                   </div>
                 </a>
               </li>
-            @else
-            <li x-animate class="transition duration-300 ease-in-out" >
+            {{-- @else --}}
+            {{-- <li x-animate class="transition duration-300 ease-in-out" >
                 <a class="block hover:bg-red-50" >
                   <div class="flex items-center px-4 py-4 sm:px-6 bg-gray-50">
                     <div class="flex min-w-0 flex-1 items-center">
@@ -392,13 +392,6 @@
                     <div>
                     </div>
                     <div class="flex items-center space-x-2">
-                      <!-- Approve button (check) -->
-                      {{-- <button wire:click="fifo" type="button" class="p-1 rounded-full hover:bg-green-100 focus:outline-none">
-                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                      </button> --}}
-                      <!-- Reject button (x) -->
                       <button x-on:confirm="{
                             title: 'Are you sure you want to delete this?',
                             icon: 'warning',
@@ -413,8 +406,8 @@
                     </div>
                   </div>
                 </a>
-              </li>
-            @endif
+              </li> --}}
+            {{-- @endif --}}
 
           @empty
             <div class="flex justify-center items-center mt-20 text-gray-600 text-4xl">
