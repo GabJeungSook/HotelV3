@@ -108,7 +108,7 @@ class ExtendGuest extends Component
 
             $total_current_hours = $this->current_time_alloted + $this->extended_rate->hour;
             $total_current_hours = ($total_current_hours > $this->extension_time_reset)
-                ? $total_current_hours - $this->extended_rate->hour
+                ? $this->extension_time_reset
                 : $total_current_hours;
                 dd($total_current_hours, $this->extension_time_reset);
             if ($total_current_hours > $this->extension_time_reset) {
