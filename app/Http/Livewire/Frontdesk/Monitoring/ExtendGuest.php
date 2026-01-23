@@ -105,9 +105,12 @@ class ExtendGuest extends Component
             $this->extended_rate = ExtensionRate::where('branch_id', auth()->user()->branch_id)
                 ->where('id', $this->extension_rate_id)
                 ->first();
-                dd($this->current_time_alloted);
-            $total_current_hours = $this->current_time_alloted + $this->extended_rate->hour;
 
+            $total_current_hours = $this->current_time_alloted + $this->extended_rate->hour;
+            $total_current_hours = ($total_current_hours > $this->extension_time_reset)
+                ? $total_current_hours - $this->extension_time_reset
+                : $total_current_hours;
+                dd($total_current_hours, $this->extension_time_reset);
             if ($total_current_hours > $this->extension_time_reset) {
                 $balance = $total_current_hours - $this->extension_time_reset;
                 $this->current_time_alloted = $balance;
