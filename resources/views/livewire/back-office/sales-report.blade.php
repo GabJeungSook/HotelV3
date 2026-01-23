@@ -39,14 +39,14 @@
                         @endforeach
                     </x-native-select>
                 </div>
-                <div>
+                {{-- <div>
                     <x-native-select wire:model.defer="type" label="Type" class="h-10 text-base">
                         <option value="Overall Sales">Overall Sales</option>
                         <option value="Daily">Daily</option>
                         <option value="Weekly">Weekly</option>
                         <option value="Monthly">Monthly</option>
                     </x-native-select>
-                </div>
+                </div> --}}
                 <x-input label="From" type="date" wire:model.defer="date_from" class="h-10 text-base" placeholder="Date From" />
                 <x-input label="To" type="date" wire:model.defer="date_to" class="h-10 text-base" placeholder="Date To" />
                  <x-native-select label="Shift" wire:model.defer="shift" class="h-10 text-base">
