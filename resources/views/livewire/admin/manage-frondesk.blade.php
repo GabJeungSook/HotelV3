@@ -105,9 +105,17 @@
       </x-modal>
     </div>
   </div> --}}
-  <div class="flex mb-5">
-    <x-button wire:click="$set('add_modal', true)" icon="plus" blue label="Add New Frontdesk" />
-  </div>
+    <div class="flex justify-between items-center mb-5">
+        @if ($cash_drawers->count() > 0)
+            <x-button wire:click="$set('add_modal', true)" icon="plus" blue label="Add New Frontdesk" />
+            <x-button wire:click="redirectToCashDrawerSetup" icon="cash" red label="Manage Cash Drawer" />
+        @else
+            <div class="text-red-600 font-semibold text-sm">
+                Please set up cash drawer first before adding frontdesk.
+            </div>
+            <x-button wire:click="redirectToCashDrawerSetup" icon="cash" red label="Set up Cash Drawer" />
+        @endif
+    </div>
   {{ $this->table }}
   <x-modal wire:model.defer="add_modal" align="center" max-width="xl">
     <x-card>

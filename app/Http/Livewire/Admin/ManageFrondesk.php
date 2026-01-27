@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\Admin;
 
 use App\Models\ActivityLog;
+use App\Models\CashDrawer;
 use Livewire\Component;
 use App\Models\Frontdesk;
 use WireUi\Traits\Actions;
@@ -22,10 +23,23 @@ class ManageFrondesk extends Component implements Tables\Contracts\HasTable
     use Tables\Concerns\InteractsWithTable;
     use Actions;
     public $add_modal = false;
+
+    public $add_drawer = false;
     public $edit_modal = false;
     public $name, $number, $frontdesk_id;
     public $search;
     public $branch_id;
+
+    public $cash_drawers;
+
+    public function mount()
+    {
+         if(auth()->user()->hasRole('superadmin')){
+            $this->cash_drawers = CashDrawer::all();
+         }else{
+            $this->cash_drawers = CashDrawer::where('branch_id', auth()->user()->branch_id)->get();
+        }
+    }
 
     public function render()
     {
@@ -187,5 +201,10 @@ class ManageFrondesk extends Component implements Tables\Contracts\HasTable
             $title = 'Success',
             $description = 'Frontdesk updated successfully'
         );
+    }
+
+    public function redirectToCashDrawerSetup()
+    {
+        return redirect()->route('admin.cash-drawers');
     }
 }

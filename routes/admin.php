@@ -66,4 +66,7 @@ Route::prefix('admin')
         Route::get('/check-in-co', function () {
             return view('admin.check-in-co-admin');
         })->name('admin.check-in-co');
+         Route::get('/manage-cash-drawers', function () {
+            return view('admin.manage.cash-drawers');
+        })->name('admin.cash-drawers');
     });

@@ -19,4 +19,9 @@ class Frontdesk extends Model
     {
         return $this->belongsTo(Branch::class);
     }
+
+    public function cash_drawer()
+    {
+        return $this->belongsTo(CashDrawer::class);
+    }
 }
