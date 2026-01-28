@@ -49,14 +49,14 @@ class User extends Component implements Tables\Contracts\HasTable
         if(auth()->user()->hasRole('superadmin')){
             return userModel::query()
             ->whereHas('roles', function ($role) {
-                $role->where('name', '!=', 'superadmin');
+                $role->whereNotIn('name', ['superadmin']);
             })
             ->with('roles');
         }else{
             return userModel::query()
             ->where('branch_id', auth()->user()->branch_id)
             ->whereHas('roles', function ($role) {
-                $role->where('name', '!=', 'superadmin');
+                $role->whereNotIn('name', ['superadmin']);
             })
             ->with('roles');
         }
@@ -266,6 +266,21 @@ class User extends Component implements Tables\Contracts\HasTable
         ]);
 
         $user->assignRole($this->role);
+
+        if ($this->role == 'frontdesk') {
+            \App\Models\Frontdesk::create([
+                'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
+                'name' => $this->name,
+                'number' => '+639000000000',
+            ]);
+
+            ActivityLog::create([
+                'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
+                'user_id' => auth()->user()->id,
+                'activity' => 'Create Frontdesk',
+                'description' => 'Created frontdesk ' . $this->name,
+            ]);
+        }
 
         ActivityLog::create([
             'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,

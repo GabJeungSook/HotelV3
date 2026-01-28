@@ -9,6 +9,7 @@ use WireUi\Traits\Actions;
 use App\Models\ActivityLog;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Forms;
 
 class ManageCashDrawers extends Component implements Tables\Contracts\HasTable
 {
@@ -44,6 +45,61 @@ class ManageCashDrawers extends Component implements Tables\Contracts\HasTable
                 ->label('NAME')
                 ->searchable()
                 ->sortable(),
+            Tables\Columns\ToggleColumn::make('is_active')
+                ->label('ACTIVE')
+                ->onColor('success')
+                ->offColor('danger')
+                ->sortable(),
+        ];
+    }
+
+     protected function getTableActions(): array
+    {
+        return [
+            Tables\Actions\EditAction::make('cash_drawer.edit')
+                ->icon('heroicon-o-pencil-alt')
+                ->color('success')
+                ->action(function ($record, $data) {
+                    $record->update([
+                        'branch_id' => auth()->user()->hasRole('superadmin') ? $data['branch_id'] : $record->branch_id,
+                        'name' => $data['name'],
+                    ]);
+
+                     ActivityLog::create([
+                            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
+                            'user_id' => auth()->user()->id,
+                            'activity' => 'Update Cash Drawer',
+                            'description' => 'Updated cash drawer name to' . $data['name'],
+                        ]);
+
+
+                    $this->dialog()->success(
+                            $title = 'Cash Drawer Updated',
+                            $description =
+                                'The cash drawer has been updated successfully.'
+                        );
+                })
+                ->form(function ($record) {
+                    return [
+                        Forms\Components\Select::make('branch_id')
+                            ->label('Branch')
+                            ->options(
+                                function () {
+                                    return \App\Models\Branch::all()->pluck('name', 'id')->toArray();
+                                }
+                            )
+                            ->default($record->branch_id)
+                            ->required()
+                            ->visible(fn () => auth()->user()->hasRole('superadmin')),
+                        Forms\Components\TextInput::make('name')
+                            ->label('Name')
+                            ->default($record->name)
+                            ->required(),
+                    ];
+                })
+                ->modalHeading('Update Cash Drawer')
+                ->modalWidth('lg'),
+
         ];
     }
 
@@ -61,12 +117,12 @@ class ManageCashDrawers extends Component implements Tables\Contracts\HasTable
         ActivityLog::create([
             'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
             'user_id' => auth()->user()->id,
-            'activity' => 'Create Requestable Item',
-            'description' => 'Created requestable item for ' . $this->name,
+            'activity' => 'Create Cash Drawer',
+            'description' => 'Created cash drawer for ' . $this->name,
         ]);
 
         $this->dialog()->success(
-            $title = 'Requestable Item Saved',
+            $title = 'Cash Drawer Saved',
             $description = 'Item has been saved successfully'
         );
         $this->reset(['name']);

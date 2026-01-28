@@ -138,8 +138,12 @@
           @endif
         <x-input label="Name" wire:model.defer="name" />
         <x-input label="Number" wire:model.defer="number" />
-
-
+        <x-native-select label="Select Cash Drawer" wire:model="drawer">
+            <option selected hidden>Select Cash Drawer</option>
+            @foreach ($cash_drawers as $drawer)
+                <option value="{{ $drawer->id }}">{{ $drawer->name }}</option>
+            @endforeach
+        </x-native-select>
       </div>
       <x-slot name="footer">
         <div class="flex justify-end gap-x-4">

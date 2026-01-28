@@ -32,12 +32,14 @@ class ManageFrondesk extends Component implements Tables\Contracts\HasTable
 
     public $cash_drawers;
 
+    public $drawer;
+
     public function mount()
     {
          if(auth()->user()->hasRole('superadmin')){
-            $this->cash_drawers = CashDrawer::all();
+            $this->cash_drawers = CashDrawer::where('is_active', 1)->get();
          }else{
-            $this->cash_drawers = CashDrawer::where('branch_id', auth()->user()->branch_id)->get();
+            $this->cash_drawers = CashDrawer::where('branch_id', auth()->user()->branch_id)->where('is_active', 1)->get();
         }
     }
 
