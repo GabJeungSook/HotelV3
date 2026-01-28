@@ -270,6 +270,7 @@ class User extends Component implements Tables\Contracts\HasTable
         if ($this->role == 'frontdesk') {
             \App\Models\Frontdesk::create([
                 'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
+                'user_id' => $user->id,
                 'name' => $this->name,
                 'number' => '+639000000000',
             ]);

@@ -14,6 +14,15 @@ class AssignedFrontdesk extends Component
     public $get_frontdesk = [];
     public $partner_modal = false;
     public $name;
+
+    public function mount()
+    {
+        $assigned = Frontdesk::where('branch_id', auth()->user()->branch_id)
+            ->where('user_id', auth()->user()->id)->get();
+        foreach ($assigned as $item) {
+            array_push($this->get_frontdesk, $item->id);
+        }
+    }
     public function render()
     {
         return view('livewire.frontdesk.assigned-frontdesk', [
@@ -47,7 +56,10 @@ class AssignedFrontdesk extends Component
 
     public function saveFrontdesk()
     {
-        $this->partner_modal = true;
+         DB::beginTransaction();
+
+
+         DB::commit();
     }
 
     public function savePartner()

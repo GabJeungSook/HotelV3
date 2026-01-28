@@ -12,8 +12,15 @@
             <p class="text-sm text-gray-500">{{ $frontdesk->number }}</p>
           </div>
           <div class="ml-auto">
-            <x-button flat negative label="Remove" wire:click="removeFrontdesk({{ $frontdesk->id }})"
-              spinner="removeFrontdesk({{ $frontdesk->id }})" sm icon="trash" />
+            <div class="ml-3">
+            <p class="text-sm font-medium text-gray-900">SHIFT</p>
+            @php
+                $currentHour = now()->hour;
+                $shift = ($currentHour >= 8 && $currentHour < 20) ? 'AM' : 'PM';
+            @endphp
+            <p class="text-sm font-semibold text-gray-800">{{ $shift }}</p>
+          </div>
+          </div>
         </li>
       @empty
         <div>Please assign a frontdesk...</div>
@@ -21,13 +28,18 @@
     </ul>
     <div class="flex justify-end  border-t pt-2 ">
       @if (collect($this->get_frontdesk)->count() > 0)
-        <x-button label="Save" sm positive right-icon="save-as" wire:click="saveFrontdesk" spinner="saveFrontdesk" />
+        <x-button label="Save" sm positive right-icon="save-as" x-on:confirm="{
+        title: 'Are you sure?',
+        description      : 'You want to save assigned frontdesk',
+        icon: 'warning',
+        method: 'saveFrontdesk'
+    }" />
       @endif
 
     </div>
   </div>
   <div class="mt-10">
-    <div>
+    {{-- <div>
       <h1 class="border-b-2 font-bold text-green-600 uppercase">Frontdesk List</h1>
       <div class="mt-6 flow-root">
         <ul role="list" class="-my-5 divide-y divide-gray-200">
@@ -57,7 +69,7 @@
         </ul>
       </div>
 
-    </div>
+    </div> --}}
 
   </div>
 

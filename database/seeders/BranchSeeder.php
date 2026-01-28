@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Branch;
+use App\Models\Frontdesk;
 use App\Models\User;
 
 class BranchSeeder extends Seeder
@@ -52,6 +53,13 @@ class BranchSeeder extends Seeder
         ]);
 
         $frontdesk->assignRole('frontdesk');
+
+        $fdesk = Frontdesk::create([
+            'name' => $frontdesk->name,
+            'number' => '+639000000000',
+            'branch_id' => $branch->id,
+            'user_id' => $frontdesk->id,
+        ]);
 
         $kiosk = User::create([
             'name' => 'Kiosk',
