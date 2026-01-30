@@ -13,12 +13,9 @@
           </div>
           <div class="ml-auto">
             <div class="ml-3">
-            <p class="text-sm font-medium text-gray-900">SHIFT</p>
-            @php
-                $currentHour = now()->hour;
-                $shift = ($currentHour >= 8 && $currentHour < 20) ? 'AM' : 'PM';
-            @endphp
-            <p class="text-sm font-semibold text-gray-800">{{ $shift }}</p>
+            <p class="text-sm font-medium text-gray-900 text-right">SHIFT</p>
+            <p class="text-sm font-semibold text-gray-800 text-right">{{ $shift }}</p>
+            <p class="text-sm font-semibold text-gray-800 text-right">{{ now()->format('Y-m-d H:i:s') }}</p>
           </div>
           </div>
         </li>
@@ -26,7 +23,14 @@
         <div>Please assign a frontdesk...</div>
       @endforelse
     </ul>
-    <div class="flex justify-end  border-t pt-2 ">
+    <div class="flex justify-between  border-t pt-2 ">
+       <x-native-select wire:model="drawer">
+            <option selected hidden>Select Cash Drawer</option>
+            @foreach ($cash_drawers as $drawer)
+            @dump($drawer)
+                <option value="{{ $drawer->id }}">{{ $drawer->name }}</option>
+            @endforeach
+        </x-native-select>
       @if (collect($this->get_frontdesk)->count() > 0)
         <x-button label="Save" sm positive right-icon="save-as" x-on:confirm="{
         title: 'Are you sure?',
