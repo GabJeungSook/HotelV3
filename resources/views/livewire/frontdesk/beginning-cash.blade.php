@@ -2,7 +2,7 @@
       <div class="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
         {{-- Header --}}
         <div class="mb-6">
-            <h1 class="text-2xl font-semibold text-gray-900">Cash on Hand ({{ auth()->user()->cash_drawer->name ?? 'No Drawer' }})</h1>
+            <h1 class="text-2xl font-semibold text-gray-900">Beginning Cash ({{ auth()->user()->cash_drawer->name ?? 'No Drawer' }})</h1>
             <p class="text-sm text-gray-500">Review summary before proceeding.</p>
         </div>
 
@@ -52,22 +52,13 @@
 
             {{-- Footer actions (bottom-right logout) --}}
             <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-end">
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button
-                        type="submit"
-                        class="inline-flex items-center rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                  <a href="{{ route('frontdesk.room-monitoring') }}"
+                        class="inline-flex items-center rounded-lg bg-yellow-600 px-4 py-2 text-sm font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2"
                     >
-                        End Shift
-                    </button>
-                </form>
+                        Start Shift
+            </a>
             </div>
         </div>
     </div>
-    {{-- @if (session('from_dashboard'))
-    <x-button emerald>
-        Start Shift
-    </x-button>
-    @endif --}}
     
 </div>

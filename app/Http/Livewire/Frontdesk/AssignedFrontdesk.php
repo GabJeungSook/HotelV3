@@ -94,7 +94,7 @@ class AssignedFrontdesk extends Component
             $description = 'Cash drawer selected successfully'
         );
 
-        return redirect()->route('frontdesk.dashboard');
+        return redirect()->route('frontdesk.beginning-cash');
         }else{
             $this->dialog()->error(
             $title = 'Oops!',

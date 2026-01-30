@@ -92,6 +92,11 @@ class User extends Authenticatable
         return $this->hasMany(ActivityLog::class);
     }
 
+    public function cash_drawer()
+    {
+        return $this->belongsTo(CashDrawer::class);
+    }
+
 
     // public function assignedFrontdesks()
     // {
