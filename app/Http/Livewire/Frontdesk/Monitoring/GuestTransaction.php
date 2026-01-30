@@ -293,6 +293,7 @@ class GuestTransaction extends Component
             $current_deposit = $this->check_in_details->total_deposit;
             Transaction::create([
                 'branch_id' => $this->check_in_details->guest->branch_id,
+                'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $this->check_in_details->room_id,
                 'guest_id' => $this->check_in_details->guest_id,
                 'floor_id' => $this->check_in_details->room->floor_id,
@@ -308,6 +309,7 @@ class GuestTransaction extends Component
                 'paid_at' => now(),
                 'override_at' => null,
                 'remarks' => 'Guest Deposit: ' . $this->deposit_remarks,
+                'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
             ]);
             $this->check_in_details->update([
                 'total_deposit' => $current_deposit + $this->deposit_amount,
@@ -600,6 +602,7 @@ class GuestTransaction extends Component
             DB::beginTransaction();
             $transaction = Transaction::create([
                 'branch_id' => $check_in_detail->guest->branch_id,
+                'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $check_in_detail->room_id,
                 'guest_id' => $check_in_detail->guest_id,
                 'floor_id' => $check_in_detail->room->floor_id,
@@ -615,6 +618,7 @@ class GuestTransaction extends Component
                 'paid_at' => null,
                 'override_at' => null,
                 'remarks' => 'Guest Extension : ' . $rate->hour . ' hours',
+                'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
             ]);
             StayExtension::create([
                 'guest_id' => $check_in_detail->guest_id,
@@ -755,6 +759,7 @@ class GuestTransaction extends Component
             $current_deduction = $check_in_detail->total_deduction;
             Transaction::create([
                 'branch_id' => $check_in_detail->guest->branch_id,
+                'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $check_in_detail->room_id,
                 'guest_id' => $check_in_detail->guest_id,
                 'floor_id' => $check_in_detail->room->floor_id,
@@ -773,6 +778,7 @@ class GuestTransaction extends Component
                     'Guest Deduction of Deposit: ₱' .
                     $this->deduction_amount .
                     ' deducted.',
+                'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
             ]);
 
             $check_in_detail->update([
@@ -942,6 +948,7 @@ class GuestTransaction extends Component
 
             $transaction = Transaction::create([
                 'branch_id' => $check_in_detail->guest->branch_id,
+                'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $check_in_detail->room_id,
                 'guest_id' => $check_in_detail->guest_id,
                 'floor_id' => $check_in_detail->room->floor_id,
@@ -958,6 +965,7 @@ class GuestTransaction extends Component
                 'override_at' => null,
                 'remarks' =>
                     'Guest Added Food and Beverages: (Front Desk) (' .$this->food_quantity .')' .' '.$food->name,
+                'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
             ]);
             //update stock
             $new_stock = $inventory->number_of_serving - $this->food_quantity;
@@ -1119,6 +1127,7 @@ class GuestTransaction extends Component
 
             $transaction = Transaction::create([
                 'branch_id' => $check_in_detail->guest->branch_id,
+                'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $check_in_detail->room_id,
                 'guest_id' => $check_in_detail->guest_id,
                 'floor_id' => $check_in_detail->room->floor_id,
@@ -1139,6 +1148,7 @@ class GuestTransaction extends Component
                     ')' .
                     ' ' .
                     $amenities->name,
+                'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
             ]);
 
             ActivityLog::create([
@@ -1291,6 +1301,7 @@ class GuestTransaction extends Component
 
             $transaction = Transaction::create([
                 'branch_id' => $check_in_detail->guest->branch_id,
+                'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $check_in_detail->room_id,
                 'guest_id' => $check_in_detail->guest_id,
                 'floor_id' => $check_in_detail->room->floor_id,
@@ -1311,6 +1322,7 @@ class GuestTransaction extends Component
                     ')' .
                     ' ' .
                     $damage_charges->name,
+                'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
             ]);
 
             ActivityLog::create([
@@ -1515,6 +1527,7 @@ class GuestTransaction extends Component
         DB::beginTransaction();
         $transaction = Transaction::create([
             'branch_id' => auth()->user()->branch_id,
+            'cash_drawer_id' => auth()->user()->cash_drawer_id,
             'room_id' => $this->room_id,
             'guest_id' => $this->guest_id,
             'floor_id' => $this->floor_id,
@@ -1539,6 +1552,7 @@ class GuestTransaction extends Component
                 ') - Reason: ' .
                 $reason->reason,
             'transfer_reason_id' => $this->reason_id,
+            'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
         ]);
 
         if($this->old_status === "Uncleaned")
@@ -1659,6 +1673,7 @@ class GuestTransaction extends Component
         if ($this->saveAsExcess == true) {
             Transaction::create([
                 'branch_id' => $transaction->branch_id,
+                'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $transaction->room_id,
                 'guest_id' => $transaction->guest_id,
                 'floor_id' => $transaction->floor_id,
@@ -1674,6 +1689,7 @@ class GuestTransaction extends Component
                 'paid_at' => now(),
                 'override_at' => null,
                 'remarks' => 'Deposit from paying ' . $transaction->description,
+                'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
             ]);
 
             $transaction->guest->checkInDetail->update([
@@ -1735,6 +1751,7 @@ class GuestTransaction extends Component
             ]);
             Transaction::create([
                 'branch_id' => $transaction->branch_id,
+                'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $transaction->room_id,
                 'guest_id' => $transaction->guest_id,
                 'floor_id' => $transaction->floor_id,
@@ -1750,6 +1767,7 @@ class GuestTransaction extends Component
                 'paid_at' => now(),
                 'override_at' => null,
                 'remarks' => 'Cashout from paying deposit ('.$transaction->description.')',
+                'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
             ]);
 
             $transaction->guest->checkInDetail->update([
@@ -1849,6 +1867,7 @@ class GuestTransaction extends Component
 
         Transaction::create([
             'branch_id' => $transaction->branch_id,
+            'cash_drawer_id' => auth()->user()->cash_drawer_id,
             'room_id' => $transaction->room_id,
             'guest_id' => $transaction->guest_id,
             'floor_id' => $transaction->floor_id,
@@ -1862,6 +1881,7 @@ class GuestTransaction extends Component
             'paid_at' => now(),
             'override_at' => null,
             'remarks' => 'Cashout from paying all unpaid balances',
+            'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
         ]);
 
         $transaction->guest->checkInDetail->update([
@@ -1935,6 +1955,7 @@ class GuestTransaction extends Component
         if (!$this->is_checkout) {
             Transaction::create([
                 'branch_id' => $transaction->branch_id,
+                'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $transaction->room_id,
                 'guest_id' => $transaction->guest_id,
                 'floor_id' => $transaction->floor_id,
@@ -1950,11 +1971,13 @@ class GuestTransaction extends Component
                 'paid_at' => now(),
                 'override_at' => null,
                 'remarks' => 'Guest Charged for Damage: Room Key & TV Remote',
+                'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
             ]);
         }
 
         Transaction::create([
             'branch_id' => $transaction->branch_id,
+            'cash_drawer_id' => auth()->user()->cash_drawer_id,
             'room_id' => $transaction->room_id,
             'guest_id' => $transaction->guest_id,
             'floor_id' => $transaction->floor_id,
@@ -1968,6 +1991,7 @@ class GuestTransaction extends Component
             'paid_at' => now(),
             'override_at' => null,
             'remarks' => 'Cashout all deposits',
+            'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
         ]);
 
         ActivityLog::create([

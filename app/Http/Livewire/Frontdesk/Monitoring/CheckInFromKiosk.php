@@ -173,6 +173,7 @@ class CheckInFromKiosk extends Component
         //create transaction for check-in
          Transaction::create([
             'branch_id' => auth()->user()->branch_id,
+            'cash_drawer_id' => auth()->user()->cash_drawer_id,
             'room_id' => $this->guest->room_id,
             'guest_id' => $this->guest->id,
             'floor_id' => Room::where('id', $this->guest->room_id)->first()->floor->id,
@@ -187,10 +188,12 @@ class CheckInFromKiosk extends Component
             'paid_at' => now(),
             'override_at' => null,
             'remarks' => 'Guest Checked In at room #' . $room_number,
+            'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
         ]);
 
         Transaction::create([
             'branch_id' => auth()->user()->branch_id,
+            'cash_drawer_id' => auth()->user()->cash_drawer_id,
             'room_id' => $this->guest->room_id,
             'guest_id' => $this->guest->id,
             'floor_id' => Room::where('id', $this->guest->room_id)->first()->floor->id,
@@ -205,11 +208,13 @@ class CheckInFromKiosk extends Component
             'paid_at' => now(),
             'override_at' => null,
             'remarks' => 'Deposit From Check In (Room Key & TV Remote)',
+            'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
         ]);
 
         if ($this->save_excess) {
             Transaction::create([
                 'branch_id' => auth()->user()->branch_id,
+                'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $this->guest->room_id,
                 'guest_id' => $this->guest->id,
                 'floor_id' => Room::where('id', $this->guest->room_id)->first()->floor->id,
@@ -223,6 +228,7 @@ class CheckInFromKiosk extends Component
                 'paid_at' => now(),
                 'override_at' => null,
                 'remarks' => 'Deposit From Check In (Excess Amount)',
+                'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
             ]);
         }
 

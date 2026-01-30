@@ -136,8 +136,11 @@ class CheckInCo extends Component
           {
               $assigned_frontdesk = auth()->user()->assigned_frontdesks;
           }
+            $currentHour = now()->hour;
+            $shift = ($currentHour >= 8 && $currentHour < 20) ? 'AM' : 'PM';
          Transaction::create([
             'branch_id' => auth()->user()->branch_id,
+            'cash_drawer_id' => auth()->user()->cash_drawer_id,
             'room_id' => $guest->room_id,
             'guest_id' => $guest->id,
             'floor_id' => $room->floor_id,
@@ -152,10 +155,12 @@ class CheckInCo extends Component
             'override_at' => null,
             'remarks' => 'Guest C/O Checked In at room #' . $room_number,
             'is_co' => true,
+            'shift' => $shift,
         ]);
 
         Transaction::create([
             'branch_id' => auth()->user()->branch_id,
+            'cash_drawer_id' => auth()->user()->cash_drawer_id,
             'room_id' => $guest->room_id,
             'guest_id' => $guest->id,
             'floor_id' => $room->floor_id,
@@ -170,6 +175,7 @@ class CheckInCo extends Component
             'override_at' => null,
             'remarks' => 'Deposit From Check In (Room Key & TV Remote)',
             'is_co' => true,
+            'shift' => $shift,
         ]);
 
         $now = Carbon::now();

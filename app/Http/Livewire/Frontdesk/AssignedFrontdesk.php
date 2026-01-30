@@ -84,7 +84,7 @@ class AssignedFrontdesk extends Component
                 ->update([
                     'time_in' => \Carbon\Carbon::now(),
                     'assigned_frontdesks' => $frontdesk_ids,
-                    'cash_drawer_id' => $this->drawer,
+                    'cash_drawer_id' => $this->drawer,  
                 ]);
 
          DB::commit();
@@ -92,7 +92,7 @@ class AssignedFrontdesk extends Component
             $title = 'Success',
             $description = 'Cash drawer selected successfully'
         );
-        
+
         return redirect()->route('frontdesk.dashboard');
         }else{
             $this->dialog()->error(

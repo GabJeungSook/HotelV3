@@ -175,6 +175,7 @@ class CheckOutGuest extends Component
 
             $transaction = Transaction::create([
                 'branch_id' => $check_in_detail->guest->branch_id,
+                'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $check_in_detail->room_id,
                 'guest_id' => $check_in_detail->guest_id,
                 'floor_id' => $check_in_detail->room->floor_id,
@@ -195,6 +196,7 @@ class CheckOutGuest extends Component
                     ')' .
                     ' ' .
                     $damage_charges->name,
+                'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
             ]);
             DB::commit();
             $this->damage_modal = false;
@@ -275,6 +277,7 @@ class CheckOutGuest extends Component
         if ($this->roomKeyHandedOver == 'No') {
             Transaction::create([
                 'branch_id' => $transaction->branch_id,
+                'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $transaction->room_id,
                 'guest_id' => $transaction->guest_id,
                 'floor_id' => $transaction->floor_id,
@@ -290,6 +293,7 @@ class CheckOutGuest extends Component
                 'paid_at' => now(),
                 'override_at' => null,
                 'remarks' => 'Guest Charged for Damage: Room Key & TV Remote',
+                'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
             ]);
         }
         DB::commit();

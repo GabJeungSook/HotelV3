@@ -157,6 +157,7 @@ class ExtendGuest extends Component
              DB::beginTransaction();
                 $transaction = Transaction::create([
                     'branch_id' => $check_in_detail->guest->branch_id,
+                    'cash_drawer_id' => auth()->user()->cash_drawer_id,
                     'room_id' => $check_in_detail->room_id,
                     'guest_id' => $check_in_detail->guest_id,
                     'floor_id' => $check_in_detail->room->floor_id,
@@ -172,6 +173,7 @@ class ExtendGuest extends Component
                     'paid_at' => null,
                     'override_at' => null,
                     'remarks' => 'Guest Extension : ' . $rate->hour . ' hours',
+                    'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
                 ]);
                 StayExtension::create([
                     'guest_id' => $check_in_detail->guest_id,

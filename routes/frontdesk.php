@@ -4,7 +4,6 @@ Route::prefix('frontdesk')
     ->middleware(['auth', 'role:frontdesk'])
     ->group(function () {
         Route::get('/dashboard', function () {
-             return view('frontdesk.select-frontdesk');
             if (auth()->user()->cash_drawer_id != null) {
                 return view('frontdesk.index');
             } else {

@@ -184,6 +184,7 @@ class RoomMonitoring extends Component
         {
             Transaction::create([
                 'branch_id' => $check_in_detail->guest->branch_id,
+                'cash_drawer_id' => $check_in_detail->guest->cash_drawer_id,
                 'room_id' => $check_in_detail->room_id,
                 'guest_id' => $check_in_detail->guest_id,
                 'floor_id' => $check_in_detail->room->floor_id,
@@ -198,6 +199,9 @@ class RoomMonitoring extends Component
                 'override_at' => null,
                 'remarks' =>
                 'Guest Added Food and Beverages: (Kitchen) (' .$this->food_quantity .')' .' '.$food->name,
+                'shift' => (now()->hour >= 8 && now()->hour < 20)
+                    ? 'AM'
+                    : 'PM',
             ]);
             //update stock
             $new_stock =
@@ -651,6 +655,7 @@ class RoomMonitoring extends Component
         $assigned_frontdesk = auth()->user()->assigned_frontdesks;
         Transaction::create([
             'branch_id' => auth()->user()->branch_id,
+            'cash_drawer_id' => $checkin->guest->cash_drawer_id,
             'room_id' => $this->room_id,
             'guest_id' => $guest->id,
             'floor_id' => Room::where('id', $this->room_id)->first()->floor->id,
@@ -665,10 +670,12 @@ class RoomMonitoring extends Component
             'paid_at' => now(),
             'override_at' => null,
             'remarks' => 'Guest Checked In at room #' . $room_number,
+            'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
         ]);
 
         Transaction::create([
             'branch_id' => auth()->user()->branch_id,
+            'cash_drawer_id' => $checkin->guest->cash_drawer_id,
             'room_id' => $guest->room_id,
             'guest_id' => $guest->id,
             'floor_id' => Room::where('id', $this->room_id)->first()->floor->id,
@@ -683,11 +690,13 @@ class RoomMonitoring extends Component
             'paid_at' => now(),
             'override_at' => null,
             'remarks' => 'Deposit From Check In (Room Key & TV Remote)',
+            'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
         ]);
 
         if ($this->save_excess) {
             Transaction::create([
                 'branch_id' => auth()->user()->branch_id,
+                'cash_drawer_id' => $checkin->guest->cash_drawer_id,
                 'room_id' => $guest->room_id,
                 'guest_id' => $guest->id,
                 'floor_id' => Room::where('id', $this->room_id)->first()->floor
@@ -702,6 +711,7 @@ class RoomMonitoring extends Component
                 'paid_at' => now(),
                 'override_at' => null,
                 'remarks' => 'Deposit From Check In (Excess Amount)',
+                'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
             ]);
         }
         $this->reset(['amountPaid']);
@@ -764,6 +774,7 @@ class RoomMonitoring extends Component
         $assigned_frontdesk = auth()->user()->assigned_frontdesks;
         Transaction::create([
             'branch_id' => auth()->user()->branch_id,
+            'cash_drawer_id' => $checkin->guest->cash_drawer_id,
             'room_id' => $this->guest->room_id,
             'guest_id' => $this->guest->id,
             'floor_id' => $this->room->floor_id,
@@ -778,10 +789,12 @@ class RoomMonitoring extends Component
             'paid_at' => now(),
             'override_at' => null,
             'remarks' => 'Guest Checked In at room #' . $room_number,
+            'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
         ]);
 
         Transaction::create([
             'branch_id' => auth()->user()->branch_id,
+            'cash_drawer_id' => $checkin->guest->cash_drawer_id,
             'room_id' => $this->guest->room_id,
             'guest_id' => $this->guest->id,
             'floor_id' => $this->room->floor_id,
@@ -796,11 +809,13 @@ class RoomMonitoring extends Component
             'paid_at' => now(),
             'override_at' => null,
             'remarks' => 'Deposit From Check In (Room Key & TV Remote)',
+            'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
         ]);
 
         if ($this->save_excess) {
             Transaction::create([
                 'branch_id' => auth()->user()->branch_id,
+                'cash_drawer_id' => $checkin->guest->cash_drawer_id,
                 'room_id' => $this->guest->room_id,
                 'guest_id' => $this->guest->id,
                 'floor_id' => $this->room->floor_id,
@@ -814,6 +829,7 @@ class RoomMonitoring extends Component
                 'paid_at' => now(),
                 'override_at' => null,
                 'remarks' => 'Deposit From Check In (Excess Amount)',
+                'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
             ]);
         }
 
@@ -920,6 +936,7 @@ class RoomMonitoring extends Component
         $assigned_frontdesk = auth()->user()->assigned_frontdesks;
         Transaction::create([
             'branch_id' => auth()->user()->branch_id,
+            'cash_drawer_id' => $checkin->guest->cash_drawer_id,
             'room_id' => $this->guest_reserve->room_id,
             'guest_id' => $this->guest_reserve->id,
             'floor_id' => $this->room_reserve->floor_id,
@@ -937,10 +954,12 @@ class RoomMonitoring extends Component
             'override_at' => null,
             'remarks' => 'Guest Checked In at room #' . $room_number,
             'is_co' => true,
+            'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
         ]);
 
         Transaction::create([
             'branch_id' => auth()->user()->branch_id,
+            'cash_drawer_id' => $checkin->guest->cash_drawer_id,
             'room_id' => $this->guest_reserve->room_id,
             'guest_id' => $this->guest_reserve->id,
             'floor_id' => $this->room_reserve->floor_id,
@@ -958,11 +977,13 @@ class RoomMonitoring extends Component
             'override_at' => null,
             'remarks' => 'Deposit From Check In (Room Key & TV Remote)',
             'is_co' => true,
+            'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
         ]);
 
         if ($this->save_excess_reserve) {
             Transaction::create([
                 'branch_id' => auth()->user()->branch_id,
+                'cash_drawer_id' => $checkin->guest->cash_drawer_id,
                 'room_id' => $this->guest_reserve->room_id,
                 'guest_id' => $this->guest_reserve->id,
                 'floor_id' => $this->room_reserve->floor_id,
@@ -977,6 +998,7 @@ class RoomMonitoring extends Component
                 'override_at' => null,
                 'remarks' => 'Deposit From Check In (Excess Amount)',
                 'is_co' => true,
+                'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
             ]);
         }
         $shift_date = Carbon::parse(auth()->user()->time_in)->format('F j, Y');
