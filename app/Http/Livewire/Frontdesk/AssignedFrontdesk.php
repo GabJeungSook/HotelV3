@@ -73,6 +73,7 @@ class AssignedFrontdesk extends Component
              array_push($this->get_frontdesk, 'N/A');
             $frontdesk_ids = json_encode($this->get_frontdesk);
             ShiftLog::create([
+                'frontdesk_id' => auth()->user()->id,
                 'time_in' => \Carbon\Carbon::now(),
                 'frontdesk_ids' => $frontdesk_ids,
                 'cash_drawer_id' => $this->drawer,

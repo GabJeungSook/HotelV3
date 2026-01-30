@@ -34,5 +34,15 @@ class ClearCashDrawerOnLogout
         $event->user->forceFill([
             'cash_drawer_id' => null,
         ])->save();
+
+        //update shift logs table
+        $shift_log = \App\Models\ShiftLog::where('frontdesk_id', $event->user->id)
+            ->whereNull('time_out')
+            ->latest()
+            ->first();
+        if ($shift_log) {
+            $shift_log->time_out = now();
+            $shift_log->save();
+        }
     }
 }

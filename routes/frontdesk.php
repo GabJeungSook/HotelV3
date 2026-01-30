@@ -94,4 +94,11 @@ Route::prefix('frontdesk')
                 return view('frontdesk.select-frontdesk');
             }
         })->name('frontdesk.check-in-co-frontdesk');
+        Route::get('/cash-on-hand', function () {
+            if (auth()->user()->cash_drawer_id != null) {
+                return view('frontdesk.cash-on-hand');
+            } else {
+                return view('frontdesk.select-frontdesk');
+            }
+        })->name('frontdesk.cash-on-hand');
     });

@@ -194,7 +194,7 @@
             </div>
           </nav>
           <div class="flex items-center md:ml-12">
-            <a href="{{ route('frontdesk.room-monitoring') }}"
+            <a href="{{ route('frontdesk.cash-on-hand') }}"
                 class="text-gray-500 fill-gray-500 group inline-flex items-center rounded-md bg-white text-base font-medium hover:text-gray-900"
                 aria-expanded="false">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24" class="mr-2">
@@ -203,12 +203,12 @@
 
                 <span>Cash on Hand</span>
               </a>
-            <form method="POST" action="{{ route('logout') }}">
+            {{-- <form method="POST" action="{{ route('logout') }}">
               @csrf
               <x-button negative label="Logout" class="ml-2"
                 onclick="event.preventDefault();
               this.closest('form').submit();" icon="logout" />
-            </form>
+            </form> --}}
           </div>
         </div>
       </div>
