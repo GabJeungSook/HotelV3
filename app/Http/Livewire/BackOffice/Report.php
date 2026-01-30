@@ -23,6 +23,11 @@ class Report extends Component
          return redirect()->route('back-office.inventory-report');
     }
 
+    public function redirectFrontdeskReport()
+    {
+         return redirect()->route('back-office.frontdesk-report');
+    }
+
     public function openReport($id)
     {
         $this->report_type = $id;

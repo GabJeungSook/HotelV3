@@ -97,6 +97,11 @@ class User extends Authenticatable
         return $this->belongsTo(CashDrawer::class);
     }
 
+    public function frontdesk()
+    {
+        return $this->hasOne(Frontdesk::class);
+    }
+
 
     // public function assignedFrontdesks()
     // {
