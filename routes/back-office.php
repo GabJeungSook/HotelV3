@@ -24,7 +24,10 @@ Route::prefix('back-office')
         Route::get('/reports', function () {
             return view('back-office.reports');
         })->name('back-office.reports');
-         Route::get('/frontdesk-report', function () {
+        Route::get('/frontdesk-report', function () {
             return view('back-office.Reports.frontdesk-report');
         })->name('back-office.frontdesk-report');
+        Route::get('/gust-extension-report', function () {
+            return view('back-office.Reports.extended-guest');
+        })->name('back-office.extended-guest-report');
     });

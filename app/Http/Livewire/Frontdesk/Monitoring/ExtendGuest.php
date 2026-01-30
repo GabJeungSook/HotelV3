@@ -216,15 +216,15 @@ class ExtendGuest extends Component
                 true
                 );
 
-                $extended_guest = ExtendedGuestReport::where('branch_id', auth()->user()->branch_id)->where('checkin_details_id', $check_in_detail->id)->first();
+                // $extended_guest = ExtendedGuestReport::where('branch_id', auth()->user()->branch_id)->where('checkin_details_id', $check_in_detail->id)->first();
 
-                 if($extended_guest != null)
-                {
-                    $extended_guest->update([
-                    'number_of_extension' => $extended_guest->number_of_extension + 1,
-                    'total_hours' => $extended_guest->total_hours + $rate->hour,
-                    ]);
-                }else{
+                //  if($extended_guest != null)
+                // {
+                //     $extended_guest->update([
+                //     'number_of_extension' => $extended_guest->number_of_extension + 1,
+                //     'total_hours' => $extended_guest->total_hours + $rate->hour,
+                //     ]);
+                // }else{
                     ExtendedGuestReport::create([
                         'branch_id' => auth()->user()->branch_id,
                         'room_id' =>  $check_in_detail->room_id,
@@ -235,7 +235,7 @@ class ExtendGuest extends Component
                         'frontdesk_id' => $decode_frontdesk[0],
                         'partner_name' => $decode_frontdesk[1],
                     ]);
-                }
+                // }
 
                 ActivityLog::create([
                 'branch_id' => auth()->user()->branch_id,

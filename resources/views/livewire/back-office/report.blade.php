@@ -120,7 +120,7 @@
         </li>
         <li>
             <div
-                wire:click="openReport(6)"
+                wire:click="redirectExtendedGuestReport"
                 class="col-span-1 flex rounded-md overflow-hidden shadow-sm cursor-pointer
                     transform transition duration-200 hover:scale-[1.02] active:scale-[0.98]"
             >

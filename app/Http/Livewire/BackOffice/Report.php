@@ -28,6 +28,11 @@ class Report extends Component
          return redirect()->route('back-office.frontdesk-report');
     }
 
+    public function redirectExtendedGuestReport()
+    {
+         return redirect()->route('back-office.extended-guest-report');
+    }
+
     public function openReport($id)
     {
         $this->report_type = $id;
