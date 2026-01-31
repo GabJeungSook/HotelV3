@@ -119,7 +119,7 @@ class ExtendGuest extends Component
                 ->where('hour', $this->current_time_alloted)
                 ->first();
 
-                 $this->extended_amount = $extend->amount;
+                 $this->extended_amount = 0;
                 $this->total_amount = $this->initial_amount + $this->extended_amount;
 
             } else {
