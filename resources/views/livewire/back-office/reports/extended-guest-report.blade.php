@@ -1,4 +1,4 @@
-<div class="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+<div class="max-w-full mx-auto py-8 px-4 sm:px-6 lg:px-8">
 
     {{-- Filters --}}
     <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 p-4 mb-6">
@@ -53,14 +53,14 @@
 
             {{-- Gray bar + Yellow label --}}
             <div class="bg-gray-300 px-3 py-2">
-                <span class="inline-block bg-yellow-300 px-2 py-1 text-xs font-bold tracking-wide text-gray-900">
+                <span class="inline-block bg-gray-300 px-2 py-1 text-xs font-bold tracking-wide text-gray-900">
                     {{ $group['label'] }}
                 </span>
             </div>
 
             {{-- Date label --}}
             <div class="px-3 py-2 border-b border-gray-200">
-                <span class="inline-block bg-yellow-300 px-2 py-1 text-sm font-semibold text-gray-900">
+                <span class="inline-block px-2 py-1 text-sm font-semibold text-gray-900">
                     {{ $group['date_label'] }}
                 </span>
             </div>

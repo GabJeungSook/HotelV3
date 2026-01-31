@@ -53,14 +53,14 @@
 
             {{-- Gray bar + yellow shift label --}}
             <div class="bg-gray-300 px-3 py-2">
-                <span class="inline-block bg-yellow-300 px-2 py-1 text-xs font-bold tracking-wide text-gray-900">
+                <span class="inline-block bg-gray-300 px-2 py-1 text-xs font-bold tracking-wide text-gray-900">
                     {{ strtoupper($group['shift']) }} SHIFT
                 </span>
             </div>
 
             {{-- Date label --}}
             <div class="px-3 py-2 border-b border-gray-200">
-                <span class="inline-block bg-yellow-300 px-2 py-1 text-sm font-semibold text-gray-900">
+                <span class="inline-block  px-2 py-1 text-sm font-semibold text-gray-900">
                     {{ $group['date_label'] }}
                 </span>
             </div>
