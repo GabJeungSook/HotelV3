@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\Frontdesk\Monitoring;
 
 use App\Models\ActivityLog;
+use App\Models\CashOnDrawer;
 use DB;
 use Carbon\Carbon;
 use App\Models\Rate;
@@ -41,8 +42,8 @@ class CheckInFromKiosk extends Component
     //modals
     public $change_modal = false;
     public function mount($record)
-    {
-         $this->additional_charges = auth()->user()->branch->initial_deposit;
+    {;
+        $this->additional_charges = auth()->user()->branch->initial_deposit;
         //  $this->record = TemporaryCheckInKiosk::where(
         //         'branch_id',
         //         auth()->user()->branch_id
@@ -191,6 +192,17 @@ class CheckInFromKiosk extends Component
             'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
         ]);
 
+        //save cash on drawer
+        CashOnDrawer::create([
+            'branch_id' => auth()->user()->branch_id,
+            'frontdesk_id' => auth()->user()->frontdesk->id,
+            'cash_drawer_id' => auth()->user()->cash_drawer_id,
+            'amount' => $this->guest->static_amount,
+            'transaction_date' => now()->toDateString(),
+            'transaction_type' => 'check-in',
+            'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
+        ]);
+
         Transaction::create([
             'branch_id' => auth()->user()->branch_id,
             'cash_drawer_id' => auth()->user()->cash_drawer_id,
@@ -211,6 +223,16 @@ class CheckInFromKiosk extends Component
             'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
         ]);
 
+        CashOnDrawer::create([
+            'branch_id' => auth()->user()->branch_id,
+            'frontdesk_id' => auth()->user()->frontdesk->id,
+            'cash_drawer_id' => auth()->user()->cash_drawer_id,
+            'amount' => $this->additional_charges,
+            'transaction_date' => now()->toDateString(),
+            'transaction_type' => 'deposit',
+            'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
+        ]);
+
         if ($this->save_excess) {
             Transaction::create([
                 'branch_id' => auth()->user()->branch_id,
@@ -228,6 +250,17 @@ class CheckInFromKiosk extends Component
                 'paid_at' => now(),
                 'override_at' => null,
                 'remarks' => 'Deposit From Check In (Excess Amount)',
+                'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
+            ]);
+
+             //save cash on drawer
+            CashOnDrawer::create([
+                'branch_id' => auth()->user()->branch_id,
+                'frontdesk_id' => auth()->user()->frontdesk->id,
+                'cash_drawer_id' => auth()->user()->cash_drawer_id,
+                'amount' => $this->excess_amount,
+                'transaction_date' => now()->toDateString(),
+                'transaction_type' => 'deposit',
                 'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
             ]);
         }

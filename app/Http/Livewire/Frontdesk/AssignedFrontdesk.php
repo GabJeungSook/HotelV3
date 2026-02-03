@@ -28,7 +28,7 @@ class AssignedFrontdesk extends Component
             ->where('user_id', auth()->user()->id)->get();
         foreach ($assigned as $item) {
             array_push($this->get_frontdesk, $item->id);
-        }   
+        }
 
         $this->cash_drawers = CashDrawer::where('branch_id', $assigned->first()->branch_id)
             ->where('is_active', 1)
@@ -85,7 +85,8 @@ class AssignedFrontdesk extends Component
                 ->update([
                     'time_in' => \Carbon\Carbon::now(),
                     'assigned_frontdesks' => $frontdesk_ids,
-                    'cash_drawer_id' => $this->drawer,  
+                    'cash_drawer_id' => $this->drawer,
+                    'shift' => $this->shift,
                 ]);
 
          DB::commit();

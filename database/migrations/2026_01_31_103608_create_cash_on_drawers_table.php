@@ -21,6 +21,7 @@ return new class extends Migration
             $table->decimal('amount', 15, 2)->default(0);
             $table->date('transaction_date');
             $table->string('transaction_type'); // e.g., 'initial', 'top-up', 'withdrawal'
+            $table->string('shift');
             $table->timestamps();
         });
     }

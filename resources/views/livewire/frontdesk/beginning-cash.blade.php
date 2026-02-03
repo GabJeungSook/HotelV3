@@ -23,7 +23,7 @@
                         <span class="text-xs text-gray-500">Extensions, Food & Beverages, Etc.</span>
                     </div>
                     <div class="w-40 text-right">
-                        <span class="inline-block h-5 w-24 rounded bg-gray-100"></span>
+                        <span class="inline-block h-5 w-24 rounded font-mono">₱ {{ number_format($total_transactions, 2) }}</span>
                     </div>
                 </div>
 
@@ -34,7 +34,7 @@
                         <span class="text-xs text-gray-500">From check-in and other deposits</span>
                     </div>
                     <div class="w-40 text-right">
-                        <span class="inline-block h-5 w-24 rounded bg-gray-100"></span>
+                        <span class="inline-block h-5 w-24 rounded font-mono">₱ {{ number_format($total_deposits, 2) }}</span>
                     </div>
                 </div>
 
@@ -45,7 +45,7 @@
                         <span class="text-xs text-gray-500">Expected cash on hand</span>
                     </div>
                     <div class="w-40 text-right">
-                        <span class="inline-block h-6 w-28 rounded bg-gray-100"></span>
+                        <span class="inline-block h-6 w-28 rounded font-mono font-bold text-lg">₱ {{ number_format($total_transactions + $total_deposits, 2) }}</span>
                     </div>
                 </div>
             </div>
@@ -60,5 +60,5 @@
             </div>
         </div>
     </div>
-    
+
 </div>

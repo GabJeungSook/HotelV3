@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Branch;
+use App\Models\CashDrawer;
 use App\Models\Frontdesk;
 use App\Models\User;
 
@@ -100,5 +101,18 @@ class BranchSeeder extends Seeder
         ]);
 
         $roomboy->assignRole('roomboy');
+
+        $cash_drawer_1 = CashDrawer::create([
+            'name' => 'Drawer 1',
+            'branch_id' => $branch->id,
+            'is_active' => 1,
+        ]);
+
+        $cash_drawer_2 = CashDrawer::create([
+            'name' => 'Drawer 2',
+            'branch_id' => $branch->id,
+            'is_active' => 1,
+        ]);
+
     }
 }
