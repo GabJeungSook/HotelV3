@@ -169,6 +169,7 @@ class CheckInFromKiosk extends Component
                 ? now()->addDays($this->guest->number_of_days)
                 : now()->addHours($this->stayingHour->number),
             'is_long_stay' => $this->is_longStay != null ? true : false,
+            'number_of_hours' => $rate,
         ]);
 
         //create transaction for check-in
