@@ -114,7 +114,6 @@ class ExtendGuest extends Component
                     $this->total_amount = $this->initial_amount + $this->extended_amount;
                 }
             }else{
-
                 if(($this->current_time_alloted == 0) && $this->guest->checkInDetail()->first()->next_extension_is_original == true)
                 {
                    $rate = Rate::where('branch_id', auth()->user()->branch_id)->whereHas('stayingHour', function($query){

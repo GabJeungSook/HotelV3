@@ -38,6 +38,7 @@ class CheckInFromKiosk extends Component
     public $amountPaid;
     public $excess = false;
     public $excess_amount = 0;
+    public $room_static_amount = 0;
 
     //modals
     public $change_modal = false;
@@ -57,6 +58,7 @@ class CheckInFromKiosk extends Component
         $this->guest = Guest::where('branch_id', auth()->user()->branch_id)
                 ->where('id', $this->temporary_checkIn->guest_id)
                 ->first();
+        $this->room_static_amount = $this->guest->static_amount;
         $this->room = Room::where('branch_id', auth()->user()->branch_id)
                 ->where('id', $this->temporary_checkIn->room_id)
                 ->first();
@@ -157,6 +159,7 @@ class CheckInFromKiosk extends Component
             'type_id' => $this->guest->type_id,
             'room_id' => $this->guest->room_id,
             'rate_id' => $this->guest->rate_id,
+            'static_room_amount' => $this->room_static_amount,
             'static_amount' => $this->guest->static_amount,
             'hours_stayed' => $this->is_longStay
                 ? 0

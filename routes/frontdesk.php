@@ -87,6 +87,13 @@ Route::prefix('frontdesk')
             return view('frontdesk.select-frontdesk');
             }
         })->name('frontdesk.extend-guest');
+         Route::get('/transfer-room/{record}', function ($record) {
+            if (auth()->user()->cash_drawer_id != null) {
+            return view('frontdesk.monitoring.transfer-room', ['record' => $record]);
+            } else {
+            return view('frontdesk.select-frontdesk');
+            }
+        })->name('frontdesk.transfer-room');
         Route::get('/check-in-co', function () {
             if (auth()->user()->cash_drawer_id != null) {
                 return view('frontdesk.check-in-co-frontdesk');

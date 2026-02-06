@@ -787,8 +787,8 @@
               <div class="col-span-2 bg-gray-200 rounded-lg p-3">
                 <dl class=" space-y-3 text-sm font-medium text-gray-500">
                   <div class="flex border-b items-center justify-between">
-                    <dt>Previous Room Amount</dt>
-                    <dd class="text-gray-700 ">&#8369;{{ number_format($guest->static_amount, 2) }}
+                    <dt>Previous Room Amounts</dt>
+                    <dd class="text-gray-700 ">&#8369;{{ number_format($check_in_details->static_room_amount, 2) }}
                     </dd>
                   </div>
                   @php
@@ -809,8 +809,8 @@
                     <dt class="text-sm">Excess Amount</dt>
                     <dd class="text-sm">&#8369;
 
-                      @if ($guest->static_amount > $new_room->amount)
-                        {{ number_format($guest->static_amount - $new_room->amount, 2) }}
+                      @if ($check_in_details->static_room_amount > $new_room->amount)
+                        {{ number_format($check_in_details->static_room_amount - $new_room->amount, 2) }}
                       @else
                         0.00
                       @endif

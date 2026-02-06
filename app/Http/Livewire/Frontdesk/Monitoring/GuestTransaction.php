@@ -1404,9 +1404,13 @@ class GuestTransaction extends Component
         {
            $this->has_rate = false;
         }else{
+            $check_in_details = CheckinDetail::where(
+                'guest_id',
+                $this->guest_id
+            )->first();
             $this->has_rate = true;
-            if ($new_room->amount > $guestss->static_amount) {
-                $this->total = $new_room->amount - $guestss->static_amount;
+            if ($new_room->amount > $check_in_details->static_room_amount) {
+                $this->total = $new_room->amount - $check_in_details->static_room_amount;
             } else {
                 $this->total = 0;
             }
