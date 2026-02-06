@@ -107,16 +107,30 @@ class ExtendGuest extends Component
             if(($this->current_time_alloted + $this->extended_rate->hour) > $this->extension_time_reset)
             {
                 $total_current_hours = $this->current_time_alloted + $this->extended_rate->hour;
-                if($this->guest->checkInDetail()->first()->next_extension_is_original)
+                if($total_current_hours >= $this->extension_time_reset)
                 {
+                    $total_current_hours = $total_current_hours - $this->extension_time_reset;
+                    $extend = ExtensionRate::where('branch_id', auth()->user()->branch_id)->where('hour', $total_current_hours)
+                     ->first();
                     $this->initial_amount = $this->rate->amount;
-                    $this->extended_amount = $this->extended_rate->amount;
+                    $this->extended_amount = $extend->amount;
                     $this->total_amount = $this->initial_amount + $this->extended_amount;
                 }else{
                     $this->initial_amount = 0;
                     $this->extended_amount = $this->extended_rate->amount;
                     $this->total_amount = $this->initial_amount + $this->extended_amount;
                 }
+                // if($this->guest->checkInDetail()->first()->next_extension_is_original)
+                // {
+
+                //     $this->initial_amount = $this->rate->amount;
+                //     $this->extended_amount = $this->extended_rate->amount;
+                //     $this->total_amount = $this->initial_amount + $this->extended_amount;
+                // }else{
+                //     $this->initial_amount = 0;
+                //     $this->extended_amount = $this->extended_rate->amount;
+                //     $this->total_amount = $this->initial_amount + $this->extended_amount;
+                // }
 
             }else{
                 $this->initial_amount = 0;
