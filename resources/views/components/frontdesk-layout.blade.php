@@ -260,6 +260,8 @@
                         Check-in Information
                       @elseif(request()->routeIs('frontdesk.extend-guest'))
                         Extend Guest Stay
+                      @elseif(request()->routeIs('frontdesk.transfer-room'))
+                        Transfer Room
                       @else
                         {{-- Transactions --}}
                       @endif

@@ -1,7 +1,7 @@
 <div class="p-6">
     <h2 class="text-xl font-semibold text-gray-800 mb-6">Guest Information</h2>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-3 md:grid-cols-2 gap-6">
         {{-- Left: Guest Details --}}
         <div class="space-y-4 text-sm text-gray-700">
             <div>

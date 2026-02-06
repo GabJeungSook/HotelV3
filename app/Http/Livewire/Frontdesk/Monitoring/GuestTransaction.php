@@ -2343,6 +2343,14 @@ class GuestTransaction extends Component
         $this->autorization_cancel_modal = true;
     }
 
+    //transfer room page
+    public function redirectToTransferRoom()
+    {
+        return redirect()->route('frontdesk.transfer-room', [
+            'record' => $this->guest_id,
+        ]);
+    }
+
 
     //extend guest page
     public function redirectToExtendGuest()

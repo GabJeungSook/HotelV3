@@ -185,7 +185,7 @@ class CheckInFromKiosk extends Component
             'transaction_type_id' => 1,
             'assigned_frontdesk_id' => json_encode($assigned_frontdesk),
             'description' => 'Guest Check In',
-            'payable_amount' => $this->guest->static_amount,
+            'payable_amount' => $this->room_static_amount,
             'paid_amount' => $this->amountPaid,
             'change_amount' =>
                 $this->excess_amount != 0 ? $this->excess_amount : 0,
@@ -201,7 +201,7 @@ class CheckInFromKiosk extends Component
             'branch_id' => auth()->user()->branch_id,
             'frontdesk_id' => auth()->user()->frontdesk->id,
             'cash_drawer_id' => auth()->user()->cash_drawer_id,
-            'amount' => $this->guest->static_amount,
+            'amount' => $this->room_static_amount,
             'transaction_date' => now()->toDateString(),
             'transaction_type' => 'check-in',
             'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
