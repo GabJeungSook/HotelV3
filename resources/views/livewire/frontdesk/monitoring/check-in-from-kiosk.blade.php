@@ -1,9 +1,9 @@
 <div class="p-6">
     <h2 class="text-xl font-semibold text-gray-800 mb-6">Check In Information</h2>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
         {{-- Left: Guest Details --}}
-        <div class="space-y-4 text-sm text-gray-700">
+        <div class="space-y-4 col-span-1 text-sm text-gray-700">
             <div>
                 <label class="block font-medium mb-1">QR Code</label>
                <div class="p-2 bg-gray-100 rounded-md">{{$guest->qr_code}}</div>
@@ -34,34 +34,69 @@
         </div>
 
         {{-- Right: Billing Details --}}
-        <div class="border rounded-md bg-gray-50 p-4 shadow-sm text-sm text-gray-700">
+        <div class="border rounded-md col-span-3 bg-gray-50 p-4 shadow-sm text-sm text-gray-700">
             <h3 class="text-lg font-semibold text-gray-700 mb-4">Billing Statement</h3>
 
-            <div class="flex justify-between text-lg mb-2">
+            <div class="flex justify-between text-xl mb-2">
                 <span class="text-gray-600">Room Rate:</span>
                 <span class="text-gray-800 font-medium">₱ {{ number_format($guest->static_amount, 2) }}</span>
             </div>
-            <div class="flex justify-between text-lg mb-2">
+            <div class="flex justify-between text-xl mb-2">
                 <span class="text-gray-600">Additional Charges:</span>
                 <span class="text-gray-800 font-medium">₱ {{ number_format($additional_charges, 2) }}</span>
             </div>
              @if($has_discount)
-            <div class="flex justify-between text-lg mb-2">
+            <div class="flex justify-between text-xl mb-2">
                 <span class="text-red-600">Discount: (Senior & PWD)</span>
                 <span class="text-red-600 font-medium">– ₱ {{ number_format($discount_amount, 2) }}</span>
             </div>
             @endif
             <hr class="my-2">
 
-            <div class="flex justify-between text-xl font-semibold text-gray-800 mb-4">
+            <div class="flex justify-between text-3xl font-semibold text-gray-800 mb-4">
                 <span>Total:</span>
                 <span>₱ {{ number_format($total, 2) }}</span>
             </div>
 
-            <div class="mt-20">
-                <label class="block font-medium mb-1">Amount Paid</label>
-                <x-input wire:model.defer="amountPaid" type="number" placeholder="0.00" class="text-right px-2 py-2" prefix="₱" />
-            </div>
+            <div class="mt-20 flex items-center justify-between gap-6">
+    <!-- Label -->
+    <label class="font-semibold text-xl whitespace-nowrap">
+        Amount Paid
+    </label>
+
+    <!-- Input -->
+    <div class="relative w-1/2">
+        <span class="absolute left-0 top-1/2 -translate-y-1/2 text-gray-700 font-semibold text-3xl">
+            ₱
+        </span>
+<input
+    wire:model.defer="amountPaid"
+    type="number"
+    autofocus
+    min="0"
+    placeholder="0.00"
+    class="
+        w-full
+        text-right
+        text-3xl
+        font-semibold
+        bg-transparent
+        border-0
+        border-b-2
+        border-gray-400
+        focus:border-blue-600
+        focus:outline-none
+        focus:ring-0
+        focus:shadow-none
+        appearance-none
+
+        pl-8
+        pb-1
+    "
+/>
+    </div>
+</div>
+
         </div>
     </div>
 

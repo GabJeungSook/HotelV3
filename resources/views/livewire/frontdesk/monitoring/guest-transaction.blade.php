@@ -93,7 +93,7 @@
     </div>
     <main class="lg:col-span-9 xl:col-span-7">
       <div class="grid grid-cols-6 gap-x-2 border rounded-lg p-4 mb-4">
-        {{-- <x-button :disabled="$check_out_date < Carbon\Carbon::now()" label="Transfer Room" sm blue right-icon="external-link" wire:click="redirectToTransferRo om" /> --}}
+        {{-- <x-button :disabled="$check_out_date < Carbon\Carbon::now()" label="Transfer Room" sm blue right-icon="external-link" wire:click="redirectToTransferRoom" /> --}}
         <x-button :disabled="$check_out_date < Carbon\Carbon::now()" label="Transfer Room" sm blue right-icon="external-link" wire:click="$set('transfer_modal', true)" />
 
         {{-- <x-button :disabled="$check_out_date < Carbon\Carbon::now()" label="Extend" sm blue right-icon="external-link" wire:click=" $set('extend_modal', true)" /> --}}

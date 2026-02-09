@@ -1,11 +1,11 @@
 <div class="p-6">
     <h2 class="text-xl font-semibold text-gray-800 mb-6">Guest Information</h2>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
         {{-- Left: Guest Details --}}
-        <div class="space-y-4 text-sm text-gray-700">
+        <div class="space-y-4 col-span-1text-sm text-gray-700">
             <div>
-                <label class="block font-medium mb-1">QR Code</label>
+                <label class="block font-medium mb-1 mt-10">QR Code</label>
                <div class="p-2 bg-gray-100 rounded-md">{{$guest->qr_code}}</div>
             </div>
             <div>
@@ -23,49 +23,96 @@
         </div>
 
         {{-- Right: Billing Details --}}
-        <div class="border rounded-md bg-gray-50 p-4 shadow-sm text-sm text-gray-700">
+        <div class="border rounded-md  col-span-3 bg-gray-50 p-4 shadow-sm text-sm text-gray-700">
 
-            {{-- <h3 class="text-lg font-semibold text-gray-700 mb-4">Billing Statement</h3>
+            {{-- <h3 class="text-lg font-semibold text-gray-700 mb-4">Billing Statement</h3> --}}
             <div class=" w-full text-lg mb-2">
-                <x-native-select label="Select Extension Rate (Hour)" wire:model="extension_rate_id">
-                    <option selected hidden>Select One</option>
-                    @forelse ($extension_rates as $rate)
-                      <option value="{{ $rate->id }}">{{ $rate->hour }}</option>
-                    @empty
-                      <option>No Rate Available</option>
-                    @endforelse
-                </x-native-select>
+                <div class="flex space-x-5 text-lg my-2 w-full">
+                    <div class="w-full">
+                        <x-native-select label="Type" wire:model="extension_rate_id">
+                            <option selected hidden>Select One</option>
+                        {{-- @forelse ($extension_rates as $rate)
+                        <option value="{{ $rate->id }}">{{ $rate->hour }}</option>
+                        @empty
+                        <option>No Rate Available</option>
+                        @endforelse --}}
+                        </x-native-select>
+                    </div>
+                    <div class="w-full">
+                        <x-native-select label="Floor" wire:model="extension_rate_id">
+                            <option selected hidden>Select One</option>
+                        {{-- @forelse ($extension_rates as $rate)
+                        <option value="{{ $rate->id }}">{{ $rate->hour }}</option>
+                        @empty
+                        <option>No Rate Available</option>
+                        @endforelse --}}
+                        </x-native-select>
+                    </div>
+                </div>
+                <div class="flex space-x-5 text-lg my-2 w-full">
+                    <div class="w-full">
+                        <x-native-select label="Room" wire:model="extension_rate_id">
+                            <option selected hidden>Select One</option>
+                        {{-- @forelse ($extension_rates as $rate)
+                        <option value="{{ $rate->id }}">{{ $rate->hour }}</option>
+                        @empty
+                        <option>No Rate Available</option>
+                        @endforelse --}}
+                        </x-native-select>
+                    </div>
+                    <div class="w-full">
+                        <x-native-select label="Status" wire:model="extension_rate_id">
+                            <option selected hidden>Select One</option>
+                        {{-- @forelse ($extension_rates as $rate)
+                        <option value="{{ $rate->id }}">{{ $rate->hour }}</option>
+                        @empty
+                        <option>No Rate Available</option>
+                        @endforelse --}}
+                        </x-native-select>
+                    </div>
+                </div>
+                <div class="w-full">
+                        <x-native-select label="Reason" wire:model="extension_rate_id">
+                            <option selected hidden>Select One</option>
+                        {{-- @forelse ($extension_rates as $rate)
+                        <option value="{{ $rate->id }}">{{ $rate->hour }}</option>
+                        @empty
+                        <option>No Rate Available</option>
+                        @endforelse --}}
+                        </x-native-select>
+                    </div>
+
                 <div class="flex justify-between text-lg my-2">
                     <span class="text-gray-600">Initial Staying Hour:</span>
-                <span class="text-gray-800 font-medium">{{ $stayingHour->number }}</span>
+                {{-- <span class="text-gray-800 font-medium">{{ $stayingHour->number }}</span> --}}
                 </div>
                 <div class="flex justify-between text-lg my-2">
                     <span class="text-gray-600">Extension Rate (hours):</span>
-                <span class="text-gray-800 font-medium">{{ $extended_rate->hour ?? 'N/A' }}</span>
+                {{-- <span class="text-gray-800 font-medium">{{ $extended_rate->hour ?? 'N/A' }}</span> --}}
                 </div>
                  <hr class="my-2">
                 <div class="flex justify-between text-lg my-2">
                     <span class="text-gray-600">
-                     Total Extension Hours (<span class="text-red-600">resets every {{ $extension_time_reset }} hours</span>) :
+                     Total Extension Hours (<span class="text-red-600">resets every  hours</span>) :
                     </span>
-                <span class="text-gray-800 font-medium">{{ $current_time_alloted }}</span>
+                {{-- <span class="text-gray-800 font-medium">{{ $current_time_alloted }}</span> --}}
                 </div>
             </div>
 
             <hr class="my-2">
             <div class="flex justify-between text-lg mb-2">
                 <span class="text-gray-600">Initial Rate:</span>
-                <span class="text-gray-800 font-medium">₱ {{ number_format($initial_amount, 2) }}</span>
+                {{-- <span class="text-gray-800 font-medium">₱ {{ number_format($initial_amount, 2) }}</span> --}}
             </div>
             <div class="flex justify-between text-lg mb-2">
                 <span class="text-gray-600">Extension Rate:</span>
-                <span class="text-gray-800 font-medium">₱ {{ number_format($extended_amount, 2) }}</span>
+                {{-- <span class="text-gray-800 font-medium">₱ {{ number_format($extended_amount, 2) }}</span> --}}
             </div>
 
             <div class="flex justify-between text-xl font-semibold text-gray-800 mt-8 mb-4">
                 <span>Total:</span>
-                <span>₱ {{ number_format($total_amount, 2) }}</span>
-            </div> --}}
+                <span>₱ {{ number_format(0, 2) }}</span>
+            </div>
         </div>
     </div>
 

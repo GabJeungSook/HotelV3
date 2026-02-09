@@ -1,11 +1,11 @@
 <div class="p-6">
     <h2 class="text-xl font-semibold text-gray-800 mb-6">Guest Information</h2>
 
-    <div class="grid grid-cols-3 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
         {{-- Left: Guest Details --}}
-        <div class="space-y-4 text-sm text-gray-700">
+        <div class="space-y-4 col-span-1 text-sm text-gray-700">
             <div>
-                <label class="block font-medium mb-1">QR Code</label>
+                <label class="block font-medium mb-1 mt-10">QR Code</label>
                <div class="p-2 bg-gray-100 rounded-md">{{$guest->qr_code}}</div>
             </div>
             <div>
@@ -34,7 +34,7 @@
         </div>
 
         {{-- Right: Billing Details --}}
-        <div class="border rounded-md bg-gray-50 p-4 shadow-sm text-sm text-gray-700">
+        <div class="border rounded-md col-span-3 bg-gray-50 p-4 shadow-sm text-sm text-gray-700">
             <h3 class="text-lg font-semibold text-gray-700 mb-4">Billing Statement</h3>
             <div class=" w-full text-lg mb-2">
                 <x-native-select label="Select Extension Rate (Hour)" wire:model="extension_rate_id">
@@ -78,17 +78,17 @@
                 <span class="text-red-600 font-medium">– ₱ {{ number_format($discount_amount, 2) }}</span>
             </div>
             @endif --}}
-            <hr class="my-2">
-            <div class="flex justify-between text-lg mb-2">
+            <hr class="my-2 border-dashed border-gray-600">
+            <div class="flex justify-between text-xl mb-2">
                 <span class="text-gray-600">Initial Rate:</span>
                 <span class="text-gray-800 font-medium">₱ {{ number_format($initial_amount, 2) }}</span>
             </div>
-            <div class="flex justify-between text-lg mb-2">
+            <div class="flex justify-between text-xl mb-2">
                 <span class="text-gray-600">Extension Rate:</span>
                 <span class="text-gray-800 font-medium">₱ {{ number_format($extended_amount, 2) }}</span>
             </div>
 
-            <div class="flex justify-between text-xl font-semibold text-gray-800 mt-8 mb-4">
+            <div class="flex justify-between text-4xl font-semibold text-gray-800 mt-8 mb-4">
                 <span>Total:</span>
                 <span>₱ {{ number_format($total_amount, 2) }}</span>
             </div>
