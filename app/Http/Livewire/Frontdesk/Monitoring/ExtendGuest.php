@@ -27,6 +27,7 @@ class ExtendGuest extends Component
     public $rate;
     public $stayingHour;
     public $extension_rates;
+    public $extension_rates_other;
     public $extension_rate_id;
     public $extension_time_reset;
 
@@ -55,10 +56,7 @@ class ExtendGuest extends Component
             )
                 ->where('id', $this->rate->staying_hour_id)
                 ->first();
-        $this->extension_rates = ExtensionRate::where(
-            'branch_id',
-            auth()->user()->branch_id
-        )->get();
+
 
         $this->extension_time_reset = Branch::where(
             'id',
@@ -69,6 +67,27 @@ class ExtendGuest extends Component
             : $this->guest->stayExtensions->sum('hours');
 
         $this->current_time_alloted = $this->guest->checkInDetail()->first()->number_of_hours;
+
+        $stayingHourIds = Rate::where('branch_id', auth()->user()->branch_id)
+            ->distinct()
+            ->pluck('staying_hour_id');
+
+        $stayingHours = StayingHour::where('branch_id', auth()->user()->branch_id)
+            ->whereIn('id', $stayingHourIds)
+            ->pluck('number');
+
+        if($this->current_time_alloted == 0 && $this->guest->checkInDetail()->first()->next_extension_is_original == true)
+        {
+            $this->extension_rates = ExtensionRate::where(
+            'branch_id',
+            auth()->user()->branch_id
+        )->whereIn('hour', $stayingHours)->get();
+        }else{
+                 $this->extension_rates = ExtensionRate::where(
+            'branch_id',
+            auth()->user()->branch_id
+        )->get();
+        }
 
         // while ($this->current_time_alloted > $this->extension_time_reset) {
         //     $this->current_time_alloted -= $this->extension_time_reset;

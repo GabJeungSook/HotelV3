@@ -59,6 +59,16 @@ class Guest extends Model
         ->where('remarks', 'Deposit From Check In (Room Key & TV Remote)');
     }
 
+    public function transferTransactions()
+    {
+        return $this->hasMany(Transaction::class)->where('transaction_type_id', 7);
+    }
+
+    public function extendTransactions()
+    {
+        return $this->hasMany(Transaction::class)->where('transaction_type_id', 6);
+    }
+
 
     public function stayExtensions()
     {

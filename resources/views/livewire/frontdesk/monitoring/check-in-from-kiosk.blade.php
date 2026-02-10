@@ -112,10 +112,10 @@
 
             </div>
             <div class="flex space-x-2">
-                <button wire:click="cancelCheckIn" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-opacity-50">
+                <button wire:click="cancelCheckIn" class="px-4 py-2 bg-red-500 text-gray-50 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
                     Cancel
                 </button>
-                <button wire:click="proceedCheckIn" class="px-4 py-2 bg-[#1877F2] text-white rounded-md hover:bg-[#166FE0] focus:outline-none focus:ring-2 focus:ring-[#1877F2] focus:ring-opacity-50">
+                <button wire:click="proceedCheckIn" class="px-4 py-2 bg-[#10b981] text-white rounded-md hover:bg-[#0ca06f] focus:outline-none focus:ring-2 focus:ring-[#10b981] focus:ring-opacity-50">
                     Check-In
                 </button>
             </div>

@@ -37,8 +37,10 @@
         <div class="border rounded-md col-span-3 bg-gray-50 p-4 shadow-sm text-sm text-gray-700">
             <h3 class="text-lg font-semibold text-gray-700 mb-4">Billing Statement</h3>
             <div class=" w-full text-lg mb-2">
+                 
                 <x-native-select label="Select Extension Rate (Hour)" wire:model="extension_rate_id">
                     <option selected hidden>Select One</option>
+
                     @forelse ($extension_rates as $rate)
                       <option value="{{ $rate->id }}">{{ $rate->hour }}</option>
                     @empty

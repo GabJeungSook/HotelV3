@@ -29,89 +29,103 @@
             <div class=" w-full text-lg mb-2">
                 <div class="flex space-x-5 text-lg my-2 w-full">
                     <div class="w-full">
-                        <x-native-select label="Type" wire:model="extension_rate_id">
+                        <x-native-select label="Type" wire:model="selected_type_id">
                             <option selected hidden>Select One</option>
-                        {{-- @forelse ($extension_rates as $rate)
-                        <option value="{{ $rate->id }}">{{ $rate->hour }}</option>
-                        @empty
-                        <option>No Rate Available</option>
-                        @endforelse --}}
+                            @forelse ($types as $type)
+                                <option value="{{ $type->id }}">{{ $type->name }}</option>
+                            @empty
+                            <option>No Type Available</option>
+                            @endforelse
                         </x-native-select>
                     </div>
                     <div class="w-full">
-                        <x-native-select label="Floor" wire:model="extension_rate_id">
+                        <x-native-select label="Floor" wire:model="selected_floor_id">
                             <option selected hidden>Select One</option>
-                        {{-- @forelse ($extension_rates as $rate)
-                        <option value="{{ $rate->id }}">{{ $rate->hour }}</option>
-                        @empty
-                        <option>No Rate Available</option>
-                        @endforelse --}}
+                            @forelse ($floors as $floor)
+                                <option value="{{ $floor->id }}">{{ $floor->numberWithFormat() }}</option>
+                            @empty
+                                <option>No Floor Available</option>
+                            @endforelse
                         </x-native-select>
                     </div>
                 </div>
                 <div class="flex space-x-5 text-lg my-2 w-full">
                     <div class="w-full">
-                        <x-native-select label="Room" wire:model="extension_rate_id">
-                            <option selected hidden>Select One</option>
-                        {{-- @forelse ($extension_rates as $rate)
-                        <option value="{{ $rate->id }}">{{ $rate->hour }}</option>
-                        @empty
-                        <option>No Rate Available</option>
-                        @endforelse --}}
-                        </x-native-select>
+                @if (!$this->enabled)
+                <x-native-select disabled label="Room">
+                    <option selected>No Room Available</option>
+                  </x-native-select>
+                @else
+                <x-native-select label="Room" wire:model="selected_room_id">
+                    <option selected hidden>Select One</option>
+                    @forelse ($rooms as $room)
+                      <option value="{{ $room->id }}">{{ $room->numberWithFormat() }}</option>
+                    @empty
+                      <option>No Room Available</option>
+                    @endforelse
+                  </x-native-select>
+                @endif
                     </div>
                     <div class="w-full">
-                        <x-native-select label="Status" wire:model="extension_rate_id">
+                        @if(!$this->enabled)
+                         <x-native-select disabled label="Status">
+                            <option selected>No Room Available</option>
+                         </x-native-select>
+                        @else
+                        <x-native-select label="Status" wire:model="selected_status">
                             <option selected hidden>Select One</option>
-                        {{-- @forelse ($extension_rates as $rate)
-                        <option value="{{ $rate->id }}">{{ $rate->hour }}</option>
-                        @empty
-                        <option>No Rate Available</option>
-                        @endforelse --}}
+                            <option value="Uncleaned">Uncleaned</option>
+                            <option value="Cleaned">Cleaned</option>
                         </x-native-select>
+                        @endif
                     </div>
                 </div>
                 <div class="w-full">
-                        <x-native-select label="Reason" wire:model="extension_rate_id">
+                        @if(!$this->enabled)
+                         <x-native-select disabled label="Reason">
+                            <option selected>No Room Available</option>
+                         </x-native-select>
+                        @else
+                        <x-native-select label="Reason" wire:model="selected_reason">
                             <option selected hidden>Select One</option>
-                        {{-- @forelse ($extension_rates as $rate)
-                        <option value="{{ $rate->id }}">{{ $rate->hour }}</option>
+                        @forelse ($reasons as $reason)
+                        <option value="{{ $reason->id }}">{{ $reason->reason }}</option>
                         @empty
-                        <option>No Rate Available</option>
-                        @endforelse --}}
+                        <option>No Reason Available</option>
+                        @endforelse
                         </x-native-select>
+                        @endif
                     </div>
-
-                <div class="flex justify-between text-lg my-2">
-                    <span class="text-gray-600">Initial Staying Hour:</span>
-                {{-- <span class="text-gray-800 font-medium">{{ $stayingHour->number }}</span> --}}
+                @if($guest->transferTransactions()->count() == 2)
+                <div class="bg-red-100 text-red-800 p-2 rounded-md mt-4 flex justify-between items-center">
+                    <p class="text-sm font-medium">Note: The guest have already transferred rooms twice and cannot be transferred further.</p>
+                    <button class="text-sm font-medium text-red-100 hover:text-red-200 hover:bg-red-800 bg-red-600 px-3 rounded-sm" wire:click="confirmTransfer({{ true }})">Override</button>
                 </div>
-                <div class="flex justify-between text-lg my-2">
-                    <span class="text-gray-600">Extension Rate (hours):</span>
-                {{-- <span class="text-gray-800 font-medium">{{ $extended_rate->hour ?? 'N/A' }}</span> --}}
+                @elseif($guest->extendTransactions()->count() > 0)
+                <div class="bg-red-100 text-red-800 p-2 rounded-md mt-4 flex justify-between items-center">
+                    <p class="text-sm font-medium">Note: The guest have already extended their stay and cannot be transferred.</p>
+                    <button class="text-sm font-medium text-red-100 hover:text-red-200 hover:bg-red-800 bg-red-600 px-3 rounded-sm" wire:click="confirmTransfer({{ true }})">Override</button>
                 </div>
-                 <hr class="my-2">
-                <div class="flex justify-between text-lg my-2">
-                    <span class="text-gray-600">
-                     Total Extension Hours (<span class="text-red-600">resets every  hours</span>) :
-                    </span>
-                {{-- <span class="text-gray-800 font-medium">{{ $current_time_alloted }}</span> --}}
+                @endif
+                <div class="flex justify-between text-xl my-2 mt-5">
+                    <span class="text-gray-600">Current Room Rate:</span>
+                <span class="text-gray-800 font-medium">₱ {{ number_format($guest->checkInDetail->rate->amount ?? 0, 2) }}</span>
+                </div>
+                <div class="flex justify-between text-xl my-2">
+                    <span class="text-gray-600">New Room Rate:</span>
+                <span class="text-gray-800 font-medium">₱ {{ number_format($new_room->amount ?? 0, 2) }}</span>
+                </div>
+                <div class="flex justify-between text-xl my-2">
+                    <span class="text-gray-600">Excess Amount:</span>
+                <span class="text-gray-800 font-medium">₱ {{ number_format($excess_amount ?? 0, 2) }}</span>
                 </div>
             </div>
 
-            <hr class="my-2">
-            <div class="flex justify-between text-lg mb-2">
-                <span class="text-gray-600">Initial Rate:</span>
-                {{-- <span class="text-gray-800 font-medium">₱ {{ number_format($initial_amount, 2) }}</span> --}}
-            </div>
-            <div class="flex justify-between text-lg mb-2">
-                <span class="text-gray-600">Extension Rate:</span>
-                {{-- <span class="text-gray-800 font-medium">₱ {{ number_format($extended_amount, 2) }}</span> --}}
-            </div>
+           <hr class="my-2 border-dashed border-gray-600">
 
-            <div class="flex justify-between text-xl font-semibold text-gray-800 mt-8 mb-4">
-                <span>Total:</span>
-                <span>₱ {{ number_format(0, 2) }}</span>
+           <div class="flex justify-between text-4xl font-semibold text-gray-800 mt-8 mb-4">
+                <span>Payable Amount:</span>
+                <span>₱ {{ number_format($payable_amount, 2) }}</span>
             </div>
         </div>
     </div>
@@ -134,14 +148,19 @@
                   {{-- <button wire:click="savePayExtend" class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-[#1877F2] focus:ring-opacity-50">
                     Save & Pay
                 </button> --}}
-                <button x-on:confirm="{
+                {{-- <button x-on:confirm="{
                         title: 'Confirm Save',
-                        description: 'Are you sure you want to extend guest stay?',
+                        description: 'Are you sure you want to transfer guest?',
                         icon: 'warning',
-                        method: 'saveExtend'
+                        method: 'saveTransfer'
                     }" class="px-4 py-2 bg-[#1877F2] text-white rounded-md hover:bg-[#5194ec] focus:outline-none focus:ring-2 focus:ring-[#1877F2] focus:ring-opacity-50">
                     Save
+                </button> --}}
+                @if(!$guest->transferTransactions()->count() == 2 || !$guest->extendTransactions()->count() > 0)
+                <button wire:click="confirmTransfer({{ false }})" class="px-4 py-2 bg-[#1877F2] text-white rounded-md hover:bg-[#5194ec] focus:outline-none focus:ring-2 focus:ring-[#1877F2] focus:ring-opacity-50">
+                    Save
                 </button>
+                @endif
             </div>
         </div>
     </div>
@@ -160,7 +179,7 @@
                     <div class="w-full divide-y divide-gray-400 ">
                         <div class="flex justify-between items-center py-2">
                             <dt class="text-gray-600 text-2xl font-bold">Excess Amount:</dt>
-                            {{-- <dd class="text-gray-800 text-2xl font-bold">₱ {{ number_format($excess_amount, 2) }}</dd> --}}
+                            <dd class="text-gray-800 text-2xl font-bold">₱ {{ number_format($excess_amount, 2) }}</dd>
                         </div>
                     </div>
                 </div>
@@ -182,7 +201,7 @@
         <x-slot name="footer">
           <div class="flex justify-end s gap-x-2">
               <x-button red label="Close" x-on:click="close" />
-              <x-button emerald label="Check-In" wire:click="saveCheckIn" />
+              <x-button emerald label="Confirm" wire:click="saveTransfer" />
           </div>
         </x-slot>
       </x-card>
