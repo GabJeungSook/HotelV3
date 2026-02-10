@@ -111,7 +111,8 @@ class TransferRoom extends Component
     }
 
     public function confirmTransfer($is_override)
-    {         if($is_override)
+    {
+        if($is_override)
         {
             $this->is_override = true;
         }else{
