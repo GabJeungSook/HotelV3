@@ -1,118 +1,115 @@
-<div>
-     <div class="my-2 hide-div  p-4 flex space-x-2 justify-between  bg-gray-100 rounded-lg">
-        <div class="flex items-center space-x-6 w-full">
-            {{-- <div>
-                <x-native-select wire:model="type" class="h-10 text-base">
-                    <option value="Overall Sales">Overall Sales</option>
-                    <option value="Daily">Daily</option>
-                    <option value="Weekly">Weekly</option>
-                    <option value="Monthly">Monthly</option>
-                </x-native-select>
+<div class="max-w-full mx-auto py-8 px-4 sm:px-6 lg:px-8">
+
+    {{-- Filters --}}
+    <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 p-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+            {{-- Category --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <select wire:model.defer="category_id"
+                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="">All</option>
+                    @foreach($categories as $cat)
+                        <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                    @endforeach
+                </select>
             </div>
-            <div class="flex items-center space-x-4">
-                <label class="inline-flex items-center space-x-2">
-                    <input type="checkbox" wire:model="showExtend" class="form-checkbox h-5 w-5 text-red-500 rounded">
-                    <span class="text-base">Extend</span>
-                </label>
-                <label class="inline-flex items-center space-x-2">
-                    <input type="checkbox" wire:model="showAmenities" class="form-checkbox h-5 w-5 text-yellow-500 rounded">
-                    <span class="text-base">Amenities</span>
-                </label>
-                <label class="inline-flex items-center space-x-2">
-                    <input type="checkbox" wire:model="showFood" class="form-checkbox h-5 w-5 text-blue-500 rounded">
-                    <span class="text-base">Food</span>
-                </label>
-                <label class="inline-flex items-center space-x-2">
-                    <input type="checkbox" wire:model="showDamages" class="form-checkbox h-5 w-5 text-green-500 rounded">
-                    <span class="text-base">Damages</span>
-                </label>
-                <label class="inline-flex items-center space-x-2">
-                    <input type="checkbox" wire:model="showDeposits" class="form-checkbox h-5 w-5 text-violet-500 rounded">
-                    <span class="text-base">Deposits</span>
-                </label>
-            </div> --}}
-        </div>
-        <div class="flex items-center space-x-2">
-            <x-button label="Print" icon="printer" @click="printOut($refs.printContainer.outerHTML);" amber />
-            <x-button label="Back" icon="arrow-left" wire:click="returnBack" slate />
+
+            {{-- Item --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Item</label>
+                <select wire:model.defer="item_id"
+                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="">All</option>
+                    @foreach($items as $item)
+                        <option value="{{ $item->id }}">{{ $item->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div></div>
+
+            {{-- Buttons --}}
+            <div class="flex items-end gap-2">
+                <button wire:click="$refresh" type="button"
+                        class="w-full md:w-auto inline-flex justify-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
+                    Apply
+                </button>
+
+                <button wire:click="resetFilters" type="button"
+                        class="w-full md:w-auto inline-flex justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Reset
+                </button>
+            </div>
         </div>
     </div>
-      {{-- <div class="flex space-x-4 hide-div p-4 items-center">
-                <x-input label="From" type="date" wire:model="date_from" class="h-10 text-base" placeholder="Date From" />
-                <x-input label="To" type="date" wire:model="date_to" class="h-10 text-base" placeholder="Date To" />
-                 <x-native-select label="Shift" wire:model="shift" class="h-10 text-base">
-                    <option value="">ALL</option>
-                    <option value="AM">AM</option>
-                    <option value="PM">PM</option>
-                </x-native-select>
-      </div> --}}
-    <div x-ref="printContainer">
-      <div class="flex mt-10 justify-center">
-        <h1 wire:loading.remove wire.target="showExtend, showAmenities, showFood, showDamages, showDeposits" class="font-bold text-xl ">INVENTORY REPORT</h1>
-            <div wire:loading wire:target="showExtend, showAmenities, showFood, showDamages, showDeposits">
-                <x-icon.spinner class="w-6 h-6 text-amber-600 animate-spin" />
-            </div>
-      </div>
-      <div class="mt-6">
- <div class="overflow-x-auto mt-4">
-    <table class="table-auto border-collapse w-full text-sm">
-        <thead>
-            <tr class="bg-gray-200 text-gray-700 font-semibold text-center">
-                <th class="border px-2 py-1">Item Code</th>
-                <th class="border px-2 py-1">Item Name</th>
-                <th class="border px-2 py-1">Category</th>
-                <th class="border px-2 py-1">Unit</th>
-                <th class="border px-2 py-1">Opening Stock</th>
-                <th class="border px-2 py-1">Stock-In</th>
-                <th class="border px-2 py-1">Stock-out</th>
-                <th class="border px-2 py-1">Wastage</th>
-                <th class="border px-2 py-1">Closing Stock</th>
-                <th class="border px-2 py-1">Unit Cost</th>
-                <th class="border px-2 py-1">Total Value</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($inventories as $item)
-            <tr class="text-center">
-                <td class="border px-2 py-1">{{ $item['item_code'] }}</td>
-                <td class="border px-2 py-1">{{ $item['item_name'] }}</td>
-                <td class="border px-2 py-1">{{ $item['category'] }}</td>
-                <td class="border px-2 py-1">{{ $item['unit'] }}</td>
-                <td class="border px-2 py-1">{{ $item['opening_stock'] }}</td>
-                <td class="border px-2 py-1">{{ $item['stock_in'] }}</td>
-                <td class="border px-2 py-1">{{ $item['stock_out'] }}</td>
-                <td class="border px-2 py-1">{{ $item['wastage'] }}</td>
-                <td class="border px-2 py-1">{{ $item['closing_stock'] }}</td>
-                <td class="border px-2 py-1">₱ {{ number_format($item['unit_cost'], 2) }}</td>
-                <td class="border px-2 py-1 font-semibold">₱ {{ number_format($item['total_value'], 2) }}</td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="11" class="border px-2 py-3 text-center text-gray-500">No inventory records found.</td>
-            </tr>
-            @endforelse
-        </tbody>
-    </table>
-</div>
-        <div class="mt-20">
-            <div class="flex justify-end space-y-7">
+
+    {{-- Report --}}
+    <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 overflow-hidden">
+
+        <div class="px-4 py-3 border-b border-gray-200">
+            <div class="text-sm font-semibold text-gray-900">INVENTORY REPORT</div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full border-collapse">
+                <thead>
+                    <tr>
+                        <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">Item Code</th>
+                        <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">Item Name</th>
+                        <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">Category</th>
+                        <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">Unit</th>
+                        <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">Opening Stock</th>
+                        <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">Stock In</th>
+                        <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">Stock Out</th>
+                        <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">Wastage</th>
+                        <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">Closing Stock</th>
+                        <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">Unit Cost</th>
+                        <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">Total Value</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @forelse($inventories as $row)
+                        <tr>
+                            <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['item_code'] }}</td>
+                            <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['item_name'] }}</td>
+                            <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['category'] }}</td>
+                            <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['unit'] }}</td>
+                            <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['opening_stock'] }}</td>
+                            <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['stock_in'] }}</td>
+                            <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['stock_out'] }}</td>
+                            <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['wastage'] }}</td>
+                            <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900 font-semibold">{{ $row['closing_stock'] }}</td>
+                            <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">₱ {{ number_format($row['unit_cost'], 2) }}</td>
+                            <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">₱ {{ number_format($row['total_value'], 2) }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="11" class="border border-gray-300 px-3 py-6 text-sm text-center text-gray-500">
+                                No inventory records found.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        {{-- Footer --}}
+        <div class="p-6 border-t border-gray-200">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-10">
                 <div class="text-gray-700">
-                  {{-- <h1 class="text-lg font-semibold">TOTAL SALES :  ₱ {{ number_format($totalSales, 2) }}</h1> --}}
+                    <div class="text-sm font-semibold">Prepared By:</div>
+                    <div class="mt-10 w-64 border-b border-gray-400"></div>
                 </div>
-              </div>
-        </div>
-        <div class="mt-20">
-          <div class="flex flex-col space-y-7">
-            <div class="text-gray-700">
-              <h1 class="text-sm font-semibold">Prepared By:</h1>
-              <h1 class="text-sm mt-8 w-48 border-b border-gray-400"></h1>
+
+                <div class="text-gray-700">
+                    <div class="text-sm font-semibold">Verified By:</div>
+                    <div class="mt-10 w-64 border-b border-gray-400"></div>
+                </div>
             </div>
-            <div class="text-gray-700">
-              <h1 class="text-sm font-semibold">Verified By:</h1>
-              <h1 class="text-sm mt-8 w-48 border-b border-gray-400"></h1>
-            </div>
-          </div>
         </div>
-      </div>
+
     </div>
 </div>

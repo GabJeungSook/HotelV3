@@ -90,16 +90,16 @@
         @forelse($groups as $group)
 
             {{-- Gray bar --}}
-            <div class="bg-gray-300 px-3 py-2">
-                <span class="inline-block bg-gray-300 px-2 py-1 text-xs font-bold tracking-wide text-gray-900">
+            {{-- <div class="bg-white px-3 py-2 border-b-2">
+                <span class="inline-block bg-white px-2 py-1 text-sm font-semibold tracking-wide text-gray-900">
                     {{ $group['label'] }}
                 </span>
-            </div>
+            </div> --}}
 
             {{-- Date label --}}
             <div class="px-3 py-2 border-b border-gray-200">
                 <span class="inline-block px-2 py-1 text-sm font-semibold text-gray-900">
-                    {{ $group['date_label'] }}
+                    {{ $group['label'] }}
                 </span>
             </div>
 

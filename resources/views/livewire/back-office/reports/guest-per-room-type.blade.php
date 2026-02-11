@@ -1,113 +1,162 @@
-<div>
-    <div class="my-2 hide-div  p-4 flex space-x-2   justify-start  bg-gray-100 rounded-lg">
-      <x-native-select wire:model="frontdesk_id">
-        <option>Select Frontdesk</option>
-        @foreach ($frontdesks as $item)
-          <option value="{{ $item->id }}">{{ $item->name }}</option>
-        @endforeach
-      </x-native-select>
-      <x-native-select wire:model="shift">
-        <option>Select Shift</option>
-        <option>AM</option>
-        <option>PM</option>
-      </x-native-select>
-      <x-native-select wire:model="room_type_id">
-        <option>Select Room Type</option>
-        @foreach ($room_types as $item)
-          <option value="{{ $item->id }}">{{ $item->name }}</option>
-        @endforeach
-      </x-native-select>
-      <x-datetime-picker placeholder="Select Date" without-time wire:model="date" />
-      <div class="w-40 ">
-        <x-time-picker placeholder="12:00 AM" wire:model="time" />
-      </div>
-    </div>
-    <div x-ref="printContainer">
-      <div class="flex">
-        <div class="flex space-x-2 items-center justify-center">
-          <x-svg.hotel class="w-10 h-10 text-gray-600" />
-          <div class="border-l-2 border-gray-500 pl-2">
-            <div class="text-gray-600 text-xl font-bold">HIMS</div>
-            <div class="text-gray-500 font-rubik border-t text-sm  leading-4">
-              {{ auth()->user()->branch_name }}
+<div class="max-w-full mx-auto py-8 px-4 sm:px-6 lg:px-8">
+
+    {{-- Filters --}}
+    <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 p-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+
+            {{-- Room Type --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Room Type</label>
+                <select wire:model.defer="room_type_id"
+                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="">All</option>
+                    @foreach($room_types as $rt)
+                        <option value="{{ $rt->id }}">{{ $rt->name }}</option>
+                    @endforeach
+                </select>
             </div>
-          </div>
+
+            {{-- Frontdesk --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Frontdesk</label>
+                <select wire:model.defer="frontdesk_id"
+                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="">All</option>
+                    @foreach($frontdesks as $fd)
+                        <option value="{{ $fd->id }}">{{ $fd->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Shift --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Shift</label>
+                <select wire:model.defer="shift"
+                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="">All</option>
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                </select>
+            </div>
+
+            {{-- Date --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                <input type="date"
+                       wire:model.defer="date"
+                       class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+            </div>
+
+            {{-- Time --}}
+            {{-- <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Time (Optional)</label>
+                <input type="time"
+                       wire:model.defer="time"
+                       class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+            </div> --}}
+
+            {{-- Buttons --}}
+            <div class="flex items-end gap-2">
+                <button wire:click="$refresh"
+                        class="w-full md:w-auto inline-flex justify-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
+                    Apply
+                </button>
+
+                <button wire:click="resetFilters"
+                        class="w-full md:w-auto inline-flex justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Reset
+                </button>
+            </div>
+
         </div>
-      </div>
-      <div class="flex mt-10 justify-center">
-        <h1 class="font-bold text-xl ">GUEST PER ROOM TYPE</h1>
-      </div>
-      <div class="mt-6">
-        <h1 class="font-bold mt-5 text-gray-700">No of New Guest: {{ $total_guest }}</h1>
-        <table id="example" class="mt-2 table-auto" style="width:100%">
-          <thead class="font-normal">
-            <tr>
-              <th class="px-2 py-2 w-32 border-gray-700 text-sm font-semibold text-left text-gray-700 border">ROOM NUMBER
-              </th>
-              <th class="px-2 py-2 border-gray-700 text-sm font-semibold text-left text-gray-700 border">GUEST NAME
-              </th>
-              <th class="px-2 py-2 border-gray-700 text-sm font-semibold text-left text-gray-700 border">CHECK-IN
-                DATE/TIME
-              </th>
-              <th class="px-2 py-2 border-gray-700 text-sm font-semibold text-left text-gray-700 border">CHECK-OUT
-                DATE/TIME
-              </th>
-              <th class="px-2 py-2 border-gray-700 text-sm font-semibold text-left text-gray-700 border">INITIAL NO. OF HOURS
-            </th>
-            <th class="px-2 py-2 border-gray-700 text-sm font-semibold text-left text-gray-700 border">TOTAL NO. OF HOURS
-            </th>
-              <th class="px-2 py-2 border-gray-700 text-sm font-semibold text-left text-gray-700 border">ROOM TYPE
-              </th>
-              <th class="px-2 py-2 border-gray-700 text-sm font-semibold text-left text-gray-700 border">SHIFT
-              </th>
-              <th class="px-2 py-2 border-gray-700 text-sm font-semibold text-left text-gray-700 border">FRONTDESK NAME
-              </th>
-            </tr>
-          </thead>
-          <tbody class="">
-
-            @foreach ($rooms as $room)
-              @foreach ($room->newGuestReports as $item)
-                <tr>
-                  @if ($loop->first)
-                  <td rowspan="{{ $room->newGuestReports->count() }}" class="px-3 border-gray-700 py-1 border">{{ $room->number }}</td>
-                  @endif
-                  <td class="px-3 border-gray-700 py-1 border uppercase">{{ $item->checkinDetail?->guest->name }}</td>
-                  <td class="px-3 border-gray-700 py-1 border">
-                    {{ \Carbon\Carbon::parse($item->created_at)->format('F d, Y h:i A') }}</td>
-                  <td class="px-3 border-gray-700 py-1 border">
-                    {{ \Carbon\Carbon::parse($item->checkinDetail?->check_out_at)->format('F d, Y h:i A') }}</td>
-                  <td class="px-3 border-gray-700 py-1 border">{{ $item->checkinDetail?->hours_stayed }}</td>
-                  <td class="px-3 border-gray-700 py-1 border">{{ $item->checkinDetail?->hours_stayed + $room->extendedGuestReports()->sum('total_hours') }}</td>
-                  <td class="px-3 border-gray-700 py-1 border uppercase">
-                    {{ $room->type->name }}</td>
-                  <td class="px-3 border-gray-700 py-1 border">{{ $item->shift }}</td>
-                  <td class="px-3 border-gray-700 py-1 border uppercase">
-                    @php
-                      $user = App\Models\Frontdesk::where('id', $item->frontdesk_id)->first();
-                    @endphp
-
-                    {{ $user->name . ', ' . $item->partner_name }}
-                  </td>
-                </tr>
-              @endforeach
-            @endforeach
-
-
-          </tbody>
-        </table>
-        <div class="mt-20">
-          <div class="flex flex-col space-y-7">
-            <div class="text-gray-700">
-              <h1 class="text-sm font-semibold">Prepared By:</h1>
-              <h1 class="text-sm mt-8 w-48 border-b border-gray-400"></h1>
-            </div>
-            <div class="text-gray-700">
-              <h1 class="text-sm font-semibold">Verified By:</h1>
-              <h1 class="text-sm mt-8 w-48 border-b border-gray-400"></h1>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
-  </div>
+
+    {{-- Report --}}
+    <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 overflow-hidden">
+
+        <div class="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+            <div class="text-sm font-semibold text-gray-900">
+                GUEST PER ROOM TYPE REPORT
+            </div>
+            <div class="text-sm font-semibold text-gray-700">
+                Total Guests: {{ $total_guest }}
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full border-collapse">
+                <thead>
+                    <tr>
+                        <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">ROOM #</th>
+                        <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">ROOM TYPE</th>
+                        <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">GUEST NAME</th>
+                        <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">CHECK-IN</th>
+                        <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">CHECK-OUT</th>
+                        <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">SHIFT</th>
+                        <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">FRONTDESK</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @forelse($reports as $item)
+                        <tr>
+                            <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
+                                {{ $item->room?->number ?? '—' }}
+                            </td>
+
+                            <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
+                                {{ $item->room?->type?->name ?? '—' }}
+                            </td>
+
+                            <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
+                                {{ $item->checkinDetail?->guest?->name ?? '—' }}
+                            </td>
+
+                            <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
+                                {{ $item->checkinDetail?->check_in_at
+                                    ? \Carbon\Carbon::parse($item->checkinDetail->check_in_at)->format('F d, Y h:i A')
+                                    : '—' }}
+                            </td>
+
+                            <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
+                                {{ $item->checkinDetail?->check_out_at
+                                    ? \Carbon\Carbon::parse($item->checkinDetail->check_out_at)->format('F d, Y h:i A')
+                                    : '—' }}
+                            </td>
+
+                            <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
+                                {{ $item->shift ?? '—' }}
+                            </td>
+
+                            <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
+                                {{ $item->frontdesk?->name ?? '—' }}
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="border border-gray-300 px-3 py-6 text-sm text-center text-gray-500">
+                                No records found for the selected filters.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        {{-- Footer --}}
+        <div class="p-6 border-t border-gray-200">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-10">
+                <div class="text-gray-700">
+                    <div class="text-sm font-semibold">Prepared By:</div>
+                    <div class="mt-10 w-64 border-b border-gray-400"></div>
+                </div>
+
+                <div class="text-gray-700">
+                    <div class="text-sm font-semibold">Verified By:</div>
+                    <div class="mt-10 w-64 border-b border-gray-400"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

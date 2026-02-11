@@ -3,64 +3,58 @@
 namespace App\Http\Livewire\BackOffice\Reports;
 
 use Livewire\Component;
-use App\Models\NewGuestReport as guestReport;
+use App\Models\NewGuestReport as reportQuery;
 use App\Models\Room;
 use App\Models\Frontdesk;
 
 class NewGuestReport extends Component
 {
-    public $only = [];
-    public $frontdesks;
-    public $frontdesk_id, $shift, $date, $time;
-    public $total_guest;
+    public $frontdesk_id;
+    public $shift;
+    public $date;
+    public $time;
 
-    public function mount()
-    {
-        $this->total_guest = guestReport::where(
-            'branch_id',
-            auth()->user()->branch_id
-        )->count();
-        $this->only = guestReport::pluck('room_id')->toArray();
-        $this->frontdesks = Frontdesk::where(
-            'branch_id',
-            auth()->user()->branch_id
-        )->get();
-    }
+    public $total_guest = 0;
+
     public function render()
     {
+        $query = reportQuery::query()
+            ->where('branch_id', auth()->user()->branch_id)
+            ->with([
+                'room',
+                'checkinDetail.guest',
+                'checkinDetail',
+                'checkinDetail.frontdesk',
+            ])
+            ->when($this->frontdesk_id, fn($q) =>
+                $q->where('frontdesk_id', $this->frontdesk_id)
+            )
+            ->when($this->shift, fn($q) =>
+                $q->where('shift', $this->shift)
+            )
+            ->when($this->date, fn($q) =>
+                $q->whereDate('created_at', $this->date)
+            )
+            ->when($this->time, fn($q) =>
+                $q->whereTime('created_at', '<=', $this->time)
+            )
+            ->orderByDesc('created_at');
+
+        $reports = $query->get();
+
+        $this->total_guest = $reports->count();
+
         return view('livewire.back-office.reports.new-guest-report', [
-            'rooms' => Room::whereIn('id', $this->only)
-                ->where('branch_id', auth()->user()->branch_id)
-                ->with('newGuestReports')
-                ->when($this->frontdesk_id, function ($query) {
-                    $query->whereHas('newGuestReports', function ($query) {
-                        $query->where('frontdesk_id', $this->frontdesk_id);
-                    });
-                })
-                ->when($this->shift, function ($query) {
-                    $query->whereHas('newGuestReports', function ($query) {
-                        $query->where('shift', $this->shift);
-                    });
-                })
-                ->when($this->date, function ($query) {
-                    $query->whereHas('newGuestReports', function ($query) {
-                        $query->whereDate('created_at', $this->date);
-                    });
-                })
-                ->when($this->time, function ($query) {
-                    $query->whereHas('newGuestReports', function ($query) {
-                        $query
-                            ->whereTime('created_at', '>=', '08:00:00')
-                            ->whereTime('created_at', '<=', $this->time);
-                    });
-                })
-                ->orderBy('number', 'asc')
-                ->get(),
+            'reports' => $reports,
+            'frontdesks' => Frontdesk::where(
+                'branch_id',
+                auth()->user()->branch_id
+            )->get(),
         ]);
     }
 
-    // public function updatedTime()
-    // {
-    //     dd($this->time);
-    // }
+    public function resetFilters()
+    {
+        $this->reset(['frontdesk_id', 'shift', 'date', 'time']);
+    }
 }

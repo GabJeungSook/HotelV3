@@ -3,44 +3,47 @@
 namespace App\Http\Livewire\BackOffice\Reports;
 
 use Livewire\Component;
-use App\Models\RoomBoyReport as reportModel;
+use App\Models\RoomBoyReport as reportQuery;
 use App\Models\User;
 
 class RoomBoyReport extends Component
 {
-    public $roomboys;
+    public $roomboy_id;
+    public $shift;
+    public $date;
 
-    public $roomboy_id, $shift, $date;
-    public $total_cleaned;
+    public $total_cleaned = 0;
 
-    public function mount()
-    {
-        $this->roomboys = User::whereHas('roles', function ($query) {
-            $query->where('name', 'roomboy');
-        })->get();
-
-        $this->total_cleaned = reportModel::where('is_cleaned', true)
-            ->whereHas('room', function ($query) {
-                $query->where('branch_id', auth()->user()->branch_id);
-            })
-            ->count();
-    }
     public function render()
     {
-        return view('livewire.back-office.reports.room-boy-report', [
-            'reports' => reportModel::whereHas('room', function ($query) {
-                $query->where('branch_id', auth()->user()->branch_id);
+        $roomboys = User::whereHas('roles', fn($q) => $q->where('name', 'roomboy'))->get();
+
+        $query = reportQuery::query()
+            ->whereHas('room', function ($q) {
+                $q->where('branch_id', auth()->user()->branch_id);
             })
-                ->when($this->roomboy_id, function ($query) {
-                    $query->where('roomboy_id', $this->roomboy_id);
-                })
-                ->when($this->shift, function ($query) {
-                    $query->where('shift', $this->shift);
-                })
-                ->when($this->date, function ($query) {
-                    $query->whereDate('created_at', $this->date);
-                })
-                ->get(),
+            ->with([
+                'room',
+                'roomboy', // make sure RoomBoyReport has roomboy() relationship
+            ])
+            ->when($this->roomboy_id, fn($q) => $q->where('roomboy_id', $this->roomboy_id))
+            ->when($this->shift, fn($q) => $q->where('shift', $this->shift))
+            ->when($this->date, fn($q) => $q->whereDate('created_at', $this->date))
+            ->orderByDesc('created_at');
+
+        $reports = $query->get();
+
+        // total cleaned under the same filters
+        $this->total_cleaned = $reports->where('is_cleaned', true)->count();
+
+        return view('livewire.back-office.reports.room-boy-report', [
+            'reports' => $reports,
+            'roomboys' => $roomboys,
         ]);
+    }
+
+    public function resetFilters()
+    {
+        $this->reset(['roomboy_id', 'shift', 'date']);
     }
 }
