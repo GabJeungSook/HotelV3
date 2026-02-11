@@ -39,14 +39,7 @@
                         @endforeach
                     </x-native-select>
                 </div>
-                {{-- <div>
-                    <x-native-select wire:model.defer="type" label="Type" class="h-10 text-base">
-                        <option value="Overall Sales">Overall Sales</option>
-                        <option value="Daily">Daily</option>
-                        <option value="Weekly">Weekly</option>
-                        <option value="Monthly">Monthly</option>
-                    </x-native-select>
-                </div> --}}
+
                 <x-input label="From" type="date" wire:model.defer="date_from" class="h-10 text-base" placeholder="Date From" />
                 <x-input label="To" type="date" wire:model.defer="date_to" class="h-10 text-base" placeholder="Date To" />
                  <x-native-select label="Shift" wire:model.defer="shift" class="h-10 text-base">
@@ -58,17 +51,7 @@
                 <x-button label="Reset" class="mt-5" wire:click="resetFilters" spinner="resetFilters" icon="refresh" amber />
       </div>
     <div x-ref="printContainer">
-      {{-- <div class="flex">
-        <div class="flex space-x-2 items-center justify-center">
-          <x-svg.hotel class="w-10 h-10 text-gray-600" />
-          <div class="border-l-2 border-gray-500 pl-2">
-            <div class="text-gray-600 text-xl font-bold">HIMS</div>
-            <div class="text-gray-500 font-rubik border-t text-sm  leading-4">
-              {{ auth()->user()->branch_name }}
-            </div>
-          </div>
-        </div>
-      </div> --}}
+
       <div class="flex mt-10 justify-center">
         <h1 wire:loading.remove wire.target="showExtend, showAmenities, showFood, showDamages, showDeposits" class="font-bold text-xl ">SALES REPORT</h1>
             <div wire:loading wire:target="showExtend, showAmenities, showFood, showDamages, showDeposits">
@@ -76,7 +59,6 @@
             </div>
       </div>
       <div class="mt-6">
-        {{-- <h1 class="font-bold mt-5 text-gray-700">No of Room Cleaned: {{ $total_cleaned }}</h1> --}}
         <table id="example" class="mt-2 table-auto" style="width:100%">
 
           <thead class="font-normal">
@@ -162,13 +144,6 @@
               </th>
               <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border">
               </th>
-              {{-- <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-left text-gray-700 border">TRANSACTION
-              </th>
-              <th class="px-2 py-2 border-gray-700 text-sm font-semibold text-left text-gray-700 border">DESCRIPTION
-              </th>
-              <th class="px-2 py-2 border-gray-700 text-sm font-semibold text-left text-gray-700 border">DATE
-              </th>
-              <th class="px-2 py-2 border-gray-700 text-sm font-semibold text-right text-gray-700 border">PAID AMOUNT</th> --}}
             </tr>
           </thead>
           <tbody class="">
@@ -285,13 +260,6 @@
                     ($showDeposits ? (($item->room->latestCheckInDetail?->guest->depositTransactionsRoomKeyRemote()->sum('deposit_amount') + $item->room->latestCheckInDetail?->guest->depositTransactions()->sum('paid_amount'))) : 0), 2) }}
                 </td>
 
-
-                {{-- <td class="px-3 border-gray-700 py-1  border">{{ $item->description }}</td>
-                <td class="px-3 border-gray-700 py-1  border">{{ $item->remarks }}</td>
-                <td class="px-3 border-gray-700 py-1 text-sm  border">
-                  {{ \Carbon\Carbon::parse($item->paid_at)->format('F d, Y h:i A') }}</td>
-                <td class="px-3 border-gray-700 py-1 text-sm text-right border">
-                    ₱ {{ number_format($item->paid_amount, 2) }}</td> --}}
               </tr>
             @endforeach
           </tbody>
@@ -300,7 +268,6 @@
             <div class="flex justify-end space-y-7">
                 <div class="text-gray-700">
                   <h1 class="text-lg font-semibold">TOTAL SALES :  ₱ {{ number_format($totalSales, 2) }}</h1>
-                  {{-- <h1 class="text-sm mt-8 w-48 border-b border-gray-400"></h1> --}}
                 </div>
               </div>
         </div>

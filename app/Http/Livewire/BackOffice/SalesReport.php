@@ -53,18 +53,6 @@ class SalesReport extends Component
 
     public function generateReport()
     {
-        // $transactions = Transaction::query()
-        // ->whereHas('guest.checkInDetail', function ($q) {
-        //     $q->when($this->date_from, fn($q, $d) => $q->whereDate('check_in_at', '>=', $d))
-        //     ->when($this->date_to, fn($q, $d) => $q->whereDate('check_in_at', '<=', $d))
-        //     ->when($this->frontdesk, fn($q, $f) => $q->where('frontdesk_id', $f));
-        // })
-        // ->when($this->shift, function ($q, $shift) {
-        //     $q->whereHas('room.checkOutGuestReports', function ($q2) use ($shift) {
-        //         $q2->where('shift', $shift);
-        //     });
-        // });
-
         $transactions = Transaction::query()
             ->whereHas('room.latestCheckInDetail', function ($q) {
                 $q->when($this->date_from, fn($q, $d) => $q->whereDate('check_out_at', '>=', $d))

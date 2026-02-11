@@ -21,6 +21,9 @@ Route::prefix('back-office')
          Route::get('/inventory-report', function () {
             return view('back-office.inventory-report');
         })->name('back-office.inventory-report');
+        Route::get('/report-hub', function () {
+            return view('back-office.report-hub');
+        })->name('back-office.report-hub');
         Route::get('/reports', function () {
             return view('back-office.reports');
         })->name('back-office.reports');
