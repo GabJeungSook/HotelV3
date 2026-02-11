@@ -216,8 +216,8 @@
               Dashboard
             </a>
             <nav class="mt-2  space-y-0.5 ">
-              <a href="{{ route('back-office.reports') }}"
-                class="{{ request()->routeIs('back-office.reports') ? 'bg-gray-100 before:h-full before:w-1 relative before:bg-gray-500 before:rounded-r before:absolute before:left-0 ' : '' }} text-gray-600 group flex items-center px-4 py-2 text-sm hover:bg-gray-100 ">
+              <a href="{{ route('back-office.report-hub') }}"
+                class="{{ request()->routeIs('back-office.report-hub') ? 'bg-gray-100 before:h-full before:w-1 relative before:bg-gray-500 before:rounded-r before:absolute before:left-0 ' : '' }} text-gray-600 group flex items-center px-4 py-2 text-sm hover:bg-gray-100 ">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                   class="mr-3 h-6 w-6 flex-shrink-0 fill-gray-600">
                   <path fill="none" d="M0 0h24v24H0z" />
