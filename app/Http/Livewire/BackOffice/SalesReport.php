@@ -177,7 +177,7 @@ class SalesReport extends Component
     //     ->all();
 
     // 5) Group check-out time (hour bucket -> guest count)
-    $checkoutBuckets = $this->twoShiftBucketsFor('check_out_at');
+    $checkoutBuckets = $this->twoShiftBucketsFor('check_out_at', true);
     // $checkoutBuckets = \App\Models\CheckInDetail::query()
     //     ->when($this->date_from, fn($q, $d) => $q->whereDate('check_out_at', '>=', $d))
     //     ->when($this->date_to, fn($q, $d) => $q->whereDate('check_out_at', '<=', $d))
@@ -199,21 +199,22 @@ class SalesReport extends Component
     ];
 }
 
-    private function twoShiftBucketsFor(string $column): array
+    private function twoShiftBucketsFor(string $column, bool $requireIsCheckout = false): array
     {
-        $q = \App\Models\CheckInDetail::query()
-            ->when($this->date_from, fn($q, $d) => $q->whereDate($column, '>=', $d))
-            ->when($this->date_to, fn($q, $d) => $q->whereDate($column, '<=', $d))
-            ->when($this->frontdesk, fn($q, $f) => $q->where('frontdesk_id', $f))
-            ->whereNotNull($column);
+         $q = \App\Models\CheckInDetail::query()
+        ->when($requireIsCheckout, fn($q) => $q->where('is_check_out', true))
+        ->when($this->date_from, fn($q, $d) => $q->whereDate($column, '>=', $d))
+        ->when($this->date_to, fn($q, $d) => $q->whereDate($column, '<=', $d))
+        ->when($this->frontdesk, fn($q, $f) => $q->where('frontdesk_id', $f))
+        ->whereNotNull($column);
 
-        // AM: 08:00 - 19:59:59 (8am to before 8pm)
+        // AM: 08:00 - 19:59:59
         $am = (clone $q)
             ->whereTime(DB::raw("TIME($column)"), '>=', '08:00:00')
             ->whereTime(DB::raw("TIME($column)"), '<',  '20:00:00')
             ->count();
 
-        // PM: 20:00 - 07:59:59 (8pm to before 8am)
+        // PM: 20:00 - 07:59:59
         $pm = (clone $q)
             ->where(function ($sub) use ($column) {
                 $sub->whereTime(DB::raw("TIME($column)"), '>=', '20:00:00')
