@@ -1,288 +1,285 @@
-<div>
-     <div class="my-2 hide-div  p-4 flex space-x-2 justify-between  bg-gray-100 rounded-lg">
-        <div class="flex items-center space-x-6 w-full">
+<div class="max-w-full mx-auto py-8 px-4 sm:px-6 lg:px-8">
 
-            <div class="flex items-center space-x-4">
-                <label class="inline-flex items-center space-x-2">
-                    <input type="checkbox" wire:model="showExtend" class="form-checkbox h-5 w-5 text-red-500 rounded">
-                    <span class="text-base">Extend</span>
-                </label>
-                <label class="inline-flex items-center space-x-2">
-                    <input type="checkbox" wire:model="showAmenities" class="form-checkbox h-5 w-5 text-yellow-500 rounded">
-                    <span class="text-base">Amenities</span>
-                </label>
-                <label class="inline-flex items-center space-x-2">
-                    <input type="checkbox" wire:model="showFood" class="form-checkbox h-5 w-5 text-blue-500 rounded">
-                    <span class="text-base">Food</span>
-                </label>
-                <label class="inline-flex items-center space-x-2">
-                    <input type="checkbox" wire:model="showDamages" class="form-checkbox h-5 w-5 text-green-500 rounded">
-                    <span class="text-base">Damages</span>
-                </label>
-                <label class="inline-flex items-center space-x-2">
-                    <input type="checkbox" wire:model="showDeposits" class="form-checkbox h-5 w-5 text-violet-500 rounded">
-                    <span class="text-base">Deposits</span>
-                </label>
+    {{-- Filters --}}
+    <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 p-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+            {{-- Frontdesk --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Frontdesk</label>
+                <select wire:model.defer="frontdesk"
+                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="">All</option>
+                    @foreach($frontdesks as $fd)
+                        <option value="{{ $fd->id }}">{{ $fd->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Date From --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">From</label>
+                <input type="date" wire:model.defer="date_from"
+                       class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
+            </div>
+
+            {{-- Date To --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">To</label>
+                <input type="date" wire:model.defer="date_to"
+                       class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
+            </div>
+
+            {{-- Shift + Buttons --}}
+            <div class="flex flex-col gap-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Shift</label>
+                    <select wire:model.defer="shift"
+                            class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="">All</option>
+                        <option value="AM">AM</option>
+                        <option value="PM">PM</option>
+                    </select>
+                </div>
+
+                <div class="flex items-end gap-2">
+                    <button wire:click="generateReport" type="button"
+                            class="w-full md:w-auto inline-flex justify-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
+                        Apply
+                    </button>
+
+                    <button wire:click="resetFilters" type="button"
+                            class="w-full md:w-auto inline-flex justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Reset
+                    </button>
+                </div>
             </div>
         </div>
-        <div class="flex items-center space-x-2">
-            <x-button label="Print" icon="printer" @click="printOut($refs.printContainer.outerHTML);" amber />
-            <x-button label="Back" icon="arrow-left" wire:click="returnBack" slate />
+
+        {{-- Column Toggles (still uniform; placed under filters) --}}
+        <div class="mt-4 flex flex-wrap gap-4">
+            <label class="inline-flex items-center gap-2 text-sm">
+                <input type="checkbox" wire:model.live="showExtend" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                <span class="text-gray-700">Extend</span>
+            </label>
+
+            <label class="inline-flex items-center gap-2 text-sm">
+                <input type="checkbox" wire:model.live="showAmenities" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                <span class="text-gray-700">Amenities</span>
+            </label>
+
+            <label class="inline-flex items-center gap-2 text-sm">
+                <input type="checkbox" wire:model.live="showFood" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                <span class="text-gray-700">Food</span>
+            </label>
+
+            <label class="inline-flex items-center gap-2 text-sm">
+                <input type="checkbox" wire:model.live="showDamages" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                <span class="text-gray-700">Damages</span>
+            </label>
+
+            <label class="inline-flex items-center gap-2 text-sm">
+                <input type="checkbox" wire:model.live="showTransfer" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                <span class="text-gray-700">Transfer Room</span>
+            </label>
         </div>
     </div>
-      <div class="flex space-x-4 hide-div p-4 items-center">
-            <div>
-                    <x-native-select wire:model.defer="frontdesk" label="Frontdesk" class="h-10 text-base">
-                        <option value="">All</option>
-                        @foreach($frontdesks as $frontdesk)
-                            <option value="{{ $frontdesk->id }}">{{ $frontdesk->name }}</option>
+
+    {{-- Report --}}
+    <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 overflow-hidden">
+        @forelse($groups as $group)
+
+            {{-- Gray bar --}}
+            <div class="bg-gray-300 px-3 py-2">
+                <span class="inline-block bg-gray-300 px-2 py-1 text-xs font-bold tracking-wide text-gray-900">
+                    {{ $group['label'] }}
+                </span>
+            </div>
+
+            {{-- Date label --}}
+            <div class="px-3 py-2 border-b border-gray-200">
+                <span class="inline-block px-2 py-1 text-sm font-semibold text-gray-900">
+                    {{ $group['date_label'] }}
+                </span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full border-collapse">
+                    <thead>
+                        <tr>
+                            <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-28">ROOM #</th>
+                            <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-56">ROOM TYPE</th>
+                            <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-64">GUEST NAME</th>
+                            <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">CHECK-IN</th>
+                            <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">CHECK-OUT</th>
+                            <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-32">INITIAL HRS</th>
+                            <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-36">ROOM AMOUNT</th>
+
+                            @if($showExtend)
+                                <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-36">EXTEND</th>
+                            @endif
+                            @if($showAmenities)
+                                <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-36">AMENITIES</th>
+                            @endif
+                            @if($showFood)
+                                <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-36">FOOD</th>
+                            @endif
+                            @if($showDamages)
+                                <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-36">DAMAGES</th>
+                            @endif
+                            @if($showTransfer)
+                                <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-36">TRANSFER</th>
+                            @endif
+
+                            <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-56">FRONTDESK</th>
+                            <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-24">SHIFT</th>
+                            <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-40">TOTAL</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach($group['rows'] as $row)
+                            <tr>
+                                <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['number'] }}</td>
+                                <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['room_type'] }}</td>
+                                <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['guest_name'] }}</td>
+                                <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['check_in'] }}</td>
+                                <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['check_out'] }}</td>
+                                <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['initial_hrs'] }}</td>
+                                <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
+                                    ₱ {{ number_format($row['room_amount'], 2) }}
+                                </td>
+
+                                @if($showExtend)
+                                    <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
+                                        ₱ {{ number_format($row['extend_amount'], 2) }}
+                                    </td>
+                                @endif
+                                @if($showAmenities)
+                                    <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
+                                        ₱ {{ number_format($row['amenities_amount'], 2) }}
+                                    </td>
+                                @endif
+                                @if($showFood)
+                                    <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
+                                        ₱ {{ number_format($row['food_amount'], 2) }}
+                                    </td>
+                                @endif
+                                @if($showDamages)
+                                    <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
+                                        ₱ {{ number_format($row['damages_amount'], 2) }}
+                                    </td>
+                                @endif
+                                @if($showTransfer)
+                                    <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
+                                        ₱ {{ number_format($row['transfer_amount'], 2) }}
+                                    </td>
+                                @endif
+
+                                <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['frontdesk_name'] }}</td>
+                                <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['shift'] }}</td>
+                                <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900 font-semibold">
+                                    ₱ {{ number_format($row['total'], 2) }}
+                                </td>
+                            </tr>
                         @endforeach
-                    </x-native-select>
-                </div>
-
-                <x-input label="From" type="date" wire:model.defer="date_from" class="h-10 text-base" placeholder="Date From" />
-                <x-input label="To" type="date" wire:model.defer="date_to" class="h-10 text-base" placeholder="Date To" />
-                 <x-native-select label="Shift" wire:model.defer="shift" class="h-10 text-base">
-                    <option value="">ALL</option>
-                    <option value="AM">AM</option>
-                    <option value="PM">PM</option>
-                </x-native-select>
-                <x-button label="Apply Filters" class="mt-5" icon="filter" spinner="generateReport" wire:click="generateReport" emerald />
-                <x-button label="Reset" class="mt-5" wire:click="resetFilters" spinner="resetFilters" icon="refresh" amber />
-      </div>
-    <div x-ref="printContainer">
-
-      <div class="flex mt-10 justify-center">
-        <h1 wire:loading.remove wire.target="showExtend, showAmenities, showFood, showDamages, showDeposits" class="font-bold text-xl ">SALES REPORT</h1>
-            <div wire:loading wire:target="showExtend, showAmenities, showFood, showDamages, showDeposits">
-                <x-icon.spinner class="w-6 h-6 text-amber-600 animate-spin" />
+                    </tbody>
+                </table>
             </div>
-      </div>
-      <div class="mt-6">
-        <table id="example" class="mt-2 table-auto" style="width:100%">
 
-          <thead class="font-normal">
-            <tr>
-              <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border bg-gray-200" colspan="7">GUEST INFORMATION</th>
-              @if($showExtend)
-              <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border bg-red-200" colspan="2">EXTEND
-              </th>
-              @endif
-              @if($showAmenities)
-              <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border bg-yellow-200" colspan="2">AMENITIES
-              </th>
-              @endif
-              @if($showFood)
-              <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border bg-blue-200" colspan="2">FOOD
-              </th>
-               @endif
-                @if($showDamages)
-               <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border bg-green-200" colspan="2">DAMAGES
-              </th>
-                @endif
-                @if($showDeposits)
-               <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border bg-violet-200" colspan="3">DEPOSITS
-              </th>
-                @endif
-                <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border bg-gray-300" colspan="3">FRONT DESK
-              </th>
-              <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border bg-gray-400">TOTAL AMOUNT
-              </th>
-            </tr>
-            <tr>
-              <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border">ROOM #
-              </th>
-              <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border">ROOM TYPE
-              </th>
-              <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border">GUEST NAME
-              </th>
-              <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border">CHECK-IN DATE
-              </th>
-              <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border">CHECK-OUT DATE
-              </th>
-              <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border">INITIAL HRS
-              </th>
-              <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border">ROOM AMOUNT
-              </th>
-                @if($showExtend)
-              <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border"># OF HOURS
-              </th>
-              <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border">AMOUNT
-              </th>
-                @endif
-                @if($showAmenities)
-              <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border">ITEM
-              </th>
-               <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border">AMOUNT
-              </th>
-              @endif
-              @if($showFood)
-              <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border">ITEM
-              </th>
-               <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border">AMOUNT
-              </th>
-                @endif
-                @if($showDamages)
-               <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border">ITEM
-              </th>
-               <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border">AMOUNT
-              </th>
-                @endif
-                @if($showDeposits)
-                 <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border">DESCRIPTION
-              </th>
-               <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border">OTHER DEPOSITS
-              </th>
-               <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border">TOTAL AMOUNT
-              </th>
-                @endif
-                <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border">NAME
-              </th>
-               <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border">FORWARDED TO
-              </th>
-               <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border">SHIFT
-              </th>
-              <th class="px-2 py-2 w-28 border-gray-700 text-sm font-semibold text-center text-gray-700 border">
-              </th>
-            </tr>
-          </thead>
-          <tbody class="">
-            @foreach ($transactions as $item)
-              <tr>
-                <td class="px-3 border-gray-700 py-1  border">{{ $item->room->number }}</td>
-                <td class="px-3 border-gray-700 py-1  border">{{ $item->room->type->name }}</td>
-                <td class="px-3 border-gray-700 py-1  border uppercase">{{ $item->room->latestCheckInDetail?->guest->name }}</td>
-                <td class="px-3 border-gray-700 py-1 border">
-                    {{ \Carbon\Carbon::parse($item->room->latestCheckInDetail?->check_in_at)->format('m-d-Y h:iA') }}
-                </td>
-                <td class="px-3 border-gray-700 py-1 border">
-                    {{ \Carbon\Carbon::parse($item->room->latestCheckInDetail?->check_out_at)->format('m-d-Y h:iA') }}
-                </td>
-                <td class="px-3 border-gray-700 py-1  border">{{ $item->room->latestCheckInDetail?->hours_stayed }} hrs</td>
-                <td class="px-3 border-gray-700 py-1 border">₱ {{ number_format($item->room->latestCheckInDetail?->rate->amount, 2) }}</td>
-                @if($showExtend)
-                <td class="px-3 border-gray-700 py-1 border">
-                    @if($item->room->extendedGuestReports())
-                        {{ $item->room->extendedGuestReports()->sum('total_hours') }} hrs
-                    @endif
-                </td>
-                <td class="px-3 border-gray-700 py-1 border">
-                    @if($item->room->extendTransactions())
-                    ₱ {{ number_format( $item->paid_at == null ? $item->room->extendTransactions()->sum('payable_amount') : $item->room->extendTransactions()->sum('paid_amount'), 2) }}
-                    @endif
-                </td>
-                @endif
-                @if($showAmenities)
-                <td class="px-3 border-gray-700 py-1 border">
-                     @if($item->room->amenitiesTransactions())
-                        {{ $item->room->amenitiesTransactions()->first()?->remarks }}
-                     @endif
-                </td>
-                <td class="px-3 border-gray-700 py-1 border">
-                     @if($item->room->amenitiesTransactions())
-                    ₱ {{ number_format( $item->paid_at == null ? $item->room->amenitiesTransactions()->sum('payable_amount') : $item->room->amenitiesTransactions()->sum('paid_amount'), 2) }}
-                    @endif
-                </td>
-                @endif
-                @if($showFood)
-                <td class="px-3 border-gray-700 py-1 border">
-                     @if($item->room->foodTransactions())
-                        {{ $item->room->foodTransactions()->first()?->remarks }}
-                    @endif
-                </td>
-                <td class="px-3 border-gray-700 py-1 border">
-                    @if($item->room->foodTransactions())
-                    ₱ {{ number_format( $item->paid_at == null ? $item->room->foodTransactions()->sum('payable_amount') : $item->room->foodTransactions()->sum('paid_amount'), 2) }}
-                    @endif
-                </td>
-                @endif
-                @if($showDamages)
-               <td class="px-3 border-gray-700 py-1 border">
-                    @if($item->room->damagesTransactions())
-                        {{ $item->room->damagesTransactions()->first()?->remarks }}
-                    @endif
-                </td>
-                <td class="px-3 border-gray-700 py-1 border">
-                    @if($item->room->damagesTransactions())
-                    ₱ {{ number_format( $item->paid_at == null ? $item->room->damagesTransactions()->sum('payable_amount') : $item->room->damagesTransactions()->sum('paid_amount'), 2) }}
-                    @endif
-                </td>
-                @endif
-                @if($showDeposits)
-                <td class="px-3 border-gray-700 py-1 border">
-                    @if($item->room->latestCheckInDetail?->guest->depositTransactionsRoomKeyRemote())
-                      Room Key & Remote: ₱ {{ number_format($item->room->latestCheckInDetail?->guest->depositTransactionsRoomKeyRemote()->sum('deposit_amount'), 2) }}
-                    @endif
-                </td>
-                <td class="px-3 border-gray-700 py-1 border">
-                    @if($item->room->latestCheckInDetail?->guest->depositTransactions())
-                        Other Deposits: ₱ {{ number_format($item->room->latestCheckInDetail?->guest->depositTransactions()->sum('paid_amount'), 2) }}
-                      {{-- {{ $item->room->depositTransactions()->first()?->remarks }} --}}
-                    @endif
-                </td>
-                <td class="px-3 border-gray-700 py-1 border">
-                    @if($item->room->latestCheckInDetail?->guest->depositTransactions())
-                    ₱ {{ number_format(($item->room->latestCheckInDetail?->guest->depositTransactionsRoomKeyRemote()->sum('deposit_amount') + $item->room->latestCheckInDetail?->guest->depositTransactions()->sum('paid_amount')), 2)}}
-                    @endif
-                </td>
-                @endif
-                <td class="px-3 border-gray-700 py-1 border uppercase">
-                    @if($item->room->checkOutGuestReports())
-                    {{ $item->room->latestCheckInDetail->frontdesk->name }}
-                        {{-- {{ ($item->room->latestCheckInDetail?->frontdesk_id !=  $item->room->checkOutGuestReports()->first()?->frontdesk->id) ? 'FWD: '.$item->room->checkOutGuestReports()->first()?->frontdesk->name : $item->room->checkOutGuestReports()->first()?->frontdesk->name }} --}}
-                    @endif
-                </td>
-                <td class="px-3 border-gray-700 py-1 border uppercase">
-                    @if($item->room->checkOutGuestReports())
-                        {{ ($item->room->latestCheckInDetail->frontdesk->id !=  $item->room->checkOutGuestReports()->first()?->frontdesk->id) ? 'FWD: '.$item->room->checkOutGuestReports()->first()?->frontdesk->name : $item->room->latestCheckInDetail->frontdesk->name }}
-                    @endif
-                </td>
-                <td class="px-3 border-gray-700 py-1 border">
-                    @if($item->room->checkOutGuestReports())
-                        @if($item->room->checkOutGuestReports()->first()?->checkinDetail->check_out_at)
-                            @php
-                                $checkOutTime = \Carbon\Carbon::parse($item->room->latestCheckInDetail?->check_out_at);
-                                $hour = $checkOutTime->hour;
-                                $shift = ($hour >= 8 && $hour < 20) ? 'AM' : 'PM';
-                            @endphp
-                            {{ $shift}}
-                        @endif
+        @empty
+            <div class="p-8 text-center text-sm text-gray-500">
+                No sales records found for the selected filters.
+            </div>
+        @endforelse
 
-                     {{-- {{ $item->room->checkOutGuestReports()->first()?->shift  }} --}}
-                    @endif
-                </td>
-                <td class="px-3 border-gray-700 py-1 border">
-                    ₱ {{ number_format($item->room->latestCheckInDetail?->rate->amount +
-                    ($showExtend ? ($item->paid_at == null ? $item->room->extendTransactions()->sum('payable_amount') : $item->room->extendTransactions()->sum('paid_amount')) : 0) +
-                    ($showAmenities ? ($item->paid_at == null ? $item->room->amenitiesTransactions()->sum('payable_amount') : $item->room->amenitiesTransactions()->sum('paid_amount')) : 0) +
-                    ($showFood ? ($item->paid_at == null ? $item->room->foodTransactions()->sum('payable_amount') : $item->room->foodTransactions()->sum('paid_amount')) : 0) +
-                    ($showDamages ? ($item->paid_at == null ? $item->room->damagesTransactions()->sum('payable_amount') : $item->room->damagesTransactions()->sum('paid_amount')) : 0) +
-                    ($showDeposits ? (($item->room->latestCheckInDetail?->guest->depositTransactionsRoomKeyRemote()->sum('deposit_amount') + $item->room->latestCheckInDetail?->guest->depositTransactions()->sum('paid_amount'))) : 0), 2) }}
-                </td>
+        {{-- Totals + signatories --}}
+        <div class="p-6 border-t border-gray-200">
+            <div class="flex justify-end">
+                <div class="text-gray-900 font-semibold">
+                    TOTAL SALES: ₱ {{ number_format($totalSales, 2) }}
+                </div>
+            </div>
 
-              </tr>
-            @endforeach
-          </tbody>
-        </table>
-        <div class="mt-20">
-            <div class="flex justify-end space-y-7">
+            <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-10">
                 <div class="text-gray-700">
-                  <h1 class="text-lg font-semibold">TOTAL SALES :  ₱ {{ number_format($totalSales, 2) }}</h1>
+                    <div class="text-sm font-semibold">Prepared By:</div>
+                    <div class="mt-10 w-64 border-b border-gray-400"></div>
                 </div>
-              </div>
-        </div>
-        <div class="mt-20">
-          <div class="flex flex-col space-y-7">
-            <div class="text-gray-700">
-              <h1 class="text-sm font-semibold">Prepared By:</h1>
-              <h1 class="text-sm mt-8 w-48 border-b border-gray-400"></h1>
+
+                <div class="text-gray-700">
+                    <div class="text-sm font-semibold">Verified By:</div>
+                    <div class="mt-10 w-64 border-b border-gray-400"></div>
+                </div>
             </div>
-            <div class="text-gray-700">
-              <h1 class="text-sm font-semibold">Verified By:</h1>
-              <h1 class="text-sm mt-8 w-48 border-b border-gray-400"></h1>
-            </div>
-          </div>
         </div>
-      </div>
+        {{-- Reports Summary --}}
+<div class="p-6 border-t border-gray-200">
+    <div class="text-center font-semibold text-gray-900 mb-4">
+        REPORTS SUMMARY
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+        {{-- Card component --}}
+        @php
+            $cards = [
+                ['title' => 'GUEST PER ACCOMMODATION', 'key' => 'guest_per_accommodation', 'left' => 'Room Type', 'right' => 'Guest Number'],
+                ['title' => 'UNOCCUPIED ROOMS', 'key' => 'unoccupied_rooms', 'left' => 'Room Type', 'right' => 'Room Number'],
+                ['title' => 'UNDER REPAIR ROOM', 'key' => 'under_repair_rooms', 'left' => 'Room Type', 'right' => 'Room Number'],
+                ['title' => 'GROUP CHECK-IN TIME', 'key' => 'group_checkin_time', 'left' => 'Time', 'right' => 'Guest'],
+                ['title' => 'GROUP CHECK-OUT TIME', 'key' => 'group_checkout_time', 'left' => 'Time', 'right' => 'Guest'],
+            ];
+        @endphp
+
+        @foreach($cards as $c)
+                <div class="rounded-lg border border-gray-300 overflow-hidden bg-white flex flex-col min-h-[220px]">
+                <div class="bg-gray-100 text-xs font-semibold text-gray-700 px-3 py-2 text-center">
+                    {{ $c['title'] }}
+                </div>
+
+                <div class="px-3 py-2 flex-1 flex flex-col">
+                    <div class="grid grid-cols-2 text-[11px] font-semibold text-gray-700 border-b border-gray-200 pb-2">
+                        <div>{{ $c['left'] }}</div>
+                        <div class="text-right">{{ $c['right'] }}</div>
+                    </div>
+
+                    @php
+                        $data = $summary[$c['key']] ?? [];
+                        $total = collect($data)->sum('value');
+
+                        $footerLabel = match($c['key']) {
+                            'guest_per_accommodation',
+                            'group_checkin_time',
+                            'group_checkout_time' => 'Total Guests',
+                            default => 'Total Rooms',
+                        };
+                    @endphp
+
+                    <div class="flex-1">
+                        <div class="divide-y divide-gray-100">
+                            @forelse($data as $row)
+                                <div class="grid grid-cols-2 py-2 text-[11px] text-gray-700">
+                                    <div class="truncate">{{ $row['label'] }}</div>
+                                    <div class="text-right font-medium">{{ number_format($row['value']) }}</div>
+                                </div>
+                            @empty
+                                <div class="py-10 text-center text-xs text-gray-400">
+                                    No data
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Footer pinned --}}
+                <div class="bg-gray-100 px-3 py-2 text-[11px] text-gray-800 font-semibold border-t border-gray-300 flex justify-between items-center">
+                    <span>{{ $footerLabel }}</span>
+                    <span>{{ number_format($total) }}</span>
+                </div>
+            </div>
+
+        @endforeach
+    </div>
+</div>
     </div>
 </div>

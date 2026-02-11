@@ -37,10 +37,10 @@ class ReportHub extends Component
                 'label' => 'Room Boy Report',
                 'component' => 'back-office.reports.room-boy-report',
             ],
-            'unoccupied' => [
-                'label' => 'Unoccupied Room Report',
-                'component' => 'back-office.reports.unoccupied-room-report',
-            ],
+            // 'unoccupied' => [
+            //     'label' => 'Unoccupied Room Report',
+            //     'component' => 'back-office.reports.unoccupied-room-report',
+            // ],
             'extended' => [
                 'label' => 'Extended Guest Report',
                 'component' => 'back-office.reports.extended-guest-report',
