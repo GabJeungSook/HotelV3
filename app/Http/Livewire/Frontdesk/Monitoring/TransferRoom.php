@@ -43,6 +43,9 @@ class TransferRoom extends Component
     public $save_pay_modal = false;
     public $save_excess = false;
     public $is_override = false;
+    public $authorization_modal = false;
+    public $test_modal = false;
+    public $code;
 
     public function mount($record)
     {
@@ -110,15 +113,9 @@ class TransferRoom extends Component
         }
     }
 
-    public function confirmTransfer($is_override)
+    public function confirmTransfer()
     {
-        if($is_override)
-        {
-            $this->is_override = true;
-        }else{
-            $this->is_override = false;
-        }
-        $this->validate([
+         $this->validate([
             'selected_type_id' => 'required',
             'selected_floor_id' => 'required',
             'selected_room_id' => 'required',
@@ -132,6 +129,37 @@ class TransferRoom extends Component
             'selected_reason.required' => 'Please select a reason for transfer.',
         ]);
 
+        if($this->is_override)
+        {
+            if(auth()->user()->branch->autorization_code == $this->code)
+            {
+                $this->authorization_modal = false;
+                        if($this->excess_amount > 0) {
+             $this->save_pay_modal = true;
+            }else{
+                $this->dialog()->confirm([
+                'title' => 'Are you Sure?',
+                'description' => 'transfer guest to new room?',
+                'icon' => 'question',
+                'accept' => [
+                    'label' => 'Confirm Transfer',
+                    'method' => 'saveTransfer',
+                    'params' => $this->is_override,
+                ],
+                'reject' => [
+                    'label' => 'Cancel',
+                ],
+            ]);
+            }
+            }else{
+                $this->authorization_modal = true;
+                $this->code = null;
+                $this->dialog()->error(
+                    $title = 'Oops',
+                    $description = 'Wrong authorization code.'
+                );
+            }
+        }else{
         if($this->excess_amount > 0) {
              $this->save_pay_modal = true;
         }else{
@@ -149,6 +177,27 @@ class TransferRoom extends Component
             ],
         ]);
         }
+        }
+    }
+
+    public function overrideTransfer()
+    {
+         $this->validate([
+            'selected_type_id' => 'required',
+            'selected_floor_id' => 'required',
+            'selected_room_id' => 'required',
+            'selected_status' => 'required',
+            'selected_reason' => 'required',
+        ], [
+            'selected_type_id.required' => 'Please select a room type.',
+            'selected_floor_id.required' => 'Please select a floor.',
+            'selected_room_id.required' => 'Please select a room.',
+            'selected_status.required' => 'Please select a status.',
+            'selected_reason.required' => 'Please select a reason for transfer.',
+        ]);
+
+        $this->authorization_modal = true;
+        $this->is_override = true;
     }
 
     public function saveTransfer()

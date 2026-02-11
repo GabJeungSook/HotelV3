@@ -99,12 +99,12 @@
                 @if($guest->transferTransactions()->count() == 2)
                 <div class="bg-red-100 text-red-800 p-2 rounded-md mt-4 flex justify-between items-center">
                     <p class="text-sm font-medium">Note: The guest have already transferred rooms twice and cannot be transferred further.</p>
-                    <button class="text-sm font-medium text-red-100 hover:text-red-200 hover:bg-red-800 bg-red-600 px-3 rounded-sm" wire:click="confirmTransfer({{ true }})">Override</button>
+                    <button class="text-sm font-medium text-red-100 hover:text-red-200 hover:bg-red-800 bg-red-600 px-3 rounded-sm" wire:click="overrideTransfer">Override</button>
                 </div>
                 @elseif($guest->extendTransactions()->count() > 0)
                 <div class="bg-red-100 text-red-800 p-2 rounded-md mt-4 flex justify-between items-center">
                     <p class="text-sm font-medium">Note: The guest have already extended their stay and cannot be transferred.</p>
-                    <button class="text-sm font-medium text-red-100 hover:text-red-200 hover:bg-red-800 bg-red-600 px-3 rounded-sm" wire:click="confirmTransfer({{ true }})">Override</button>
+                    <button class="text-sm font-medium text-red-100 hover:text-red-200 hover:bg-red-800 bg-red-600 px-3 rounded-sm" wire:click="overrideTransfer">Override</button>
                 </div>
                 @endif
                 <div class="flex justify-between text-xl my-2 mt-5">
@@ -157,7 +157,7 @@
                     Save
                 </button> --}}
                 @if(!$guest->transferTransactions()->count() == 2 || !$guest->extendTransactions()->count() > 0)
-                <button wire:click="confirmTransfer(false)" class="px-4 py-2 bg-[#1877F2] text-white rounded-md hover:bg-[#5194ec] focus:outline-none focus:ring-2 focus:ring-[#1877F2] focus:ring-opacity-50">
+                <button wire:click="confirmTransfer" class="px-4 py-2 bg-[#1877F2] text-white rounded-md hover:bg-[#5194ec] focus:outline-none focus:ring-2 focus:ring-[#1877F2] focus:ring-opacity-50">
                     Save
                 </button>
                 @endif
@@ -206,4 +206,34 @@
         </x-slot>
       </x-card>
     </x-modal>
+
+    {{-- moadal for authorization code --}}
+      <x-modal wire:model.defer="authorization_modal" align="center" max-width="md">
+    <x-card>
+      <div class="flex space-x-1">
+        <h1 class=" text-xl font-bold text-gray-600">AUTHORIZATION CODE</h1>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5 fill-green-600">
+          <path fill="none" d="M0 0h24v24H0z" />
+          <path d="M17 14h-4.341a6 6 0 1 1 0-4H23v4h-2v4h-4v-4zM7 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
+        </svg>
+      </div>
+      <div class="mt-7">
+        <input type="password" wire:model="code"
+          class="w-full text-lg
+      @error('code')
+          border-red-500
+      @enderror
+        rounded-lg">
+      </div>
+      @error('code')
+        <span class="text-sm text-red-500 mt-1">{{ $message }}</span>
+      @enderror
+      <div class="mt-5 flex justify-end items-center space-x-2">
+        <x-button x-on:click="close" label="CANCEL" sm negative />
+        <x-button label="PROCEED" sm positive wire:click="confirmTransfer" spinner="confirmTransfer" />
+
+      </div>
+
+    </x-card>
+  </x-modal>
 </div>
