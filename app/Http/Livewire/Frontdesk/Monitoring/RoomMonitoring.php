@@ -102,9 +102,9 @@ class RoomMonitoring extends Component
     {
           $temp = TemporaryCheckInKiosk::where('id', $id)
             ->first();
-          $temp->update([
-            'is_opened' => true,
-          ]);
+        //   $temp->update([
+        //     'is_opened' => true,
+        //   ]);
           return redirect()->route('frontdesk.check-in-from-kiosk', $id);
     }
 

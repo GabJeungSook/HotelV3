@@ -19,11 +19,18 @@ class CashOnHand extends Component
             ->whereNot('transaction_type', 'deposit')
             ->sum('amount');
 
-        $this->total_deposits = CashOnDrawer::where('branch_id', auth()->user()->branch_id)
+        $deposits = CashOnDrawer::where('branch_id', auth()->user()->branch_id)
             ->where('cash_drawer_id', auth()->user()->cash_drawer_id)
             ->where('transaction_date', now()->toDateString())
             ->where('transaction_type', 'deposit')
             ->sum('amount');
+        $deductions = CashOnDrawer::where('branch_id', auth()->user()->branch_id)
+            ->where('cash_drawer_id', auth()->user()->cash_drawer_id)
+            ->where('transaction_date', now()->toDateString())
+            ->sum('deduction');
+
+        $this->total_deposits = $deposits - $deductions;
+
     }
     public function render()
     {

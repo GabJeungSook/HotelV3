@@ -85,22 +85,22 @@ class RateSeeder extends Seeder
         ExtensionRate::create([
             'branch_id' => 1,
             'hour' => 6,
-            'amount' => 100,
+            'amount' => 112,
         ]);
         ExtensionRate::create([
             'branch_id' => 1,
             'hour' => 12,
-            'amount' => 200,
+            'amount' => 224,
         ]);
         ExtensionRate::create([
             'branch_id' => 1,
             'hour' => 18,
-            'amount' => 400,
+            'amount' => 336,
         ]);
         ExtensionRate::create([
             'branch_id' => 1,
             'hour' => 24,
-            'amount' => 500,
+            'amount' => 448,
         ]);
     }
 }

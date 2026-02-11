@@ -24,6 +24,7 @@ use App\Models\StayExtension;
 use App\Models\RequestableItem;
 use App\Models\TransactionType;
 use App\Models\AssignedFrontdesk;
+use App\Models\CashOnDrawer;
 use App\Models\FrontdeskInventory;
 use App\Models\CheckOutGuestReport;
 use App\Models\ExtendedGuestReport;
@@ -1674,6 +1675,17 @@ class GuestTransaction extends Component
             'deposit_amount' => $this->pay_excess,
         ]);
 
+        //save cash on drawer
+        CashOnDrawer::create([
+            'branch_id' => auth()->user()->branch_id,
+            'frontdesk_id' => auth()->user()->frontdesk->id,
+            'cash_drawer_id' => auth()->user()->cash_drawer_id,
+            'amount' => $transaction->payable_amount,
+            'transaction_date' => now()->toDateString(),
+            'transaction_type' => 'Payment from '.$transaction->description,
+            'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
+        ]);
+
         if ($this->saveAsExcess == true) {
             Transaction::create([
                 'branch_id' => $transaction->branch_id,
@@ -1695,6 +1707,16 @@ class GuestTransaction extends Component
                 'remarks' => 'Deposit from paying ' . $transaction->description,
                 'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
             ]);
+
+             CashOnDrawer::create([
+            'branch_id' => auth()->user()->branch_id,
+            'frontdesk_id' => auth()->user()->frontdesk->id,
+            'cash_drawer_id' => auth()->user()->cash_drawer_id,
+            'amount' => $this->pay_excess,
+            'transaction_date' => now()->toDateString(),
+            'transaction_type' => 'deposit',
+            'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
+        ]);
 
             $transaction->guest->checkInDetail->update([
                 'total_deposit' =>
@@ -1774,6 +1796,17 @@ class GuestTransaction extends Component
                 'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
             ]);
 
+            //save deduction
+            CashOnDrawer::create([
+                'branch_id' => auth()->user()->branch_id,
+                'frontdesk_id' => auth()->user()->frontdesk->id,
+                'cash_drawer_id' => auth()->user()->cash_drawer_id,
+                'deduction' => $this->pay_transaction_amount,
+                'transaction_date' => now()->toDateString(),
+                'transaction_type' => 'Payment from deposit - '.$transaction->description,
+                'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
+            ]);
+
             $transaction->guest->checkInDetail->update([
                 'total_deduction' =>
                     $transaction->guest->checkInDetail->total_deduction +
@@ -1820,12 +1853,27 @@ class GuestTransaction extends Component
 
     public function payAllUnpaid()
     {
+        $payable = Transaction::where('branch_id', auth()->user()->branch_id)
+            ->where('guest_id', $this->guest_id)
+            ->whereNull('paid_at')->sum('payable_amount');
+
         Transaction::where('branch_id', auth()->user()->branch_id)
             ->where('guest_id', $this->guest_id)
             ->whereNull('paid_at')
             ->update([
                 'paid_at' => now(),
                 'paid_amount' => DB::raw('payable_amount'),]);
+
+        //save cash on drawer
+        CashOnDrawer::create([
+            'branch_id' => auth()->user()->branch_id,
+            'frontdesk_id' => auth()->user()->frontdesk->id,
+            'cash_drawer_id' => auth()->user()->cash_drawer_id,
+            'amount' => $payable,
+            'transaction_date' => now()->toDateString(),
+            'transaction_type' => 'Paid all unpaid bills',
+            'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
+        ]);
 
         ActivityLog::create([
             'branch_id' => auth()->user()->branch_id,
@@ -1887,6 +1935,17 @@ class GuestTransaction extends Component
             'remarks' => 'Cashout from paying all unpaid balances',
             'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
         ]);
+
+        //save deduction
+            CashOnDrawer::create([
+                'branch_id' => auth()->user()->branch_id,
+                'frontdesk_id' => auth()->user()->frontdesk->id,
+                'cash_drawer_id' => auth()->user()->cash_drawer_id,
+                'deduction' => $this->pay_transaction_amount,
+                'transaction_date' => now()->toDateString(),
+                'transaction_type' => 'Payment from deposit - '.$transaction->description,
+                'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
+            ]);
 
         $transaction->guest->checkInDetail->update([
             'total_deduction' =>
@@ -2179,6 +2238,7 @@ class GuestTransaction extends Component
         $this->pay_transaction_amount = $transaction->payable_amount;
         $this->remarks = $transaction->remarks;
         $this->override_modal = true;
+        $this->override_amount = null;
     }
 
     public function addOverride()
@@ -2237,6 +2297,17 @@ class GuestTransaction extends Component
                 $this->remarks .
                 ' | Override Payable Amount: ₱' .
                 number_format($this->override_amount, 2),
+        ]);
+
+        //save cash on drawer
+        CashOnDrawer::create([
+            'branch_id' => auth()->user()->branch_id,
+            'frontdesk_id' => auth()->user()->frontdesk->id,
+            'cash_drawer_id' => auth()->user()->cash_drawer_id,
+            'amount' => $transaction->payable_amount,
+            'transaction_date' => now()->toDateString(),
+            'transaction_type' => 'Override Payment from '.$transaction->description,
+            'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
         ]);
 
         ActivityLog::create([
