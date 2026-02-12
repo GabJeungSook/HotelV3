@@ -36,7 +36,7 @@
                 {{ $this->reports[$report]['label'] ?? 'Report' }}
             </div>
             <div class="text-xs text-gray-500">
-                Use filters inside the report, then print/export.
+                Use filters inside the report.
             </div>
         </div>
 
