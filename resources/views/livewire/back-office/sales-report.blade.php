@@ -98,9 +98,9 @@
 
     <div class="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
         <div class="text-sm font-semibold text-gray-900">SALES REPORT</div>
-        <div class="text-sm font-semibold text-gray-700">
+        {{-- <div class="text-sm font-semibold text-gray-700">
             TOTAL SALES: ₱ {{ number_format($totalSales, 2) }}
-        </div>
+        </div> --}}
     </div>
 
     <div class="overflow-x-auto">
