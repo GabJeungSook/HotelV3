@@ -87,111 +87,104 @@
 
     {{-- Report --}}
     <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 overflow-hidden">
-        @forelse($groups as $group)
+        @php
+    // Flatten all group rows into one list
+    $allRows = collect($groups ?? [])
+        ->flatMap(fn($g) => $g['rows'] ?? [])
+        ->values();
+@endphp
 
-            {{-- Gray bar --}}
-            {{-- <div class="bg-white px-3 py-2 border-b-2">
-                <span class="inline-block bg-white px-2 py-1 text-sm font-semibold tracking-wide text-gray-900">
-                    {{ $group['label'] }}
-                </span>
-            </div> --}}
+<div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 overflow-hidden">
 
-            {{-- Date label --}}
-            <div class="px-3 py-2 border-b border-gray-200">
-                <span class="inline-block px-2 py-1 text-sm font-semibold text-gray-900">
-                    {{ $group['label'] }}
-                </span>
-            </div>
+    <div class="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+        <div class="text-sm font-semibold text-gray-900">SALES REPORT</div>
+        <div class="text-sm font-semibold text-gray-700">
+            TOTAL SALES: ₱ {{ number_format($totalSales, 2) }}
+        </div>
+    </div>
 
-            <div class="overflow-x-auto">
-                <table class="min-w-full border-collapse">
-                    <thead>
-                        <tr>
-                            <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-28">ROOM #</th>
-                            <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-56">ROOM TYPE</th>
-                            <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-64">GUEST NAME</th>
-                            <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">CHECK-IN</th>
-                            <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">CHECK-OUT</th>
-                            <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-32">INITIAL HRS</th>
-                            <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-36">ROOM AMOUNT</th>
+    <div class="overflow-x-auto">
+        <table class="min-w-full border-collapse">
+            <thead>
+                <tr>
+                    <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-28">ROOM #</th>
+                    <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-56">ROOM TYPE</th>
+                    <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-64">GUEST NAME</th>
+                    <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">CHECK-IN</th>
+                    <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">CHECK-OUT</th>
+                    <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-32">INITIAL HRS</th>
+                    <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-36">ROOM AMOUNT</th>
 
-                            @if($showExtend)
-                                <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-36">EXTEND</th>
-                            @endif
-                            @if($showAmenities)
-                                <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-36">AMENITIES</th>
-                            @endif
-                            @if($showFood)
-                                <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-36">FOOD</th>
-                            @endif
-                            @if($showDamages)
-                                <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-36">DAMAGES</th>
-                            @endif
-                            @if($showTransfer)
-                                <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-36">TRANSFER</th>
-                            @endif
+                    @if($showExtend)
+                        <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-36">EXTEND</th>
+                    @endif
+                    @if($showAmenities)
+                        <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-36">AMENITIES</th>
+                    @endif
+                    @if($showFood)
+                        <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-36">FOOD</th>
+                    @endif
+                    @if($showDamages)
+                        <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-36">DAMAGES</th>
+                    @endif
+                    @if($showTransfer)
+                        <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-36">TRANSFER</th>
+                    @endif
 
-                            <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-56">FRONTDESK</th>
-                            <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-24">SHIFT</th>
-                            <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-40">TOTAL</th>
-                        </tr>
-                    </thead>
+                    <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-56">FRONTDESK</th>
+                    <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-24">SHIFT</th>
+                    <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-40">TOTAL</th>
+                </tr>
+            </thead>
 
-                    <tbody>
-                        @foreach($group['rows'] as $row)
-                            <tr>
-                                <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['number'] }}</td>
-                                <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['room_type'] }}</td>
-                                <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['guest_name'] }}</td>
-                                <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['check_in'] }}</td>
-                                <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['check_out'] }}</td>
-                                <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['initial_hrs'] }}</td>
-                                <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
-                                    ₱ {{ number_format($row['room_amount'], 2) }}
-                                </td>
+            <tbody>
+                @forelse($allRows as $row)
+                    <tr>
+                        <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['number'] }}</td>
+                        <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['room_type'] }}</td>
+                        <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['guest_name'] }}</td>
+                        <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['check_in'] }}</td>
+                        <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['check_out'] }}</td>
+                        <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['initial_hrs'] }}</td>
+                        <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
+                            ₱ {{ number_format($row['room_amount'], 2) }}
+                        </td>
 
-                                @if($showExtend)
-                                    <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
-                                        ₱ {{ number_format($row['extend_amount'], 2) }}
-                                    </td>
-                                @endif
-                                @if($showAmenities)
-                                    <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
-                                        ₱ {{ number_format($row['amenities_amount'], 2) }}
-                                    </td>
-                                @endif
-                                @if($showFood)
-                                    <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
-                                        ₱ {{ number_format($row['food_amount'], 2) }}
-                                    </td>
-                                @endif
-                                @if($showDamages)
-                                    <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
-                                        ₱ {{ number_format($row['damages_amount'], 2) }}
-                                    </td>
-                                @endif
-                                @if($showTransfer)
-                                    <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
-                                        ₱ {{ number_format($row['transfer_amount'], 2) }}
-                                    </td>
-                                @endif
+                        @if($showExtend)
+                            <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">₱ {{ number_format($row['extend_amount'], 2) }}</td>
+                        @endif
+                        @if($showAmenities)
+                            <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">₱ {{ number_format($row['amenities_amount'], 2) }}</td>
+                        @endif
+                        @if($showFood)
+                            <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">₱ {{ number_format($row['food_amount'], 2) }}</td>
+                        @endif
+                        @if($showDamages)
+                            <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">₱ {{ number_format($row['damages_amount'], 2) }}</td>
+                        @endif
+                        @if($showTransfer)
+                            <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">₱ {{ number_format($row['transfer_amount'], 2) }}</td>
+                        @endif
 
-                                <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['frontdesk_name'] }}</td>
-                                <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['shift'] }}</td>
-                                <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900 font-semibold">
-                                    ₱ {{ number_format($row['total'], 2) }}
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+                        <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['frontdesk_name'] }}</td>
+                        <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">{{ $row['shift'] }}</td>
+                        <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900 font-semibold">
+                            ₱ {{ number_format($row['total'], 2) }}
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="{{ 10 + ($showExtend?1:0)+($showAmenities?1:0)+($showFood?1:0)+($showDamages?1:0)+($showTransfer?1:0) }}"
+                            class="border border-gray-300 px-3 py-6 text-sm text-center text-gray-500">
+                            No sales records found for the selected filters.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
 
-        @empty
-            <div class="p-8 text-center text-sm text-gray-500">
-                No sales records found for the selected filters.
-            </div>
-        @endforelse
 
         {{-- Totals + signatories --}}
         <div class="p-6 border-t border-gray-200">
