@@ -426,7 +426,7 @@
               <div class="flex items-center justify-between py-2">
                 <dt class="font-medium text-gray-900">Available Deposit</dt>
                 <dd class="font-medium text-indigo-600">
-                  ₱{{ number_format($check_in_details->total_deposit - $check_in_details->total_deduction, 2) }}</dd>
+                  ₱{{ number_format(($deposit_remote_and_key + $deposit_except_remote_and_key) - $check_in_details->total_deduction, 2) }}</dd>
               </div>
               {{-- @if ($check_in_details->total_deposit - $check_in_details->total_deduction != 0)
                 <div class="p-3">
