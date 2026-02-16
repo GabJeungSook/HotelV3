@@ -360,9 +360,7 @@
     <div class="bg-gray-50 px-3 py-2 text-sm font-semibold border border-gray-300 border-t-0">
         <div class="flex justify-between">
             <span>TOTAL</span>
-            <span>
-                ₱ {{ number_format(collect($roomSummary['totals'] ?? [])->sum(), 2) }}
-            </span>
+            <span>₱ {{ number_format(collect($roomSummary['totals'] ?? [])->sum(), 2) }}</span>
         </div>
     </div>
 </div>
