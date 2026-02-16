@@ -178,6 +178,7 @@ class CheckInFromKiosk extends Component
         //create transaction for check-in
          Transaction::create([
             'branch_id' => auth()->user()->branch_id,
+            'checkin_detail_id' => $checkin->id,
             'cash_drawer_id' => auth()->user()->cash_drawer_id,
             'room_id' => $this->guest->room_id,
             'guest_id' => $this->guest->id,
@@ -209,6 +210,7 @@ class CheckInFromKiosk extends Component
 
         Transaction::create([
             'branch_id' => auth()->user()->branch_id,
+            'checkin_detail_id' => $checkin->id,
             'cash_drawer_id' => auth()->user()->cash_drawer_id,
             'room_id' => $this->guest->room_id,
             'guest_id' => $this->guest->id,
@@ -240,6 +242,7 @@ class CheckInFromKiosk extends Component
         if ($this->save_excess) {
             Transaction::create([
                 'branch_id' => auth()->user()->branch_id,
+                'checkin_detail_id' => $checkin->id,
                 'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $this->guest->room_id,
                 'guest_id' => $this->guest->id,

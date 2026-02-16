@@ -59,4 +59,9 @@ class CheckinDetail extends Model
     {
         return $this->belongsTo(Frontdesk::class);
     }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
 }

@@ -184,6 +184,7 @@ class RoomMonitoring extends Component
         {
             Transaction::create([
                 'branch_id' => $check_in_detail->guest->branch_id,
+                'checkin_detail_id' => $check_in_detail->id,
                 'cash_drawer_id' => $check_in_detail->guest->cash_drawer_id,
                 'room_id' => $check_in_detail->room_id,
                 'guest_id' => $check_in_detail->guest_id,
@@ -656,6 +657,7 @@ class RoomMonitoring extends Component
         $assigned_frontdesk = auth()->user()->assigned_frontdesks;
         Transaction::create([
             'branch_id' => auth()->user()->branch_id,
+            'checkin_detail_id' => $checkin->id,
             'cash_drawer_id' => $checkin->guest->cash_drawer_id,
             'room_id' => $this->room_id,
             'guest_id' => $guest->id,
@@ -676,6 +678,7 @@ class RoomMonitoring extends Component
 
         Transaction::create([
             'branch_id' => auth()->user()->branch_id,
+            'checkin_detail_id' => $checkin->id,
             'cash_drawer_id' => $checkin->guest->cash_drawer_id,
             'room_id' => $guest->room_id,
             'guest_id' => $guest->id,
@@ -697,6 +700,7 @@ class RoomMonitoring extends Component
         if ($this->save_excess) {
             Transaction::create([
                 'branch_id' => auth()->user()->branch_id,
+                'checkin_detail_id' => $checkin->id,
                 'cash_drawer_id' => $checkin->guest->cash_drawer_id,
                 'room_id' => $guest->room_id,
                 'guest_id' => $guest->id,
@@ -775,6 +779,7 @@ class RoomMonitoring extends Component
         $assigned_frontdesk = auth()->user()->assigned_frontdesks;
         Transaction::create([
             'branch_id' => auth()->user()->branch_id,
+            'checkin_detail_id' => $checkin->id,
             'cash_drawer_id' => $checkin->guest->cash_drawer_id,
             'room_id' => $this->guest->room_id,
             'guest_id' => $this->guest->id,
@@ -795,6 +800,7 @@ class RoomMonitoring extends Component
 
         Transaction::create([
             'branch_id' => auth()->user()->branch_id,
+            'checkin_detail_id' => $checkin->id,
             'cash_drawer_id' => $checkin->guest->cash_drawer_id,
             'room_id' => $this->guest->room_id,
             'guest_id' => $this->guest->id,
@@ -816,6 +822,7 @@ class RoomMonitoring extends Component
         if ($this->save_excess) {
             Transaction::create([
                 'branch_id' => auth()->user()->branch_id,
+                'checkin_detail_id' => $checkin->id,
                 'cash_drawer_id' => $checkin->guest->cash_drawer_id,
                 'room_id' => $this->guest->room_id,
                 'guest_id' => $this->guest->id,
@@ -937,6 +944,7 @@ class RoomMonitoring extends Component
         $assigned_frontdesk = auth()->user()->assigned_frontdesks;
         Transaction::create([
             'branch_id' => auth()->user()->branch_id,
+            'checkin_detail_id' => $checkin->id,
             'cash_drawer_id' => $checkin->guest->cash_drawer_id,
             'room_id' => $this->guest_reserve->room_id,
             'guest_id' => $this->guest_reserve->id,
@@ -960,6 +968,7 @@ class RoomMonitoring extends Component
 
         Transaction::create([
             'branch_id' => auth()->user()->branch_id,
+            'checkin_detail_id' => $checkin->id,
             'cash_drawer_id' => $checkin->guest->cash_drawer_id,
             'room_id' => $this->guest_reserve->room_id,
             'guest_id' => $this->guest_reserve->id,
@@ -984,6 +993,7 @@ class RoomMonitoring extends Component
         if ($this->save_excess_reserve) {
             Transaction::create([
                 'branch_id' => auth()->user()->branch_id,
+                'checkin_detail_id' => $checkin->id,
                 'cash_drawer_id' => $checkin->guest->cash_drawer_id,
                 'room_id' => $this->guest_reserve->room_id,
                 'guest_id' => $this->guest_reserve->id,

@@ -140,6 +140,7 @@ class CheckInCo extends Component
             $shift = ($currentHour >= 8 && $currentHour < 20) ? 'AM' : 'PM';
          Transaction::create([
             'branch_id' => auth()->user()->branch_id,
+            'checkin_detail_id' => $checkin->id,
             'cash_drawer_id' => auth()->user()->cash_drawer_id,
             'room_id' => $guest->room_id,
             'guest_id' => $guest->id,
@@ -160,6 +161,7 @@ class CheckInCo extends Component
 
         Transaction::create([
             'branch_id' => auth()->user()->branch_id,
+            'checkin_detail_id' => $checkin->id,
             'cash_drawer_id' => auth()->user()->cash_drawer_id,
             'room_id' => $guest->room_id,
             'guest_id' => $guest->id,

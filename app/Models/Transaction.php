@@ -10,6 +10,11 @@ class Transaction extends Model
     use HasFactory;
     protected $guarded = [];
 
+    public function checkin_details()
+    {
+        return $this->belongsTo(CheckinDetail::class);
+    }
+
     public function guest()
     {
         return $this->belongsTo(Guest::class);

@@ -175,6 +175,7 @@ class CheckOutGuest extends Component
 
             $transaction = Transaction::create([
                 'branch_id' => $check_in_detail->guest->branch_id,
+                'checkin_detail_id' => $check_in_detail->id,
                 'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $check_in_detail->room_id,
                 'guest_id' => $check_in_detail->guest_id,
@@ -273,10 +274,15 @@ class CheckOutGuest extends Component
         //     'total_deduction' =>
         //         $this->record->checkInDetail->total_deduction + $balance,
         // ]);
+        $check_in_detail = CheckinDetail::where(
+                'guest_id',
+                $this->record->id
+            )->first();
 
         if ($this->roomKeyHandedOver == 'No') {
             Transaction::create([
                 'branch_id' => $transaction->branch_id,
+                'checkin_detail_id' => $check_in_detail->id,
                 'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $transaction->room_id,
                 'guest_id' => $transaction->guest_id,

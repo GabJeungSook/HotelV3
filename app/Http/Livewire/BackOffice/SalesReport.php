@@ -286,8 +286,9 @@ class SalesReport extends Component
 
         // Group overall (excluding transaction types)
         $transactions = (clone $base)
-            ->whereNotIn('transaction_type_id', [5, 7])
-            ->selectRaw('room_id, SUM(paid_amount) as paid_amount')
+            ->whereNotIn('transaction_type_id', [5, 2])
+            ->selectRaw('room_id, SUM(payable_amount) as paid_amount')
+            ->whereNotNull('paid_at')
             ->groupBy('room_id')
             ->get();
 
@@ -296,35 +297,40 @@ class SalesReport extends Component
         // Side buckets per room
         $this->extendedTransactions = Transaction::where('transaction_type_id', 6)
             ->whereIn('room_id', $roomIds)
-            ->selectRaw('room_id, SUM(paid_amount) as paid_amount')
+            ->selectRaw('room_id, SUM(payable_amount) as paid_amount')
+            ->whereNotNull('paid_at')
             ->groupBy('room_id')
             ->get()
             ->keyBy('room_id');
 
         $this->amenitiesTransactions = Transaction::where('transaction_type_id', 8)
             ->whereIn('room_id', $roomIds)
-            ->selectRaw('room_id, SUM(paid_amount) as paid_amount')
+            ->selectRaw('room_id, SUM(payable_amount) as paid_amount')
+            ->whereNotNull('paid_at')
             ->groupBy('room_id')
             ->get()
             ->keyBy('room_id');
 
         $this->foodTransactions = Transaction::where('transaction_type_id', 9)
             ->whereIn('room_id', $roomIds)
-            ->selectRaw('room_id, SUM(paid_amount) as paid_amount')
+            ->selectRaw('room_id, SUM(payable_amount) as paid_amount')
+            ->whereNotNull('paid_at')
             ->groupBy('room_id')
             ->get()
             ->keyBy('room_id');
 
         $this->damagesTransactions = Transaction::where('transaction_type_id', 4)
             ->whereIn('room_id', $roomIds)
-            ->selectRaw('room_id, SUM(paid_amount) as paid_amount')
+            ->selectRaw('room_id, SUM(payable_amount) as paid_amount')
+            ->whereNotNull('paid_at')
             ->groupBy('room_id')
             ->get()
             ->keyBy('room_id');
 
         $this->transferTransactions = Transaction::where('transaction_type_id', 7)
             ->whereIn('room_id', $roomIds)
-            ->selectRaw('room_id, SUM(paid_amount) as paid_amount')
+            ->selectRaw('room_id, SUM(payable_amount) as paid_amount')
+            ->whereNotNull('paid_at')
             ->groupBy('room_id')
             ->get()
             ->keyBy('room_id');

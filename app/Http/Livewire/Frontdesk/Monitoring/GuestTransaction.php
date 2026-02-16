@@ -294,6 +294,7 @@ class GuestTransaction extends Component
             $current_deposit = $this->check_in_details->total_deposit;
             Transaction::create([
                 'branch_id' => $this->check_in_details->guest->branch_id,
+                'checkin_detail_id' => $this->check_in_details->id,
                 'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $this->check_in_details->room_id,
                 'guest_id' => $this->check_in_details->guest_id,
@@ -603,6 +604,7 @@ class GuestTransaction extends Component
             DB::beginTransaction();
             $transaction = Transaction::create([
                 'branch_id' => $check_in_detail->guest->branch_id,
+                'checkin_detail_id' => $check_in_detail->id,
                 'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $check_in_detail->room_id,
                 'guest_id' => $check_in_detail->guest_id,
@@ -760,6 +762,7 @@ class GuestTransaction extends Component
             $current_deduction = $check_in_detail->total_deduction;
             Transaction::create([
                 'branch_id' => $check_in_detail->guest->branch_id,
+                'checkin_detail_id' => $check_in_detail->id,
                 'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $check_in_detail->room_id,
                 'guest_id' => $check_in_detail->guest_id,
@@ -949,6 +952,7 @@ class GuestTransaction extends Component
 
             $transaction = Transaction::create([
                 'branch_id' => $check_in_detail->guest->branch_id,
+                'checkin_detail_id' => $check_in_detail->id,
                 'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $check_in_detail->room_id,
                 'guest_id' => $check_in_detail->guest_id,
@@ -1128,6 +1132,7 @@ class GuestTransaction extends Component
 
             $transaction = Transaction::create([
                 'branch_id' => $check_in_detail->guest->branch_id,
+                'checkin_detail_id' => $check_in_detail->id,
                 'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $check_in_detail->room_id,
                 'guest_id' => $check_in_detail->guest_id,
@@ -1302,6 +1307,7 @@ class GuestTransaction extends Component
 
             $transaction = Transaction::create([
                 'branch_id' => $check_in_detail->guest->branch_id,
+                'checkin_detail_id' => $check_in_detail->id,
                 'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $check_in_detail->room_id,
                 'guest_id' => $check_in_detail->guest_id,
@@ -1532,6 +1538,7 @@ class GuestTransaction extends Component
         DB::beginTransaction();
         $transaction = Transaction::create([
             'branch_id' => auth()->user()->branch_id,
+            'checkin_detail_id' => $check_in_detail->id,
             'cash_drawer_id' => auth()->user()->cash_drawer_id,
             'room_id' => $this->room_id,
             'guest_id' => $this->guest_id,
@@ -1667,6 +1674,8 @@ class GuestTransaction extends Component
             $this->pay_transaction_id
         )->first();
 
+        $check_in_detail = CheckinDetail::where('guest_id', $this->guest_id)->first();
+
         DB::beginTransaction();
         $transaction->update([
             'paid_amount' => $this->pay_amount,
@@ -1689,6 +1698,7 @@ class GuestTransaction extends Component
         if ($this->saveAsExcess == true) {
             Transaction::create([
                 'branch_id' => $transaction->branch_id,
+                'checkin_detail_id' => $check_in_detail->id,
                 'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $transaction->room_id,
                 'guest_id' => $transaction->guest_id,
@@ -1775,8 +1785,10 @@ class GuestTransaction extends Component
                 'change_amount' => 0,
                 'paid_at' => now(),
             ]);
+            $check_in_detail = CheckinDetail::where('guest_id', $this->guest_id)->first();
             Transaction::create([
                 'branch_id' => $transaction->branch_id,
+                'checkin_detail_id' => $check_in_detail->id,
                 'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $transaction->room_id,
                 'guest_id' => $transaction->guest_id,
@@ -1912,6 +1924,7 @@ class GuestTransaction extends Component
         )
             ->where('guest_id', $this->guest_id)
             ->first();
+        $check_in_detail = CheckinDetail::where('guest_id', $this->guest_id)->first();
         Transaction::where('branch_id', auth()->user()->branch_id)
             ->where('guest_id', $this->guest_id)
             ->whereNull('paid_at')
@@ -1919,6 +1932,7 @@ class GuestTransaction extends Component
 
         Transaction::create([
             'branch_id' => $transaction->branch_id,
+            'checkin_detail_id' => $check_in_detail->id,
             'cash_drawer_id' => auth()->user()->cash_drawer_id,
             'room_id' => $transaction->room_id,
             'guest_id' => $transaction->guest_id,
@@ -2018,6 +2032,7 @@ class GuestTransaction extends Component
         if (!$this->is_checkout) {
             Transaction::create([
                 'branch_id' => $transaction->branch_id,
+                'checkin_detail_id' => $guest->checkInDetail->id,
                 'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $transaction->room_id,
                 'guest_id' => $transaction->guest_id,
@@ -2040,6 +2055,7 @@ class GuestTransaction extends Component
 
         Transaction::create([
             'branch_id' => $transaction->branch_id,
+            'checkin_detail_id' => $guest->checkInDetail->id,
             'cash_drawer_id' => auth()->user()->cash_drawer_id,
             'room_id' => $transaction->room_id,
             'guest_id' => $transaction->guest_id,

@@ -175,6 +175,7 @@ class ExtendGuest extends Component
              DB::beginTransaction();
                 $transaction = Transaction::create([
                     'branch_id' => $check_in_detail->guest->branch_id,
+                    'checkin_detail_id' => $check_in_detail->id,
                     'cash_drawer_id' => auth()->user()->cash_drawer_id,
                     'room_id' => $check_in_detail->room_id,
                     'guest_id' => $check_in_detail->guest_id,
