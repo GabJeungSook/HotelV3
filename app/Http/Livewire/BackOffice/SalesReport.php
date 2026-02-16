@@ -591,13 +591,15 @@ private function buildRoomSummary(): void
     foreach ($grouped as $typeName => $items) {
 
         $rowPerFloor = [];
+        $rowTotal = 0;
 
         foreach ($floors as $floor) {
-            $amount = $items
+            $amount = (float) $items
                 ->where('room.floor_id', $floor->id)
                 ->sum('payable_amount');
 
             $rowPerFloor[$floor->id] = $amount;
+            $rowTotal += $amount;
 
             $totalsPerFloor[$floor->id] += $amount;
         }
@@ -605,6 +607,7 @@ private function buildRoomSummary(): void
         $tableRows[] = [
             'description' => $typeName,
             'floors'      => $rowPerFloor,
+            'row_total'   => $rowTotal, // ✅ this drives your "Total" column
         ];
     }
 
