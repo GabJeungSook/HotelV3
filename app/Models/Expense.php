@@ -14,4 +14,9 @@ class Expense extends Model
     {
         return $this->belongsTo(ExpenseCategory::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(\App\Models\Frontdesk::class, 'user_id'); // since user_id IS frontdesk
+    }
 }

@@ -12,7 +12,7 @@ class Transaction extends Model
 
     public function checkin_details()
     {
-        return $this->belongsTo(CheckinDetail::class);
+        return $this->belongsTo(CheckinDetail::class, 'checkin_detail_id');
     }
 
     public function guest()

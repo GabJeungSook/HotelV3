@@ -94,7 +94,7 @@
         ->values();
 @endphp
 
-<div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 overflow-hidden">
+<div class="bg-white rounded-sm shadow-sm ring-1 ring-gray-200 overflow-hidden">
 
     <div class="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
         <div class="text-sm font-semibold text-gray-900">SALES REPORT</div>
@@ -273,6 +273,100 @@
 
         @endforeach
     </div>
+
+    {{-- expense summary --}}
+    <div class="p-6 border-t border-gray-200">
+    <div class="text-center font-semibold text-gray-900 mb-4">EXPENSE SUMMARY</div>
+
+    <div class="overflow-x-auto">
+        <table class="min-w-full border-collapse">
+            <thead>
+                <tr>
+                    <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">Expense Type</th>
+                    <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">Description</th>
+                    <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-28">Shift</th>
+                    <th class="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-800 w-32">Amount</th>
+                    <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-56">Frontdesk</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($expensesRows ?? [] as $e)
+                    <tr>
+                        <td class="border border-gray-300 px-3 py-2 text-sm">{{ $e['expense_type'] }}</td>
+                        <td class="border border-gray-300 px-3 py-2 text-sm">{{ $e['description'] }}</td>
+                        <td class="border border-gray-300 px-3 py-2 text-sm">{{ $e['shift'] }}</td>
+                        <td class="border border-gray-300 px-3 py-2 text-sm text-right">₱ {{ number_format($e['amount'], 2) }}</td>
+                        <td class="border border-gray-300 px-3 py-2 text-sm">{{ $e['frontdesk'] }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="5" class="border border-gray-300 px-3 py-8 text-center text-sm text-gray-500">
+                            No expenses found for the selected filters.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div class="bg-gray-50 px-3 py-2 text-sm font-semibold flex justify-end border border-gray-300 border-t-0">
+        TOTAL EXPENSES: ₱ {{ number_format($expensesTotal ?? 0, 2) }}
+    </div>
+</div>
+    {{-- Room Summary --}}
+    <div class="p-6 border-t border-gray-200">
+    <div class="text-center font-semibold text-gray-900 mb-4">ROOM SUMMARY</div>
+
+    <div class="overflow-x-auto">
+        <table class="min-w-full border-collapse">
+            <thead>
+                <tr>
+                    <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">Description</th>
+                    @foreach(($roomSummary['floors'] ?? []) as $f)
+                        <th class="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-800">
+                             {{ $f['number'] }}{{ $f['number'] == 1 ? 'st' : ($f['number'] == 2 ? 'nd' : ($f['number'] == 3 ? 'rd' : 'th')) }} Floor
+                        </th>
+                    @endforeach
+                    <th class="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-800">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse(($roomSummary['rows'] ?? []) as $r)
+                    <tr>
+                        <td class="border border-gray-300 px-3 py-2 text-sm font-medium">{{ $r['description'] }}</td>
+
+                        @foreach(($roomSummary['floors'] ?? []) as $f)
+                            <td class="border border-gray-300 px-3 py-2 text-sm text-right">
+                                ₱ {{ number_format($r['floors'][$f['id']] ?? 0, 2) }}
+                            </td>
+                        @endforeach
+
+                        <td class="border border-gray-300 px-3 py-2 text-sm text-right font-semibold">
+                            ₱ {{ number_format($r['row_total'] ?? 0, 2) }}
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="{{ (count($roomSummary['floors'] ?? []) + 2) }}" class="border border-gray-300 px-3 py-8 text-center text-sm text-gray-500">
+                            No room summary data for the selected filters.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    {{-- Footer totals per floor --}}
+    <div class="bg-gray-50 px-3 py-2 text-sm font-semibold border border-gray-300 border-t-0">
+        <div class="flex justify-between">
+            <span>TOTAL</span>
+            <span>
+                ₱ {{ number_format(collect($roomSummary['totals'] ?? [])->sum(), 2) }}
+            </span>
+        </div>
+    </div>
+</div>
+
 </div>
     </div>
 </div>
