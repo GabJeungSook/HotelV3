@@ -3,19 +3,20 @@
 namespace App\Http\Livewire\Frontdesk\Monitoring;
 
 use App\Models\ActivityLog;
+use App\Models\Branch;
 use App\Models\CashOnDrawer;
-use DB;
-use Carbon\Carbon;
+use App\Models\CheckinDetail;
+use App\Models\Guest;
+use App\Models\NewGuestReport;
 use App\Models\Rate;
 use App\Models\Room;
-use App\Models\Guest;
+use App\Models\StayingHour;
+use App\Models\TemporaryCheckInKiosk;
+use App\Models\Transaction;
+use Carbon\Carbon;
+use DB;
 use Livewire\Component;
 use WireUi\Traits\Actions;
-use App\Models\StayingHour;
-use App\Models\Transaction;
-use App\Models\CheckinDetail;
-use App\Models\NewGuestReport;
-use App\Models\TemporaryCheckInKiosk;
 
 class CheckInFromKiosk extends Component
 {
@@ -110,12 +111,11 @@ class CheckInFromKiosk extends Component
     public function proceedCheckIn()
     {
         $this->validate([
-            'amountPaid' => 'required|numeric|min:' . $this->total,
+            'amountPaid' => 'required|numeric',
         ],
         [
             'amountPaid.required' => 'Amount Paid is required',
             'amountPaid.numeric' => 'Amount Paid must be a number',
-            'amountPaid.min' => 'Amount Paid must be at least ' . $this->total,
         ]);
 
 
@@ -124,13 +124,22 @@ class CheckInFromKiosk extends Component
             $this->excess_amount = $this->amountPaid - $this->total;
             $this->change_modal = true;
         }else{
-             $this->dialog()->confirm([
-            'title'       => 'Save Transaction?',
-            'description' => 'The guest payment is the exact amount. Do you want to proceed with the check-in?',
-            'acceptLabel' => 'Yes, proceed',
-            'method'      => 'saveCheckIn',
-            'params'      => 'Saved',
-        ]);
+            if($this->amountPaid < $this->total)
+            {
+                 $this->dialog()->error(
+                    $title = 'Oops !!!',
+                    $description = 'Amount paid is less than the total payable amount.'
+                );
+            }else{
+                $this->dialog()->confirm([
+                'title'       => 'Save Transaction?',
+                'description' => 'The guest payment is the exact amount. Do you want to proceed with the check-in?',
+                'acceptLabel' => 'Yes, proceed',
+                'method'      => 'saveCheckIn',
+                'params'      => 'Saved',
+                ]);
+            }
+
         }
     }
 
@@ -152,6 +161,11 @@ class CheckInFromKiosk extends Component
             true
         );
 
+        $extension_time_reset = Branch::where(
+            'id',
+            auth()->user()->branch_id
+        )->first()->extension_time_reset;
+
          //save check-in details
          $checkin = CheckinDetail::create([
             'guest_id' => $this->guest->id,
@@ -172,7 +186,8 @@ class CheckInFromKiosk extends Component
                 ? now()->addDays($this->guest->number_of_days)
                 : now()->addHours($this->stayingHour->number),
             'is_long_stay' => $this->is_longStay != null ? true : false,
-            'number_of_hours' => $rate,
+            'number_of_hours' => $rate == $extension_time_reset ? 0 : $rate,
+            'next_extension_is_original' => $rate == $extension_time_reset ? 1 : 0,
         ]);
 
         //create transaction for check-in
