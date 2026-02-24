@@ -1,8 +1,8 @@
-<div>
+<div class="pt-10 ">
 
   <div class="flex items-end justify-between">
     <div>
-      <h1 class="font-bold text-blue-500">CHECK-IN</h1>
+      <h1 class="font-bold text-green-600">CHECK-IN</h1>
       <h1 class="text-3xl uppercase font-extrabold text-gray-600">Select rate </h1>
     </div>
     <div>

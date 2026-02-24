@@ -43,7 +43,7 @@ Route::middleware([
                 ->user()
                 ->hasRole('kiosk')
         ) {
-            return redirect()->route('kiosk.check-in');
+            return redirect()->route('kiosk.dashboard');
         }
 
         if (

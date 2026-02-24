@@ -33,7 +33,7 @@
         </div>
       </a>
       <span class="font-bold text-lg text-gray-50 md:mx-0 mx-auto">OR</span>
-      <a href=""
+      <a href="{{ route('kiosk.check-out') }}"
         class="w-full max-w-md md:w-[28rem] border relative h-64 md:h-80 bg-gradient-to-bl shadow-xl overflow-hidden from-red-800 via-red-800 to-transparent rounded-2xl flex-shrink-0">
 
         <svg class="h-48 md:h-72 text-white absolute -right-16 md:-right-28 opacity-10 top-0" xmlns="http://www.w3.org/2000/svg"

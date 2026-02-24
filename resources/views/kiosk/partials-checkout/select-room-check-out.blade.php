@@ -1,10 +1,10 @@
 <div class="pt-10 ">
   <div class="flex items-end justify-between">
     <div>
-      <h1 class="font-bold text-green-600">CHECK-IN</h1>
+      <h1 class="font-bold text-red-600">CHECK-OUT</h1>
       <h1 class="text-3xl uppercase font-extrabold text-gray-600">Select room </h1>
     </div>
-    <div>
+    {{-- <div>
       @if ($steps == 1)
         <a href="{{ route('kiosk.dashboard') }}"
         class="bg-gray-50 outline-blue-500 border border-blue-500 p-2 px-4 flex space-x-1 rounded-full">
@@ -24,12 +24,12 @@
           <span class="font-semibold text-blue-500 uppercase">Back</span>
         </button>
       @endif
-    </div>
+    </div> --}}
   </div>
   <div class="mt-5">
     <div class="flex space-x-2">
       @foreach ($floors as $floor)
-        @if ($floor->rooms->where('status', 'Available')->where('is_priority', true)->where('type_id', $type_id)->count() > 0)
+        @if ($floor->rooms->where('status', 'Occupied')->count() > 0)
           <button>
             <div wire:click="$set('floor_id', {{ $floor->id }})"
               class="border border-blue-500 bg-gray-50 py-2 px-3 rounded-full flex items-center justify-center {{ $floor_id == $floor->id ? 'text-green-600 border-green-500' : 'text-gray-600 border-blue-500' }} ">
@@ -42,7 +42,7 @@
     <div class="grid lg:grid-cols-5 sm:grid-cols-3 mt-5 gap-5">
 
       @forelse ($rooms as $room)
-        <button wire:key="{{ $room->id }}room" wire:click="selectRoom({{ $room->id }})" type="button">
+        <button wire:click="selectRoom({{ $room->id }})" type="button">
           <div class="border-2 border-blue-500 bg-gray-50 h-40 relative overflow-hidden  rounded-2xl grid place-content-center {{ $room_id == $room->id ? 'border-green-500' : 'border-blue-500' }}">
             <svg
               class="lg:h-56 sm:h-44 absolute {{ $room_id == $room->id ? 'text-green-600 opacity-40' : 'text-gray-600 opacity-10' }}  top-0 -right-10"
@@ -52,11 +52,12 @@
                 fill="currentColor"></path>
             </svg>
             <h1 class="font-bold text-gray-700 relative lg:text-4xl sm:text-lg">{{ $room->numberWithFormat() }}</h1>
+            <h4 class="font-bold text-green-700 relative lg:text-md sm:text-lg">{{ $room->latestGuest->name ?? 'No Guest' }}</h4>
           </div>
         </button>
       @empty
         <div class="col-span-5 w-full  flex justify-center items-center mt-10">
-          <h1 class="font-bold text-white relative text-4xl">No Priority rooms</h1>
+          <h1 class="font-bold text-white relative text-4xl">No Occupied rooms</h1>
         </div>
       @endforelse
     </div>
@@ -65,7 +66,7 @@
 <div class="fixed bottom-20 right-0 left-0">
   <div class="flex justify-center">
     @if ($room_id)
-      <x-button label="NEXT" wire:click="$set('steps', 3)" lg class="font-medium " right-icon="chevron-double-right"
+      <x-button label="NEXT" wire:click="$set('steps', 2)" lg class="font-medium " right-icon="chevron-double-right"
         spinner green />
     @endif
   </div>
