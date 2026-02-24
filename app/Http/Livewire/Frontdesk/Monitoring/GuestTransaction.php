@@ -2096,8 +2096,8 @@ class GuestTransaction extends Component
     public function checkOut()
     {
         $guest = Guest::where('id', $this->guest_id)->first();
-       // if($guest->has_kiosk_check_out)
-        //{
+       if($guest->has_kiosk_check_out)
+        {
 
             $bills_unpaid = Transaction::selectRaw(
                 'sum(payable_amount) as total_payable_amount, transaction_type_id'
@@ -2135,18 +2135,18 @@ class GuestTransaction extends Component
                 //  $this->reminders_modal = true;
                 $this->proceedCheckout();
             }
-        // }else{
-        //      $this->dialog()->confirm([
-        //             'title' => 'Unable to Check Out',
-        //             'description' => 'Guest must check out using kiosk first.',
-        //             'acceptLabel' => 'Ok',
-        //             'method' => 'closeModal',
-        //             'reject' => [
-        //                 'label' => 'Cancel',
-        //                 'method' => 'closeModal',
-        //             ],
-        //         ]);
-        // }
+        }else{
+             $this->dialog()->confirm([
+                    'title' => 'Unable to Check Out',
+                    'description' => 'Guest must check out using kiosk first.',
+                    'acceptLabel' => 'Ok',
+                    'method' => 'closeModal',
+                    'reject' => [
+                        'label' => 'Cancel',
+                        'method' => 'closeModal',
+                    ],
+                ]);
+        }
 
     }
 
