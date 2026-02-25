@@ -153,7 +153,12 @@ class CheckIn extends Component
             $this->steps = 4;
         } else {
             $this->validate([
-                'longstay' => 'required|numeric|min:1|max:31',
+                'longstay' => 'required|integer|min:1|max:31',
+            ],[
+                'longstay.required' => 'Please enter number of days.',
+                'longstay.integer' => 'Number of days must be a whole number.',
+                'longstay.min' => 'Number of days must be at least 1.',
+                'longstay.max' => 'Number of days must not exceed 31.',
             ]);
 
             $long = StayingHour::where('branch_id', auth()->user()->branch_id)
