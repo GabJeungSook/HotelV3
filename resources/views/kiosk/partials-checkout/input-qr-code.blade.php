@@ -15,27 +15,29 @@
         </button>
     </div>
   </div>
-  <div class="mt-5">
-    <div>
-    <div>
-        {{-- <h1 class="text-6xl text-center font-bold text-gray-700 mt-5">SCAN QR CODE (CHECK-OUT)</h1> --}}
-    </div>
-    <div class="flex justify-center mt-16">
-        <input wire:model="qr_code" type="text" id="qr_code" class="text-center p-4 text-2xl focus:outline-none w-full mx-14 rounded-md" autofocus autocomplete="off" />
-    </div>
-    <small  class="flex justify-center mt-3 font-medium text-red-600">*Input QR Code Here*</small>
-</div>
+<div class="mt-5">
+  <div class="flex justify-center ">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-24 w-24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z" />
+    </svg>
 
-
+      {{-- <h1 class="text-6xl text-center font-bold text-gray-700 mt-5">SCAN QR CODE (CHECK-OUT)</h1> --}}
   </div>
+  <div class="flex justify-center mt-16">
+      <input wire:model="qr_code" type="text" id="qr_code" class="text-center p-4 text-2xl focus:outline-none w-full mx-14 rounded-md" autofocus autocomplete="off" />
+  </div>
+  <small  class="flex justify-center mt-3 font-medium text-red-600">*Input QR Code Here*</small>
 </div>
+
 <div class="fixed bottom-20 right-0 left-0">
   <div class="flex justify-center">
     @if ($qr_code)
-      <x-button label="NEXT" wire:click="$set('steps', 3)" lg class="font-medium " right-icon="chevron-double-right"
+      <x-button label="NEXT" wire:click="validateQR" lg class="font-medium " right-icon="chevron-double-right"
         spinner green />
     @endif
   </div>
+</div>
 
 <script>
     const qrInput = document.getElementById('qr_code');
@@ -43,4 +45,6 @@
         qrInput.focus();
     });
 </script>
-</div>
+
+  </div>
+

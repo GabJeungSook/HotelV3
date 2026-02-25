@@ -52,7 +52,7 @@ class CheckinDetail extends Model
 
     public function extendedGuestReports()
     {
-        return $this->hasMany(ExtendedGuestReport::class);
+        return $this->hasMany(ExtendedGuestReport::class, 'checkin_details_id');
     }
 
     public function frontdesk()

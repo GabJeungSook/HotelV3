@@ -92,6 +92,7 @@
           @forelse ($rooms as $room)
             @php
             $latest_checkInDetails = $room->checkInDetails->sortByDesc('created_at')->first();
+            $has_check_out = $room->latestCheckInDetail->guest->has_kiosk_check_out;
             // if($room->checkInDetails->first() != null)
             if($room->latestCheckInDetail != null)
             {
@@ -113,7 +114,11 @@
                 $date_now = Carbon\Carbon::now();
                 $is_true = $date_now->equalTo($one_hour_before); // Check if the current time is exactly equal to 1 hour before the checkout time
             @endphp --}}
-            <tr class="rounded-md {{ $is_true ? 'bg-red-100' : 'bg-gray-100' }}">
+            <tr class="rounded-md
+                {{ $is_true
+                    ? 'bg-red-100'
+                    : ($has_check_out ? 'bg-blue-200' : 'bg-gray-100')
+                }}">
               <td class="whitespace-nowrap rounded-l-lg py-3 pl-4  text-sm font-bold text-green-600 sm:pl-6">
                 {{ $room->numberWithFormat() }}
                 {{-- <p class="text-sm text-gray-500 font-normal">{{$room->type->name}}</p> --}}
@@ -194,6 +199,8 @@
                     @endphp
                     <span class="inline-flex items-center rounded-md bg-red-500 px-2 py-1 text-sm font-medium text-white">Over Time: {{$check_out_date->diffForHumans()}}</span>
                     {{-- <span class="inline-flex items-center rounded-md bg-red-100 px-2 py-1 text-sm font-medium text-red-700">Time Expired!</span> --}}
+                    @elseif ($has_check_out)
+                    <span class="inline-flex items-center rounded-md bg-blue-500 px-2 py-1 text-sm font-medium text-white">Checked-out in Kiosk</span>
                     @else
                     <h1>Time:</h1>
                     <div class="text-red-500">
