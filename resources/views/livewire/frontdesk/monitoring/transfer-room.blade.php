@@ -160,7 +160,7 @@
                     }" class="px-4 py-2 bg-[#1877F2] text-white rounded-md hover:bg-[#5194ec] focus:outline-none focus:ring-2 focus:ring-[#1877F2] focus:ring-opacity-50">
                     Save
                 </button> --}}
-                @if(!$guest->transferTransactions()->count() == 2 || !$guest->extendTransactions()->count() > 0)
+                @if($guest->transferTransactions()->count() < 2 && $guest->extendTransactions()->count() == 0)
                 <button wire:click="confirmTransfer" class="px-4 py-2 bg-[#1877F2] text-white rounded-md hover:bg-[#5194ec] focus:outline-none focus:ring-2 focus:ring-[#1877F2] focus:ring-opacity-50">
                     Save
                 </button>
