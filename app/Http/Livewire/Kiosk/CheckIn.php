@@ -54,7 +54,7 @@ class CheckIn extends Component
             ->toArray();
         return view('livewire.kiosk.check-in', [
             'rooms' => Room::whereTypeId($this->type_id)
-                ->where('status', 'Available')
+                ->whereIn('status', ['Available', 'Cleaned'])
                 ->whereNotIn('id', $temporaryCheckInKiosk)
                 ->whereNotIn('id', $temporaryReserved)
                 ->where('is_priority', true)
