@@ -418,31 +418,76 @@ class RoomMonitoring extends Component
 
     public function searchRooms()
     {
-        return Room::where('branch_id', auth()->user()->branch_id)
-            ->where('status', 'Occupied')
-            ->when($this->filter_status, function ($query) {
-                return $query->where('status', $this->filter_status);
-            })
-            ->when($this->filter_floor, function ($query) {
-                return $query->where('floor_id', $this->filter_floor);
-            })
-            ->when($this->search, function ($query) {
-                return $query->where('number', 'like',  $this->search . '%');
-            })
-            ->with('floor')
-            ->with(['checkInDetails' => function ($query) {
-                $query->where('is_check_out', false)  // Filter where is_check_out is false
-                  ->orderBy('check_out_at', 'asc');
-            }])
-            ->selectRaw('rooms.*, COALESCE(checkin_details.check_out_at, NULL) AS check_out_at,
-                        (CASE WHEN status = "Occupied" THEN 1 ELSE 0 END) AS is_occupied') // Add calculated column for occupancy status
-            ->whereRaw('(checkin_details.is_check_out IS NULL OR checkin_details.is_check_out = 0)')
-            ->leftJoin('checkin_details', function ($join) {
-                $join->on('rooms.id', '=', 'checkin_details.room_id');
-            }) // Join checkInDetails
-            ->orderByRaw('is_occupied DESC, check_out_at ASC') // Order by occupancy status first, then by check_out_at
-            ->distinct() // Ensure distinct rooms
-            ->paginate(10);
+        return Room::where('rooms.branch_id', auth()->user()->branch_id)
+        ->where('rooms.status', 'Occupied')
+
+        ->when($this->filter_status, function ($query) {
+            return $query->where('rooms.status', $this->filter_status);
+        })
+
+        ->when($this->filter_floor, function ($query) {
+            return $query->where('rooms.floor_id', $this->filter_floor);
+        })
+
+        ->when($this->search, function ($query) {
+            return $query->where('rooms.number', 'like', $this->search);
+        })
+
+        ->with('floor')
+
+        ->leftJoin('checkin_details', function ($join) {
+            $join->on('rooms.id', '=', 'checkin_details.room_id');
+        })
+
+        ->leftJoin('guests', function ($join) {
+            $join->on('checkin_details.guest_id', '=', 'guests.id');
+        })
+
+        ->selectRaw('
+            rooms.*,
+            COALESCE(checkin_details.check_out_at, NULL) AS check_out_at,
+            (CASE WHEN rooms.status = "Occupied" THEN 1 ELSE 0 END) AS is_occupied,
+            (CASE WHEN guests.has_kiosk_check_out = 1 THEN 1 ELSE 0 END) AS has_kiosk_priority
+        ')
+
+        ->whereRaw('(checkin_details.is_check_out IS NULL OR checkin_details.is_check_out = 0)')
+
+        ->orderByRaw('
+            has_kiosk_priority DESC,
+            is_occupied DESC,
+            check_out_at ASC
+        ')
+
+        ->distinct()
+        ->paginate(10);
+
+
+
+        // return Room::where('branch_id', auth()->user()->branch_id)
+        //     ->where('status', 'Occupied')
+        //     ->when($this->filter_status, function ($query) {
+        //         return $query->where('status', $this->filter_status);
+        //     })
+        //     ->when($this->filter_floor, function ($query) {
+        //         return $query->where('floor_id', $this->filter_floor);
+        //     })
+        //     ->when($this->search, function ($query) {
+        //         return $query->where('number', 'like',  $this->search . '%');
+        //     })
+        //     ->with('floor')
+        //     ->with(['checkInDetails' => function ($query) {
+        //         $query->where('is_check_out', false)  // Filter where is_check_out is false
+        //           ->orderBy('check_out_at', 'asc');
+        //     }])
+        //     ->selectRaw('rooms.*, COALESCE(checkin_details.check_out_at, NULL) AS check_out_at,
+        //                 (CASE WHEN status = "Occupied" THEN 1 ELSE 0 END) AS is_occupied') // Add calculated column for occupancy status
+        //     ->whereRaw('(checkin_details.is_check_out IS NULL OR checkin_details.is_check_out = 0)')
+        //     ->leftJoin('checkin_details', function ($join) {
+        //         $join->on('rooms.id', '=', 'checkin_details.room_id');
+        //     }) // Join checkInDetails
+        //     ->orderByRaw('is_occupied DESC, check_out_at ASC') // Order by occupancy status first, then by check_out_at
+        //     ->distinct() // Ensure distinct rooms
+        //     ->paginate(10);
     }
 
     // public function searchRooms()

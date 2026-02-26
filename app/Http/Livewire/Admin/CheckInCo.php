@@ -221,12 +221,12 @@ class CheckInCo extends Component
             $title = 'Success',
             $description = 'C/O Guest Has been Check-in'
         );
-        return redirect()->route('admin.reservation');
+        return redirect()->route('frontdesk.room-monitoring');
 
     }
 
     public function redirectBack()
     {
-        return redirect()->route('admin.reservation');
+        return redirect()->route('frontdesk.room-monitoring');
     }
 }
