@@ -15,6 +15,8 @@ class Settings extends Component
 
     public $discount_modal = false;
 
+    public $kiosk_time_limit_modal = false;
+
     public $code, $old_code, $old;
     public $reset_time;
 
@@ -22,6 +24,7 @@ class Settings extends Component
 
     public $discount_enabled = false;
     public $discount_amount;
+    public $kiosk_time_limit;
     public $editMode = false;
     public function render()
     {
@@ -65,6 +68,11 @@ class Settings extends Component
                     $this->discount_amount = auth()->user()->branch->discount_amount;
                     $this->editMode = true;
                     $this->discount_modal = true;
+                break;
+            case 'kiosk_time_limit':
+                    $this->kiosk_time_limit = auth()->user()->branch->kiosk_time_limit;
+                    $this->editMode = true;
+                    $this->kiosk_time_limit_modal = true;
                 break;
 
 
@@ -203,5 +211,24 @@ class Settings extends Component
         $this->discount_modal = false;
         $this->discount_enabled = false;
         $this->discount_amount = null;
+    }
+
+    public function saveKioskTimeLimit()
+    {
+        $this->validate([
+            'kiosk_time_limit' => 'required|numeric',
+        ]);
+
+        auth()
+            ->user()
+            ->branch->update([
+                'kiosk_time_limit' => $this->kiosk_time_limit,
+            ]);
+        $this->dialog()->success(
+            $title = 'Success',
+            $description = 'Kiosk time limit has been updated.'
+        );
+        $this->kiosk_time_limit_modal = false;
+        $this->kiosk_time_limit = null;
     }
 }

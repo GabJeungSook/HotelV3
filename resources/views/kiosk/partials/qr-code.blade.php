@@ -1,4 +1,4 @@
-<div>
+<div class="pt-10 ">
   <div class="flex items-end justify-between">
     <div>
       <h1 class="font-bold text-green-400">CHECK-IN</h1>

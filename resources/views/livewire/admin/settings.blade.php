@@ -102,10 +102,24 @@
                                     </span>
                                 @endif
                             </div>
+                            </td>
                     <td
                         class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6 md:pr-0">
                           <x-button xs positive icon="pencil-alt" wire:click="openModal('discount')"
                             spinner="openModal('discount')" label="UPDATE" />
+                      </td>
+                    </tr>
+                                        <tr>
+                      <td
+                        class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-600 uppercase sm:pl-6 md:pl-0">
+                        KIOSK CHECK-IN TIME LIMIT (Minutes)</td>
+                        <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-500 flex items-center justify-between">
+                        {{ auth()->user()->branch->kiosk_time_limit }}
+                         </td>
+                    <td
+                        class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6 md:pr-0">
+                          <x-button xs positive icon="pencil-alt" wire:click="openModal('kiosk_time_limit')"
+                            spinner="openModal('kiosk_time_limit')" label="UPDATE" />
                       </td>
                     </tr>
 
@@ -211,6 +225,23 @@
         <div class="flex justify-end gap-x-2">
           <x-button flat negative label="Cancel" x-on:click="close" />
           <x-button positive right-icon="arrow-narrow-right" wire:click="saveDiscount" spinner="saveDiscount"
+            label="Save" />
+        </div>
+      </x-slot>
+    </x-card>
+  </x-modal>
+
+    <x-modal wire:model.defer="kiosk_time_limit_modal" max-width="md" align="center">
+    <x-card title="KIOSK TIME LIMIT">
+
+      <div class="flex flex-col space-y-2">
+        <x-input wire:model="kiosk_time_limit" label="Kiosk Time Limit (Minutes)" placeholder=""/>
+      </div>
+
+      <x-slot name="footer">
+        <div class="flex justify-end gap-x-2">
+          <x-button flat negative label="Cancel" x-on:click="close" />
+          <x-button positive right-icon="arrow-narrow-right" wire:click="saveKioskTimeLimit" spinner="saveKioskTimeLimit"
             label="Save" />
         </div>
       </x-slot>

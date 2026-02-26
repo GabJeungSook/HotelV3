@@ -427,7 +427,7 @@ class RoomMonitoring extends Component
                 return $query->where('floor_id', $this->filter_floor);
             })
             ->when($this->search, function ($query) {
-                return $query->where('number', 'like', '%' . $this->search . '%');
+                return $query->where('number', 'like',  $this->search . '%');
             })
             ->with('floor')
             ->with(['checkInDetails' => function ($query) {
