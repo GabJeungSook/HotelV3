@@ -38,7 +38,7 @@
                   </div>
                 <div class="mt-2 border-b border-gray-300">
                   <h1 class="text-xs text-gray-500">Initial Check In Hours</h1>
-                  <h1 class="font-bold text-gray-700">{{ $guest->rates->stayingHour->number }} Hours</h1>
+                  <h1 class="font-bold text-gray-700">{{ $guest->is_long_stay ? ($guest->number_of_days * $guest->rates->stayingHour->number) : $guest->rates->stayingHour->number }} Hours</h1>
                 </div>
                 @if ($guest->stayExtensions->count() > 0)
                 <div class="mt-2 border-b border-gray-300">
@@ -49,7 +49,7 @@
                 <div class="mt-2 border-b border-gray-300">
                   <h1 class="text-xs text-gray-500">Total Staying Hours</h1>
                   <h1 class="font-bold text-gray-700">
-                    {{ $guest->rates->stayingHour->number + $guest->stayExtensions->sum('hours') }} Hours</h1>
+                    {{ $guest->is_long_stay ? ($guest->number_of_days * $guest->rates->stayingHour->number + $guest->stayExtensions->sum('hours')) : ($guest->rates->stayingHour->number + $guest->stayExtensions->sum('hours')) }} Hours</h1>
                 </div>
                 <div class="mt-2 border-b border-gray-300">
                   <h1 class="text-xs text-gray-500">Time Remaining</h1>
@@ -277,7 +277,7 @@
                               ₱{{ number_format($transaction->payable_amount, 2) }}
                             </td>
                             <td class="whitespace-nowrap px-3 py-2 text-sm text-gray-600 ">
-                              {{ Carbon\Carbon::parse($transaction->created_at)->format('F d, Y h:i A') }}
+                              {{ Carbon\Carbon::parse($transaction->updated_at)->format('F d, Y h:i A') }}
                             </td>
                             <td class="whitespace-nowrap px-3 py-2 text-sm text-gray-600 ">
                               @if ($transaction->paid_at == null && $transaction->payable_amount > 0)
@@ -293,7 +293,7 @@
                                     spinner="override({{ $transaction->id }})" label="Override" />
                                 </div>
                               @elseif($transaction->transaction_type_id == 7 && $transaction->paid_at == null)
-                                {{ Carbon\Carbon::parse($transaction->created_at)->format('F d, Y h:i A') }}
+                                {{ Carbon\Carbon::parse($transaction->updated_at)->format('F d, Y h:i A') }}
                               @else
                                 {{ Carbon\Carbon::parse($transaction->paid_at)->format('F d, Y h:i A') }}
                               @endif

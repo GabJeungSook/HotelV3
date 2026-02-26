@@ -64,4 +64,9 @@ class CheckinDetail extends Model
     {
         return $this->hasMany(Transaction::class);
     }
+
+    public function transferedGuestReports()
+    {
+        return $this->hasMany(TransferedGuestReport::class);
+    }
 }

@@ -2203,6 +2203,7 @@ class GuestTransaction extends Component
         $checkin = CheckinDetail::where('guest_id', $this->guest_id)->first();
         $checkin->update([
             'is_check_out' => true,
+            'check_out_at' => Carbon::now()->toDateTimeString(),
         ]);
         // CheckinDetail::where('guest_id', $this->guest_id)->update([
         //     'is_check_out' => true,

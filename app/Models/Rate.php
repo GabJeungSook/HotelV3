@@ -24,4 +24,9 @@ class Rate extends Model
     {
         return $this->belongsTo(StayingHour::class);
     }
+
+    public function transferedGuestReport()
+    {
+        return $this->hasMany(TransferedGuestReport::class);
+    }
 }

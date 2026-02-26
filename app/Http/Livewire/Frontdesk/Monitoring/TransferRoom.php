@@ -2,19 +2,22 @@
 
 namespace App\Http\Livewire\Frontdesk\Monitoring;
 
-use App\Models\Rate;
-use App\Models\Room;
-use App\Models\Type;
-use App\Models\Floor;
-use App\Models\Guest;
-use Livewire\Component;
-use WireUi\Traits\Actions;
 use App\Models\ActivityLog;
-use App\Models\Transaction;
 use App\Models\CashOnDrawer;
 use App\Models\CheckinDetail;
+use App\Models\Floor;
+use App\Models\Guest;
+use App\Models\Rate;
+use App\Models\Room;
+use App\Models\TemporaryCheckInKiosk;
+use App\Models\Transaction;
+use App\Models\TransferedGuestReport;
 use App\Models\TransferReason;
+use App\Models\Type;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Livewire\Component;
+use WireUi\Traits\Actions;
 
 class TransferRoom extends Component
 {
@@ -46,6 +49,8 @@ class TransferRoom extends Component
     public $authorization_modal = false;
     public $test_modal = false;
     public $code;
+    public $current_room_rate;
+    public $new_room_rate;
 
     public function mount($record)
     {
@@ -53,6 +58,13 @@ class TransferRoom extends Component
         $this->guest =  $this->guest = Guest::where('branch_id', auth()->user()->branch_id)
                 ->where('id', $record)
                 ->first();
+
+        $is_long_stay = $this->guest->is_long_stay;
+        $days_stayed = $this->guest->number_of_days;
+        $amount = $this->guest->checkInDetail->rate->amount;
+        $this->current_room_rate = $is_long_stay ? $amount * $days_stayed : $amount;
+
+
         $this->room = Room::where('branch_id', auth()->user()->branch_id)
                 ->where('id', $this->guest->checkInDetail->room_id)
                 ->first();
@@ -77,9 +89,14 @@ class TransferRoom extends Component
         $this->selected_status = null;
         $this->selected_reason = null;
 
+        $kiosk_reservation = TemporaryCheckInKiosk::where('branch_id', auth()->user()->branch_id)
+            ->pluck('room_id')->toArray();
+
+
         $this->rooms = Room::where('branch_id', auth()->user()->branch_id)
             ->where('type_id', $this->selected_type_id)
             ->where('floor_id', $this->selected_floor_id)
+            ->whereNotIn('id', $kiosk_reservation)
             ->where('status', 'Available')
             ->get();
         $this->room_count = Room::where('branch_id', auth()->user()->branch_id)
@@ -94,15 +111,20 @@ class TransferRoom extends Component
                             $query->where('branch_id', auth()->user()->branch_id)->where('number', '=', $hours);
                         })
                         ->first();
-        $this->excess_amount =  ($this->new_room && isset($this->new_room->amount)) ? max(0, $this->guest->checkInDetail->rate->amount - $this->new_room->amount) : 0;
-        $this->payable_amount = ($this->new_room && isset($this->new_room->amount)) ? max(0, $this->new_room->amount - $this->guest->checkInDetail->rate->amount) : 0;;
+        $this->new_room_rate = $this->guest->is_long_stay ? ($this->new_room ? $this->new_room->amount * $this->guest->number_of_days : 0) : ($this->new_room ? $this->new_room->amount : 0);
+
+        $this->excess_amount =  ($this->new_room && isset($this->new_room_rate)) ? max(0, $this->current_room_rate - $this->new_room_rate) : 0;
+        $this->payable_amount = ($this->new_room && isset($this->new_room_rate)) ? max(0, $this->new_room_rate - $this->current_room_rate) : 0;
     }
 
     public function updatedSelectedFloorId()
     {
+         $kiosk_reservation = TemporaryCheckInKiosk::where('branch_id', auth()->user()->branch_id)
+            ->pluck('room_id')->toArray();
         $this->rooms = Room::where('branch_id', auth()->user()->branch_id)
             ->where('type_id', $this->selected_type_id)
             ->where('floor_id', $this->selected_floor_id)
+            ->whereNotIn('id', $kiosk_reservation)
             ->where('status', 'Available')
             ->get();
 
@@ -257,7 +279,7 @@ class TransferRoom extends Component
                 'paid_amount' => $this->excess_amount,
                 'change_amount' => 0,
                 'deposit_amount' => $this->excess_amount,
-                'paid_at' => now(),
+                'paid_at' => Carbon::now()->toDateTimeString(),
                 'override_at' => null,
                 'remarks' => 'Deposit From Transfer Room (Excess Amount)',
                 'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
@@ -274,6 +296,11 @@ class TransferRoom extends Component
                 'transaction_type' => 'deposit',
                 'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
             ]);
+
+             CheckinDetail::where('guest_id', $this->guest->id)->update([
+                'total_deposit' => $this->guest->total_deposit + $this->excess_amount,
+            ]);
+
         }
 
         if($this->selected_status === "Uncleaned")
@@ -291,16 +318,45 @@ class TransferRoom extends Component
             'status' => 'Occupied',
         ]);
 
+        $initial_deposit = auth()->user()->branch->initial_deposit;
+
          Guest::where('id', $this->guest->id)->update([
             'previous_room_id' => $check_in_detail->room_id,
             'room_id' => $this->selected_room_id,
+            'static_amount' => ($this->new_room_rate + $initial_deposit),
         ]);
 
+
         $new_room = Room::where('id',  $this->selected_room_id)->first();
+
+        $transaction = Transaction::where('checkin_detail_id', $check_in_detail->id)->where('description', 'Guest Check In')->first();
+        $transaction->update([
+            'remarks' => 'Guest Checked In at room #' . $new_room->number,
+            'payable_amount' => $this->new_room_rate,
+            'paid_amount' => $this->new_room_rate,
+            'change_amount' => 0,
+            'paid_at' => Carbon::now()->toDateTimeString()
+        ]);
+
+        TransferedGuestReport::create([
+            'checkin_detail_id' => $check_in_detail->id,
+            'previous_room_id' => $check_in_detail->room_id,
+            'new_room_id' => $new_room->id,
+            'rate_id' => $this->guest->rate_id,
+            'previous_amount' => $check_in_detail->static_room_amount,
+            'new_amount' => $this->new_room_rate,
+            'original_check_in_time' => $transaction->created_at,
+        ]);
+
          CheckinDetail::where('guest_id', $this->guest->id)->update([
             'type_id' => $this->selected_type_id,
             'room_id' => $this->selected_room_id,
+            'static_room_amount' => $this->new_room_rate,
+            'static_amount' => ($this->new_room_rate + $initial_deposit),
         ]);
+
+
+
 
         ActivityLog::create([
             'branch_id' => auth()->user()->branch_id,

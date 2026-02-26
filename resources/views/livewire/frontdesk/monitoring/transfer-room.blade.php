@@ -106,14 +106,18 @@
                     <p class="text-sm font-medium">Note: The guest have already extended their stay and cannot be transferred.</p>
                     <button class="text-sm font-medium text-red-100 hover:text-red-200 hover:bg-red-800 bg-red-600 px-3 rounded-sm" wire:click="overrideTransfer">Override</button>
                 </div>
+                @elseif($guest->is_long_stay)
+                  <div class="bg-blue-100 text-blue-800 p-2 rounded-md mt-4 flex justify-between items-center">
+                    <p class="text-sm font-medium">Note: This is a long stay transaction. Calculation of rates are multiplied by the number of days stayed. ({{ $guest->number_of_days }} days)</p>
+                </div>
                 @endif
                 <div class="flex justify-between text-xl my-2 mt-5">
                     <span class="text-gray-600">Current Room Rate:</span>
-                <span class="text-gray-800 font-medium">₱ {{ number_format($guest->checkInDetail->rate->amount ?? 0, 2) }}</span>
+                <span class="text-gray-800 font-medium">₱ {{ number_format($current_room_rate ?? 0, 2) }}</span>
                 </div>
                 <div class="flex justify-between text-xl my-2">
                     <span class="text-gray-600">New Room Rate:</span>
-                <span class="text-gray-800 font-medium">₱ {{ number_format($new_room->amount ?? 0, 2) }}</span>
+                <span class="text-gray-800 font-medium">₱ {{ number_format($new_room_rate  ?? 0, 2) }}</span>
                 </div>
                 <div class="flex justify-between text-xl my-2">
                     <span class="text-gray-600">Excess Amount:</span>

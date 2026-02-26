@@ -140,4 +140,9 @@ class Room extends Model
     {
         return $this->hasMany(TemporaryReserved::class);
     }
+
+    public function transferedGuestReports()
+    {
+        return $this->hasMany(TransferedGuestReport::class);
+    }
 }
