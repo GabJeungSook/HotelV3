@@ -107,9 +107,11 @@ class ExtendGuest extends Component
             $current = $this->current_time_alloted + $this->extended_rate->hour;
             if(($current > $this->extension_time_reset) && $this->current_time_alloted != $this->extension_time_reset)
             {
+
                 $total_current_hours = $this->current_time_alloted + $this->extended_rate->hour;
                 if($total_current_hours >= $this->extension_time_reset)
                 {
+
                     $total_current_hours = $total_current_hours - $this->extension_time_reset;
                     $rate = Rate::where('branch_id', auth()->user()->branch_id)->where('type_id', operator: $this->rate->type_id)->whereHas('stayingHour', function($query) use ($total_current_hours){
                         $query->where('number', $total_current_hours);
@@ -128,11 +130,14 @@ class ExtendGuest extends Component
                     $this->extended_amount = $extend->amount;
                     $this->total_amount = $this->initial_amount + $this->extended_amount;
                 }else{
+
                     $this->initial_amount = 0;
                     $this->extended_amount = $this->extended_rate->amount;
                     $this->total_amount = $this->initial_amount + $this->extended_amount;
                 }
             }else{
+
+
 
                 // $this->initial_amount = 0;
                 // $this->extended_amount = $this->extended_rate->amount;
@@ -140,7 +145,8 @@ class ExtendGuest extends Component
 
                 if(($this->current_time_alloted == 0) && $this->guest->checkInDetail()->first()->next_extension_is_original == true)
                 {
-                   $rate = Rate::where('branch_id', auth()->user()->branch_id)->whereHas('stayingHour', function($query){
+
+                   $rate = Rate::where('branch_id', auth()->user()->branch_id)->where('type_id', operator: $this->rate->type_id)->whereHas('stayingHour', function($query){
                         $query->where('number', $this->extended_rate->hour);
                         })->first();
                     $this->initial_amount = $rate->amount;
