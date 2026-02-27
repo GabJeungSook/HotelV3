@@ -2227,7 +2227,7 @@ class GuestTransaction extends Component
             'checkin_details_id' => $checkin->id,
             'room_id' => $checkin->room_id,
             'shift_date' => $shift_date,
-            'shift' => $shift_schedule,
+            'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
             'frontdesk_id' => $decode_frontdesk[0],
             'partner_name' => $decode_frontdesk[1],
         ]);

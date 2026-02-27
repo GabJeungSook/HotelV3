@@ -429,7 +429,13 @@ class SalesReport extends Component
         // Compute room amount and total sales
         $roomAmount = 0;
         foreach ($transactions as $t) {
-            $roomAmount += (float) ($t->room->latestCheckInDetail?->rate?->amount ?? 0);
+            //if long stay, multiply rate by number of days
+            if($t->room->latestCheckInDetail?->guest?->is_long_stay)
+                {
+                    $roomAmount += (float) ($t->room->latestCheckInDetail?->rate?->amount ?? 0) * ($t->room->latestCheckInDetail?->guest?->number_of_days ?? 1);
+                }else{
+                    $roomAmount += (float) ($t->room->latestCheckInDetail?->rate?->amount ?? 0);
+                }
         }
 
         $this->totalSales =
@@ -485,7 +491,12 @@ class SalesReport extends Component
                 // transfer summed by stay (checkin_detail_id)
                 $transTotalForStay = (float) ($this->transferTransactions[$detailId]->paid_amount ?? 0);
 
-                $roomRate = (float) ($detail?->rate?->amount ?? 0);
+                //if long stay
+                if($detail?->guest?->is_long_stay) {
+                    $roomRate = (float) ($detail?->rate?->amount ?? 0) * $detail?->guest?->number_of_days;
+                } else {
+                    $roomRate = (float) ($detail?->rate?->amount ?? 0);
+                }
                 $extend   = (float) ($this->extendedTransactions[$roomId]->paid_amount ?? 0);
                 $amen     = (float) ($this->amenitiesTransactions[$roomId]->paid_amount ?? 0);
                 $food     = (float) ($this->foodTransactions[$roomId]->paid_amount ?? 0);
@@ -507,7 +518,7 @@ class SalesReport extends Component
                     'guest_name' => strtoupper($detail?->guest?->name ?? '—'),
                     'check_in'   => $detail?->check_in_at ? Carbon::parse($detail->check_in_at)->format('m-d-Y h:iA') : '—',
                     'check_out'  => $detail?->check_out_at ? Carbon::parse($detail->check_out_at)->format('m-d-Y h:iA') : '—',
-                    'initial_hrs'=> $detail?->hours_stayed ? ($detail->hours_stayed . ' hrs') : '—',
+                    'initial_hrs'=> $detail?->hours_stayed ? ($detail->guest?->is_long_stay ? (($detail->hours_stayed * $detail->guest?->number_of_days) . ' hrs') : ($detail->hours_stayed . ' hrs')) : '—',
                     'room_amount'=> $roomRate,
 
                     'extend_amount'    => $extend,
