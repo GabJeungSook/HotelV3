@@ -28,46 +28,58 @@ public function store(Request $request)
         $transaction = Guest::whereYear('created_at', Carbon::today()->year)->count() + 1;
 
         $transaction_code = $request->branch_id . today()->format('y') . str_pad($transaction, 4, '0', STR_PAD_LEFT);
+        $room = Room::where('branch_id', $request->branch_id)->where('id', $request->room_id)->first();
 
-        //check on temporary check-in kiosk for the room id
-        if (TemporaryCheckInKiosk::where('room_id', $request->room_id)
-            ->where('branch_id', $request->branch_id)
-            ->exists()) {
+        if (!$room) {
             return response()->json([
                 'success' => false,
-                'message' => 'This room is already occupied.',
-            ], 400);
-        }else{
-             $guest = Guest::create([
-            'branch_id' => $request->branch_id,
-            'name' => $request->name,
-            'contact' => $request->contact == null ? 'N/A' : "09{$request->contact}",
-            'qr_code' => $transaction_code,
-            'room_id' => $request->room_id,
-            'rate_id' => $request->rate_id,
-            'type_id' => $request->type_id,
-            'static_amount' => $request->room_pay,
-            'is_long_stay' => $request->longstay != null,
-            'number_of_days' => $request->longstay ?? 0,
-            'has_discount' => $request->has_discount,
-            'discount_amount' => $request->discount_amount ?? 0,
-            ]);
-
-
-            TemporaryCheckInKiosk::create([
-                'guest_id' => $guest->id,
-                'room_id' => $request->room_id,
-                'branch_id' => $request->branch_id,
-                'terminated_at' => Carbon::now()->addMinutes(20),
-            ]);
-
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Guest successfully checked in.',
-                'guest' => $guest,
-            ], 201);
+                'message' => 'Room not found.',
+            ], 404);
         }
+
+    $hasTemporary = TemporaryCheckInKiosk::where('room_id', $request->room_id)
+        ->where('branch_id', $request->branch_id)
+        ->exists();
+
+    // IMPORTANT: Replace CheckInDetail + checked_out_at with your real table/model/column
+    $hasActiveCheckin = CheckInDetail::where('room_id', $request->room_id)
+        ->where('branch_id', $request->branch_id) // keep if your checkins are per-branch
+        ->exists();
+
+    if ($hasTemporary || $hasActiveCheckin) {
+        return response()->json([
+            'success' => false,
+            'message' => 'This room is already occupied.',
+        ], 409);
+    }
+
+    $guest = Guest::create([
+        'branch_id' => $request->branch_id,
+        'name' => $request->name,
+        'contact' => $request->contact == null ? 'N/A' : "09{$request->contact}",
+        'qr_code' => $transaction_code,
+        'room_id' => $request->room_id,
+        'rate_id' => $request->rate_id,
+        'type_id' => $request->type_id,
+        'static_amount' => $request->room_pay,
+        'is_long_stay' => $request->longstay != null,
+        'number_of_days' => $request->longstay ?? 0,
+        'has_discount' => $request->has_discount,
+        'discount_amount' => $request->discount_amount ?? 0,
+    ]);
+
+    TemporaryCheckInKiosk::create([
+        'guest_id' => $guest->id,
+        'room_id' => $request->room_id,
+        'branch_id' => $request->branch_id,
+        'terminated_at' => Carbon::now()->addMinutes(20),
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Guest successfully checked in.',
+        'guest' => $guest,
+    ], 201);
 
 
     }
