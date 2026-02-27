@@ -232,6 +232,7 @@ class RoomMonitoring extends Component
         return view('livewire.frontdesk.monitoring.room-monitoring', [
              'rooms' => $this->searchRooms(),
             'kiosks' => $this->searchKiosk(),
+            'checkOutKiosks' =>$this->searchCheckOutKiosk(),
             'types' => Type::where(
                 'branch_id',
                 auth()->user()->branch_id
@@ -340,6 +341,18 @@ class RoomMonitoring extends Component
             ->orderBy('created_at', 'asc')
             ->get();
     }
+
+    public function searchCheckOutKiosk()
+    {
+          return Room::with('guest')
+            ->where('branch_id', auth()->user()->branch_id)
+            ->whereHas('guest', function ($query) {
+                $query->where('has_kiosk_check_out', true);
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
 
     public function searchReserves()
     {

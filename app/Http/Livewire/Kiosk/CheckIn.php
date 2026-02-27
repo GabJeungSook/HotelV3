@@ -227,7 +227,7 @@ class CheckIn extends Component
     {
         $room = Room::where('branch_id', auth()->user()->branch_id)->where('id', $this->room_id)->first();
 
-        if($room->latestCheckInDetail->count() == 0)
+        if(!$room->latestCheckInDetail)
         {
               $transaction = Guest::whereYear(
             'created_at',

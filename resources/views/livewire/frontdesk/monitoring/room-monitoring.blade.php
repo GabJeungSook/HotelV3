@@ -266,51 +266,7 @@
             {{-- <span class="text-lg font-semibold text-green-600">Count: {{ $kiosks->count() }}</span> --}}
         </div>
     </div>
-      {{-- <div class="mt-3 p-4 border rounded-lg">
-        <div>
-          <div class="header font-bold text-gray-700">GUEST INFORMATION</div>
-          <div class="mt-2 grid grid-cols-2 gap-4">
-            <x-input label="Guest Name" wire:model.defer="name" placeholder="" />
-            <x-input right-icon="user" wire:model="contact_number" label="Contact Number" placeholder="09" />
-          </div>
-        </div>
-        <div class="mt-5" x-animate>
-          <div class="header font-bold text-green-700">CHECK-IN INFORMATION</div>
-          <div class="mt-2 grid grid-cols-2 gap-4">
-            <x-native-select label="Room Type" wire:model="type_id">
-              <option hidden selected>Select Room Type</option>
-              @foreach ($types as $type)
-                <option value="{{ $type->id }}">{{ $type->name }}</option>
-              @endforeach
-            </x-native-select>
-            <x-native-select label="Room " wire:model="room_id">
-              <option hidden selected>Select Room </option>
-              @foreach ($roomss as $room)
-                <option value="{{ $room->id }}">{{ $room->numberWithFormat() }}</option>
-              @endforeach
-            </x-native-select>
-            @if (!$is_longStay)
-              <x-native-select label="Rate " wire:model="rate_id">
-                <option hidden selected>Select Rate</option>
-                @foreach ($ratess as $rate)
-                  <option value="{{ $rate->id }}">
-                    {{ $rate->stayingHour->number . ' Hours - ₱' . number_format($rate->amount, 2) }}</option>
-                @endforeach
-              </x-native-select>
 
-            @endif
-            <div class="flex items-end">
-              <x-checkbox id="right-label" label="Long Stay" wire:model="is_longStay" />
-            </div>
-            @if ($is_longStay)
-              <x-input label="Number of Days" placeholder="" />
-            @endif
-          </div>
-        </div>
-        <div class="mt-3 justify-end flex w-full">
-          <x-button wire:click="checkInGuest" label="Check-In" positive />
-        </div>
-      </div> --}}
 
 
       <div class="overflow-auto h-64 bg-white shadow sm:rounded-md mt-4">
@@ -367,21 +323,37 @@
                   </div>
                 </a>
               </li>
-            {{-- @else --}}
-            {{-- <li x-animate class="transition duration-300 ease-in-out" >
-                <a class="block hover:bg-red-50" >
-                  <div class="flex items-center px-4 py-4 sm:px-6 bg-gray-50">
+          @empty
+            <div class="flex justify-center items-center mt-20 text-gray-600 text-4xl">
+              <span>No Data Found</span>
+            </div>
+          @endforelse
+
+        </ul>
+      </div>
+
+        <div class="mt-3 p-4 border rounded-lg overflow-auto h-64 bg-white shadow sm:rounded-md">
+        <div>
+          <div class="header font-bold text-gray-700">CHECKED-OUT FROM KIOSK</div>
+        </div>
+        <div class="mt-5" x-animate>
+                  <ul role="list" class="divide-y divide-gray-200 " x-animate>
+          @forelse($checkOutKiosks as $kiosk)
+            {{-- @if ($loop->first) --}}
+            <li x-animate class="transition duration-300 ease-in-out" >
+                <a href="#" class="block hover:bg-red-50" >
+                  <div class="flex justify-between items-center px-4 py-4 sm:px-6 bg-gray-50">
                     <div class="flex min-w-0 flex-1 items-center">
 
                       <div class="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-4">
                         <div class="flex items-center">
-                          <p class="truncate text-sm font-medium text-gray-300 uppercase">{{ $kiosk->guest->name }}
-                            (ROOM #{{ $kiosk->guest->room->number }})
+                          <p class="truncate text-sm font-medium text-green-500 uppercase">{{ $kiosk->guest->first()->name }}
+                            (ROOM #{{ $kiosk->first()->number }})
                           </p>
                         </div>
                         <div class="hidden md:block">
                           <div>
-                            <p class="flex items-center text-sm text-gray-300">
+                            <p class="flex items-center text-sm text-green-500">
                               <!-- Heroicon name: mini/check-circle -->
                               <svg class="mr-1.5 w-5 h-5 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
                                 viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -390,32 +362,23 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                   d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z" />
                               </svg>
-                              {{ $kiosk->guest->qr_code }}
+                              {{ $kiosk->guest->first()->qr_code }}
                             </p>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <div>
-                    </div>
                     <div class="flex items-center space-x-2">
-                      <button x-on:confirm="{
-                            title: 'Are you sure you want to delete this?',
-                            icon: 'warning',
-                            method: 'deleteTempKiosk',
-                            params: {{ $kiosk->id }},
-                        }"
-                            type="button" class="p-1 rounded-full hover:bg-red-100 focus:outline-none">
-                       <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3M4 7h16" />
-                        </svg>
-                      </button>
+                      <!-- Approve button (check) -->
+                      <div></div>
+                      <div>
+
+                          <x-button href="{{ route('frontdesk.guest-transaction', ['id' => $kiosk->guest->first()->id]) }}" label="Manage" positive sm right-icon="" />
+                      </div>
                     </div>
                   </div>
                 </a>
-              </li> --}}
-            {{-- @endif --}}
-
+              </li>
           @empty
             <div class="flex justify-center items-center mt-20 text-gray-600 text-4xl">
               <span>No Data Found</span>
@@ -423,6 +386,7 @@
           @endforelse
 
         </ul>
+        </div>
       </div>
 
       {{-- FOR RESERVATIONS --}}
