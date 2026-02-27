@@ -45,9 +45,12 @@ class CheckOut extends Component
                 ->when($this->floor_id, function ($query) {
                     return $query->where('floor_id', $this->floor_id);
                 })
-                ->withWhereHas('latestCheckInDetail.guest', function ($q) {
+                ->whereHas('latestCheckInDetail.guest', function ($q) {
                     $q->where('has_kiosk_check_out', 0);
                 })
+                ->with([
+                    'latestCheckInDetail.guest.type'
+                ])
                 ->orderBy('number', 'asc')
                 ->get(),
         ]);
