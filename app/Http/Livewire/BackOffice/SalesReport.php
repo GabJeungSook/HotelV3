@@ -366,6 +366,12 @@ class SalesReport extends Component
             ->groupBy('room_id')
             ->get();
 
+        $checkinDetailIds = $transactions
+        ->map(fn ($t) => $t->room?->latestCheckInDetail?->id)
+        ->filter()
+        ->unique()
+        ->values();
+
         $roomIds = $transactions->pluck('room_id');
 
         // Side buckets per room
@@ -401,13 +407,24 @@ class SalesReport extends Component
             ->get()
             ->keyBy('room_id');
 
-        $this->transferTransactions = Transaction::where('transaction_type_id', 7)
-            ->whereIn('room_id', $roomIds)
-            ->selectRaw('room_id, SUM(payable_amount) as paid_amount')
-            ->whereNotNull('paid_at')
-            ->groupBy('room_id')
-            ->get()
-            ->keyBy('room_id');
+        $this->transferTransactions = Transaction::query()
+        ->where('transaction_type_id', 7)
+        ->whereIn('checkin_detail_id', $checkinDetailIds)  // ✅ stay-based scope
+        ->whereNotNull('paid_at')
+        ->selectRaw('checkin_detail_id, SUM(payable_amount) as paid_amount')
+        ->groupBy('checkin_detail_id')
+        ->get()
+        ->keyBy('checkin_detail_id');
+
+        // $this->transferTransactions = Transaction::query()
+        //     ->where('transaction_type_id', 7)
+        //     ->whereIn('room_id', $roomIds) // keep if you want to stay within current scope
+        //     ->whereNotNull('paid_at')
+        //     ->whereNotNull('checkin_detail_id')
+        //     ->selectRaw('checkin_detail_id, SUM(payable_amount) as paid_amount')
+        //     ->groupBy('checkin_detail_id')
+        //     ->get()
+        //     ->keyBy('checkin_detail_id');
 
         // Compute room amount and total sales
         $roomAmount = 0;
@@ -447,16 +464,35 @@ class SalesReport extends Component
                 ? 'Unknown Date'
                 : Carbon::parse($dateKey)->format('F d, Y');
 
+                $transferAssignedRoomByDetail = [];
+
+            $items
+                ->groupBy(fn($t) => $t->room->latestCheckInDetail?->id)
+                ->each(function ($group, $detailId) use (&$transferAssignedRoomByDetail) {
+                    if (!$detailId) return;
+
+                    // pick ONE room in this date group to carry the transfer total
+                    // here: smallest room number
+                    $winner = $group->sortBy(fn($t) => (int) ($t->room?->number ?? PHP_INT_MAX))->first();
+                    $transferAssignedRoomByDetail[$detailId] = $winner?->room_id;
+                });
+
             $rows = $items->map(function ($t) {
                 $detail = $t->room->latestCheckInDetail;
                 $roomId = $t->room_id;
+                $detailId = $detail?->id;
+
+                // transfer summed by stay (checkin_detail_id)
+                $transTotalForStay = (float) ($this->transferTransactions[$detailId]->paid_amount ?? 0);
 
                 $roomRate = (float) ($detail?->rate?->amount ?? 0);
                 $extend   = (float) ($this->extendedTransactions[$roomId]->paid_amount ?? 0);
                 $amen     = (float) ($this->amenitiesTransactions[$roomId]->paid_amount ?? 0);
                 $food     = (float) ($this->foodTransactions[$roomId]->paid_amount ?? 0);
                 $dam      = (float) ($this->damagesTransactions[$roomId]->paid_amount ?? 0);
-                $trans    = (float) ($this->transferTransactions[$roomId]->paid_amount ?? 0);
+                // only show it on the "winner" room row
+                $detailId = $detail?->id;
+                $trans = (float) ($this->transferTransactions[$detailId]->paid_amount ?? 0);
 
                 $total = $roomRate
                     + ($this->showExtend ? $extend : 0)

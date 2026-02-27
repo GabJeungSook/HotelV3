@@ -351,6 +351,7 @@ class TransferRoom extends Component
          CheckinDetail::where('guest_id', $this->guest->id)->update([
             'type_id' => $this->selected_type_id,
             'room_id' => $this->selected_room_id,
+            'rate_id' => $this->new_room ? $this->new_room->id : $this->guest->rate_id,
             'static_room_amount' => $this->new_room_rate,
             'static_amount' => ($this->new_room_rate + $initial_deposit),
         ]);
