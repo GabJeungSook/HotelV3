@@ -52,12 +52,12 @@
 
             {{-- Footer actions (bottom-right logout) --}}
             <div class="px-6 py-4 space-x-4 border-t border-gray-200 flex items-center justify-end">
-                <button
+                {{-- <button
                         type="button"
                         wire:click="$set('withdraw_modal', true)"
                         class="inline-flex items-center rounded-lg bg-yellow-600 px-4 py-2 text-sm font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2">
                         Withdraw Cash
-                </button>
+                </button> --}}
                 <button type="button" wire:click="$set('logout_modal', true)" class="inline-flex items-center rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
                     End Shift
                 </button>
