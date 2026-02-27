@@ -227,8 +227,8 @@ class CheckIn extends Component
     {
         $room = Room::where('branch_id', auth()->user()->branch_id)->where('id', $this->room_id)->first();
 
-        if(!$room->latestCheckInDetail)
-        {
+        // if(!$room->latestCheckInDetail)
+        // {
               $transaction = Guest::whereYear(
             'created_at',
             \Carbon\Carbon::today()->year
@@ -271,14 +271,14 @@ class CheckIn extends Component
         // event(new CheckInEvent(auth()->user()->branch_id));
 
         $this->steps = 5;
-        }else{
-                $this->dialog()->error(
-                    $title = 'SORRY',
-                    $description =
-                        'Room is already occupied. Please select another room.'
-                );
-                return;
-        }
+        // }else{
+        //         $this->dialog()->error(
+        //             $title = 'SORRY',
+        //             $description =
+        //                 'Room is already occupied. Please select another room.'
+        //         );
+        //         return;
+        // }
     }
 
     public function redirectToHome()
