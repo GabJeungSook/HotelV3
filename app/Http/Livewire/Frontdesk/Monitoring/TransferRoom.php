@@ -245,7 +245,7 @@ class TransferRoom extends Component
             'paid_amount' => 0,
             'change_amount' => 0,
             'deposit_amount' => 0,
-            'paid_at' => Carbon::now()->toDateTimeString(),
+            'paid_at' => null,
             'override_at' => null,
             'remarks' =>
                 'Guest Transfered from Room #' .

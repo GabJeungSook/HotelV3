@@ -362,7 +362,6 @@ class SalesReport extends Component
         $transactions = (clone $base)
             ->whereNotIn('transaction_type_id', [5, 2])
             ->selectRaw('room_id, SUM(payable_amount) as paid_amount')
-            ->whereNotNull('paid_at')
             ->groupBy('room_id')
             ->get();
 
@@ -410,8 +409,8 @@ class SalesReport extends Component
         $this->transferTransactions = Transaction::query()
         ->where('transaction_type_id', 7)
         ->whereIn('checkin_detail_id', $checkinDetailIds)  // ✅ stay-based scope
-        ->whereNotNull('paid_at')
         ->selectRaw('checkin_detail_id, SUM(payable_amount) as paid_amount')
+        ->whereNotNull('paid_at')
         ->groupBy('checkin_detail_id')
         ->get()
         ->keyBy('checkin_detail_id');

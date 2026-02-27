@@ -225,7 +225,11 @@ class CheckIn extends Component
 
     public function confirmCheckIn()
     {
-        $transaction = Guest::whereYear(
+        $room = Room::find($this->room_id);
+
+        if($room->latestCheckInDetail->count() == 0)
+        {
+              $transaction = Guest::whereYear(
             'created_at',
             \Carbon\Carbon::today()->year
         )->count();
@@ -267,6 +271,14 @@ class CheckIn extends Component
         // event(new CheckInEvent(auth()->user()->branch_id));
 
         $this->steps = 5;
+        }else{
+                $this->dialog()->error(
+                    $title = 'SORRY',
+                    $description =
+                        'Room is already occupied. Please select another room.'
+                );
+                return;
+        }
     }
 
     public function redirectToHome()
