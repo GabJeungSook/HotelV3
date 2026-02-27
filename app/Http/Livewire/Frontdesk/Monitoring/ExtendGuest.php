@@ -37,6 +37,7 @@ class ExtendGuest extends Component
     public $initial_amount;
     public $extended_amount;
     public $total_amount;
+    public $new_rate;
     public function mount($record)
     {
         $this->assigned_frontdesk = auth()->user()->assigned_frontdesks;
