@@ -348,7 +348,7 @@
                       <div class="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-4">
                         <div class="flex items-center">
                           <p class="truncate text-sm font-medium text-green-500 uppercase">{{ $kiosk->guest->first()->name }}
-                            (ROOM #{{ $kiosk->first()->number }})
+                            (ROOM #{{ $kiosk->guest->first()->room->number }})
                           </p>
                         </div>
                         <div class="hidden md:block">
