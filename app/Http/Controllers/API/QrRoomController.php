@@ -19,7 +19,8 @@ class QrRoomController extends Controller
                 })
                 ->with([
                     'latestCheckInDetail.guest.type',
-                    'floor' // Optional: Include floor info if needed
+                    'floor', // Optional: Include floor info if needed
+                    'latestCheckInDetail.transactions'
                 ])
                 ->first();
 
