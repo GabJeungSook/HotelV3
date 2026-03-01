@@ -103,13 +103,13 @@
 
                   <div class="flex justify-between text-gray-700">
                     <dt class="font-bold">Total Deposit</dt>
-                    <dd class="font-semibold text-red-600">&#8369;{{ $checkInDetail ? number_format($total_deposit, 2) : 0 }}</dd>
+                    <dd class="font-semibold">&#8369;{{ $checkInDetail ? number_format($total_deposit, 2) : 0 }}</dd>
                   </div>
 
                   <div class="flex justify-between text-green-600 pt-2 border-t border-gray-300">
                     <dt class="font-bold text-xl">Total</dt>
                     <dd class="font-semibold text-lg">
-                      &#8369;{{ $checkInDetail ? number_format(($room_amount +  $total_amount) - $total_deposit, 2) : 0}}
+                      &#8369;{{ $checkInDetail ? number_format(($room_amount +  $total_amount) + $total_deposit, 2) : 0}}
                     </dd>
                   </div>
                 </div>
