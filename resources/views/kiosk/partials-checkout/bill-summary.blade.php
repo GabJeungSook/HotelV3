@@ -76,7 +76,7 @@
                             $checkInDetail
                                 ? (
                                     $checkInDetail->guest->is_long_stay
-                                        ? ($checkInDetail->hours_stayed * $checkInDetail->guest->number_of_days) . ' days'
+                                        ? ($checkInDetail->hours_stayed * $checkInDetail->guest->number_of_days) . ' hours'
                                         : $checkInDetail->hours_stayed . ' hours'
                                 )
                                 : 'N/A'
@@ -98,7 +98,7 @@
                                     $checkInDetail->guest->is_long_stay
                                         ? (
                                             (($checkInDetail->hours_stayed * $checkInDetail->guest->number_of_days)
-                                            + $extension_hours) . ' days'
+                                            + $extension_hours) . ' hours'
                                           )
                                         : ($checkInDetail->hours_stayed + $extension_hours) . ' hours'
                                   )
