@@ -109,7 +109,7 @@
                   <div class="flex justify-between text-green-600 pt-2 border-t border-gray-300">
                     <dt class="font-bold text-xl">Total</dt>
                     <dd class="font-semibold text-lg">
-                      &#8369;{{ $checkInDetail ? number_format(($room_amount +  $total_amount) : 0}}
+                      &#8369;{{ $checkInDetail ? number_format(($room_amount +  $total_amount), 2) : 0}}
                     </dd>
                   </div>
                 </div>
