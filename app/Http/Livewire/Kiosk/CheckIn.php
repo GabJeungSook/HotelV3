@@ -92,7 +92,7 @@ class CheckIn extends Component
             ->toArray();
         if (
             Room::where('type_id', $type_id)
-                ->where('status', 'Available')
+                ->whereIn('status', ['Available', 'Cleaned'])
                 ->whereNotIn('id', $temporaryCheckInKiosk)
                 ->where('is_priority', true)
                 ->with(['type.rates'])
