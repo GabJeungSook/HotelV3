@@ -71,8 +71,18 @@
 
                     <div class="flex justify-between">
                       <dt class="font-medium">Initial Time</dt>
-                      <dd class="font-semibold">{{ $checkInDetail ? $checkInDetail->hours_stayed.' hours' : 'N/A' }}</dd>
-                    </div>
+                     <dd class="font-semibold">
+                        {{
+                            $checkInDetail
+                                ? (
+                                    $checkInDetail->guest->is_long_stay
+                                        ? ($checkInDetail->hours_stayed * $checkInDetail->guest->number_of_days) . ' days'
+                                        : $checkInDetail->hours_stayed . ' hours'
+                                )
+                                : 'N/A'
+                        }}
+                    </dd>
+                    </div> 
 
                     <div class="flex justify-between">
                       <dt class="font-medium">Total Extension Hours</dt>
@@ -81,7 +91,20 @@
 
                     <div class="flex justify-between">
                       <dt class="font-medium">Total Staying Hours</dt>
-                      <dd class="font-semibold">{{ $checkInDetail ? ($checkInDetail->hours_stayed + $extension_hours).' hours' : 'N/A' }}</dd>
+                      <dd class="font-semibold">
+                        {{
+                            $checkInDetail
+                                ? (
+                                    $checkInDetail->guest->is_long_stay
+                                        ? (
+                                            (($checkInDetail->hours_stayed * $checkInDetail->guest->number_of_days)
+                                            + $extension_hours) . ' days'
+                                          )
+                                        : ($checkInDetail->hours_stayed + $extension_hours) . ' hours'
+                                  )
+                                : 'N/A'
+                        }}
+                    </dd>
                     </div>
                   </div>
                 </section>
