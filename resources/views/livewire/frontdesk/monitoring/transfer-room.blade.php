@@ -131,6 +131,7 @@
                 <span>Payable Amount:</span>
                 <span>₱ {{ number_format($payable_amount, 2) }}</span>
             </div>
+            @if($payable_amount > 0)
             <!-- amount paid -->
                <div class="mt-20 flex items-center justify-between gap-6">
     <!-- Label -->
@@ -171,6 +172,7 @@
     </div>
 </div>
              <!-- amount paid end -->
+              @endif
         </div>
     </div>
 
