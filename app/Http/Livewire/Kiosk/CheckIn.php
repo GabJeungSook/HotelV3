@@ -283,7 +283,7 @@ class CheckIn extends Component
 
     public function redirectToHome()
     {
-        return redirect()->route('kiosk.check-in');
+        return redirect()->route('kiosk.dashboard');
     }
 
     public function backRoom()

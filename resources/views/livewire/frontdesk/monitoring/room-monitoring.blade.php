@@ -331,7 +331,7 @@
 
         </ul>
       </div>
-
+<!-- 
         <div class="mt-3 p-4 border rounded-lg overflow-auto h-64 bg-white shadow sm:rounded-md">
         <div>
           <div class="header font-bold text-gray-700">CHECKED-OUT FROM KIOSK</div>
@@ -339,7 +339,6 @@
         <div class="mt-5" x-animate>
                   <ul role="list" class="divide-y divide-gray-200 " x-animate>
           @forelse($checkOutKiosks as $kiosk)
-            {{-- @if ($loop->first) --}}
             <li x-animate class="transition duration-300 ease-in-out" >
                 <a href="#" class="block hover:bg-red-50" >
                   <div class="flex justify-between items-center px-4 py-4 sm:px-6 bg-gray-50">
@@ -354,7 +353,6 @@
                         <div class="hidden md:block">
                           <div>
                             <p class="flex items-center text-sm text-green-500">
-                              <!-- Heroicon name: mini/check-circle -->
                               <svg class="mr-1.5 w-5 h-5 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
                                 viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -369,7 +367,6 @@
                       </div>
                     </div>
                     <div class="flex items-center space-x-2">
-                      <!-- Approve button (check) -->
                       <div></div>
                       <div>
 
@@ -387,7 +384,7 @@
 
         </ul>
         </div>
-      </div>
+      </div> -->
 
       {{-- FOR RESERVATIONS --}}
 
