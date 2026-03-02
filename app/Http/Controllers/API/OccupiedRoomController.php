@@ -22,16 +22,8 @@ class OccupiedRoomController extends Controller
                     $query->where('status', 'Occupied')
                     ->with([
                         'latestCheckInDetail.guest.type',
-                        'latestCheckInDetail.extendedGuestReports',
+                        'latestCheckInDetail.extendedGuestReports'
                     ])
-                    ->withSum([
-                        'latestCheckInDetail.extendedGuestReports as extension_hours' => function ($q) {},
-                    ], 'total_hours')
-                     ->withSum([
-                        'latestCheckInDetail.transactions as room_amount' => function ($q) {
-                        $q->whereNotIn('transaction_type_id', [1]);
-                        },
-                    ], 'payable_amount')
                     ->withSum([
                         'latestCheckInDetail.transactions as total_amount' => function ($q) {
                         $q->whereNotIn('transaction_type_id', [1,2,5]);
