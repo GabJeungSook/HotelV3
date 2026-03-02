@@ -125,6 +125,7 @@ class SalesReport extends Component
             })
             ->when($this->shift, function ($q, $shift) {
                 $q->whereHas('checkin_details', function ($q2) use ($shift) {
+
                     if ($shift === 'AM') {
                         $q2->whereTime(DB::raw('TIME(check_out_at)'), '>=', '08:00:00')
                            ->whereTime(DB::raw('TIME(check_out_at)'), '<',  '20:00:00');
@@ -546,7 +547,7 @@ class SalesReport extends Component
     private function resolveShift(string $checkOutAt): string
     {
         $hour = Carbon::parse($checkOutAt)->hour;
-        return ($hour >= 8 && $hour < 20) ? 'AM' : 'PM';
+        return ($hour >= 8 && $hour < 20) ? 'PM' : 'AM';
     }
 
     public function resetFilters()
