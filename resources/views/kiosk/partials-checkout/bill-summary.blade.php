@@ -82,7 +82,7 @@
                                 : 'N/A'
                         }}
                     </dd>
-                    </div> 
+                    </div>
 
                     <div class="flex justify-between">
                       <dt class="font-medium">Total Extension Hours</dt>
@@ -115,6 +115,12 @@
               {{-- AMOUNTS --}}
               <section class="p-3">
                 <div class="space-y-2">
+
+                  <div class="flex justify-between text-gray-700">
+                    <dt class="font-bold">Total Deposit</dt>
+                    <dd class="font-semibold">&#8369;{{ $checkInDetail ? number_format($total_deposit, 2) : 0 }}</dd>
+                  </div>
+
                     <div class="flex justify-between text-gray-700">
                     <dt class="font-bold">Room Amount</dt>
                     <dd class="font-semibold">&#8369;{{ $checkInDetail ? number_format($room_amount, 2) : 0 }}</dd>
@@ -122,11 +128,6 @@
                   <div class="flex justify-between text-gray-700">
                     <dt class="font-bold">Other Transactions</dt>
                     <dd class="font-semibold">&#8369;{{ $checkInDetail ? number_format($total_amount, 2) : 0 }}</dd>
-                  </div>
-
-                  <div class="flex justify-between text-gray-700">
-                    <dt class="font-bold">Total Deposit</dt>
-                    <dd class="font-semibold">&#8369;{{ $checkInDetail ? number_format($total_deposit, 2) : 0 }}</dd>
                   </div>
 
                   <div class="flex justify-between text-green-600 pt-2 border-t border-gray-300">

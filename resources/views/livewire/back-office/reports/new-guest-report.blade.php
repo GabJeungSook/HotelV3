@@ -80,6 +80,7 @@
                         <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">CHECK-IN DATE/TIME</th>
                         <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">CHECK-OUT DATE/TIME</th>
                         <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">INITIAL HRS</th>
+                        <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">TOTAL EXTENSION HRS</th>
                         <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">TOTAL HRS</th>
                         <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">SHIFT</th>
                         <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">FRONTDESK</th>
@@ -104,10 +105,13 @@
                                     : '—' }}
                             </td>
                             <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
-                                {{ $item->checkinDetail?->hours_stayed }}
+                                {{ $item->checkinDetail ? ($item->checkinDetail->guest->is_long_stay ? ($item->checkinDetail->hours_stayed * $item->checkinDetail->guest->number_of_days) . ' hours' : $item->checkinDetail->hours_stayed . ' hours') : '—' }}
+                            </td>
+                             <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
+                                {{ $item->checkinDetail ? ($item->checkinDetail->extendedGuestReports->sum('total_hours') > 0 ? $item->checkinDetail->extendedGuestReports->sum('total_hours') . ' hours' : '-') : '—' }}
                             </td>
                             <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
-                                {{ $item->checkinDetail?->hours_stayed }}
+                                {{ $item->checkinDetail ? ($item->checkinDetail->guest->is_long_stay ? (($item->checkinDetail->hours_stayed * $item->checkinDetail->guest->number_of_days) + $item->checkinDetail->extendedGuestReports->sum('total_hours')) . ' hours' : ($item->checkinDetail->hours_stayed + $item->checkinDetail->extendedGuestReports->sum('total_hours')) . ' hours') : '—' }}
                             </td>
                             <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
                                 {{ $item->shift }}

@@ -26,6 +26,7 @@ class CheckoutGuest extends Component
                 'checkinDetail.guest',
                 'checkinDetail',
                 'frontdesk',
+                'checkinDetail.extendedGuestReports',
             ])
             ->when($this->frontdesk_id, fn($q) =>
                 $q->where('frontdesk_id', $this->frontdesk_id)
