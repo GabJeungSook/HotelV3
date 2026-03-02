@@ -16,6 +16,7 @@ class OccupiedRoomController extends Controller
     public function occupiedRooms($branchId)
     {
         try {
+            //query
             $floors = Floor::where('branch_id', $branchId)->with(['rooms' => function ($query) use ($branchId) {
                     $query->where('status', 'Occupied')->with(['latestCheckInDetail.guest.type', 'latestCheckInDetail.transactions' => function ($q) {
                         $q->whereNotIn('transaction_type_id', [2,5]);
