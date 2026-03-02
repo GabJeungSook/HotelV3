@@ -547,7 +547,7 @@ class SalesReport extends Component
     private function resolveShift(string $checkOutAt): string
     {
         $hour = Carbon::parse($checkOutAt)->hour;
-        return ($hour >= 8 && $hour < 20) ? 'PM' : 'AM';
+        return ($hour >= 8 && $hour < 20) ? 'AM' : 'PM';
     }
 
     public function resetFilters()
