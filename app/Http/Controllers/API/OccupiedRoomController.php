@@ -17,33 +17,13 @@ class OccupiedRoomController extends Controller
     {
         try {
             //query
-            $floors = Floor::where('branch_id', $branchId)
-                ->with(['rooms' => function ($query) {
-                    $query->where('status', 'Occupied')
-                    ->with([
-                        'latestCheckInDetail.guest.type',
-                        'latestCheckInDetail.extendedGuestReports'
-                    ])
-                    ->withSum([
-                        'latestCheckInDetail.transactions as total_amount' => function ($q) {
-                        $q->whereNotIn('transaction_type_id', [1,2,5]);
-                        },
-                    ], 'payable_amount')
-                    ->withSum([
-                        'latestCheckInDetail.transactions as total_deposit' => function ($q) {
-                        $q->where('transaction_type_id', 2);
-                        },
-                    ], 'payable_amount');
+            $floors = Floor::where('branch_id', $branchId)->with(['rooms' => function ($query) use ($branchId) {
+                    $query->where('status', 'Occupied')->with(['latestCheckInDetail.guest.type', 'latestCheckInDetail.transactions' => function ($q) {
+                        $q->whereNotIn('transaction_type_id', [2,5]);
+                    }, 'latestCheckInDetail.extendedGuestReports']);
                 }])
                 ->orderBy('number')
                 ->get();
-            // $floors = Floor::where('branch_id', $branchId)->with(['rooms' => function ($query) use ($branchId) {
-            //         $query->where('status', 'Occupied')->with(['latestCheckInDetail.guest.type', 'latestCheckInDetail.transactions' => function ($q) {
-            //             $q->whereNotIn('transaction_type_id', [2,5]);
-            //         }, 'latestCheckInDetail.extendedGuestReports']);
-            //     }])
-            //     ->orderBy('number')
-            //     ->get();
 
             return ApiResponse::success(['data' => $floors], 200);
         } catch (\Exception $e) {
