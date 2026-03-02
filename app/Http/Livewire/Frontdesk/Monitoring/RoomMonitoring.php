@@ -349,6 +349,9 @@ class RoomMonitoring extends Component
             ->whereHas('guest', function ($query) {
                 $query->where('has_kiosk_check_out', true);
             })
+            ->whereHas('guest.checkInDetail', function ($query) {
+                $query->where('is_check_out', false);
+            })
             ->orderBy('created_at', 'desc')
             ->get();
     }

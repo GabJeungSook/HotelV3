@@ -71,8 +71,18 @@
 
                     <div class="flex justify-between">
                       <dt class="font-medium">Initial Time</dt>
-                      <dd class="font-semibold">{{ $checkInDetail ? $checkInDetail->hours_stayed.' hours' : 'N/A' }}</dd>
-                    </div>
+                     <dd class="font-semibold">
+                        {{
+                            $checkInDetail
+                                ? (
+                                    $checkInDetail->guest->is_long_stay
+                                        ? ($checkInDetail->hours_stayed * $checkInDetail->guest->number_of_days) . ' hours'
+                                        : $checkInDetail->hours_stayed . ' hours'
+                                )
+                                : 'N/A'
+                        }}
+                    </dd>
+                    </div> 
 
                     <div class="flex justify-between">
                       <dt class="font-medium">Total Extension Hours</dt>
@@ -81,7 +91,20 @@
 
                     <div class="flex justify-between">
                       <dt class="font-medium">Total Staying Hours</dt>
-                      <dd class="font-semibold">{{ $checkInDetail ? ($checkInDetail->hours_stayed + $extension_hours).' hours' : 'N/A' }}</dd>
+                      <dd class="font-semibold">
+                        {{
+                            $checkInDetail
+                                ? (
+                                    $checkInDetail->guest->is_long_stay
+                                        ? (
+                                            (($checkInDetail->hours_stayed * $checkInDetail->guest->number_of_days)
+                                            + $extension_hours) . ' hours'
+                                          )
+                                        : ($checkInDetail->hours_stayed + $extension_hours) . ' hours'
+                                  )
+                                : 'N/A'
+                        }}
+                    </dd>
                     </div>
                   </div>
                 </section>
@@ -103,13 +126,13 @@
 
                   <div class="flex justify-between text-gray-700">
                     <dt class="font-bold">Total Deposit</dt>
-                    <dd class="font-semibold text-red-600">&#8369;{{ $checkInDetail ? number_format($total_deposit, 2) : 0 }}</dd>
+                    <dd class="font-semibold">&#8369;{{ $checkInDetail ? number_format($total_deposit, 2) : 0 }}</dd>
                   </div>
 
                   <div class="flex justify-between text-green-600 pt-2 border-t border-gray-300">
                     <dt class="font-bold text-xl">Total</dt>
                     <dd class="font-semibold text-lg">
-                      &#8369;{{ $checkInDetail ? number_format(($room_amount +  $total_amount) - $total_deposit, 2) : 0}}
+                      &#8369;{{ $checkInDetail ? number_format(($room_amount +  $total_amount), 2) : 0}}
                     </dd>
                   </div>
                 </div>

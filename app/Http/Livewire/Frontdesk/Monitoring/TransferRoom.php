@@ -241,11 +241,12 @@ class TransferRoom extends Component
             'transaction_type_id' => 7,
             'assigned_frontdesk_id' => json_encode($this->assigned_frontdesk),
             'description' => 'Room Transfer',
-            'payable_amount' => $this->payable_amount,
+            // 'payable_amount' => $this->payable_amount,
+            'payable_amount' => 0,
             'paid_amount' => 0,
             'change_amount' => 0,
             'deposit_amount' => 0,
-            'paid_at' => null,
+            'paid_at' => now()->toDateString(),
             'override_at' => null,
             'remarks' =>
                 'Guest Transfered from Room #' .

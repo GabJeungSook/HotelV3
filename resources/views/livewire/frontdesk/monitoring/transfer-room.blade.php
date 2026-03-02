@@ -131,6 +131,46 @@
                 <span>Payable Amount:</span>
                 <span>₱ {{ number_format($payable_amount, 2) }}</span>
             </div>
+            <!-- amount paid -->
+            <!-- @if($payable_amount > 0)
+               <div class="mt-20 flex items-center justify-between gap-6">
+    <label class="font-semibold text-xl whitespace-nowrap">
+        Amount Paid
+    </label>
+
+    <div class="relative w-1/2">
+        <span class="absolute left-0 top-1/2 -translate-y-1/2 text-gray-700 font-semibold text-3xl">
+            ₱
+        </span>
+<input
+    wire:model.defer="amountPaid"
+    type="number"
+    autofocus
+    min="0"
+    placeholder="0.00"
+    class="
+        w-full
+        text-right
+        text-3xl
+        font-semibold
+        bg-transparent
+        border-0
+        border-b-2
+        border-gray-400
+        focus:border-blue-600
+        focus:outline-none
+        focus:ring-0
+        focus:shadow-none
+        appearance-none
+
+        pl-8
+        pb-1
+    "
+/>
+    </div>
+</div>
+@endif -->
+<!-- amount paid end -->
         </div>
     </div>
 
@@ -162,7 +202,7 @@
                 </button> --}}
                 @if($guest->transferTransactions()->count() < 2 && $guest->extendTransactions()->count() == 0)
                 <button wire:click="confirmTransfer" class="px-4 py-2 bg-[#1877F2] text-white rounded-md hover:bg-[#5194ec] focus:outline-none focus:ring-2 focus:ring-[#1877F2] focus:ring-opacity-50">
-                    Save
+                    Save & Pay
                 </button>
                 @endif
             </div>
