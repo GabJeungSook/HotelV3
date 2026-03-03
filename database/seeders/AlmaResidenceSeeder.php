@@ -72,698 +72,698 @@ class AlmaResidenceSeeder extends Seeder
             'number' => '5',
         ]);
 
-        Room::create([ ‘branch_id’ => 1, ‘number’ => 1, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+        Room::create([ 'branch_id' => 1, 'number' => 1, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 2, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 2, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 3, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 3, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 4, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 4, 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 5, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 5, 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 6, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 6, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 7, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 7, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 8, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 8, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 9, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 9, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 10, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 10, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 11, ‘type_id’ => $twin->id,
-‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 11, 'type_id' => $twin->id,
+'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 12, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 12, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 14, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 14, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 15, ‘type_id’ => $twin->id,
-‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 15, 'type_id' => $twin->id,
+'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 16, ‘type_id’ => $twin->id,
-‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 16, 'type_id' => $twin->id,
+'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 17, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 17, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 18, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 18, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 19, ‘type_id’ => $twin->id,
-‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 19, 'type_id' => $twin->id,
+'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 20, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 20, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 21, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 21, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 22, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 22, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 23, ‘type_id’ => $twin->id,
-‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 23, 'type_id' => $twin->id,
+'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 24, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 24, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 25, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 25, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 26, ‘type_id’ => $twin->id,
-‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 26, 'type_id' => $twin->id,
+'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 27, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 27, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 28, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 28, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 29, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 29, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 30, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 30, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 31, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 31, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 32, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 32, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 33, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 33, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 34, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 34, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 35, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 35, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 36, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 36, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 37, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 37, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 38, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 38, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 39, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 39, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 50, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 50, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 51, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 51, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 52, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 52, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 53, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $firstFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 53, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $firstFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 60, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 60, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 61, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 61, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 62, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 62, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 63, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 63, 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 64, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 64, 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 65, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 65, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 66, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 66, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 67, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 67, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 68, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 68, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 69, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 69, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 70, ‘type_id’ => $twin->id,
-‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 70, 'type_id' => $twin->id,
+'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 71, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 71, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 72, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 72, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 73, ‘type_id’ => $twin->id,
-‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 73, 'type_id' => $twin->id,
+'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 74, ‘type_id’ => $twin->id,
-‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 74, 'type_id' => $twin->id,
+'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 75, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 75, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 76, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 76, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 77, ‘type_id’ => $twin->id,
-‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 77, 'type_id' => $twin->id,
+'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 78, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 78, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 79, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 79, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 80, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 80, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 81, ‘type_id’ => $twin->id,
-‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 81, 'type_id' => $twin->id,
+'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 82, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 82, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 83, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 83, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 84, ‘type_id’ => $twin->id,
-‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 84, 'type_id' => $twin->id,
+'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 85, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 85, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 86, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 86, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 87, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 87, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 88, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 88, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 89, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 89, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 90, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 90, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 91, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 91, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 92, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 92, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 93, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 93, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 94, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 94, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 95, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 95, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 96, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 96, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 97, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 97, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 98, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 98, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 99, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 99, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 100, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 100, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 101, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $secondFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 101, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $secondFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 120, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 120, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 121, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 121, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 122, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 122, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 123, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 123, 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 124, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 124, 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 125, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 125, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 126, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 126, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 127, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 127, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 128, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 128, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 129, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 129, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 130, ‘type_id’ =>
-$twin->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 130, 'type_id' =>
+$twin->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 131, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 131, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 132, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 132, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 133, ‘type_id’ =>
-$twin->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 133, 'type_id' =>
+$twin->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 134, ‘type_id’ =>
-$twin->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 134, 'type_id' =>
+$twin->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 135, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 135, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 136, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 136, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 137, ‘type_id’ =>
-$twin->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 137, 'type_id' =>
+$twin->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 138, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 138, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 139, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 139, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 150, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 150, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 151, ‘type_id’ =>
-$twin->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 151, 'type_id' =>
+$twin->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 152, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 152, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 153, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 153, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 154, ‘type_id’ =>
-$twin->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 154, 'type_id' =>
+$twin->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 155, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 155, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 156, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 156, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 157, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 157, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 158, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 158, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 159, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 159, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 160, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 160, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 161, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 161, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 162, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 162, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 163, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 163, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 164, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 164, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 165, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 165, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 166, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 166, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 167, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 167, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 168, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 168, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 169, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 169, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 170, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 170, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 171, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 171, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => ‘3A’, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => '3A', 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => ‘3B’, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => '3B', 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => ‘3C’, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => '3C', 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => ‘3D’, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => '3D', 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => ‘3E’, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => '3E', 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => ‘3F’, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => '3F', 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => ‘3G’, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $thirdFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => '3G', 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $thirdFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 200, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 200, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 201, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 201, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 202, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 202, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 203, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 203, 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 204, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 204, 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 205, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 205, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 206, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 206, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 207, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 207, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 208, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 208, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 209, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 209, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 210, ‘type_id’ =>
-$twin->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 210, 'type_id' =>
+$twin->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 211, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 211, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 212, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 212, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 214, ‘type_id’ =>
-$twin->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 214, 'type_id' =>
+$twin->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 215, ‘type_id’ =>
-$twin->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 215, 'type_id' =>
+$twin->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 216, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 216, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 217, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 217, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 218, ‘type_id’ =>
-$twin->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 218, 'type_id' =>
+$twin->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 219, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 219, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 220, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 220, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 221, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 221, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 222, ‘type_id’ =>
-$twin->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 222, 'type_id' =>
+$twin->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 223, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 223, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 224, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 224, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 225, ‘type_id’ =>
-$twin->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 225, 'type_id' =>
+$twin->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 226, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 226, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 227, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 227, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 228, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 228, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 229, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 229, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 230, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 230, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 231, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 231, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 232, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 232, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 233, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 233, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 234, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 234, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 235, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 235, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 236, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 236, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 237, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 237, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 238, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 238, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 239, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 239, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 250, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 250, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 251, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 251, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 252, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 252, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => ‘4A’, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => '4A', 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => ‘4B’, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => '4B', 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => ‘4C’, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => '4C', 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => ‘4D’, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => '4D', 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => ‘4E’, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => '4E', 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => ‘4F’, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => '4F', 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => ‘4G’, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $fourthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => '4G', 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $fourthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 253, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 253, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 254, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 254, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 255, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 255, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 256, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 256, 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 257, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 257, 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 258, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 258, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 259, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 259, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 260, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 260, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 261, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 261, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 262, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 262, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 263, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 263, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 264, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 264, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 265, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 265, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 266, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 266, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 267, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 267, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 268, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 268, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 269, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 269, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 270, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 270, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 271, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 271, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 272, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 272, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 273, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 273, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 274, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 274, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 275, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 275, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 276, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 276, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 277, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 277, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 278, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 278, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 279, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 279, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 280, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 280, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 281, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 281, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 282, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 282, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 283, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 283, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 284, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 284, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 285, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 285, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 286, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 286, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 287, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 287, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 288, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 288, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 289, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 289, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 290, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 290, 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 291, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 291, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 292, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 292, 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 293, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 293, 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => 294, ‘type_id’ =>
-$double->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => 294, 'type_id' =>
+$double->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => ‘5A’, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => '5A', 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => ‘5B’, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => '5B', 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => ‘5C’, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => '5C', 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => ‘5D’, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => '5D', 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => ‘5E’, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => '5E', 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => ‘5F’, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => '5F', 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
-Room::create([ ‘branch_id’ => 1, ‘number’ => ‘5G’, ‘type_id’ =>
-$single->id, ‘status’ => ‘Available’, ‘floor_id’ => $fifthFloor->id,]);
+Room::create([ 'branch_id' => 1, 'number' => '5G', 'type_id' =>
+$single->id, 'status' => 'Available', 'floor_id' => $fifthFloor->id,]);
 
 
         // Room::create([
