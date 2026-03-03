@@ -18,6 +18,8 @@ class Main extends Component
     public $user;
     public $floors;
     public $rooms;
+    public $authorization_modal = false;
+    public $code;
 
     public function mount()
     {
@@ -237,6 +239,117 @@ class Main extends Component
                 $message = 'Room cleaned successfully'
             );
         }
+    }
+
+    public function finishCleaningOverride()
+    {
+         $room = Room::where(
+            'id',
+            $id
+        )->first();
+
+        $record_count = RoomBoyReport::where('roomboy_id', auth()->user()->id)
+            ->whereDate('created_at', now())
+            ->count();
+
+        $getlastRecord = RoomBoyReport::where('room_id', $room->id)
+            ->where('roomboy_id', auth()->user()->id)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        // if (now()->diffInMinutes($room->started_cleaning_at) < 15) {
+        //     $this->dialog()->error(
+        //         $title = 'Error',
+        //         $message = 'You need to clean for at least 15 minutes'
+        //     );
+        // } else {
+            DB::beginTransaction();
+
+            CleaningHistory::create([
+                'user_id' => auth()->user()->id,
+                'room_id' => $room->id,
+                'floor_id' => $room->floor_id,
+                'branch_id' => $room->branch_id,
+                'current_assigned_floor_id' =>
+                    auth()->user()->roomboy_assigned_floor_id == $room->floor_id
+                        ? true
+                        : false,
+                'start_time' => $room->started_cleaning_at,
+                'end_time' => \Carbon\Carbon::now(),
+                'expected_end_time' => $room->time_to_clean,
+                'cleaning_duration' => now()->diffInMinutes(
+                    $room->started_cleaning_at
+                ),
+                'delayed_cleaning' => \Carbon\Carbon::parse(
+                    $room->time_to_clean
+                )->isPast()
+                    ? true
+                    : false,
+            ]);
+
+            auth()
+                ->user()
+                ->update([
+                    'roomboy_cleaning_room_id' => null,
+                ]);
+
+            $room->update([
+                'status' => 'Available',
+                'started_cleaning_at' => null,
+                'time_to_clean' => null,
+            ]);
+
+            // if ($record_count > 0) {
+
+            // } else {
+            //     dd('getlastrecord');
+            // }
+
+            $totalMinutes = ceil(
+                \Carbon\Carbon::parse($getlastRecord->cleaning_start)
+                    ->diffInSeconds(\Carbon\Carbon::now()) / 60
+            );
+
+            $getlastRecord->update([
+                'cleaning_end' => \Carbon\Carbon::now(),
+                'total_hours_spent' => $totalMinutes,
+                'is_cleaned' => true,
+            ]);
+
+            DB::commit();
+
+            $this->dialog()->success(
+                $title = 'Success',
+                $message = 'Room cleaned successfully'
+            );
+       // }
+    }
+
+    public function overrideCleaning()
+    {
+         if(auth()->user()->branch->autorization_code == $this->code)
+            {
+                $this->authorization_modal = false;
+                $this->dialog()->confirm([
+                'title' => 'Are you Sure?',
+                'description' => 'Finish cleaning this room?',
+                'icon' => 'question',
+                'accept' => [
+                    'label' => 'Finish Cleaning',
+                    'method' => 'finishCleaningOverride',
+                ],
+                'reject' => [
+                    'label' => 'Cancel',
+                ],
+            ]);
+            }else{
+                $this->authorization_modal = true;
+                $this->code = null;
+                $this->dialog()->error(
+                    $title = 'Oops',
+                    $description = 'Wrong authorization code.'
+                );
+            }
     }
 
 

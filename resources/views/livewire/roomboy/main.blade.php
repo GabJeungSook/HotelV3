@@ -172,12 +172,9 @@
                                                         </svg>
                                                     </button>
                                                      <button
-                                                        class="bg-red-600 text-white hover:bg-red-500 flex items-center gap-2 px-4 py-2 rounded">
+                                                        class="mt-3 bg-red-600 text-white hover:bg-red-500 flex items-center gap-2 px-4 py-2 rounded"
+                                                        wire:click="$set('authorization_modal', 'true')">
                                                         Override
-                                                        <!-- Right arrow icon (Heroicons: arrow-narrow-right) -->
-                                                        <svg class="w-5 h-5 ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                                        </svg>
                                                     </button>
                                                 </div>
                                             </div>
@@ -253,4 +250,33 @@
           </div>
         </section>
     </div>
+        {{-- moadal for authorization code --}}
+      <x-modal wire:model.defer="authorization_modal" align="center" max-width="md">
+    <x-card>
+      <div class="flex space-x-1">
+        <h1 class=" text-xl font-bold text-gray-600">AUTHORIZATION CODE</h1>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5 fill-green-600">
+          <path fill="none" d="M0 0h24v24H0z" />
+          <path d="M17 14h-4.341a6 6 0 1 1 0-4H23v4h-2v4h-4v-4zM7 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
+        </svg>
+      </div>
+      <div class="mt-7">
+        <input type="password" wire:model="code"
+          class="w-full text-lg
+      @error('code')
+          border-red-500
+      @enderror
+        rounded-lg">
+      </div>
+      @error('code')
+        <span class="text-sm text-red-500 mt-1">{{ $message }}</span>
+      @enderror
+      <div class="mt-5 flex justify-end items-center space-x-2">
+        <x-button x-on:click="close" label="CANCEL" sm negative />
+        <x-button label="PROCEED" sm positive wire:click="overrideCleaning" spinner="overrideCleaning" />
+
+      </div>
+
+    </x-card>
+  </x-modal>
 </div>
