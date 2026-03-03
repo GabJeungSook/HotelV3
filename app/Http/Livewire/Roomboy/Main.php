@@ -20,6 +20,7 @@ class Main extends Component
     public $rooms;
     public $authorization_modal = false;
     public $code;
+    public $override_cleaning_id;
 
     public function mount()
     {
@@ -245,7 +246,7 @@ class Main extends Component
     {
          $room = Room::where(
             'id',
-            $id
+            $this->override_cleaning_id
         )->first();
 
         $record_count = RoomBoyReport::where('roomboy_id', auth()->user()->id)
@@ -323,6 +324,12 @@ class Main extends Component
                 $message = 'Room cleaned successfully'
             );
        // }
+    }
+
+    public function openAuthModal($id)
+    {
+        $this->override_cleaning_id = $id;
+        $this->authorization_modal = true;
     }
 
     public function overrideCleaning()
