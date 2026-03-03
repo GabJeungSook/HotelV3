@@ -171,12 +171,12 @@ class Main extends Component
             ->orderBy('id', 'desc')
             ->first();
 
-        if (now()->diffInMinutes($room->started_cleaning_at) < 15) {
-            $this->dialog()->error(
-                $title = 'Error',
-                $message = 'You need to clean for at least 15 minutes'
-            );
-        } else {
+        // if (now()->diffInMinutes($room->started_cleaning_at) < 15) {
+        //     $this->dialog()->error(
+        //         $title = 'Error',
+        //         $message = 'You need to clean for at least 15 minutes'
+        //     );
+        // } else {
             DB::beginTransaction();
 
             CleaningHistory::create([
@@ -236,7 +236,7 @@ class Main extends Component
                 $title = 'Success',
                 $message = 'Room cleaned successfully'
             );
-        }
+       // }
     }
 
 
