@@ -44,7 +44,7 @@ class FloorController extends Controller
             $temporaryReserved,
             $floorId
         ) {
-            $query->where('status', 'Available')
+            $query->whereIn('status', ['Available', 'Cleaned'])
                 ->where('is_priority', true)
                 ->when($typeId, fn($q) => $q->where('type_id', $typeId))
                 ->when($floorId, fn($q) => $q->where('floor_id', $floorId))
