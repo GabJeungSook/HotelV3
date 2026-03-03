@@ -326,10 +326,10 @@ class Main extends Component
        // }
     }
 
-    public function openAuthModal($id)
+    public function openAuthorizationModal($id)
     {
-        $this->override_cleaning_id = $id;
         $this->authorization_modal = true;
+        $this->override_cleaning_id = $id;
     }
 
     public function overrideCleaning()
