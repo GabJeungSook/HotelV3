@@ -12,9 +12,9 @@
     }
 
     body {
-        transform: scale(0.9);
+        transform: scale(0.7);
         transform-origin: top left;
-        width: 111%;
+        width: 125%;
     }
 
     table {
