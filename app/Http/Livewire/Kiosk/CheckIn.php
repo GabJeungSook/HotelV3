@@ -237,7 +237,7 @@ class CheckIn extends Component
                     ->lockForUpdate()
                     ->first();
 
-                if ($room && $room->latestCheckInDetail) {
+                if ($room || $room->latestCheckInDetail) {
                     DB::rollBack();
                     $this->dialog()->error(
                         'SORRY',
@@ -247,12 +247,12 @@ class CheckIn extends Component
                 }
 
                 $temporaryCheckInKiosk = TemporaryCheckInKiosk::where('branch_id', auth()->user()->branch_id)
-                    ->where('room_id', $room->id)
+                    ->where('room_id', $this->room_id)
                     ->lockForUpdate()
                     ->exists();
 
                 $temporaryReserved = TemporaryReserved::where('branch_id', auth()->user()->branch_id)
-                    ->where('room_id', $room->id)
+                    ->where('room_id', $this->room_id)
                     ->lockForUpdate()
                     ->exists();
 
