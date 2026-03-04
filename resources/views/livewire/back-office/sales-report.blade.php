@@ -16,9 +16,9 @@
                 </select>
 
                  <div class="flex items-end gap-2">
-                    <button type="button"
+                    <button @click="printOut($refs.printContainer.outerHTML);" type="button"
                             class="w-full md:w-auto inline-flex justify-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
-                        Print PDF
+                        Print
                     </button>
                 </div>
             </div>
@@ -93,7 +93,7 @@
     </div>
 
     {{-- Report --}}
-    <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 overflow-hidden">
+    <div x-ref="printContainer" class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 overflow-hidden">
         @php
     // Flatten all group rows into one list
     $allRows = collect($groups ?? [])

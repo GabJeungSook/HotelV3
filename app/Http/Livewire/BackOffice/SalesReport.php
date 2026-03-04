@@ -673,6 +673,11 @@ private function buildRoomSummary(): void
     ];
 }
 
+public function printPdf()
+{
+    
+}
+
 
 
 }
