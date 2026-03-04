@@ -237,7 +237,7 @@ class CheckIn extends Component
                     ->lockForUpdate()
                     ->first();
 
-                if ($room || $room->latestCheckInDetail) {
+                if ($room) {
                     DB::rollBack();
                     $this->dialog()->error(
                         'SORRY',
