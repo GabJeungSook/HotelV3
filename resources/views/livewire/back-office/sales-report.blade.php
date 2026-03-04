@@ -1,5 +1,34 @@
 <div class="max-w-full mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <style>
+@page {
+    size: A4 landscape;
+    margin: 15mm;
+}
 
+@media print {
+
+    .no-print {
+        display: none !important;
+    }
+
+    body {
+        transform: scale(0.9);
+        transform-origin: top left;
+        width: 111%;
+    }
+
+    table {
+        width: 100% !important;
+        table-layout: fixed;
+        font-size: 11px !important;
+    }
+
+    th, td {
+        padding: 4px !important;
+        overflow-wrap: break-word;
+    }
+}
+</style>
     {{-- Filters --}}
     <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 p-4 mb-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
