@@ -2,7 +2,7 @@
     <style>
 @page {
     size: A4 landscape;
-    margin: 15mm;
+    margin: 12mm;
 }
 
 @media print {
@@ -20,11 +20,11 @@
     table {
         width: 100% !important;
         table-layout: fixed;
-        font-size: 11px !important;
+        font-size: 10px !important;
     }
 
     th, td {
-        padding: 4px !important;
+        padding: 2px !important;
         overflow-wrap: break-word;
     }
 }
@@ -35,7 +35,7 @@
 
             {{-- Frontdesk --}}
             <div class="flex flex-col gap-3">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Frontdesk</label>
+                <label class="block text-sm font-medium text-gray-700">Frontdesk</label>
                 <select wire:model.defer="frontdesk"
                         class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                     <option value="">All</option>
