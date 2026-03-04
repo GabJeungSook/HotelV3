@@ -12,7 +12,7 @@
     }
 
     body {
-        transform: scale(0.7);
+        transform: scale(0.5);
         transform-origin: top left;
         width: 125%;
     }
