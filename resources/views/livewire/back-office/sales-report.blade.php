@@ -5,7 +5,7 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
 
             {{-- Frontdesk --}}
-            <div>
+            <div class="flex flex-col gap-3">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Frontdesk</label>
                 <select wire:model.defer="frontdesk"
                         class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
@@ -14,6 +14,13 @@
                         <option value="{{ $fd->id }}">{{ $fd->name }}</option>
                     @endforeach
                 </select>
+
+                 <div class="flex items-end gap-2">
+                    <button type="button"
+                            class="w-full md:w-auto inline-flex justify-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
+                        Print PDF
+                    </button>
+                </div>
             </div>
 
             {{-- Date From --}}
