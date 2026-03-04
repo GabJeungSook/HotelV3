@@ -225,60 +225,84 @@ class CheckIn extends Component
 
     public function confirmCheckIn()
     {
-        $room = Room::where('branch_id', auth()->user()->branch_id)->where('id', $this->room_id)->first();
 
-        // if(!$room->latestCheckInDetail)
-        // {
-              $transaction = Guest::whereYear(
-            'created_at',
-            \Carbon\Carbon::today()->year
-        )->count();
-        $transaction += 1;
-        $transaction_code =
-            auth()->user()->branch_id .
-            today()->format('y') .
-            str_pad($transaction, 4, '0', STR_PAD_LEFT);
-        $this->generatedQrCode = $transaction_code;
-        try {
-        DB::beginTransaction();
-        $guest = Guest::create([
-            'branch_id' => auth()->user()->branch_id,
-            'name' => $this->name,
-            'contact' => $this->contact == null ? 'N/A' : '09' . $this->contact,
-            'qr_code' => $transaction_code,
-            'room_id' => $this->room_id,
-            'rate_id' => $this->rate_id,
-            'type_id' => $this->type_id,
-            'static_amount' => $this->room_pay,
-            'is_long_stay' => $this->longstay != null ? true : false,
-            'number_of_days' => $this->longstay != null ? $this->longstay : 0,
-        ]);
+          DB::beginTransaction();
 
-        TemporaryCheckInKiosk::create([
-            'guest_id' => $guest->id,
-            'room_id' => $this->room_id,
-            'branch_id' => auth()->user()->branch_id,
-            'terminated_at' => Carbon::now()->addMinutes(20),
-        ]);
-        DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-        }
-        //fix this
-        // TerminationInKiosk::dispatch($this->room_id)->delay(
-        //     Carbon::now()->addMinutes(20)
-        // );
-        // event(new CheckInEvent(auth()->user()->branch_id));
+            try {
 
-        $this->steps = 5;
-        // }else{
-        //         $this->dialog()->error(
-        //             $title = 'SORRY',
-        //             $description =
-        //                 'Room is already occupied. Please select another room.'
-        //         );
-        //         return;
-        // }
+                $room = Room::where('branch_id', auth()->user()->branch_id)
+                    ->where('id', $this->room_id)
+                    ->where('status', 'Occupied')
+                    ->with('latestCheckInDetail')
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$room || !$room->latestCheckInDetail) {
+                    DB::rollBack();
+                    $this->dialog()->error(
+                        'SORRY',
+                        'Room is already occupied. Please select another room.'
+                    );
+                    return;
+                }
+
+                $temporaryCheckInKiosk = TemporaryCheckInKiosk::where('branch_id', auth()->user()->branch_id)
+                    ->where('room_id', $room->id)
+                    ->lockForUpdate()
+                    ->exists();
+
+                $temporaryReserved = TemporaryReserved::where('branch_id', auth()->user()->branch_id)
+                    ->where('room_id', $room->id)
+                    ->lockForUpdate()
+                    ->exists();
+
+                if ($temporaryCheckInKiosk || $temporaryReserved) {
+                    DB::rollBack();
+                    $this->dialog()->error(
+                        'SORRY',
+                        'Room is already reserved. Please select another room.'
+                    );
+                    return;
+                }
+
+                $transaction = Guest::whereYear('created_at', now()->year)->lockForUpdate()->count();
+                $transaction += 1;
+
+                $transaction_code =
+                    auth()->user()->branch_id .
+                    now()->format('y') .
+                    str_pad($transaction, 4, '0', STR_PAD_LEFT);
+
+                $this->generatedQrCode = $transaction_code;
+
+                $guest = Guest::create([
+                    'branch_id' => auth()->user()->branch_id,
+                    'name' => $this->name,
+                    'contact' => $this->contact ? '09' . $this->contact : 'N/A',
+                    'qr_code' => $transaction_code,
+                    'room_id' => $this->room_id,
+                    'rate_id' => $this->rate_id,
+                    'type_id' => $this->type_id,
+                    'static_amount' => $this->room_pay,
+                    'is_long_stay' => $this->longstay ? true : false,
+                    'number_of_days' => $this->longstay ?? 0,
+                ]);
+
+                TemporaryCheckInKiosk::create([
+                    'guest_id' => $guest->id,
+                    'room_id' => $this->room_id,
+                    'branch_id' => auth()->user()->branch_id,
+                    'terminated_at' => now()->addMinutes(20),
+                ]);
+
+                DB::commit();
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e; // do not silently swallow errors in production
+            }
+
+            $this->steps = 5;
     }
 
     public function redirectToHome()
