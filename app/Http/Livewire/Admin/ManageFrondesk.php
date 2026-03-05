@@ -84,6 +84,11 @@ class ManageFrondesk extends Component implements Tables\Contracts\HasTable
                 ->label('NUMBER')
                 ->searchable()
                 ->sortable(),
+                Tables\Columns\TextColumn::make('passcode')
+                ->label('PASSCODE')
+                ->searchable()
+                ->formatStateUsing(fn (string $state): string => ("*****"))
+                ->sortable(),
         ];
     }
 

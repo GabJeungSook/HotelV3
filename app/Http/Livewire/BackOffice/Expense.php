@@ -110,6 +110,7 @@ class Expense extends Component
 
         ExpenseModel::create([
             'user_id' => $this->user_id,
+            'branch_id' => auth()->user()->branch_id,
             'shift' => $this->shift,
             'name' => $user->name,
             'expense_category_id' => $this->expense_category_id,

@@ -157,8 +157,11 @@
         <div class="hidden md:flex md:flex-1 md:items-center md:justify-between">
           <nav class="flex space-x-10">
             <div class="flex space-x-10">
+              @php
+                  $isBeginningCash = request()->routeIs('frontdesk.beginning-cash');
+              @endphp
               <!-- Item active: "text-gray-900", Item inactive: "text-gray-500" -->
-              <a href="{{ route('frontdesk.dashboard') }}"
+              <a href="{{ $isBeginningCash ? '#' : route('frontdesk.dashboard') }}"
                 class="text-gray-500 fill-gray-500 group inline-flex items-center rounded-md bg-white text-base font-medium hover:text-gray-900 "
                 aria-expanded="false">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" class="mr-2"
@@ -169,7 +172,7 @@
                 </svg>
                 <span>Dashboard</span>
               </a>
-              <a href="{{ route('frontdesk.room-monitoring') }}"
+              <a href="{{ $isBeginningCash ? '#' : route('frontdesk.room-monitoring') }}"
                 class="text-gray-500 fill-gray-500 group inline-flex items-center rounded-md bg-white text-base font-medium hover:text-gray-900 "
                 aria-expanded="false">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"
@@ -180,7 +183,7 @@
                 </svg>
                 <span>Room Monitoring</span>
               </a>
-              <a href="{{ route('frontdesk.frontdesk-extension') }}"
+              <a href="{{ $isBeginningCash ? '#' : route('frontdesk.frontdesk-extension') }}"
                 class="text-gray-500 fill-gray-500 group inline-flex items-center rounded-md bg-white text-base font-medium hover:text-gray-900 "
                 aria-expanded="false">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24" class="mr-2">
@@ -189,7 +192,7 @@
 
                 <span>Extension Report</span>
               </a>
-               <a href="{{ route('frontdesk.expenses') }}"
+               <a href="{{ $isBeginningCash ? '#' : route('frontdesk.expenses') }}"
                 class="text-gray-500 fill-gray-500 group inline-flex items-center rounded-md bg-white text-base font-medium hover:text-gray-900 "
                 aria-expanded="false">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24" class="mr-2">
@@ -213,7 +216,7 @@
             </div>
           </nav>
           <div class="flex items-center md:ml-12">
-            <a href="{{ route('frontdesk.cash-on-hand') }}"
+            <a href="{{ $isBeginningCash ? '#' : route('frontdesk.cash-on-hand') }}"
                 class="text-gray-500 fill-gray-500 group inline-flex items-center rounded-md bg-white text-base font-medium hover:text-gray-900"
                 aria-expanded="false">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24" class="mr-2">
