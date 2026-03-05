@@ -20,7 +20,9 @@
               <th scope="col"
                 class="py-3.5 w-40 pl-4 pr-3 text-left text-sm font-semibold text-gray-600 sm:pl-6 md:pl-0"></th>
               <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-600 sm:pl-6 md:pl-0">
-                EMPLOYEE NAME</th>
+                DATE</th>
+              {{-- <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-600 sm:pl-6 md:pl-0">
+                FRONTDESK NAME</th> --}}
               <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-600 sm:pl-6 md:pl-0">
                 SHIFT</th>
               <th scope="col"
@@ -32,15 +34,18 @@
           <tbody>
             @forelse ($categories as $category)
               <tr>
-                <th colspan="5" class="bg-gray-200 text-left font-semibold uppercase text-gray-700 p-2">
+                <th colspan="6" class="bg-gray-200 text-left font-semibold uppercase text-gray-700 p-2">
                   {{ $category->name }}</th>
               </tr>
-              @forelse ($category->expenses as $expense)
+              @forelse ($category->expenses->where('user_id', $user_id) as $expense)
                 <tr class="border-b border-gray-200">
                   <td class="hidden py-3 px-3 text-right text-sm text-gray-500 sm:table-cell"></td>
                   <td class="py-3 pl-4 pr-3 text-sm sm:pl-6 md:pl-0">
-                    <div class="font-medium text-gray-500 uppercase">{{ $expense->name }}</div>
+                    <div class="font-medium text-gray-500 uppercase">{{ Carbon\Carbon::parse($expense->created_at)->format('F d, Y h:i A') }}</div>
                   </td>
+                  {{-- <td class="py-3 pl-4 pr-3 text-sm sm:pl-6 md:pl-0">
+                    <div class="font-medium text-gray-500 uppercase">{{ $expense->name }}</div>
+                  </td> --}}
                   <td class="py-3 pl-4 pr-3 text-sm sm:pl-6 md:pl-0">
                     <div class="font-medium text-gray-500 uppercase">{{ $expense->shift }}</div>
                   </td>
@@ -186,18 +191,17 @@
         <h1 class="text-lg font-semibold uppercase text-gray-600 ">Add New Expenses</h1>
       </div>
       <div class="mt-5 px-4 grid grid-cols-1 gap-4">
-         <x-native-select label="Frontdesk" wire:model="user_id">
+         {{-- <x-native-select label="Frontdesk" wire:model="user_id">
           <option selected hidden>Select User</option>
           @foreach ($users as $user)
             <option value="{{ $user->id }}">{{ $user->name }}</option>
           @endforeach
-        </x-native-select>
-        <x-native-select label="Shift" wire:model="shift">
+        </x-native-select> --}}
+        {{-- <x-native-select label="Shift" wire:model="shift">
           <option selected hidden>Select Shift</option>
           <option value="AM">AM</option>
           <option value="PM">PM</option>
-        </x-native-select>
-        {{-- <x-input label="Employee Name" wire:model.defer="employee_name" /> --}}
+        </x-native-select> --}}
         <x-native-select label="Category" wire:model="expense_category_id">
           <option selected hidden>Select Category</option>
           @foreach ($categories as $category)

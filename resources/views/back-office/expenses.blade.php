@@ -1,6 +1,3 @@
-@section('breadcrumbs')
-  Expenses
-@endsection
-<x-back-office-layout>
+<x-frontdesk-layout>
   <livewire:back-office.expense />
-</x-back-office-layout>
+</x-frontdesk-layout>

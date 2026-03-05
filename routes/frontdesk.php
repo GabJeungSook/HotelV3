@@ -122,4 +122,18 @@ Route::prefix('frontdesk')
                 return view('frontdesk.select-frontdesk');
             }
         })->name('frontdesk.frontdesk-extension');
+        Route::get('/frontdesk-expenses', function () {
+            if (auth()->user()->cash_drawer_id != null) {
+                return view('back-office.expenses');
+            } else {
+                return view('frontdesk.select-frontdesk');
+            }
+        })->name('frontdesk.expenses');
+        Route::get('/frontdesk-expense-report', function () {
+            if (auth()->user()->cash_drawer_id != null) {
+                return view('back-office.expense-report');
+            } else {
+                return view('frontdesk.select-frontdesk');
+            }
+        })->name('frontdesk.expense-report');
     });

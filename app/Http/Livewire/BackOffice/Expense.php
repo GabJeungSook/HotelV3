@@ -27,8 +27,9 @@ class Expense extends Component
 
     public function mount()
     {
-
-        $this->users = User::where('branch_id', auth()->user()->branch_id)->role('frontdesk')->get();
+        $this->user_id = auth()->user()->id;
+        $this->shift = auth()->user()->shift;
+        //$this->users = User::where('branch_id', auth()->user()->branch_id)->role('frontdesk')->get();
     }
 
     public function render()
@@ -37,7 +38,7 @@ class Expense extends Component
             $query
         ) {
             $query->where('branch_id', auth()->user()->branch_id);
-        })->sum('amount');
+        })->where('user_id', $this->user_id)->sum('amount');
         return view('livewire.back-office.expense', [
             'total' => $this->total,
             'categories' => ExpenseCategory::where(
@@ -61,7 +62,7 @@ class Expense extends Component
 
     public function redirectReport()
     {
-        return redirect()->route('back-office.expense-report');
+        return redirect()->route('frontdesk.expense-report');
     }
 
     public function editCategory($category_id)
@@ -100,8 +101,6 @@ class Expense extends Component
     {
         // Validate the inputs
         $this->validate([
-            'user_id' => 'required',
-            'shift' => 'required',
             'expense_category_id' => 'required',
             'expense_amount' => 'required|numeric',
             'description' => 'required',

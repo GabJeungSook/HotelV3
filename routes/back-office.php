@@ -9,12 +9,12 @@ Route::prefix('back-office')
         Route::get('/sales', function () {
             return view('back-office.sales');
         })->name('back-office.sales');
-        Route::get('/expenses', function () {
-            return view('back-office.expenses');
-        })->name('back-office.expenses');
-        Route::get('/expense-report', function () {
-            return view('back-office.expense-report');
-        })->name('back-office.expense-report');
+        // Route::get('/expenses', function () {
+        //     return view('back-office.expenses');
+        // })->name('back-office.expenses');
+        // Route::get('/expense-report', function () {
+        //     return view('back-office.expense-report');
+        // })->name('back-office.expense-report');
         Route::get('/sales-report', function () {
             return view('back-office.sales-report');
         })->name('back-office.sales-report');

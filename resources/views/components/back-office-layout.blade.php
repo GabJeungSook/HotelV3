@@ -228,7 +228,7 @@
               </a>
             </nav>
 
-            <a href="{{ route('back-office.expenses') }}"
+            {{-- <a href="{{ route('back-office.expenses') }}"
               class="{{ request()->routeIs('back-office.expenses') ? 'bg-gray-100 before:h-full before:w-1 relative before:bg-gray-500 before:rounded-r before:absolute before:left-0 ' : '' }} text-gray-700 hover:bg-gray-100 hover:bg-opacity-75 group flex items-center px-4 py-2 text-sm ">
               <!-- Heroicon name: outline/folder -->
               <svg class="w-6 h-6 mr-3  flex-shrink-0 text-gray-600" stroke-width="1.5" viewBox="0 0 24 24"
@@ -251,7 +251,7 @@
                 <path d="M3 3L21 21" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path>
               </svg>
               Expenses
-            </a>
+            </a> --}}
           </nav>
           {{-- <div class="border-t mt-5 py-1">
             <div class="px-1 text-xs font-medium">REPORTS</div>

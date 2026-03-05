@@ -1,7 +1,4 @@
-@section('breadcrumbs')
-  Expense Report
-@endsection
-<x-back-office-layout>
+<x-frontdesk-layout>
   <livewire:back-office.expense-report />
 
     <script>
@@ -24,4 +21,4 @@
 
     }
   </script>
-</x-back-office-layout>
+</x-frontdesk-layout>

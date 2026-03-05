@@ -114,6 +114,10 @@ class ExtendGuest extends Component
                 {
 
                     $total_current_hours = $total_current_hours - $this->extension_time_reset;
+                    if($total_current_hours)
+                    {   
+                        $total_current_hours = $this->extension_time_reset;
+                    }
                     $rate = Rate::where('branch_id', auth()->user()->branch_id)->where('type_id', operator: $this->rate->type_id)->whereHas('stayingHour', function($query) use ($total_current_hours){
                         $query->where('number', $total_current_hours);
                         })->first();
