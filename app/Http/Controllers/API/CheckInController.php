@@ -20,7 +20,6 @@ public function store(Request $request)
             'rate_id' => 'required|integer',
             'type_id' => 'required|integer',
             'room_pay' => 'required|numeric',
-            'longstay' => 'nullable|integer',
         ]);
 
         // $user = Auth::user();
@@ -47,7 +46,7 @@ public function store(Request $request)
             'rate_id' => $request->rate_id,
             'type_id' => $request->type_id,
             'static_amount' => $request->room_pay,
-            'is_long_stay' => $request->longstay != null,
+            'is_long_stay' => $request->longstay > 0 ? true : false,
             'number_of_days' => $request->longstay ?? 0,
             'has_discount' => $request->has_discount,
             'discount_amount' => $request->discount_amount ?? 0,
