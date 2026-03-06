@@ -7,6 +7,7 @@ use App\Models\ShiftLog;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use WireUi\Traits\Actions;
+use DB;
 
 class CashOnHand extends Component
 {
@@ -20,9 +21,15 @@ class CashOnHand extends Component
     public $description;
     public $authorization_modal = false;
     public $code;
+    public $current_shift;
 
     public function mount()
     {
+        $this->current_shift = ShiftLog::where('frontdesk_id', auth()->user()->id)
+                                ->where('cash_drawer_id', auth()->user()->cash_drawer_id)
+                                ->whereNull('time_out')
+                                ->orderBy('created_at', 'desc')
+                                ->first();
         $this->total_transactions = CashOnDrawer::where('branch_id', auth()->user()->branch_id)
             ->where('cash_drawer_id', auth()->user()->cash_drawer_id)
             ->where('transaction_date', now()->toDateString())
@@ -30,6 +37,7 @@ class CashOnHand extends Component
             ->sum('amount');
 
         $this->total_expenses = Expense::where('branch_id', auth()->user()->branch_id)
+            ->where('shift_log_id', $this->current_shift->id)
             ->where('user_id', auth()->user()->id)
             ->sum('amount');
 
@@ -86,13 +94,21 @@ class CashOnHand extends Component
             return;
 
         }else{
+            DB::beginTransaction();
             $shift = ShiftLog::where('frontdesk_id', auth()->user()->id)
                 ->where('cash_drawer_id', auth()->user()->cash_drawer_id)
                 ->whereNull('time_out')
                 ->first();
             $shift->end_cash = $this->remittance;
             $shift->description = $this->description;
+            $shift->total_expenses = $this->total_expenses;
             $shift->save();
+
+            //deactivate drawer
+            $shift->cash_drawer->update([
+                'is_active' => false,
+            ]);
+            DB::commit();
 
             Auth::logout();
 

@@ -19,4 +19,9 @@ class Expense extends Model
     {
         return $this->belongsTo(\App\Models\Frontdesk::class, 'user_id'); // since user_id IS frontdesk
     }
+
+    public function shift_log()
+    {
+        return $this->belongsTo(ShiftLog::class, 'shift_log_id');
+    }
 }

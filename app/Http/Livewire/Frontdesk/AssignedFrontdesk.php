@@ -29,9 +29,12 @@ class AssignedFrontdesk extends Component
         foreach ($assigned as $item) {
             array_push($this->get_frontdesk, $item->id);
         }
+        $shifts = ShiftLog::whereHas('frontdesk', function($query){
+            $query->where('branch_id', auth()->user()->branch_id);
+        })->get();
 
         $this->cash_drawers = CashDrawer::where('branch_id', $assigned->first()->branch_id)
-            ->where('is_active', 1)
+            ->where('is_active', 0)
             ->get();
     }
     public function render()
@@ -87,6 +90,10 @@ class AssignedFrontdesk extends Component
                     'assigned_frontdesks' => $frontdesk_ids,
                     'cash_drawer_id' => $this->drawer,
                     'shift' => $this->shift,
+                ]);
+
+                CashDrawer::where('id', $this->drawer)->update([
+                    'is_active' => true,
                 ]);
 
          DB::commit();

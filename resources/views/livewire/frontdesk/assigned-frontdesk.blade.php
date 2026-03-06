@@ -27,7 +27,6 @@
        <x-native-select wire:model="drawer">
             <option selected hidden>Select Cash Drawer</option>
             @foreach ($cash_drawers as $drawer)
-            @dump($drawer)
                 <option value="{{ $drawer->id }}">{{ $drawer->name }}</option>
             @endforeach
         </x-native-select>

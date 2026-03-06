@@ -37,7 +37,7 @@
                 <th colspan="6" class="bg-gray-200 text-left font-semibold uppercase text-gray-700 p-2">
                   {{ $category->name }}</th>
               </tr>
-              @forelse ($category->expenses->where('user_id', $user_id) as $expense)
+              @forelse ($category->expenses->where('branch_id', auth()->user()->branch_id)->where('user_id', $user_id)->where('shift_log_id', $current_shift->id) as $expense)
                 <tr class="border-b border-gray-200">
                   <td class="hidden py-3 px-3 text-right text-sm text-gray-500 sm:table-cell"></td>
                   <td class="py-3 pl-4 pr-3 text-sm sm:pl-6 md:pl-0">
@@ -55,6 +55,9 @@
                     &#8369; {{ number_format($expense->amount, 2) }}</td>
                 </tr>
               @empty
+              <tr>
+                <td colspan="6" class="py-3 px-3 text-center text-sm text-gray-500">No expenses recorded for this category.</td>
+              </tr>
               @endforelse
 
             @empty

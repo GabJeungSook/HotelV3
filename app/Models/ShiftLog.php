@@ -24,4 +24,9 @@ class ShiftLog extends Model
     {
         return $this->belongsTo(CashDrawer::class, 'cash_drawer_id');
     }
+
+    public function expenses()
+    {
+        return $this->hasMany(Expense::class);
+    }
 }

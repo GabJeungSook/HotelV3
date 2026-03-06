@@ -6,6 +6,7 @@ use App\Models\User;
 use Livewire\Component;
 use WireUi\Traits\Actions;
 use App\Models\ExpenseCategory;
+use App\Models\ShiftLog;
 use App\Models\Expense as ExpenseModel;
 use Spatie\Permission\Models\Role;
 
@@ -24,11 +25,17 @@ class Expense extends Component
     public $employee_name, $expense_category_id, $expense_amount, $description, $user_id, $shift;
 
     public $users;
+    public $current_shift;
 
     public function mount()
     {
         $this->user_id = auth()->user()->id;
         $this->shift = auth()->user()->shift;
+         $this->current_shift = ShiftLog::where('frontdesk_id', $this->user_id)
+                                ->where('cash_drawer_id', auth()->user()->cash_drawer_id)
+                                ->whereNull('time_out')
+                                ->orderBy('created_at', 'desc')
+                                ->first();
         //$this->users = User::where('branch_id', auth()->user()->branch_id)->role('frontdesk')->get();
     }
 
@@ -38,7 +45,7 @@ class Expense extends Component
             $query
         ) {
             $query->where('branch_id', auth()->user()->branch_id);
-        })->where('user_id', $this->user_id)->sum('amount');
+        })->where('shift_log_id', $this->current_shift->id)->where('user_id', $this->user_id)->sum('amount');
         return view('livewire.back-office.expense', [
             'total' => $this->total,
             'categories' => ExpenseCategory::where(
@@ -109,6 +116,7 @@ class Expense extends Component
         $user = User::find($this->user_id);
 
         ExpenseModel::create([
+            'shift_log_id' => $this->current_shift->id,
             'user_id' => $this->user_id,
             'branch_id' => auth()->user()->branch_id,
             'shift' => $this->shift,
