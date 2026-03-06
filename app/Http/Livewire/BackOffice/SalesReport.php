@@ -31,12 +31,8 @@ class SalesReport extends Component
     public array $groups = []; // NEW: for uniform grouped layout
 
     // grouped transaction buckets
-    public $extendedTransactions;
-    public $amenitiesTransactions;
-    public $foodTransactions;
-    public $damagesTransactions;
-    public $transferTransactions;
-    public $depositTransactions;
+    public array $salesRooms = [];     // visible sales rows for blade
+    public array $salesRoomsRaw = [];  // master rows before toggle filtering
 
     public array $summary = [];
 
@@ -47,47 +43,134 @@ class SalesReport extends Component
 
     public function mount()
     {
-        $this->summary = [];
-        $this->transactions = collect();
-        $this->totalSales = 0;
-        $this->groups = [];
+       $this->summary = [];
+    $this->transactions = collect();
+    $this->totalSales = 0;
+    $this->groups = [];
+    $this->salesRooms = [];
+    $this->salesRoomsRaw = [];
+    $this->expensesRows = collect();
+    $this->expensesTotal = 0;
+    $this->roomSummary = [];
 
-        $this->generateReport();
-        $this->summary = $this->buildSummary();
-        $this->buildExpensesSummary();
-        $this->buildRoomSummary();
+    $this->generateReport();
+    $this->summary = $this->buildSummary();
+    $this->buildExpensesSummary();
+    $this->buildRoomSummary();
     }
 
     /**
      * ✅ Fix totals when toggles change (NO DB hit)
      */
-    public function updatedShowExtend()   { $this->recomputeTotals(); }
-    public function updatedShowAmenities(){ $this->recomputeTotals(); }
-    public function updatedShowFood()     { $this->recomputeTotals(); }
-    public function updatedShowDamages()  { $this->recomputeTotals(); }
-    public function updatedShowTransfer() { $this->recomputeTotals(); }
+    // public function updatedShowExtend()   { $this->recomputeTotals(); }
+    // public function updatedShowAmenities(){ $this->recomputeTotals(); }
+    // public function updatedShowFood()     { $this->recomputeTotals(); }
+    // public function updatedShowDamages()  { $this->recomputeTotals(); }
+    // public function updatedShowTransfer() { $this->recomputeTotals(); }
 
-    private function recomputeTotals(): void
-    {
-        $newTotal = 0;
+    // private function recomputeTotals(): void
+    // {
+    //     $newTotal = 0;
 
-        foreach ($this->groups as $gIndex => $group) {
-            foreach ($group['rows'] as $rIndex => $row) {
-                $total =
+    //     foreach ($this->groups as $gIndex => $group) {
+    //         foreach ($group['rows'] as $rIndex => $row) {
+    //             $total =
+    //                 (float) $row['room_amount']
+    //                 + ($this->showExtend ? (float) $row['extend_amount'] : 0)
+    //                 + ($this->showAmenities ? (float) $row['amenities_amount'] : 0)
+    //                 + ($this->showFood ? (float) $row['food_amount'] : 0)
+    //                 + ($this->showDamages ? (float) $row['damages_amount'] : 0)
+    //                 + ($this->showTransfer ? (float) $row['transfer_amount'] : 0);
+
+    //             $this->groups[$gIndex]['rows'][$rIndex]['total'] = $total;
+    //             $newTotal += $total;
+    //         }
+    //     }
+
+    //     $this->totalSales = $newTotal;
+    // }
+
+public function updatedShowExtend()   { $this->recomputeTotals(); }
+public function updatedShowAmenities(){ $this->recomputeTotals(); }
+public function updatedShowFood()     { $this->recomputeTotals(); }
+public function updatedShowDamages()  { $this->recomputeTotals(); }
+public function updatedShowTransfer() { $this->recomputeTotals(); }
+
+private function recomputeTotals(): void
+{
+    $this->applySalesVisibilityAndTotals();
+}
+
+private function applySalesVisibilityAndTotals(): void
+{
+    $rooms = [];
+    $grandTotal = 0;
+
+    foreach ($this->salesRoomsRaw as $room) {
+        $visibleRows = collect($room['rows'])
+            ->filter(function ($row) {
+                return match ($row['row_type']) {
+                    'room_amount' => true,
+                    'extend'      => $this->showExtend,
+                    'amenities'   => $this->showAmenities,
+                    'food'        => $this->showFood,
+                    'damages'     => $this->showDamages,
+                    'transfer'    => $this->showTransfer,
+                    default       => true,
+                };
+            })
+            ->values()
+            ->all();
+
+        if (count($visibleRows) > 0) {
+            foreach ($visibleRows as $idx => $row) {
+                $lineTotal =
                     (float) $row['room_amount']
-                    + ($this->showExtend ? (float) $row['extend_amount'] : 0)
-                    + ($this->showAmenities ? (float) $row['amenities_amount'] : 0)
-                    + ($this->showFood ? (float) $row['food_amount'] : 0)
-                    + ($this->showDamages ? (float) $row['damages_amount'] : 0)
-                    + ($this->showTransfer ? (float) $row['transfer_amount'] : 0);
+                    + (float) $row['extend_amount']
+                    + (float) $row['amenities_amount']
+                    + (float) $row['food_amount']
+                    + (float) $row['damages_amount']
+                    + (float) $row['transfer_amount'];
 
-                $this->groups[$gIndex]['rows'][$rIndex]['total'] = $total;
-                $newTotal += $total;
+                $visibleRows[$idx]['total'] = $lineTotal;
+                $grandTotal += $lineTotal;
             }
-        }
 
-        $this->totalSales = $newTotal;
+            $room['rows'] = $visibleRows;
+            $room['rowspan'] = count($visibleRows);
+            $rooms[] = $room;
+        }
     }
+
+    $this->salesRooms = $rooms;
+    $this->totalSales = $grandTotal;
+}
+
+private function applySalesTypeFilter($query, string $column = 'check_out_at')
+{
+    switch ($this->type) {
+        case 'Daily':
+            $query->whereDate($column, now()->toDateString());
+            break;
+
+        case 'Weekly':
+            $query->whereBetween($column, [
+                now()->copy()->startOfWeek(),
+                now()->copy()->endOfWeek(),
+            ]);
+            break;
+
+        case 'Monthly':
+            $query->whereMonth($column, now()->month)
+                  ->whereYear($column, now()->year);
+            break;
+
+        default:
+            break;
+    }
+
+    return $query;
+}
 
     private function shiftWindow(): array
     {
@@ -311,149 +394,342 @@ class SalesReport extends Component
         ]);
     }
 
-    public function generateReport()
-    {
-        // Base query: transactions grouped per room_id
-        $base = Transaction::query()
-            // IMPORTANT: eager-load room + nested relations used in the blade
-            ->with([
-                'room.type',
-                'room.latestCheckInDetail.guest',
-                'room.latestCheckInDetail.rate',
-                'room.latestCheckInDetail.frontdesk',
-            ])
-            ->whereHas('room.latestCheckInDetail', function ($q) {
-                $q->when($this->date_from, fn($q, $d) => $q->whereDate('check_out_at', '>=', $d))
-                  ->when($this->date_to, fn($q, $d) => $q->whereDate('check_out_at', '<=', $d))
-                  ->when($this->frontdesk, fn($q, $f) => $q->where('frontdesk_id', $f));
-            })
-            ->when($this->shift, function ($q, $shift) {
-                $q->whereHas('room.latestCheckInDetail', function ($q2) use ($shift) {
-                    if ($shift === 'AM') {
-                        $q2->whereTime(DB::raw('TIME(check_out_at)'), '>=', '08:00:00')
-                           ->whereTime(DB::raw('TIME(check_out_at)'), '<', '20:00:00');
-                    }
+public function generateReport()
+{
+    $detailsQuery = \App\Models\CheckInDetail::query()
+        ->with([
+            'room.type',
+            'guest',
+            'rate',
+            'frontdesk',
+        ])
+        ->whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))
+        ->whereNotNull('check_out_at')
+        ->when($this->date_from, fn($q, $d) => $q->whereDate('check_out_at', '>=', $d))
+        ->when($this->date_to, fn($q, $d) => $q->whereDate('check_out_at', '<=', $d))
+        ->when($this->frontdesk, fn($q, $f) => $q->where('frontdesk_id', $f))
+        ->when($this->shift, function ($q, $shift) {
+            if ($shift === 'AM') {
+                $q->whereTime(DB::raw('TIME(check_out_at)'), '>=', '08:00:00')
+                  ->whereTime(DB::raw('TIME(check_out_at)'), '<', '20:00:00');
+            }
 
-                    if ($shift === 'PM') {
-                        $q2->where(function ($sub) {
-                            $sub->whereTime(DB::raw('TIME(check_out_at)'), '>=', '20:00:00')
-                                ->orWhereTime(DB::raw('TIME(check_out_at)'), '<', '08:00:00');
-                        });
-                    }
+            if ($shift === 'PM') {
+                $q->where(function ($sub) {
+                    $sub->whereTime(DB::raw('TIME(check_out_at)'), '>=', '20:00:00')
+                        ->orWhereTime(DB::raw('TIME(check_out_at)'), '<', '08:00:00');
                 });
-            });
+            }
+        });
 
-        // Optional type filter (kept as-is)
-        switch ($this->type) {
-            case 'Daily':
-                $base->whereDate('paid_at', now()->toDateString());
-                break;
-            case 'Weekly':
-                $base->whereBetween('paid_at', [now()->startOfWeek(), now()->endOfWeek()]);
-                break;
-            case 'Monthly':
-                $base->whereMonth('paid_at', now()->month)
-                     ->whereYear('paid_at', now()->year);
-                break;
-            default:
-                break;
-        }
+    $this->applySalesTypeFilter($detailsQuery, 'check_out_at');
 
-        // Group overall (excluding transaction types)
-        $transactions = (clone $base)
-            ->whereNotIn('transaction_type_id', [5, 2])
-            ->selectRaw('room_id, SUM(payable_amount) as paid_amount')
-            ->groupBy('room_id')
-            ->get();
+    $details = $detailsQuery
+        ->orderBy('room_id')
+        ->orderBy('check_in_at')
+        ->orderBy('check_out_at')
+        ->get();
 
-        $checkinDetailIds = $transactions
-        ->map(fn ($t) => $t->room?->latestCheckInDetail?->id)
-        ->filter()
-        ->unique()
-        ->values();
+    $detailIds = $details->pluck('id')->values();
 
-        $roomIds = $transactions->pluck('room_id');
+    $frontdeskMap = Frontdesk::query()
+    ->where('branch_id', auth()->user()->branch_id)
+    ->pluck('name', 'id');
 
-        // Side buckets per room
-        $this->extendedTransactions = Transaction::where('transaction_type_id', 6)
-            ->whereIn('room_id', $roomIds)
-            ->selectRaw('room_id, SUM(payable_amount) as paid_amount')
-            ->whereNotNull('paid_at')
-            ->groupBy('room_id')
-            ->get()
-            ->keyBy('room_id');
+$txRows = Transaction::query()
+    ->whereIn('checkin_detail_id', $detailIds)
+    ->whereNotNull('paid_at')
+    ->whereIn('transaction_type_id', [4, 6, 7, 8, 9])
+    ->select([
+        'id',
+        'checkin_detail_id',
+        'transaction_type_id',
+        'payable_amount',
+        'assigned_frontdesk_id',
+        'paid_at',
+    ])
+    ->orderBy('paid_at')
+    ->get()
+    ->map(function ($tx) use ($frontdeskMap) {
+        $frontdeskId = $this->extractAssignedFrontdeskId($tx->assigned_frontdesk_id);
 
-        $this->amenitiesTransactions = Transaction::where('transaction_type_id', 8)
-            ->whereIn('room_id', $roomIds)
-            ->selectRaw('room_id, SUM(payable_amount) as paid_amount')
-            ->whereNotNull('paid_at')
-            ->groupBy('room_id')
-            ->get()
-            ->keyBy('room_id');
+        $tx->resolved_frontdesk_id = $frontdeskId;
+        $tx->resolved_frontdesk_name = $frontdeskId
+            ? strtoupper($frontdeskMap[$frontdeskId] ?? '—')
+            : '—';
 
-        $this->foodTransactions = Transaction::where('transaction_type_id', 9)
-            ->whereIn('room_id', $roomIds)
-            ->selectRaw('room_id, SUM(payable_amount) as paid_amount')
-            ->whereNotNull('paid_at')
-            ->groupBy('room_id')
-            ->get()
-            ->keyBy('room_id');
+        return $tx;
+    })
+    ->groupBy('checkin_detail_id');
 
-        $this->damagesTransactions = Transaction::where('transaction_type_id', 4)
-            ->whereIn('room_id', $roomIds)
-            ->selectRaw('room_id, SUM(payable_amount) as paid_amount')
-            ->whereNotNull('paid_at')
-            ->groupBy('room_id')
-            ->get()
-            ->keyBy('room_id');
+    $this->salesRoomsRaw = $this->buildSalesRooms($details, $txRows);
+    $this->applySalesVisibilityAndTotals();
 
-        $this->transferTransactions = Transaction::query()
-        ->where('transaction_type_id', 7)
-        ->whereIn('checkin_detail_id', $checkinDetailIds)  // ✅ stay-based scope
-        ->selectRaw('checkin_detail_id, SUM(payable_amount) as paid_amount')
-        ->whereNotNull('paid_at')
-        ->groupBy('checkin_detail_id')
-        ->get()
-        ->keyBy('checkin_detail_id');
+    // leave the rest untouched
+    $this->summary = $this->buildSummary();
+    $this->buildExpensesSummary();
+    $this->buildRoomSummary();
+}
 
-        // $this->transferTransactions = Transaction::query()
-        //     ->where('transaction_type_id', 7)
-        //     ->whereIn('room_id', $roomIds) // keep if you want to stay within current scope
-        //     ->whereNotNull('paid_at')
-        //     ->whereNotNull('checkin_detail_id')
-        //     ->selectRaw('checkin_detail_id, SUM(payable_amount) as paid_amount')
-        //     ->groupBy('checkin_detail_id')
-        //     ->get()
-        //     ->keyBy('checkin_detail_id');
-
-        // Compute room amount and total sales
-        $roomAmount = 0;
-        foreach ($transactions as $t) {
-            //if long stay, multiply rate by number of days
-            if($t->room->latestCheckInDetail?->guest?->is_long_stay)
-                {
-                    $roomAmount += (float) ($t->room->latestCheckInDetail?->rate?->amount ?? 0) * ($t->room->latestCheckInDetail?->guest?->number_of_days ?? 1);
-                }else{
-                    $roomAmount += (float) ($t->room->latestCheckInDetail?->rate?->amount ?? 0);
-                }
-        }
-
-        $this->totalSales =
-            ($this->showExtend ? (float) $this->extendedTransactions->sum('paid_amount') : 0) +
-            ($this->showAmenities ? (float) $this->amenitiesTransactions->sum('paid_amount') : 0) +
-            ($this->showFood ? (float) $this->foodTransactions->sum('paid_amount') : 0) +
-            ($this->showDamages ? (float) $this->damagesTransactions->sum('paid_amount') : 0) +
-            ($this->showTransfer ? (float) $this->transferTransactions->sum('paid_amount') : 0) +
-            (float) $roomAmount;
-
-        $this->transactions = $transactions;
-
-        // Build grouped structure for uniform report view
-        $this->groups = $this->buildGroups($transactions);
-
-        // ✅ Keep summary in sync with filters after generate
-        $this->summary = $this->buildSummary();
+private function extractAssignedFrontdeskId($value): ?int
+{
+    if (blank($value)) {
+        return null;
     }
+
+    // already array-like
+    if (is_array($value)) {
+        return isset($value[0]) && is_numeric($value[0]) ? (int) $value[0] : null;
+    }
+
+    // JSON string like: [2,"N/A"]
+    if (is_string($value)) {
+        $decoded = json_decode($value, true);
+
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return isset($decoded[0]) && is_numeric($decoded[0]) ? (int) $decoded[0] : null;
+        }
+
+        // fallback: grab first number from string
+        if (preg_match('/\d+/', $value, $matches)) {
+            return (int) $matches[0];
+        }
+    }
+
+    return null;
+}
+
+private function buildSalesRooms($details, $txRowsByDetail): array
+{
+    $rooms = [];
+
+    $groupedByRoom = $details
+        ->groupBy('room_id')
+        ->sortBy(function ($items) {
+            return (int) ($items->first()?->room?->number ?? PHP_INT_MAX);
+        });
+
+    foreach ($groupedByRoom as $roomId => $roomDetails) {
+        $room = $roomDetails->first()?->room;
+        $roomRows = [];
+
+        foreach ($roomDetails as $detail) {
+            $guest = $detail->guest;
+            $rate = $detail->rate;
+            $frontdesk = $detail->frontdesk;
+
+            $baseGuestName = strtoupper($guest?->name ?? '—');
+
+            $roomAmount = $guest?->is_long_stay
+                ? (float) ($rate?->amount ?? 0) * (int) ($guest?->number_of_days ?? 1)
+                : (float) ($rate?->amount ?? 0);
+
+            $meta = [
+                'room_type'      => $room?->type?->name ?? '—',
+                'guest_name'     => $baseGuestName,
+                'check_in'       => $detail->check_in_at ? Carbon::parse($detail->check_in_at)->format('m-d-Y h:iA') : '—',
+                'check_out'      => $detail->check_out_at ? Carbon::parse($detail->check_out_at)->format('m-d-Y h:iA') : '—',
+                'initial_hrs'    => $detail->hours_stayed
+                    ? ($guest?->is_long_stay
+                        ? (($detail->hours_stayed * (int) ($guest?->number_of_days ?? 1)) . ' hrs')
+                        : ($detail->hours_stayed . ' hrs'))
+                    : '—',
+                'frontdesk_name' => strtoupper($frontdesk?->name ?? '—'),
+                'shift'          => $detail->check_out_at ? $this->resolveShift($detail->check_out_at) : '—',
+            ];
+
+            // Base room row
+            $roomRows[] = [
+                'detail_id'         => $detail->id,
+                'row_type'          => 'room_amount',
+                'number'            => $room?->number ?? '—',
+                'room_type'         => $meta['room_type'],
+                'guest_name'        => $meta['guest_name'],
+                'check_in'          => $meta['check_in'],
+                'check_out'         => $meta['check_out'],
+                'initial_hrs'       => $meta['initial_hrs'],
+                'room_amount'       => $roomAmount,
+                'extend_amount'     => 0,
+                'amenities_amount'  => 0,
+                'food_amount'       => 0,
+                'damages_amount'    => 0,
+                'transfer_amount'   => 0,
+                'frontdesk_name'    => $meta['frontdesk_name'],
+                'shift'             => $meta['shift'],
+                'total'             => $roomAmount,
+            ];
+
+            $detailTxs = collect($txRowsByDetail[$detail->id] ?? []);
+
+            // EXTEND special rule
+            $extendTxs = $detailTxs
+                ->where('transaction_type_id', 6)
+                ->values();
+
+            if ($extendTxs->isNotEmpty()) {
+                $extendByFrontdesk = $extendTxs
+                    ->groupBy(fn($tx) => $tx->user_id ?: 'unknown')
+                    ->map(function ($group) {
+                        $first = $group->first();
+
+                        return [
+                            'user_id'        => $first->user_id,
+                            'frontdesk_name' => strtoupper($first?->user?->name ?? '—'),
+                            'amount'         => (float) $group->sum('payable_amount'),
+                            'first_paid_at'  => optional($group->sortBy('paid_at')->first())->paid_at,
+                        ];
+                    })
+                    ->sortBy('first_paid_at')
+                    ->values();
+
+                $isForwardedExtend = $extendByFrontdesk->count() > 1;
+
+                foreach ($extendByFrontdesk as $idx => $extendGroup) {
+    $roomRows[] = [
+        'detail_id'         => $detail->id,
+        'row_type'          => 'extend',
+        'number'            => $room?->number ?? '—',
+        'room_type'         => '-',
+        'guest_name'        => $isForwardedExtend
+            ? 'FWD ' . $baseGuestName
+            : '-',
+        'check_in'          => '-',
+        'check_out'         => '-',
+        'initial_hrs'       => '-',
+        'room_amount'       => 0,
+        'extend_amount'     => (float) $extendGroup['amount'],
+        'amenities_amount'  => 0,
+        'food_amount'       => 0,
+        'damages_amount'    => 0,
+        'transfer_amount'   => 0,
+        'frontdesk_name'    => $extendGroup['frontdesk_name'],
+        'shift'             => $meta['shift'],
+        'total'             => (float) $extendGroup['amount'],
+    ];
+}
+            }
+
+            // Amenities summed per stay
+            $amenitiesAmount = (float) $detailTxs
+                ->where('transaction_type_id', 8)
+                ->sum('payable_amount');
+
+            if ($amenitiesAmount > 0) {
+                $roomRows[] = [
+                    'detail_id'         => $detail->id,
+                    'row_type'          => 'amenities',
+                    'number'            => $room?->number ?? '—',
+                    'room_type'         => '-',
+                    'guest_name'        => '-',
+                    'check_in'          => '-',
+                    'check_out'         => '-',
+                    'initial_hrs'       => '-',
+                    'room_amount'       => 0,
+                    'extend_amount'     => 0,
+                    'amenities_amount'  => $amenitiesAmount,
+                    'food_amount'       => 0,
+                    'damages_amount'    => 0,
+                    'transfer_amount'   => 0,
+                    'frontdesk_name'    => $meta['frontdesk_name'],
+                    'shift'             => $meta['shift'],
+                    'total'             => $amenitiesAmount,
+                ];
+            }
+
+            // Food summed per stay
+            $foodAmount = (float) $detailTxs
+                ->where('transaction_type_id', 9)
+                ->sum('payable_amount');
+
+            if ($foodAmount > 0) {
+                $roomRows[] = [
+                    'detail_id'         => $detail->id,
+                    'row_type'          => 'food',
+                    'number'            => $room?->number ?? '—',
+                    'room_type'         => '-',
+                    'guest_name'        => '-',
+                    'check_in'          => '-',
+                    'check_out'         => '-',
+                    'initial_hrs'       => '-',
+                    'room_amount'       => 0,
+                    'extend_amount'     => 0,
+                    'amenities_amount'  => 0,
+                    'food_amount'       => $foodAmount,
+                    'damages_amount'    => 0,
+                    'transfer_amount'   => 0,
+                    'frontdesk_name'    => $meta['frontdesk_name'],
+                    'shift'             => $meta['shift'],
+                    'total'             => $foodAmount,
+                ];
+            }
+
+            // Damages summed per stay
+            $damagesAmount = (float) $detailTxs
+                ->where('transaction_type_id', 4)
+                ->sum('payable_amount');
+
+            if ($damagesAmount > 0) {
+                $roomRows[] = [
+                    'detail_id'         => $detail->id,
+                    'row_type'          => 'damages',
+                    'number'            => $room?->number ?? '—',
+                    'room_type'         => '-',
+                    'guest_name'        => '-',
+                    'check_in'          => '-',
+                    'check_out'         => '-',
+                    'initial_hrs'       => '-',
+                    'room_amount'       => 0,
+                    'extend_amount'     => 0,
+                    'amenities_amount'  => 0,
+                    'food_amount'       => 0,
+                    'damages_amount'    => $damagesAmount,
+                    'transfer_amount'   => 0,
+                    'frontdesk_name'    => $meta['frontdesk_name'],
+                    'shift'             => $meta['shift'],
+                    'total'             => $damagesAmount,
+                ];
+            }
+
+            // Transfer summed per stay
+            $transferAmount = (float) $detailTxs
+                ->where('transaction_type_id', 7)
+                ->sum('payable_amount');
+
+            if ($transferAmount > 0) {
+                $roomRows[] = [
+                    'detail_id'         => $detail->id,
+                    'row_type'          => 'transfer',
+                    'number'            => $room?->number ?? '—',
+                    'room_type'         => '-',
+                    'guest_name'        => '-',
+                    'check_in'          => '-',
+                    'check_out'         => '-',
+                    'initial_hrs'       => '-',
+                    'room_amount'       => 0,
+                    'extend_amount'     => 0,
+                    'amenities_amount'  => 0,
+                    'food_amount'       => 0,
+                    'damages_amount'    => 0,
+                    'transfer_amount'   => $transferAmount,
+                    'frontdesk_name'    => $meta['frontdesk_name'],
+                    'shift'             => $meta['shift'],
+                    'total'             => $transferAmount,
+                ];
+            }
+        }
+
+        if (count($roomRows) > 0) {
+            $rooms[] = [
+                'room_id'     => $roomId,
+                'room_number' => $room?->number ?? '—',
+                'rowspan'     => count($roomRows),
+                'rows'        => $roomRows,
+            ];
+        }
+    }
+
+    return $rooms;
+}
 
     private function buildGroups($transactions): array
     {
@@ -550,23 +826,25 @@ class SalesReport extends Component
         return ($hour >= 8 && $hour < 20) ? 'AM' : 'PM';
     }
 
-    public function resetFilters()
-    {
-        $this->reset(['frontdesk', 'type', 'date_from', 'date_to', 'shift']);
-        $this->transactions = collect();
-        $this->groups = [];
-        $this->totalSales = 0;
+ public function resetFilters()
+{
+    $this->reset(['frontdesk', 'type', 'date_from', 'date_to', 'shift']);
+    $this->transactions = collect();
+    $this->groups = [];
+    $this->salesRooms = [];
+    $this->salesRoomsRaw = [];
+    $this->totalSales = 0;
 
-        $this->type = 'Overall Sales';
-        $this->generateReport();
-    }
+    $this->type = 'Overall Sales';
+    $this->generateReport();
+}
 
     private function buildExpensesSummary(): void
     {
         [$start, $end] = $this->shiftWindow();
 
         $rows = \App\Models\Expense::query()
-            ->with(['category', 'user'])
+            ->with(['expenseCategory', 'user'])
             ->whereBetween('created_at', [$start, $end])
             ->when($this->shift, fn($q) => $q->where('shift', $this->shift))
             ->when($this->frontdesk, fn($q) => $q->where('user_id', $this->frontdesk)) // ✅ frontdesk = user_id
