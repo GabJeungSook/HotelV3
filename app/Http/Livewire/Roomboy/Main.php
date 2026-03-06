@@ -271,7 +271,12 @@ class Main extends Component
         //     );
         // } else {
             DB::beginTransaction();
-
+            if($room->time_to_clean === null)
+            {
+                $room->update([
+                    'time_to_clean' => \Carbon\Carbon::parse($room->started_cleaning_at)->addMinutes(15),
+                ]);
+            }
             CleaningHistory::create([
                 'user_id' => auth()->user()->id,
                 'room_id' => $room->id,
