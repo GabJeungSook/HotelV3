@@ -180,6 +180,7 @@ class Main extends Component
                 $message = 'You need to clean for at least 15 minutes'
             );
         } else {
+            dd($room);
             DB::beginTransaction();
 
             CleaningHistory::create([
