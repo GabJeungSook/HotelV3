@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\Guest;
+use App\Models\Room;
 use App\Models\TemporaryCheckInKiosk;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,30 +14,46 @@ class CheckInController extends Controller
 {
 public function store(Request $request)
 {
-        $request->validate([
-            'name' => 'required|string',
-            'contact' => 'nullable|string',
-            'room_id' => 'required|integer',
-            'rate_id' => 'required|integer',
-            'type_id' => 'required|integer',
-            'room_pay' => 'required|numeric',
-        ]);
 
         // $user = Auth::user();
+
+         $room = Room::where('branch_id', $request->branch_id)
+                    ->where('id', $request->room_id)
+                    ->where('status', 'Occupied')
+                    ->with('latestCheckInDetail')
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($room) {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'This room is already occupied.',
+                    ], 400);
+                }
+
+                $temporaryCheckInKiosk = TemporaryCheckInKiosk::where('branch_id', $request->branch_id)
+                    ->where('room_id', $request->room_id)
+                    ->lockForUpdate()
+                    ->exists();
+
+                $temporaryReserved = TemporaryReserved::where('branch_id', $request->branch_id)
+                    ->where('room_id', $request->room_id)
+                    ->lockForUpdate()
+                    ->exists();
+
+                if ($temporaryCheckInKiosk || $temporaryReserved) {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Room is already reserved. Please select another room.',
+                    ], 400);
+                }       
 
         $transaction = Guest::whereYear('created_at', Carbon::today()->year)->count() + 1;
 
         $transaction_code = $request->branch_id . today()->format('y') . str_pad($transaction, 4, '0', STR_PAD_LEFT);
 
-        //check on temporary check-in kiosk for the room id
-        if (TemporaryCheckInKiosk::where('room_id', $request->room_id)
-            ->where('branch_id', $request->branch_id)
-            ->exists()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'This room is already occupied.',
-            ], 400);
-        }else{
              $guest = Guest::create([
             'branch_id' => $request->branch_id,
             'name' => $request->name,
@@ -66,7 +83,6 @@ public function store(Request $request)
                 'message' => 'Guest successfully checked in.',
                 'guest' => $guest,
             ], 201);
-        }
 
 
     }
