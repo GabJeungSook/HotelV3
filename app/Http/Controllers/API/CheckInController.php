@@ -17,38 +17,38 @@ public function store(Request $request)
 
         // $user = Auth::user();
 
-         $room = Room::where('branch_id', $request->branch_id)
-                    ->where('id', $request->room_id)
-                    ->where('status', 'Occupied')
-                    ->with('latestCheckInDetail')
-                    ->lockForUpdate()
-                    ->first();
+        //  $room = Room::where('branch_id', $request->branch_id)
+        //             ->where('id', $request->room_id)
+        //             ->where('status', 'Occupied')
+        //             ->with('latestCheckInDetail')
+        //             ->lockForUpdate()
+        //             ->first();
 
-                if ($room) {
-                    DB::rollBack();
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'This room is already occupied.',
-                    ], 400);
-                }
+        //         if ($room) {
+        //             DB::rollBack();
+        //             return response()->json([
+        //                 'success' => false,
+        //                 'message' => 'This room is already occupied.',
+        //             ], 400);
+        //         }
 
-                $temporaryCheckInKiosk = TemporaryCheckInKiosk::where('branch_id', $request->branch_id)
-                    ->where('room_id', $request->room_id)
-                    ->lockForUpdate()
-                    ->exists();
+        //         $temporaryCheckInKiosk = TemporaryCheckInKiosk::where('branch_id', $request->branch_id)
+        //             ->where('room_id', $request->room_id)
+        //             ->lockForUpdate()
+        //             ->exists();
 
-                $temporaryReserved = TemporaryReserved::where('branch_id', $request->branch_id)
-                    ->where('room_id', $request->room_id)
-                    ->lockForUpdate()
-                    ->exists();
+        //         $temporaryReserved = TemporaryReserved::where('branch_id', $request->branch_id)
+        //             ->where('room_id', $request->room_id)
+        //             ->lockForUpdate()
+        //             ->exists();
 
-                if ($temporaryCheckInKiosk || $temporaryReserved) {
-                    DB::rollBack();
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Room is already reserved. Please select another room.',
-                    ], 400);
-                }       
+        //         if ($temporaryCheckInKiosk || $temporaryReserved) {
+        //             DB::rollBack();
+        //             return response()->json([
+        //                 'success' => false,
+        //                 'message' => 'Room is already reserved. Please select another room.',
+        //             ], 400);
+        //         }       
 
         $transaction = Guest::whereYear('created_at', Carbon::today()->year)->count() + 1;
 
