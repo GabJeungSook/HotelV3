@@ -180,7 +180,12 @@ class Main extends Component
                 $message = 'You need to clean for at least 15 minutes'
             );
         } else {
-            dd($room);
+            if($room->time_to_clean === null)
+            {
+                $room->update([
+                    'time_to_clean' => \Carbon\Carbon::parse($room->started_cleaning_at)->addMinutes(15),
+                ]);
+            }
             DB::beginTransaction();
 
             CleaningHistory::create([
