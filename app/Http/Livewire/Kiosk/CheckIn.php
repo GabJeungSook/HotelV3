@@ -279,10 +279,7 @@ class CheckIn extends Component
             //         now()->format('y') .
             //         str_pad($transaction, 4, '0', STR_PAD_LEFT);
 
-                    $transaction_code =
-                    auth()->user()->branch_id .
-                    now()->format('y') .
-                    sprintf('%04d', random_int(0, 9999));
+                    $transaction_code = sprintf('%04d', random_int(0, 9999));
 
                 $this->generatedQrCode = $transaction_code;
 
