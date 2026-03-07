@@ -79,7 +79,7 @@ class CheckIn extends Component
         $this->getTypes();
         $this->floors = Floor::get();
 
-        $this->steps = 2;
+        $this->steps = 1;
     }
 
     public function selectType($type_id)

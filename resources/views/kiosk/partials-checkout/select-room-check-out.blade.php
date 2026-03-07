@@ -63,9 +63,9 @@
     </div>
   </div>
 </div>
-<div class="fixed bottom-10 right-0 left-0">
+<div class="fixed bottom-20 right-0 left-0">
   <div class="flex justify-center">
-    {{-- @if ($room_id) --}}
+    @if ($room_id)
          <button 
           wire:click="$set('steps', 2)"
           class="font-medium px-8 py-3 text-white bg-green-600 rounded-2xl flex items-center gap-2">
@@ -82,6 +82,6 @@
           </svg>
 
       </button>
-    {{-- @endif --}}
+    @endif
   </div>
 </div>
