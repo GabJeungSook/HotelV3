@@ -4,7 +4,7 @@ namespace App\Http\Livewire\BackOffice;
 
 use Livewire\Component;
 use App\Models\Frontdesk;
-use App\Models\CheckInDetail;
+use App\Models\CheckinDetail;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -227,7 +227,7 @@ private function applySalesTypeFilter($query, string $column = 'check_out_at')
         $checkinIds = (clone $tx)->distinct()->pluck('checkin_detail_id')->values();
 
         // Load stays once (room/type/guest)
-        $details = \App\Models\CheckInDetail::query()
+        $details = CheckinDetail::query()
             ->whereIn('id', $checkinIds)
             ->with(['room.type', 'guest'])
             ->get();
@@ -256,7 +256,7 @@ private function applySalesTypeFilter($query, string $column = 'check_out_at')
          */
         [$start, $end] = $this->shiftWindow();
 
-        $occupiedRoomIds = \App\Models\CheckInDetail::query()
+        $occupiedRoomIds = CheckinDetail::query()
             ->when($this->frontdesk, fn($q, $f) => $q->where('frontdesk_id', $f))
             ->whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))
             ->where(function ($q) use ($start, $end) {
@@ -334,7 +334,7 @@ private function applySalesTypeFilter($query, string $column = 'check_out_at')
 
     private function twoShiftBucketsFor(string $column, bool $requireIsCheckout = false): array
     {
-        $q = \App\Models\CheckInDetail::query()
+        $q = CheckinDetail::query()
             ->whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))
             ->when($requireIsCheckout, fn($q) => $q->where('is_check_out', true))
             ->when($this->date_from, fn($q, $d) => $q->whereDate($column, '>=', $d))
@@ -397,7 +397,7 @@ private function applySalesTypeFilter($query, string $column = 'check_out_at')
 
 public function generateReport()
 {
-    $detailsQuery = \App\Models\CheckInDetail::query()
+    $detailsQuery = CheckinDetail::query()
         ->with([
             'room.type',
             'guest',
