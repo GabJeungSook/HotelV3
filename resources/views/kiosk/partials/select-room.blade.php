@@ -65,8 +65,24 @@
 <div class="fixed bottom-20 right-0 left-0">
   <div class="flex justify-center">
     @if ($room_id)
-      <x-button label="NEXT" wire:click="$set('steps', 3)" lg class="font-medium " right-icon="chevron-double-right"
-        spinner green />
+     <button 
+          wire:click="$set('steps', 3)"
+          class="font-medium px-8 py-3 text-white bg-green-600 rounded-2xl flex items-center gap-2">
+          
+          NEXT
+          
+          <svg xmlns="http://www.w3.org/2000/svg" 
+              class="w-14 h-14" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+
+      </button>
+      {{-- <x-button label="NEXT" wire:click="$set('steps', 3)" lg class="font-medium " right-icon="chevron-double-right"
+        spinner green /> --}}
     @endif
   </div>
 </div>
