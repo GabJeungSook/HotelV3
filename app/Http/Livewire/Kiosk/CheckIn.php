@@ -265,8 +265,14 @@ class CheckIn extends Component
                     return;
                 }
 
-                $transaction = Guest::whereYear('created_at', now()->year)->lockForUpdate()->count();
+              $transaction = Guest::whereYear('created_at', now()->year)
+                    ->lockForUpdate()
+                    ->count();
+
                 $transaction += 1;
+
+                // limit to 4 digits
+                $transaction = $transaction % 10000;
 
                 $transaction_code =
                     auth()->user()->branch_id .
