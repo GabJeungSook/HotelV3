@@ -265,19 +265,24 @@ class CheckIn extends Component
                     return;
                 }
 
-              $transaction = Guest::whereYear('created_at', now()->year)
-                    ->lockForUpdate()
-                    ->count();
+            //   $transaction = Guest::whereYear('created_at', now()->year)
+            //         ->lockForUpdate()
+            //         ->count();
 
-                $transaction += 1;
+            //     $transaction += 1;
 
-                // limit to 4 digits
-                $transaction = $transaction % 10000;
+            //     // limit to 4 digits
+            //     $transaction = $transaction % 10000;
 
-                $transaction_code =
+            //     $transaction_code =
+            //         auth()->user()->branch_id .
+            //         now()->format('y') .
+            //         str_pad($transaction, 4, '0', STR_PAD_LEFT);
+
+                    $transaction_code =
                     auth()->user()->branch_id .
                     now()->format('y') .
-                    str_pad($transaction, 4, '0', STR_PAD_LEFT);
+                    sprintf('%04d', random_int(0, 9999));
 
                 $this->generatedQrCode = $transaction_code;
 
