@@ -7,7 +7,7 @@
     <div class="mt-4 md:mt-0">
       @if ($steps == 1)
         <a href="{{ route('kiosk.dashboard') }}"
-          class="bg-gray-50 outline-blue-500 border border-blue-500 p-2 px-4 flex space-x-1 rounded-full">
+          class="bg-gray-50 outline-blue-500 border border-blue-500 p-8 px-14 flex space-x-1 rounded-full">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
             class="w-6 text-blue-500 h-6">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18" />
@@ -16,7 +16,7 @@
         </a>
       @else
         <button x-on:click="step--"
-          class="bg-gray-50 outline-blue-500 border border-blue-500 p-2 px-4 flex space-x-1 rounded-full">
+          class="bg-gray-50 outline-blue-500 border border-blue-500 p-8 px-14 flex space-x-1 rounded-full">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
             stroke="currentColor" class="w-6 text-blue-500 h-6">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18" />
