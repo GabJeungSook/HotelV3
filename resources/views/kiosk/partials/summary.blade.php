@@ -26,7 +26,7 @@
       @endif
     </div>
   </div>
-  <div class="px-2 md:px-10 lg:px-40 mt-5">
+  <div class="px-2 md:px-2 lg:px-2 mt-5">
     <div class="w-full flex flex-col lg:flex-row space-y-5 lg:space-y-0 lg:space-x-5 bg-gray-50 border-2 border-blue-500 bg-opacity-75 rounded-2xl">
       <div class="w-full lg:w-96 border-b-2 lg:border-b-0 lg:border-r-2 border-gray-600 p-5">
         <h1 class="font-medium text-xl text-gray-700">Personal Information</h1>
@@ -79,7 +79,7 @@
           <div class="w-full">
             <div class="mt-5 border-gray-200">
               <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6 px-2 border-gray-200 py-5">
-                <svg class="w-40 h-40 md:w-64 md:h-64 mx-auto md:mx-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 24" fill="currentColor">
+                {{-- <svg class="w-40 h-40 md:w-64 md:h-64 mx-auto md:mx-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 24" fill="currentColor">
                   <!-- SVG paths unchanged -->
                   <path d="m5.638 22.405v.001c0 .881-.714 1.595-1.595 1.595-.002 0-.003 0-.005 0h-.001c-.881 0-1.594-.714-1.594-1.594 0-.001 0-.001 0-.002v-20.809-.001c0-.881.714-1.594 1.594-1.594h.001.005c.881 0 1.595.714 1.595 1.595z"></path>
                   <path d="m2.014 2.686h-1.115c-.487.015-.876.413-.876.902s.389.887.874.902h.001 1.115z"></path>
@@ -99,7 +99,7 @@
                   <path d="m19.854 12.028.834-.442.834.442-.16-.93.674-.658-.93-.136-.417-.85-.417.85-.938.136.682.658z"></path>
                   <path d="m23.766 9.454-.417.85-.93.136.673.658-.16.93.834-.442.834.442-.16-.93.682-.658-.938-.136z"></path>
                   <path d="m6.142 2.686h4.45v1.804h-4.45z"></path>
-                </svg>
+                </svg> --}}
                 <div class="w-full border-t-2 md:border-t-0 md:border-l-2 relative mt-4 md:mt-0">
                   <div class="flex px-4 justify-between items-end">
                     <div>
