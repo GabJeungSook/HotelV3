@@ -30,8 +30,8 @@
                {{-- Remittance --}}
                 <div class="px-6 py-5 flex items-center justify-between">
                     <div class="flex flex-col">
-                        <span class="text-sm font-medium text-gray-900">Remittance</span>
-                        <span class="text-xs text-gray-500">Cash remitted to vault or management</span>
+                        <span class="text-sm font-medium text-gray-900">Cash on Hand</span>
+                        {{-- <span class="text-xs text-gray-500">Cash remitted to vault or management</span> --}}
                     </div>
 
                     <div class="w-48">

@@ -61,9 +61,9 @@ class CashOnHand extends Component
             'remittance' => 'required|numeric|min:0',
             'description' => 'required'
         ], [
-            'remittance.required' => 'Please enter the beginning cash amount.',
-            'remittance.numeric' => 'The beginning cash must be a valid number.',
-            'remittance.min' => 'The beginning cash cannot be negative.',
+            'remittance.required' => 'Please enter the ending cash amount.',
+            'remittance.numeric' => 'The ending cash must be a valid number.',
+            'remittance.min' => 'The ending cash cannot be negative.',
             'description.required' => 'Please enter a description for the remittance.'
         ]);
 
