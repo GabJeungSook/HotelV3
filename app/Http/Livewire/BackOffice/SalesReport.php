@@ -4,6 +4,7 @@ namespace App\Http\Livewire\BackOffice;
 
 use Livewire\Component;
 use App\Models\Frontdesk;
+use App\Models\CheckInDetail;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
