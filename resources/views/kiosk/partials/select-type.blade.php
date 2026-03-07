@@ -102,7 +102,7 @@
   <div class="fixed bottom-20 right-0 left-0">
     <div class="flex justify-center">
       @if ($type_id)
-        <x-button label="NEXT" wire:click="$set('steps', 2)" lg class="font-medium " right-icon="chevron-double-right"
+        <x-button label="NEXT" wire:click="$set('steps', 2)" 2xl class="font-medium " right-icon="chevron-double-right"
           green />
       @endif
     </div>
