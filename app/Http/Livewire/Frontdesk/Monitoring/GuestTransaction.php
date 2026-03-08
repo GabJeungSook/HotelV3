@@ -292,8 +292,22 @@ class GuestTransaction extends Component
                 $this->guest_id
             )->first();
             $current_deposit = $this->check_in_details->total_deposit;
+            $users = userModel::role('frontdesk')->get();
+
+            $threshold = now()->subMinutes(5)->timestamp;
+
+            $onlineUsers = [];
+
+            foreach ($users as $user) {
+                if ($this->isUserOnline($user, $threshold)) {
+                    $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
+                }
+            }
+
+            $shiftLogId = collect($onlineUsers)->where('frontdesk_id', auth()->user()->id)->first()->id ?? null;
             Transaction::create([
                 'branch_id' => $this->check_in_details->guest->branch_id,
+                'shift_log_id' => $shiftLogId,
                 'checkin_detail_id' => $this->check_in_details->id,
                 'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $this->check_in_details->room_id,
@@ -602,8 +616,22 @@ class GuestTransaction extends Component
             // dd($rate);
 
             DB::beginTransaction();
+            $users = userModel::role('frontdesk')->get();
+
+            $threshold = now()->subMinutes(5)->timestamp;
+
+            $onlineUsers = [];
+
+            foreach ($users as $user) {
+                if ($this->isUserOnline($user, $threshold)) {
+                    $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
+                }
+            }
+
+            $shiftLogId = collect($onlineUsers)->where('frontdesk_id', auth()->user()->id)->first()->id ?? null;
             $transaction = Transaction::create([
                 'branch_id' => $check_in_detail->guest->branch_id,
+                'shift_log_id' => $shiftLogId,
                 'checkin_detail_id' => $check_in_detail->id,
                 'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $check_in_detail->room_id,
@@ -760,8 +788,22 @@ class GuestTransaction extends Component
                 $this->guest_id
             )->first();
             $current_deduction = $check_in_detail->total_deduction;
+            $users = userModel::role('frontdesk')->get();
+
+            $threshold = now()->subMinutes(5)->timestamp;
+
+            $onlineUsers = [];
+
+            foreach ($users as $user) {
+                if ($this->isUserOnline($user, $threshold)) {
+                    $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
+                }
+            }
+
+            $shiftLogId = collect($onlineUsers)->where('frontdesk_id', auth()->user()->id)->first()->id ?? null;
             Transaction::create([
                 'branch_id' => $check_in_detail->guest->branch_id,
+                'shift_log_id' => $shiftLogId,
                 'checkin_detail_id' => $check_in_detail->id,
                 'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $check_in_detail->room_id,
@@ -949,9 +991,22 @@ class GuestTransaction extends Component
                 ->where('frontdesk_menu_id', $this->food_id)
                 ->first();
 
+            $users = userModel::role('frontdesk')->get();
 
+            $threshold = now()->subMinutes(5)->timestamp;
+
+            $onlineUsers = [];
+
+            foreach ($users as $user) {
+                if ($this->isUserOnline($user, $threshold)) {
+                    $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
+                }
+            }
+
+            $shiftLogId = collect($onlineUsers)->where('frontdesk_id', auth()->user()->id)->first()->id ?? null;
             $transaction = Transaction::create([
                 'branch_id' => $check_in_detail->guest->branch_id,
+                'shift_log_id' => $shiftLogId,
                 'checkin_detail_id' => $check_in_detail->id,
                 'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $check_in_detail->room_id,
@@ -1130,8 +1185,23 @@ class GuestTransaction extends Component
                 ->where('id', $this->item_id)
                 ->first();
 
+                $users = userModel::role('frontdesk')->get();
+
+            $threshold = now()->subMinutes(5)->timestamp;
+
+            $onlineUsers = [];
+
+            foreach ($users as $user) {
+                if ($this->isUserOnline($user, $threshold)) {
+                    $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
+                }
+            }
+
+            $shiftLogId = collect($onlineUsers)->where('frontdesk_id', auth()->user()->id)->first()->id ?? null;
+
             $transaction = Transaction::create([
                 'branch_id' => $check_in_detail->guest->branch_id,
+                'shift_log_id' => $shiftLogId,
                 'checkin_detail_id' => $check_in_detail->id,
                 'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $check_in_detail->room_id,
@@ -1305,8 +1375,22 @@ class GuestTransaction extends Component
                 ->where('id', $this->item_id_damage)
                 ->first();
 
+                $users = userModel::role('frontdesk')->get();
+
+            $threshold = now()->subMinutes(5)->timestamp;
+
+            $onlineUsers = [];
+
+            foreach ($users as $user) {
+                if ($this->isUserOnline($user, $threshold)) {
+                    $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
+                }
+            }
+
+            $shiftLogId = collect($onlineUsers)->where('frontdesk_id', auth()->user()->id)->first()->id ?? null;
             $transaction = Transaction::create([
                 'branch_id' => $check_in_detail->guest->branch_id,
+                'shift_log_id' => $shiftLogId,
                 'checkin_detail_id' => $check_in_detail->id,
                 'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $check_in_detail->room_id,
@@ -1536,8 +1620,22 @@ class GuestTransaction extends Component
         )->first();
         $reason = TransferReason::find($this->reason_id);
         DB::beginTransaction();
+        $users = userModel::role('frontdesk')->get();
+
+            $threshold = now()->subMinutes(5)->timestamp;
+
+            $onlineUsers = [];
+
+            foreach ($users as $user) {
+                if ($this->isUserOnline($user, $threshold)) {
+                    $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
+                }
+            }
+
+        $shiftLogId = collect($onlineUsers)->where('frontdesk_id', auth()->user()->id)->first()->id ?? null;
         $transaction = Transaction::create([
             'branch_id' => auth()->user()->branch_id,
+            'shift_log_id' => $shiftLogId,
             'checkin_detail_id' => $check_in_detail->id,
             'cash_drawer_id' => auth()->user()->cash_drawer_id,
             'room_id' => $this->room_id,
@@ -1696,8 +1794,22 @@ class GuestTransaction extends Component
         ]);
 
         if ($this->saveAsExcess == true) {
+            $users = userModel::role('frontdesk')->get();
+
+            $threshold = now()->subMinutes(5)->timestamp;
+
+            $onlineUsers = [];
+
+            foreach ($users as $user) {
+                if ($this->isUserOnline($user, $threshold)) {
+                    $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
+                }
+            }
+
+            $shiftLogId = collect($onlineUsers)->where('frontdesk_id', auth()->user()->id)->first()->id ?? null;
             Transaction::create([
                 'branch_id' => $transaction->branch_id,
+                'shift_log_id' => $shiftLogId,
                 'checkin_detail_id' => $check_in_detail->id,
                 'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $transaction->room_id,
@@ -1786,8 +1898,22 @@ class GuestTransaction extends Component
                 'paid_at' => now(),
             ]);
             $check_in_detail = CheckinDetail::where('guest_id', $this->guest_id)->first();
+            $users = userModel::role('frontdesk')->get();
+
+            $threshold = now()->subMinutes(5)->timestamp;
+
+            $onlineUsers = [];
+
+            foreach ($users as $user) {
+                if ($this->isUserOnline($user, $threshold)) {
+                    $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
+                }
+            }
+
+            $shiftLogId = collect($onlineUsers)->where('frontdesk_id', auth()->user()->id)->first()->id ?? null;
             Transaction::create([
                 'branch_id' => $transaction->branch_id,
+                'shift_log_id' => $shiftLogId,
                 'checkin_detail_id' => $check_in_detail->id,
                 'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $transaction->room_id,
@@ -1930,8 +2056,23 @@ class GuestTransaction extends Component
             ->whereNull('paid_at')
             ->update(['paid_at' => now()]);
 
+            $users = userModel::role('frontdesk')->get();
+
+            $threshold = now()->subMinutes(5)->timestamp;
+
+            $onlineUsers = [];
+
+            foreach ($users as $user) {
+                if ($this->isUserOnline($user, $threshold)) {
+                    $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
+                }
+            }
+
+            $shiftLogId = collect($onlineUsers)->where('frontdesk_id', auth()->user()->id)->first()->id ?? null;
+
         Transaction::create([
             'branch_id' => $transaction->branch_id,
+            'shift_log_id' => $shiftLogId,
             'checkin_detail_id' => $check_in_detail->id,
             'cash_drawer_id' => auth()->user()->cash_drawer_id,
             'room_id' => $transaction->room_id,
@@ -2030,8 +2171,22 @@ class GuestTransaction extends Component
         ]);
 
         if (!$this->is_checkout) {
+            $users = userModel::role('frontdesk')->get();
+
+            $threshold = now()->subMinutes(5)->timestamp;
+
+            $onlineUsers = [];
+
+            foreach ($users as $user) {
+                if ($this->isUserOnline($user, $threshold)) {
+                    $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
+                }
+            }
+
+            $shiftLogId = collect($onlineUsers)->where('frontdesk_id', auth()->user()->id)->first()->id ?? null;
             Transaction::create([
                 'branch_id' => $transaction->branch_id,
+                'shift_log_id' => $shiftLogId,
                 'checkin_detail_id' => $guest->checkInDetail->id,
                 'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $transaction->room_id,
@@ -2053,8 +2208,23 @@ class GuestTransaction extends Component
             ]);
         }
 
+        $users = userModel::role('frontdesk')->get();
+
+            $threshold = now()->subMinutes(5)->timestamp;
+
+            $onlineUsers = [];
+
+            foreach ($users as $user) {
+                if ($this->isUserOnline($user, $threshold)) {
+                    $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
+                }
+            }
+
+            $shiftLogId = collect($onlineUsers)->where('frontdesk_id', auth()->user()->id)->first()->id ?? null;
+
         Transaction::create([
             'branch_id' => $transaction->branch_id,
+            'shift_log_id' => $shiftLogId,
             'checkin_detail_id' => $guest->checkInDetail->id,
             'cash_drawer_id' => auth()->user()->cash_drawer_id,
             'room_id' => $transaction->room_id,

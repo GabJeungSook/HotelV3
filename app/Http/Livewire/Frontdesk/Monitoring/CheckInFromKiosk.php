@@ -190,9 +190,24 @@ class CheckInFromKiosk extends Component
             'next_extension_is_original' => $rate == $extension_time_reset ? 1 : 0,
         ]);
 
+        $users = userModel::role('frontdesk')->get();
+
+            $threshold = now()->subMinutes(5)->timestamp;
+
+            $onlineUsers = [];
+
+            foreach ($users as $user) {
+                if ($this->isUserOnline($user, $threshold)) {
+                    $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
+                }
+            }
+
+            $shiftLogId = collect($onlineUsers)->where('frontdesk_id', auth()->user()->id)->first()->id ?? null;
+
         //create transaction for check-in
          Transaction::create([
             'branch_id' => auth()->user()->branch_id,
+            'shift_log_id' => $shiftLogId,
             'checkin_detail_id' => $checkin->id,
             'cash_drawer_id' => auth()->user()->cash_drawer_id,
             'room_id' => $this->guest->room_id,
@@ -222,9 +237,22 @@ class CheckInFromKiosk extends Component
             'transaction_type' => 'check-in',
             'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
         ]);
+        $users = userModel::role('frontdesk')->get();
 
+            $threshold = now()->subMinutes(5)->timestamp;
+
+            $onlineUsers = [];
+
+            foreach ($users as $user) {
+                if ($this->isUserOnline($user, $threshold)) {
+                    $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
+                }
+            }
+
+            $shiftLogId = collect($onlineUsers)->where('frontdesk_id', auth()->user()->id)->first()->id ?? null;
         Transaction::create([
             'branch_id' => auth()->user()->branch_id,
+            'shift_log_id' => $shiftLogId,
             'checkin_detail_id' => $checkin->id,
             'cash_drawer_id' => auth()->user()->cash_drawer_id,
             'room_id' => $this->guest->room_id,
@@ -255,8 +283,22 @@ class CheckInFromKiosk extends Component
         ]);
 
         if ($this->save_excess) {
+            $users = userModel::role('frontdesk')->get();
+
+            $threshold = now()->subMinutes(5)->timestamp;
+
+            $onlineUsers = [];
+
+            foreach ($users as $user) {
+                if ($this->isUserOnline($user, $threshold)) {
+                    $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
+                }
+            }
+
+            $shiftLogId = collect($onlineUsers)->where('frontdesk_id', auth()->user()->id)->first()->id ?? null;
             Transaction::create([
                 'branch_id' => auth()->user()->branch_id,
+                'shift_log_id' => $shiftLogId,
                 'checkin_detail_id' => $checkin->id,
                 'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $this->guest->room_id,

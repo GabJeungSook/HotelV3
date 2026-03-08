@@ -41,25 +41,7 @@ class User extends Component implements Tables\Contracts\HasTable
                 ->paginate(10),
             'branches' => \App\Models\Branch::all(),
         ]);
-    }
-
-    public function mount()
-{
-    $users = userModel::role('frontdesk')->get();
-
-    $threshold = now()->subMinutes(5)->timestamp;
-
-    $onlineUsers = [];
-
-    foreach ($users as $user) {
-        if ($this->isUserOnline($user, $threshold)) {
-            $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
-        }
-    }
-
-    $collection = collect($onlineUsers);
-    dd($collection->first()->frontdesk_id);
-}
+    }         
 
 private function isUserOnline($user, $threshold)
 {
