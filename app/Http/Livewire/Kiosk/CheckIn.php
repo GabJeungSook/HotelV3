@@ -314,13 +314,14 @@ class CheckIn extends Component
                 ]);
 
                 DB::commit();
+                $this->steps = 5;
 
             } catch (\Exception $e) {
                 DB::rollBack();
                 throw $e; // do not silently swallow errors in production
             }
 
-            $this->steps = 5;
+            //$this->steps = 5;
     }
 
     public function redirectToHome()
