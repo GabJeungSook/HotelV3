@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\Guest;
 use App\Models\Transaction;
 use App\Models\CheckinDetail;
+use App\Models\User;
 use App\Models\HotelItems;
 use App\Models\RequestableItem;
 use WireUi\Traits\Actions;
@@ -449,7 +450,7 @@ class ManageGuestTransaction extends Component
         $inventory = Inventory::where('branch_id', auth()->user()->branch_id)
             ->where('menu_id', $this->food_id)
             ->first();
-            $users = userModel::role('frontdesk')->get();
+            $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -529,7 +530,7 @@ class ManageGuestTransaction extends Component
             ->where('id', $this->item_id)
             ->first();
 
-            $users = userModel::role('frontdesk')->get();
+            $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -616,7 +617,7 @@ class ManageGuestTransaction extends Component
             ->where('id', $this->item_id_damage)
             ->first();
 
-            $users = userModel::role('frontdesk')->get();
+            $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -840,7 +841,7 @@ class ManageGuestTransaction extends Component
             $this->guest->id
         )->first();
         DB::beginTransaction();
-        $users = userModel::role('frontdesk')->get();
+        $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -919,7 +920,7 @@ class ManageGuestTransaction extends Component
             $this->guest->id
         )->first();
         $current_deposit = $check_in_detail->total_deposit;
-        $users = userModel::role('frontdesk')->get();
+        $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -987,7 +988,7 @@ class ManageGuestTransaction extends Component
             $this->guest->id
         )->first();
         $current_deduction = $check_in_detail->total_deduction;
-        $users = userModel::role('frontdesk')->get();
+        $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -1206,7 +1207,7 @@ class ManageGuestTransaction extends Component
             ->first();
 
         DB::beginTransaction();
-        $users = userModel::role('frontdesk')->get();
+        $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -1323,7 +1324,7 @@ class ManageGuestTransaction extends Component
             'guest_id',
             $this->guest->id
             )->first();
-            $users = userModel::role('frontdesk')->get();
+            $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -1414,7 +1415,7 @@ class ManageGuestTransaction extends Component
             'guest_id',
             $this->guest->id
             )->first();
-            $users = userModel::role('frontdesk')->get();
+            $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -1534,7 +1535,7 @@ class ManageGuestTransaction extends Component
             ->whereNull('paid_at')
             ->update(['paid_at' => now()]);
 
-            $users = userModel::role('frontdesk')->get();
+            $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -1632,7 +1633,7 @@ class ManageGuestTransaction extends Component
         ]);
 
         if (!$this->is_checkout) {
-            $users = userModel::role('frontdesk')->get();
+            $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -1671,7 +1672,7 @@ class ManageGuestTransaction extends Component
             ]);
         }
 
-        $users = userModel::role('frontdesk')->get();
+        $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -1716,6 +1717,8 @@ class ManageGuestTransaction extends Component
         $this->reminderIndex = 4;
         $this->reminders_modal = true;
     }
+
+    private function isUserOnline($user, $threshold) { return $user->sessions() ->where('last_activity', '>=', $threshold) ->exists(); }
 
     public function checkOut()
     {

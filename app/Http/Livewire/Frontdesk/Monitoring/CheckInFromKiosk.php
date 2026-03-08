@@ -4,6 +4,7 @@ namespace App\Http\Livewire\Frontdesk\Monitoring;
 
 use App\Models\ActivityLog;
 use App\Models\Branch;
+use App\Models\User;
 use App\Models\CashOnDrawer;
 use App\Models\CheckinDetail;
 use App\Models\Guest;
@@ -190,7 +191,7 @@ class CheckInFromKiosk extends Component
             'next_extension_is_original' => $rate == $extension_time_reset ? 1 : 0,
         ]);
 
-        $users = userModel::role('frontdesk')->get();
+        $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -237,7 +238,7 @@ class CheckInFromKiosk extends Component
             'transaction_type' => 'check-in',
             'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
         ]);
-        $users = userModel::role('frontdesk')->get();
+        $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -283,7 +284,7 @@ class CheckInFromKiosk extends Component
         ]);
 
         if ($this->save_excess) {
-            $users = userModel::role('frontdesk')->get();
+            $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -401,6 +402,8 @@ class CheckInFromKiosk extends Component
 
         return redirect()->route('frontdesk.room-monitoring');
     }
+
+    private function isUserOnline($user, $threshold) { return $user->sessions() ->where('last_activity', '>=', $threshold) ->exists(); }
 
     public function render()
     {

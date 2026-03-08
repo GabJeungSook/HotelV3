@@ -274,7 +274,11 @@
                               <p> {{ $transaction->remarks }}</p>
                             </td>
                             <td class="whitespace-nowrap px-3 py-2 text-sm text-gray-600 ">
+                              @if($guest->has_discount && $transaction->transaction_type_id == 1)
+                              ₱{{ number_format(($transaction->payable_amount - $guest->discount_amount), 2) }}
+                              @else
                               ₱{{ number_format($transaction->payable_amount, 2) }}
+                              @endif
                             </td>
                             <td class="whitespace-nowrap px-3 py-2 text-sm text-gray-600 ">
                               {{ Carbon\Carbon::parse($transaction->updated_at)->format('F d, Y h:i A') }}
@@ -306,7 +310,19 @@
                             SUBTOTAL:
                           </td>
                           <td class="whitespace-nowrap px-3 py-2 text-sm font-bold text-gray-600 ">
-                            &#8369;{{ number_format($type->transactions->where('guest_id', $guest_id)->sum('payable_amount'), 2) }}
+                            &#8369;{{
+                                number_format(
+                                    $type->transactions
+                                        ->where('guest_id', $guest_id)
+                                        ->map(function ($transaction) use ($guest) {
+                                            if ($guest->has_discount && $transaction->transaction_type_id == 1) {
+                                                return $transaction->payable_amount - $guest->discount_amount; // example: 20% discount
+                                            }
+                                            return $transaction->payable_amount;
+                                        })
+                                        ->sum(),
+                                2)
+                                }}
                           </td>
                           <td class="whitespace-nowrap py-2 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
                           </td>
@@ -346,16 +362,35 @@
                 @if ($bill->transaction_type->name != 'Deposit' && $bill->transaction_type->name != 'Cashout')
                   <div wire:key="{{ $loop->index }}" class="flex items-center justify-between py-2">
                     <dt class="text-gray-600">{{ $bill->transaction_type->name }}</dt>
-                    <dd class="font-medium text-gray-900">₱ {{ number_format($bill->total_payable_amount, 2) }}</dd>
+                    @if($guest->has_discount && $bill->transaction_type_id == 1)
+                    <dd class="font-medium text-gray-900">₱ {{ number_format($bill->total_payable_amount - $guest->discount_amount, 2) }}</dd>
+                    @else
+                    <dd class="font-medium text-gray-900">₱ {{ number_format(($bill->total_payable_amount), 2) }}</dd>
+                    @endif
                   </div>
                 @endif
               @endforeach
               @php
+                // $total_paid = $transaction_bills_paid
+                //     ->filter(function ($bill) {
+                //         return $bill->transaction_type->name != 'Deposit' && $bill->transaction_type->name != 'Cashout';
+                //     })
+                //     ->sum('total_payable_amount');
                 $total_paid = $transaction_bills_paid
-                    ->filter(function ($bill) {
-                        return $bill->transaction_type->name != 'Deposit' && $bill->transaction_type->name != 'Cashout';
-                    })
-                    ->sum('total_payable_amount');
+    ->filter(function ($bill) {
+        return $bill->transaction_type->name != 'Deposit' 
+            && $bill->transaction_type->name != 'Cashout';
+    })
+    ->map(function ($bill) use ($guest) {
+        $amount = $bill->total_payable_amount;
+
+        if ($guest->has_discount && $bill->transaction_type_id == 1) {
+            $amount = $amount - $guest->discount_amount; // example 20% discount
+        }
+
+        return $amount;
+    })
+    ->sum();
               @endphp
               <div class="flex items-center justify-between py-2">
                 <dt class="font-medium text-gray-900 text-md">Total Amount</dt>

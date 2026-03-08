@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Models\Rate;
 use App\Models\Room;
 use App\Models\Guest;
+use App\Models\User;
 use App\Models\Branch;
 use Livewire\Component;
 use App\Models\ActivityLog;
@@ -189,7 +190,7 @@ class ExtendGuest extends Component
                 ->where('id', $this->extension_rate_id)
                 ->first();
              DB::beginTransaction();
-             $users = userModel::role('frontdesk')->get();
+             $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -328,6 +329,7 @@ class ExtendGuest extends Component
     {
         return redirect()->route('frontdesk.guest-transaction', ['id' => $this->guest->id]);
     }
+    private function isUserOnline($user, $threshold) { return $user->sessions() ->where('last_activity', '>=', $threshold) ->exists(); }
     public function render()
     {
         return view('livewire.frontdesk.monitoring.extend-guest');

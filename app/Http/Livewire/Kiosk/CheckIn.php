@@ -31,9 +31,11 @@ class CheckIn extends Component
     public $rate_id;
     public $longstay;
     public $generatedQrCode;
-
+    public $discount_available = false;
+    public $discount_amount = 0;
     public $name, $contact;
 
+    public $discountEnabled = false;
     //check_in details
     public $room_number, $room_type, $room_floor, $room_rate, $room_pay;
 
@@ -78,6 +80,8 @@ class CheckIn extends Component
     {
         $this->getTypes();
         $this->floors = Floor::get();
+        $this->discountEnabled = false;
+        $this->discount_amount = 0;
 
         $this->steps = 1;
     }
@@ -149,6 +153,10 @@ class CheckIn extends Component
                 'id',
                 $this->rate_id
             )->first()->amount;
+            $rate = Rate::where('id', $this->rate_id)->first();
+            if ($rate->has_discount && auth()->user()->branch->discount_enabled) {
+                $this->discount_available = true;
+            }
 
             $this->steps = 4;
         } else {
@@ -294,6 +302,8 @@ class CheckIn extends Component
                     'static_amount' => $this->room_pay,
                     'is_long_stay' => $this->longstay ? true : false,
                     'number_of_days' => $this->longstay ?? 0,
+                    'has_discount' => $this->discountEnabled,
+                    'discount_amount' => $this->discountEnabled ? $this->discount_amount : 0,
                 ]);
 
                 TemporaryCheckInKiosk::create([
@@ -316,6 +326,16 @@ class CheckIn extends Component
     public function redirectToHome()
     {
         return redirect()->route('kiosk.dashboard');
+    }
+
+    public function applyDiscount()
+    {
+      
+       if($this->discountEnabled) {
+        $this->discount_amount = auth()->user()->branch->discount_amount;
+       } else {
+        $this->discount_amount = 0;
+       }
     }
 
     public function backRoom()

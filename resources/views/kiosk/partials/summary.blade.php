@@ -48,7 +48,7 @@
         </div>
         <div class="w-full mt-10 md:mt-24">
           <div class="flex flex-col space-y-3">
-            <div
+            {{-- <div
               class="relative flex h-40 flex-col justify-between overflow-hidden rounded-lg bg-gray-100 before:absolute before:bottom-[2.5rem] before:-left-2 before:h-5 before:w-5 before:rounded-full before:bg-white after:absolute after:bottom-[2.5rem] after:-right-2 after:h-5 after:w-5 after:rounded-full after:bg-white">
               <div class="flex flex-col justify-between flex-1">
                 <section class="p-3">
@@ -69,7 +69,37 @@
                   </dd>
                 </div>
               </section>
-            </div>
+            </div> --}}
+            @if($discount_available)
+          <label class="flex items-center gap-4 cursor-pointer select-none">
+
+          <span class="text-lg font-semibold text-gray-700">
+              Senior Citizen & PWD Discount
+          </span>
+
+          <div class="relative">
+              <input 
+                  type="checkbox"
+                  wire:model="discountEnabled"
+                  wire:change="applyDiscount"
+                  class="sr-only peer"
+              >
+
+              <!-- Track -->
+              <div class="w-16 h-9 bg-gray-300 rounded-full 
+                  peer-checked:bg-green-500 
+                  transition-colors duration-300">
+              </div>
+
+              <!-- Knob -->
+              <div class="absolute top-1 left-1 w-7 h-7 bg-white rounded-full shadow-md
+                  transition-transform duration-300
+                  peer-checked:translate-x-7">
+              </div>
+          </div>
+
+      </label>
+      @endif
           </div>
         </div>
       </div>
@@ -121,11 +151,21 @@
                       </div>
                       <div class="font-bold text-xl text-gray-700">&#8369;200.00</div>
                     </div>
+                     <div class="mt-4 flex flex-col md:flex-row justify-between items-end gap-2">
+                      <div>
+                        <h1 class="font-bold text-green-700 underline uppercase">DISCOUNT</h1>
+                        <h1 class="text-gray-600">Senior Citizen & PWD</h1>
+                      </div>
+                      <div class="font-bold text-xl text-red-600">-&#8369;{{ number_format($discount_amount, 2) }}</div>
+                    </div>
+
+                   <div class="relative mt-4 px-4">
                     <div class="flex border-t py-1 justify-between mt-4">
                       <div class="font-bold text-gray-600">TOTAL CHARGE</div>
-                      <div class="font-bold text-red-700 text-xl">&#8369;{{ number_format($room_pay + 200, 2) }}</div>
+                      <div class="font-bold text-green-700 text-xl">&#8369;{{ number_format(($room_pay + 200) - $discount_amount, 2) }}</div>
                     </div>
                   </div>
+
                 </div>
               </div>
             </div>

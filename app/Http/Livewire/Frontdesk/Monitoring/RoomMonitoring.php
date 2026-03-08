@@ -12,6 +12,7 @@ use App\Models\Floor;
 use App\Models\Guest;
 use Livewire\Component;
 use App\Models\Inventory;
+use App\Models\User;
 use WireUi\Traits\Actions;
 use App\Models\StayingHour;
 use App\Models\Transaction;
@@ -182,7 +183,7 @@ class RoomMonitoring extends Component
             ->first();
         if($inventory != null)
         {
-            $users = userModel::role('frontdesk')->get();
+            $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -730,7 +731,7 @@ class RoomMonitoring extends Component
         ]);
         $room_number = Room::where('id', $this->room_id)->first()->number;
         $assigned_frontdesk = auth()->user()->assigned_frontdesks;
-        $users = userModel::role('frontdesk')->get();
+        $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -765,7 +766,7 @@ class RoomMonitoring extends Component
             'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
         ]);
 
-        $users = userModel::role('frontdesk')->get();
+        $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -801,7 +802,7 @@ class RoomMonitoring extends Component
         ]);
 
         if ($this->save_excess) {
-            $users = userModel::role('frontdesk')->get();
+            $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -854,6 +855,8 @@ class RoomMonitoring extends Component
 
     }
 
+    private function isUserOnline($user, $threshold) { return $user->sessions() ->where('last_activity', '>=', $threshold) ->exists(); }
+
     public function saveCheckInDetails()
     {
         $this->validate([
@@ -894,7 +897,7 @@ class RoomMonitoring extends Component
         $room_number = Room::where('id', $this->guest->room_id)->first()
             ->number;
         $assigned_frontdesk = auth()->user()->assigned_frontdesks;
-        $users = userModel::role('frontdesk')->get();
+        $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -929,7 +932,7 @@ class RoomMonitoring extends Component
             'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
         ]);
 
-        $users = userModel::role('frontdesk')->get();
+        $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -966,7 +969,7 @@ class RoomMonitoring extends Component
         ]);
 
         if ($this->save_excess) {
-            $users = userModel::role('frontdesk')->get();
+            $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -1102,7 +1105,7 @@ class RoomMonitoring extends Component
 
             ->number;
         $assigned_frontdesk = auth()->user()->assigned_frontdesks;
-        $users = userModel::role('frontdesk')->get();
+        $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -1140,7 +1143,7 @@ class RoomMonitoring extends Component
             'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
         ]);
 
-        $users = userModel::role('frontdesk')->get();
+        $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -1180,7 +1183,7 @@ class RoomMonitoring extends Component
         ]);
 
         if ($this->save_excess_reserve) {
-            $users = userModel::role('frontdesk')->get();
+            $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 

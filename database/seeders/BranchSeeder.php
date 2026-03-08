@@ -105,13 +105,13 @@ class BranchSeeder extends Seeder
         $cash_drawer_1 = CashDrawer::create([
             'name' => 'Drawer 1',
             'branch_id' => $branch->id,
-            'is_active' => 1,
+            'is_active' => 0,
         ]);
 
         $cash_drawer_2 = CashDrawer::create([
             'name' => 'Drawer 2',
             'branch_id' => $branch->id,
-            'is_active' => 1,
+            'is_active' => 0,
         ]);
 
     }

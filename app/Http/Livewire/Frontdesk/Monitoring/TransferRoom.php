@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\Frontdesk\Monitoring;
 
 use App\Models\ActivityLog;
+use App\Models\User;
 use App\Models\CashOnDrawer;
 use App\Models\CheckinDetail;
 use App\Models\Floor;
@@ -231,7 +232,7 @@ class TransferRoom extends Component
         )->first();
         $reason = TransferReason::find($this->selected_reason);
         DB::beginTransaction();
-        $users = userModel::role('frontdesk')->get();
+        $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -280,7 +281,7 @@ class TransferRoom extends Component
 
         if($this->save_excess)
         {
-            $users = userModel::role('frontdesk')->get();
+            $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -413,6 +414,8 @@ class TransferRoom extends Component
     {
         return redirect()->route('frontdesk.guest-transaction', ['id' => $this->guest->id]);
     }
+
+    private function isUserOnline($user, $threshold) { return $user->sessions() ->where('last_activity', '>=', $threshold) ->exists(); }
     public function render()
     {
         return view('livewire.frontdesk.monitoring.transfer-room');

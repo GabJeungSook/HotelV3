@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\Frontdesk\GuestTransactions;
 
 use App\Models\Guest;
+use App\Models\User;
 use Livewire\Component;
 use App\Models\HotelItems;
 use WireUi\Traits\Actions;
@@ -172,7 +173,7 @@ class CheckOutGuest extends Component
             )
                 ->where('id', $this->item_id_damage)
                 ->first();
-            $users = userModel::role('frontdesk')->get();
+            $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
@@ -239,6 +240,8 @@ class CheckOutGuest extends Component
         }
     }
 
+    private function isUserOnline($user, $threshold) { return $user->sessions() ->where('last_activity', '>=', $threshold) ->exists(); }
+
     public function hasHandedRemote($value)
     {
 
@@ -293,7 +296,7 @@ class CheckOutGuest extends Component
             )->first();
 
         if ($this->roomKeyHandedOver == 'No') {
-            $users = userModel::role('frontdesk')->get();
+            $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
 
