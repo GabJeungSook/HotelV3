@@ -287,7 +287,7 @@ class CheckIn extends Component
                     now()->format('y') .
                     str_pad($transaction, 4, '0', STR_PAD_LEFT);
 
-                    // $transaction_code = sprintf('%05d', random_int(0, 99999));
+                // $transaction_code = sprintf('%05d', random_int(0, 99999));
 
                 $this->generatedQrCode = $transaction_code;
 
@@ -314,14 +314,13 @@ class CheckIn extends Component
                 ]);
 
                 DB::commit();
-                $this->steps = 5;
 
             } catch (\Exception $e) {
                 DB::rollBack();
                 throw $e; // do not silently swallow errors in production
             }
 
-            //$this->steps = 5;
+            $this->steps = 5;
     }
 
     public function redirectToHome()
