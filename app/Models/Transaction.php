@@ -35,4 +35,9 @@ class Transaction extends Model
         return $this->belongsTo(User::class, 'assigned_frontdesk_id', 'id');
     }
 
+    public function shift_log()
+    {
+        return $this->belongsTo(ShiftLog::class, 'shift_log_id');
+    }
+
 }

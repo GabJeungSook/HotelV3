@@ -43,6 +43,31 @@ class User extends Component implements Tables\Contracts\HasTable
         ]);
     }
 
+    public function mount()
+{
+    $users = userModel::role('frontdesk')->get();
+
+    $threshold = now()->subMinutes(5)->timestamp;
+
+    $onlineUsers = [];
+
+    foreach ($users as $user) {
+        if ($this->isUserOnline($user, $threshold)) {
+            $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
+        }
+    }
+
+    $collection = collect($onlineUsers);
+    dd($collection->first()->frontdesk_id);
+}
+
+private function isUserOnline($user, $threshold)
+{
+    return $user->sessions()
+        ->where('last_activity', '>=', $threshold)
+        ->exists();
+}
+
 
     protected function getTableQuery(): Builder
     {

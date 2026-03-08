@@ -172,9 +172,22 @@ class CheckOutGuest extends Component
             )
                 ->where('id', $this->item_id_damage)
                 ->first();
+            $users = userModel::role('frontdesk')->get();
 
+            $threshold = now()->subMinutes(5)->timestamp;
+
+            $onlineUsers = [];
+
+            foreach ($users as $user) {
+                if ($this->isUserOnline($user, $threshold)) {
+                    $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
+                }
+            }
+
+            $shiftLogId = collect($onlineUsers)->where('frontdesk_id', auth()->user()->id)->first()->id ?? null;
             $transaction = Transaction::create([
                 'branch_id' => $check_in_detail->guest->branch_id,
+                'shift_log_id' => $shiftLogId,
                 'checkin_detail_id' => $check_in_detail->id,
                 'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $check_in_detail->room_id,

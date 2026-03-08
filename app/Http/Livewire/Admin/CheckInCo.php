@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\Admin;
 
 use Carbon\Carbon;
+use App\Models\User;
 use App\Models\Rate;
 use App\Models\Room;
 use App\Models\Type;
@@ -138,6 +139,8 @@ class CheckInCo extends Component
           }
             $currentHour = now()->hour;
             $shift = ($currentHour >= 8 && $currentHour < 20) ? 'AM' : 'PM';
+            
+
          Transaction::create([
             'branch_id' => auth()->user()->branch_id,
             'checkin_detail_id' => $checkin->id,

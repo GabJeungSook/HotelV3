@@ -103,6 +103,11 @@ class User extends Authenticatable
         return $this->hasOne(Frontdesk::class);
     }
 
+    public function shiftLogs()
+    {
+        return $this->hasMany(ShiftLog::class, 'frontdesk_id');
+    }
+
 
     // public function assignedFrontdesks()
     // {
