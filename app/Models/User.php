@@ -108,6 +108,16 @@ class User extends Authenticatable
         return $this->hasMany(ShiftLog::class, 'frontdesk_id');
     }
 
+    public function expenses()
+    {
+        return $this->hasMany(Expense::class);
+    }
+
+     public function remittances()
+    {
+        return $this->hasMany(Remittance::class);
+    }
+
 
     // public function assignedFrontdesks()
     // {

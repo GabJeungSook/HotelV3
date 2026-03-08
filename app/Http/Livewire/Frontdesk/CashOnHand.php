@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\Frontdesk;
 use App\Models\CashOnDrawer;
 use App\Models\Expense;
+use App\Models\Remittance;
 use App\Models\ShiftLog;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,7 @@ class CashOnHand extends Component
     use Actions;
     public $total_transactions = 0;
     public $total_expenses = 0;
+    public $total_remittances = 0;
     public $total_deposits = 0;
     public $logout_modal = false;
     public $withdraw_modal = false;
@@ -41,6 +43,11 @@ class CashOnHand extends Component
             ->where('user_id', auth()->user()->id)
             ->sum('amount');
 
+        $this->total_remittances = Remittance::where('branch_id', auth()->user()->branch_id)
+            ->where('shift_log_id', $this->current_shift->id)
+            ->where('user_id', auth()->user()->id)
+            ->sum('total_remittance');
+
         $deposits = CashOnDrawer::where('branch_id', auth()->user()->branch_id)
             ->where('cash_drawer_id', auth()->user()->cash_drawer_id)
             ->where('transaction_date', now()->toDateString())
@@ -59,12 +66,10 @@ class CashOnHand extends Component
     {
         $this->validate([
             'remittance' => 'required|numeric|min:0',
-            'description' => 'required'
         ], [
             'remittance.required' => 'Please enter the ending cash amount.',
             'remittance.numeric' => 'The ending cash must be a valid number.',
             'remittance.min' => 'The ending cash cannot be negative.',
-            'description.required' => 'Please enter a description for the remittance.'
         ]);
 
         $this->logout_modal = true;
@@ -102,6 +107,7 @@ class CashOnHand extends Component
             $shift->end_cash = $this->remittance;
             $shift->description = $this->description;
             $shift->total_expenses = $this->total_expenses;
+            $shift->total_remittances = $this->total_remittances;
             $shift->save();
 
             //deactivate drawer

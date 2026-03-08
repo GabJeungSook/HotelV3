@@ -1,8 +1,8 @@
 <x-frontdesk-layout>
    <div class="mx-auto px-20 ">
-    <h1 class="font-bold text-2xl text-gray-500">Expense Report</h1>
+    <h1 class="font-bold text-2xl text-gray-500">Remittance Report</h1>
     <div class="mt-5">
-          <livewire:back-office.expense-report />
+          <livewire:frontdesk.remittance-report />
     </div>
   </div>
 

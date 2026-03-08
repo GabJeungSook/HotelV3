@@ -34,4 +34,9 @@ class ShiftLog extends Model
     {
         return $this->hasMany(Transaction::class);
     }
+
+    public function remittances()
+    {
+        return $this->hasMany(Remittance::class);
+    }
 }

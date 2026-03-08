@@ -33,7 +33,7 @@
                         {{-- <span class="text-xs text-gray-500">Extensions, Food & Beverages, Etc.</span> --}}
                     </div>
                     <div class="w-40 text-right">
-                        <span class="inline-block h-5 w-24 rounded font-mono">₱ {{ number_format($total_expenses, 2) }}</span>
+                        <span class="inline-block h-5 w-24 rounded font-mono">₱ {{ number_format($total_remittances, 2) }}</span>
                     </div>
                 </div>
 
@@ -64,7 +64,7 @@
                 </div>
 
                 {{-- Description --}}
-                <div class="px-6 py-5">
+                {{-- <div class="px-6 py-5">
                     <div class="flex flex-col mb-2">
                         <span class="text-sm font-semibold text-gray-900">Description</span>
                         <span class="text-xs text-gray-500">Add notes or explanation for this report</span>
@@ -77,7 +77,7 @@
                         placeholder="Enter description or remarks..."
                     ></textarea>
                     @error('description') <span class="text-sm text-red-500 mt-1">{{ $message }}</span> @enderror
-                </div>
+                </div> --}}
             </div>
 
             {{-- Footer actions (bottom-right logout) --}}

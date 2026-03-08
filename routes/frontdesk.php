@@ -136,4 +136,18 @@ Route::prefix('frontdesk')
                 return view('frontdesk.select-frontdesk');
             }
         })->name('frontdesk.expense-report');
+         Route::get('/frontdesk-remittance', function () {
+            if (auth()->user()->cash_drawer_id != null) {
+                return view('frontdesk.remittance');
+            } else {
+                return view('frontdesk.select-frontdesk');
+            }
+        })->name('frontdesk.remittance');
+        Route::get('/frontdesk-remittance-report', function () {
+            if (auth()->user()->cash_drawer_id != null) {
+                return view('frontdesk.remittance-report');
+            } else {
+                return view('frontdesk.select-frontdesk');
+            }
+        })->name('frontdesk.remittance-report');
     });

@@ -202,7 +202,7 @@
 
                 <span>Expenses</span>
               </a>
-               <a href="{{ $isBeginningCash ? '#' : route('frontdesk.expenses') }}"
+               <a href="{{ $isBeginningCash ? '#' : route('frontdesk.remittance') }}"
                 class="text-gray-500 fill-gray-500 group inline-flex items-center rounded-md bg-white text-base font-medium hover:text-gray-900 "
                 aria-expanded="false">
                 {{-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" >
