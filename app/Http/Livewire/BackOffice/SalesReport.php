@@ -895,7 +895,11 @@ private function buildRoomSummary(): void
         ->whereNotIn('transaction_type_id', [1, 5]) // ✅ EXCLUDED
         ->when($this->date_from, fn($q, $d) => $q->whereDate('paid_at', '>=', $d))
         ->when($this->date_to, fn($q, $d) => $q->whereDate('paid_at', '<=', $d))
-        ->when($this->frontdesk, fn($q, $f) => $q->where('user_id', $f))
+            ->when($this->frontdesk, function ($q, $f) {
+        $q->whereHas('shift_log', function ($shiftQuery) use ($f) {
+            $shiftQuery->where('frontdesk_id', $f);
+        });
+    })
         ->get();
 
     /*
