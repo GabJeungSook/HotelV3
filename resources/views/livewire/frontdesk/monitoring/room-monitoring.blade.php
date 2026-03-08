@@ -193,24 +193,48 @@
 
                 @if ($room->status == 'Occupied')
                   <div class="flex space-x-1">
-                    @if ($check_out_date < Carbon\Carbon::now())
-                    @php
-                    $over_time = $check_out_date->diffForHumans();
+                   @php
+                    $now = Carbon\Carbon::now();
+                    $grace_end = $check_out_date->copy()->addMinutes(15);
                     @endphp
-                    <span class="inline-flex items-center rounded-md bg-red-500 px-2 py-1 text-sm font-medium text-white">Over Time: {{$check_out_date->diffForHumans()}}</span>
-                    {{-- <span class="inline-flex items-center rounded-md bg-red-100 px-2 py-1 text-sm font-medium text-red-700">Time Expired!</span> --}}
+
+                    @if ($now > $grace_end)
+
+                        <span class="inline-flex items-center rounded-md bg-red-500 px-2 py-1 text-sm font-medium text-white">
+                            Over Time: {{ $check_out_date->diffForHumans() }}
+                        </span>
+
+                    @elseif ($now > $check_out_date)
+
+                        <span class="inline-flex items-center rounded-md bg-yellow-500 px-2 py-1 text-sm font-medium text-white">
+                            Grace Period
+                        </span>
+
+                        <div class="text-yellow-500">
+                            <x-countdown :expires="$grace_end">
+                                <span x-text="timer.minutes">{{ $component->minutes() }}</span>m :
+                                <span x-text="timer.seconds">{{ $component->seconds() }}</span>s
+                            </x-countdown>
+                        </div>
+
                     @elseif ($has_check_out)
-                    <span class="inline-flex items-center rounded-md bg-blue-500 px-2 py-1 text-sm font-medium text-white">Checked-out in Kiosk</span>
+
+                        <span class="inline-flex items-center rounded-md bg-blue-500 px-2 py-1 text-sm font-medium text-white">
+                            Checked-out in Kiosk
+                        </span>
+
                     @else
-                    <h1>Time:</h1>
-                    <div class="text-red-500">
-                      <x-countdown :expires="$check_out_date">
-                        <span x-text="timer.days">{{ $component->days() }}</span>d :
-                        <span x-text="timer.hours">{{ $component->hours() }}</span>h :
-                        <span x-text="timer.minutes">{{ $component->minutes() }}</span>m :
-                        <span x-text="timer.seconds">{{ $component->seconds() }}</span>s
-                      </x-countdown>
-                    </div>
+
+                        <h1>Time:</h1>
+                        <div class="text-red-500">
+                            <x-countdown :expires="$check_out_date">
+                                <span x-text="timer.days">{{ $component->days() }}</span>d :
+                                <span x-text="timer.hours">{{ $component->hours() }}</span>h :
+                                <span x-text="timer.minutes">{{ $component->minutes() }}</span>m :
+                                <span x-text="timer.seconds">{{ $component->seconds() }}</span>s
+                            </x-countdown>
+                        </div>
+
                     @endif
 
                   </div>

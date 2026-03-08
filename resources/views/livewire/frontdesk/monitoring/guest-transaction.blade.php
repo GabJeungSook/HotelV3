@@ -54,20 +54,40 @@
                 <div class="mt-2 border-b border-gray-300">
                   <h1 class="text-xs text-gray-500">Time Remaining</h1>
                   <h1 class="font-bold text-gray-700">
-                    @php
+                  @php
                       $check_out_date = Carbon\Carbon::parse($guest->checkinDetail->check_out_at ?? null);
+                      $now = Carbon\Carbon::now();
+                      $grace_end = $check_out_date?->copy()->addMinutes(15);
+                  @endphp
 
-                    @endphp
-                      @if ($check_out_date < Carbon\Carbon::now())
-                      <span class="inline-flex items-center rounded-md py-1 text-sm font-medium text-red-700">Time Expired!</span>
+                  @if ($check_out_date)
+                      @if ($now->gt($grace_end))
+                          <span class="inline-flex items-center rounded-md py-1 text-sm font-medium text-red-700">
+                              Time Expired!
+                          </span>
+
+                      @elseif ($now->gt($check_out_date))
+                          <div class="text-yellow-600">
+                              <span class="inline-flex items-center rounded-md py-1 text-sm font-medium text-yellow-700">
+                                  Grace Period:
+                              </span>
+                              <x-countdown :expires="$grace_end" class="text-yellow-600">
+                                  <span x-text="timer.days">{{ $component->days() }}</span>d :
+                                  <span x-text="timer.hours">{{ $component->hours() }}</span>h :
+                                  <span x-text="timer.minutes">{{ $component->minutes() }}</span>m :
+                                  <span x-text="timer.seconds">{{ $component->seconds() }}</span>s
+                              </x-countdown>
+                          </div>
+
                       @else
-                    <x-countdown :expires="$check_out_date" class="text-red-600">
-                      <span x-text="timer.days">{{ $component->days() }}</span>d :
-                      <span x-text="timer.hours">{{ $component->hours() }}</span>h :
-                      <span x-text="timer.minutes">{{ $component->minutes() }}</span>m :
-                      <span x-text="timer.seconds">{{ $component->seconds() }}</span>s
-                    </x-countdown>
-                    @endif
+                          <x-countdown :expires="$check_out_date" class="text-red-600">
+                              <span x-text="timer.days">{{ $component->days() }}</span>d :
+                              <span x-text="timer.hours">{{ $component->hours() }}</span>h :
+                              <span x-text="timer.minutes">{{ $component->minutes() }}</span>m :
+                              <span x-text="timer.seconds">{{ $component->seconds() }}</span>s
+                          </x-countdown>
+                      @endif
+                  @endif
                   </h1>
                 </div>
                 <div class="mt-2 border-b border-gray-300">
@@ -93,17 +113,21 @@
     </div>
     <main class="lg:col-span-9 xl:col-span-7">
       <div class="grid grid-cols-6 gap-x-2 border rounded-lg p-4 mb-4">
-        <x-button :disabled="$check_out_date < Carbon\Carbon::now()" label="Transfer Room" sm blue right-icon="external-link" wire:click="redirectToTransferRoom" />
+        @php
+          $grace_end = $check_out_date?->copy()->addMinutes(15);
+        @endphp
+
+        <x-button :disabled="$grace_end < Carbon\Carbon::now()"  label="Transfer Room" sm blue right-icon="external-link" wire:click="redirectToTransferRoom" />
         {{-- <x-button :disabled="$check_out_date < Carbon\Carbon::now()" label="Transfer Room" sm blue right-icon="external-link" wire:click="$set('transfer_modal', true)" /> --}}
 
         {{-- <x-button :disabled="$check_out_date < Carbon\Carbon::now()" label="Extend" sm blue right-icon="external-link" wire:click=" $set('extend_modal', true)" /> --}}
         {{-- <x-button label="Extend" sm blue right-icon="external-link" wire:click=" $set('extend_modal', true)" /> --}}
         <x-button label="Extend" sm blue right-icon="external-link" wire:click="redirectToExtendGuest" />
-        <x-button :disabled="$check_out_date < Carbon\Carbon::now()" label="Damage Charges" sm blue right-icon="external-link" wire:click=" $set('damage_modal', true)" />
-        <x-button :disabled="$check_out_date < Carbon\Carbon::now()" label="Amenities" sm blue right-icon="external-link" wire:click=" $set('amenities_modal', true)" />
-        <x-button :disabled="$check_out_date < Carbon\Carbon::now()" label="Food and Beverages" sm blue right-icon="external-link"
+        <x-button :disabled="$grace_end < Carbon\Carbon::now()" label="Damage Charges" sm blue right-icon="external-link" wire:click=" $set('damage_modal', true)" />
+        <x-button :disabled="$grace_end < Carbon\Carbon::now()" label="Amenities" sm blue right-icon="external-link" wire:click=" $set('amenities_modal', true)" />
+        <x-button :disabled="$grace_end < Carbon\Carbon::now()" label="Food and Beverages" sm blue right-icon="external-link"
           wire:click=" $set('food_beverages_modal', true)" />
-        <x-button :disabled="$check_out_date < Carbon\Carbon::now()" label="Deposits" sm blue right-icon="external-link" wire:click=" $set('deposit_modal', true)" />
+        <x-button :disabled="$grace_end < Carbon\Carbon::now()" label="Deposits" sm blue right-icon="external-link" wire:click=" $set('deposit_modal', true)" />
       </div>
 
       <div class="border  p-4 rounded-xl">
