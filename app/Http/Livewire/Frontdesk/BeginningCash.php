@@ -14,6 +14,7 @@ class BeginningCash extends Component
 
     public $previous_shift;
     public $beginning_cash;
+    public $current_shift;
 
     public function mount()
     {
@@ -23,6 +24,14 @@ class BeginningCash extends Component
         ->whereNotNull('time_out')
         ->orderByDesc('time_out')
         ->first();
+
+        $this->current_shift = ShiftLog::where('cash_drawer_id', '!=',$user->cash_drawer_id)
+        ->whereNull('time_out')
+        ->where('beginning_cash', '>', 0)
+        ->whereHas('frontdesk', function($query) {
+            $query->where('branch_id', auth()->user()->branch_id);
+        })->orderByDesc('time_in')->first();
+
 
         $this->total_transactions = CashOnDrawer::where('branch_id', $user->branch_id)
             ->where('cash_drawer_id', $user->cash_drawer_id)
@@ -47,26 +56,46 @@ class BeginningCash extends Component
 
     public function saveBeginningCash()
     {
-        $this->validate([
-            'beginning_cash' => 'required|numeric|min:0'
-        ], [
-            'beginning_cash.required' => 'Please enter the beginning cash amount.',
-            'beginning_cash.numeric' => 'The beginning cash must be a valid number.',
-            'beginning_cash.min' => 'The beginning cash cannot be negative.'
-        ]);
+        if($this->current_shift)
+            {
+                     $shift = ShiftLog::where('frontdesk_id', auth()->user()->id)
+                        ->where('cash_drawer_id', auth()->user()->cash_drawer_id)
+                        ->whereNull('time_out')
+                        ->first();
 
-        $shift = ShiftLog::where('frontdesk_id', auth()->user()->id)
-            ->where('cash_drawer_id', auth()->user()->cash_drawer_id)
-            ->whereNull('time_out')
-            ->first();
+                    $shift->beginning_cash = $this->current_shift->beginning_cash;
+                    $shift->save();
 
-        $shift->beginning_cash = $this->beginning_cash;
-        $shift->save();
+                    $this->dialog()->success(
+                        $title = 'Success',
+                        $description = 'Beginning cash saved successfully'
+                    );
+            }else{
+                 $this->validate([
+                        'beginning_cash' => 'required|numeric|min:0'
+                    ], [
+                        'beginning_cash.required' => 'Please enter the beginning cash amount.',
+                        'beginning_cash.numeric' => 'The beginning cash must be a valid number.',
+                        'beginning_cash.min' => 'The beginning cash cannot be negative.'
+                    ]);
 
-         $this->dialog()->success(
-            $title = 'Success',
-            $description = 'Beginning cash saved successfully'
-        );
+                       $shift = ShiftLog::where('frontdesk_id', auth()->user()->id)
+                        ->where('cash_drawer_id', auth()->user()->cash_drawer_id)
+                        ->whereNull('time_out')
+                        ->first();
+
+                    $shift->beginning_cash = $this->beginning_cash;
+                    $shift->save();
+
+                    $this->dialog()->success(
+                        $title = 'Success',
+                        $description = 'Beginning cash saved successfully'
+                    );
+
+            }
+       
+
+     
 
         return redirect()->route('frontdesk.room-monitoring');
 

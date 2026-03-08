@@ -56,10 +56,16 @@
 
                 <div class="w-48">
                     <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 font-semibold">
+                        
+                        @if($current_shift)
+                        <div>
+                            <span class="inline-block h-5 w-48 rounded font-mono">₱ {{ number_format($current_shift->beginning_cash, 2) }}</span>
+                            <p class="text-xs text-gray-500">Beginning cash of {{$current_shift->frontdesk->name}}</p>
+                        </div>
+                        @else
+                         <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 font-semibold">
                             ₱
                         </span>
-
                         <input 
                             type="number"
                             step="0.01"
@@ -68,6 +74,8 @@
                             class="w-full pl-7 pr-3 py-1.5 text-right border rounded-md font-mono text-lg font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             placeholder="0.00"
                         >
+                        @endif
+                       
                     </div>
                     @error('beginning_cash') <span class="text-sm text-red-500 mt-1">{{ $message }}</span> @enderror
                 </div>
