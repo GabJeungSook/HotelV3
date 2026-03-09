@@ -867,46 +867,45 @@ private function buildSalesRooms($details, $txRowsByDetail): array
 
 private function buildRoomSummary(): void
 {
-    [$start, $end] = $this->shiftWindow();
-
-    /*
-    |--------------------------------------------------------------------------
-    | 1. Get all floors (ordered by number)
-    |--------------------------------------------------------------------------
-    */
     $floors = \App\Models\Floor::query()
         ->where('branch_id', auth()->user()->branch_id)
         ->orderBy('number')
         ->get();
 
-    /*
-    |--------------------------------------------------------------------------
-    | 2. Get transactions within filtered scope
-    |--------------------------------------------------------------------------
-    | Exclude:
-    | - Room Amount (base stay)
-    | - transaction_type_id 1
-    | - transaction_type_id 5
-    |--------------------------------------------------------------------------
-    */
+    // SAME FILTER SOURCE AS generateReport()
+    $detailsQuery = CheckinDetail::query()
+        ->with(['room.floor'])
+        ->whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))
+        ->whereNotNull('check_out_at')
+        ->when($this->date_from, fn($q, $d) => $q->whereDate('check_out_at', '>=', $d))
+        ->when($this->date_to, fn($q, $d) => $q->whereDate('check_out_at', '<=', $d))
+        ->when($this->frontdesk, fn($q, $f) => $q->where('frontdesk_id', $f))
+        ->when($this->shift, function ($q, $shift) {
+            if ($shift === 'AM') {
+                $q->whereTime(DB::raw('TIME(check_out_at)'), '>=', '08:00:00')
+                  ->whereTime(DB::raw('TIME(check_out_at)'), '<', '20:00:00');
+            }
+
+            if ($shift === 'PM') {
+                $q->where(function ($sub) {
+                    $sub->whereTime(DB::raw('TIME(check_out_at)'), '>=', '20:00:00')
+                        ->orWhereTime(DB::raw('TIME(check_out_at)'), '<', '08:00:00');
+                });
+            }
+        });
+
+    $this->applySalesTypeFilter($detailsQuery, 'check_out_at');
+
+    $detailIds = $detailsQuery->pluck('id');
+
     $transactions = Transaction::query()
         ->with(['room.floor', 'transaction_type'])
+        ->whereIn('checkin_detail_id', $detailIds)
         ->whereNotNull('paid_at')
-        ->whereNotIn('transaction_type_id', [1, 5]) // ✅ EXCLUDED
-        ->when($this->date_from, fn($q, $d) => $q->whereDate('paid_at', '>=', $d))
-        ->when($this->date_to, fn($q, $d) => $q->whereDate('paid_at', '<=', $d))
-            ->when($this->frontdesk, function ($q, $f) {
-        $q->whereHas('shift_log', function ($shiftQuery) use ($f) {
-            $shiftQuery->where('frontdesk_id', $f);
-        });
-    })
+        ->whereNotIn('transaction_type_id', [2, 5]) // keep if intended
+        ->whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))
         ->get();
 
-    /*
-    |--------------------------------------------------------------------------
-    | 3. Group by Transaction Type (description row)
-    |--------------------------------------------------------------------------
-    */
     $grouped = $transactions->groupBy(
         fn($t) => $t->transaction_type?->name ?? 'Unknown'
     );
@@ -919,39 +918,32 @@ private function buildRoomSummary(): void
     }
 
     foreach ($grouped as $typeName => $items) {
-
         $rowPerFloor = [];
         $rowTotal = 0;
 
         foreach ($floors as $floor) {
             $amount = (float) $items
-                ->where('room.floor_id', $floor->id)
+                ->filter(fn($t) => $t->room?->floor_id == $floor->id)
                 ->sum('payable_amount');
 
             $rowPerFloor[$floor->id] = $amount;
             $rowTotal += $amount;
-
             $totalsPerFloor[$floor->id] += $amount;
         }
 
         $tableRows[] = [
-            'description' => $typeName,
+            'description' => $typeName == 'Check In' ? 'Room' : $typeName,
             'floors'      => $rowPerFloor,
-            'row_total'   => $rowTotal, // ✅ this drives your "Total" column
+            'row_total'   => $rowTotal,
         ];
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | 4. Store final structure
-    |--------------------------------------------------------------------------
-    */
     $this->roomSummary = [
         'floors' => $floors->map(fn($f) => [
-            'id'     => $f->id,
+            'id' => $f->id,
             'number' => $f->number,
         ])->all(),
-        'rows'   => $tableRows,
+        'rows' => $tableRows,
         'totals' => $totalsPerFloor,
     ];
 }
