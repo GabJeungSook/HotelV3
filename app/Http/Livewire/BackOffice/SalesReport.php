@@ -233,6 +233,7 @@ class SalesReport extends Component
                 'transaction_type_id',
                 'payable_amount',
                 'assigned_frontdesk_id',
+                'shift_log_id',
                 'created_at',
                 'shift',
             ]);
