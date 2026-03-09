@@ -315,7 +315,7 @@ class SalesReport extends Component
                 $detailTxs = collect($txRowsByDetail[$detail->id] ?? []);
 
                 $baseTx = $detailTxs
-                    ->where('transaction_type_id', 2)
+                    ->where('transaction_type_id', 1)
                     ->sortBy('created_at')
                     ->first();
 
