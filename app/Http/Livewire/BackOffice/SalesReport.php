@@ -315,48 +315,101 @@ class SalesReport extends Component
                 $detailTxs = collect($txRowsByDetail[$detail->id] ?? []);
 
                 $baseTx = $detailTxs
-                    ->where('transaction_type_id', 1)
-                    ->sortBy('created_at')
-                    ->first();
+    ->where('transaction_type_id', 1)
+    ->sortBy('created_at')
+    ->first();
 
-                $defaultShift = $baseTx?->resolved_shift
-                    ?? optional($detailTxs->sortBy('created_at')->first())->resolved_shift
-                    ?? '—';
+$meta = [
+    'room_type'      => $room?->type?->name ?? '—',
+    'guest_name'     => $baseGuestName,
+    'check_in'       => $detail->check_in_at ? Carbon::parse($detail->check_in_at)->format('m-d-Y h:iA') : '—',
+    'check_out'      => $detail->check_out_at ? Carbon::parse($detail->check_out_at)->format('m-d-Y h:iA') : '—',
+    'initial_hrs'    => $detail->hours_stayed
+        ? ($guest?->is_long_stay
+            ? (($detail->hours_stayed * (int) ($guest?->number_of_days ?? 1)) . ' hrs')
+            : ($detail->hours_stayed . ' hrs'))
+        : '—',
+    'frontdesk_name' => strtoupper($frontdesk?->name ?? '—'),
+];
 
-                $meta = [
-                    'room_type'      => $room?->type?->name ?? '—',
-                    'guest_name'     => $baseGuestName,
-                    'check_in'       => $detail->check_in_at ? Carbon::parse($detail->check_in_at)->format('m-d-Y h:iA') : '—',
-                    'check_out'      => $detail->check_out_at ? Carbon::parse($detail->check_out_at)->format('m-d-Y h:iA') : '—',
-                    'initial_hrs'    => $detail->hours_stayed
-                        ? ($guest?->is_long_stay
-                            ? (($detail->hours_stayed * (int) ($guest?->number_of_days ?? 1)) . ' hrs')
-                            : ($detail->hours_stayed . ' hrs'))
-                        : '—',
-                    'frontdesk_name' => strtoupper($frontdesk?->name ?? '—'),
-                    'shift'          => $defaultShift,
-                ];
+/*
+|--------------------------------------------------------------------------
+| Base room row
+|--------------------------------------------------------------------------
+| Show it only if:
+| - no shift filter is selected, OR
+| - the filtered transactions still contain the base/check-in tx
+|--------------------------------------------------------------------------
+*/
+if (!$this->shift || $baseTx) {
+    $roomRows[] = [
+        'detail_id'         => $detail->id,
+        'row_type'          => 'room_amount',
+        'number'            => $room?->number ?? '—',
+        'room_type'         => $meta['room_type'],
+        'guest_name'        => $meta['guest_name'],
+        'check_in'          => $meta['check_in'],
+        'check_out'         => $meta['check_out'],
+        'initial_hrs'       => $meta['initial_hrs'],
+        'room_amount'       => $roomAmount,
+        'extend_amount'     => 0,
+        'amenities_amount'  => 0,
+        'food_amount'       => 0,
+        'damages_amount'    => 0,
+        'transfer_amount'   => 0,
+        'frontdesk_name'    => $baseTx
+            ? strtoupper($baseTx->resolved_frontdesk_name ?? $meta['frontdesk_name'])
+            : $meta['frontdesk_name'],
+        'shift'             => $baseTx
+            ? strtoupper($baseTx->resolved_shift ?? '—')
+            : '—',
+        'total'             => $roomAmount,
+    ];
+}
 
-                // Base room row
-                $roomRows[] = [
-                    'detail_id'         => $detail->id,
-                    'row_type'          => 'room_amount',
-                    'number'            => $room?->number ?? '—',
-                    'room_type'         => $meta['room_type'],
-                    'guest_name'        => $meta['guest_name'],
-                    'check_in'          => $meta['check_in'],
-                    'check_out'         => $meta['check_out'],
-                    'initial_hrs'       => $meta['initial_hrs'],
-                    'room_amount'       => $roomAmount,
-                    'extend_amount'     => 0,
-                    'amenities_amount'  => 0,
-                    'food_amount'       => 0,
-                    'damages_amount'    => 0,
-                    'transfer_amount'   => 0,
-                    'frontdesk_name'    => $meta['frontdesk_name'],
-                    'shift'             => $meta['shift'],
-                    'total'             => $roomAmount,
-                ];
+                // $baseTx = $detailTxs
+                //     ->where('transaction_type_id', 1)
+                //     ->sortBy('created_at')
+                //     ->first();
+
+                // $defaultShift = $baseTx?->resolved_shift
+                //     ?? optional($detailTxs->sortBy('created_at')->first())->resolved_shift
+                //     ?? '—';
+
+                // $meta = [
+                //     'room_type'      => $room?->type?->name ?? '—',
+                //     'guest_name'     => $baseGuestName,
+                //     'check_in'       => $detail->check_in_at ? Carbon::parse($detail->check_in_at)->format('m-d-Y h:iA') : '—',
+                //     'check_out'      => $detail->check_out_at ? Carbon::parse($detail->check_out_at)->format('m-d-Y h:iA') : '—',
+                //     'initial_hrs'    => $detail->hours_stayed
+                //         ? ($guest?->is_long_stay
+                //             ? (($detail->hours_stayed * (int) ($guest?->number_of_days ?? 1)) . ' hrs')
+                //             : ($detail->hours_stayed . ' hrs'))
+                //         : '—',
+                //     'frontdesk_name' => strtoupper($frontdesk?->name ?? '—'),
+                //     'shift'          => $defaultShift,
+                // ];
+
+                // // Base room row
+                // $roomRows[] = [
+                //     'detail_id'         => $detail->id,
+                //     'row_type'          => 'room_amount',
+                //     'number'            => $room?->number ?? '—',
+                //     'room_type'         => $meta['room_type'],
+                //     'guest_name'        => $meta['guest_name'],
+                //     'check_in'          => $meta['check_in'],
+                //     'check_out'         => $meta['check_out'],
+                //     'initial_hrs'       => $meta['initial_hrs'],
+                //     'room_amount'       => $roomAmount,
+                //     'extend_amount'     => 0,
+                //     'amenities_amount'  => 0,
+                //     'food_amount'       => 0,
+                //     'damages_amount'    => 0,
+                //     'transfer_amount'   => 0,
+                //     'frontdesk_name'    => $meta['frontdesk_name'],
+                //     'shift'             => $meta['shift'],
+                //     'total'             => $roomAmount,
+                // ];
 
                 $extendTxs = $detailTxs
                     ->where('transaction_type_id', 6)
