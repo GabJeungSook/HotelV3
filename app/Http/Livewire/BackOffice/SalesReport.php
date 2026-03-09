@@ -576,140 +576,141 @@ if ($transferAmount > 0) {
         return $rooms;
     }
 
-    private function buildSummary(): array
-    {
-        $tx = Transaction::query()
-            ->whereNotNull('checkin_detail_id')
-            ->with(['checkin_details.room.type', 'checkin_details.guest'])
-            ->whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id));
+   private function buildSummary(): array
+{
+    $tx = Transaction::query()
+        ->whereNotNull('checkin_detail_id')
+        ->with(['checkin_details.room.type', 'checkin_details.guest'])
+        ->whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id));
 
-        $this->applyTransactionDateFilters($tx, 'created_at');
-        $this->applyShiftFilter($tx);
+    $this->applyTransactionDateFilters($tx, 'created_at');
+    $this->applyShiftFilter($tx);
 
-        $tx->when($this->frontdesk, function ($q, $f) {
-            $q->whereHas('checkin_details', fn($q2) => $q2->where('frontdesk_id', $f));
-        });
+    $tx->when($this->frontdesk, function ($q, $f) {
+        $q->whereHas('checkin_details', fn($q2) => $q2->where('frontdesk_id', $f));
+    });
 
-        $checkinIds = (clone $tx)->distinct()->pluck('checkin_detail_id')->values();
-        $transferredCheckinIds = Transaction::query()
+    $checkinIds = (clone $tx)->distinct()->pluck('checkin_detail_id')->values();
+
+    // Exclude transferred-room stays from summary counts
+    $transferredCheckinIds = Transaction::query()
         ->where('transaction_type_id', 7)
         ->whereIn('checkin_detail_id', $checkinIds)
         ->distinct()
         ->pluck('checkin_detail_id');
 
-        $guestCheckinIds = $checkinIds->diff($transferredCheckinIds)->values();
+    $effectiveCheckinIds = $checkinIds->diff($transferredCheckinIds)->values();
 
-        $details = CheckinDetail::query()
-            ->whereIn('id', $guestCheckinIds)
-            ->with(['room.type', 'guest'])
-            ->get();
+    $details = CheckinDetail::query()
+        ->whereIn('id', $effectiveCheckinIds)
+        ->with(['room.type', 'guest'])
+        ->get();
 
-        $guestCounts = $details
-            ->groupBy(fn($d) => $d->room?->type?->name ?? 'Unknown')
-            ->map(function ($items) {
-                return $items->pluck('guest_id')->filter()->unique()->count();
-            });
+    $guestCounts = $details
+        ->groupBy(fn($d) => $d->room?->type?->name ?? 'Unknown')
+        ->map(function ($items) {
+            return $items->pluck('guest_id')->filter()->unique()->count();
+        });
 
-        $allTypes = \App\Models\Type::where('branch_id', auth()->user()->branch_id)->get();
+    $allTypes = \App\Models\Type::where('branch_id', auth()->user()->branch_id)->get();
 
-        $guestPerType = $allTypes->map(function ($type) use ($guestCounts) {
-            return [
-                'label' => $type->name,
-                'value' => (int) ($guestCounts[$type->name] ?? 0),
-            ];
-        })->values()->all();
-
-        [$start, $end] = $this->shiftWindow();
-
-        $occupiedRoomIds = CheckinDetail::query()
-            ->when($this->frontdesk, fn($q, $f) => $q->where('frontdesk_id', $f))
-            ->whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))
-            ->where(function ($q) use ($start, $end) {
-                $q->where('check_in_at', '<', $end)
-                  ->where(function ($q2) use ($start) {
-                      $q2->whereNull('check_out_at')
-                         ->orWhere('check_out_at', '>', $start);
-                  });
-            })
-            ->distinct()
-            ->pluck('room_id');
-
-        $allRooms = \App\Models\Room::query()
-            ->where('branch_id', auth()->user()->branch_id)
-            ->with('type')
-            ->get();
-
-        $unoccupiedRooms = $allRooms->whereNotIn('id', $occupiedRoomIds);
-
-        $unoccupiedCounts = $unoccupiedRooms
-            ->groupBy(fn($r) => $r->type?->name ?? 'Unknown')
-            ->map(fn($items) => $items->count());
-
-        $unoccupiedPerType = $allTypes->map(function ($type) use ($unoccupiedCounts) {
-            return [
-                'label' => $type->name,
-                'value' => (int) ($unoccupiedCounts[$type->name] ?? 0),
-            ];
-        })->values()->all();
-
-        $damagedRoomIds = Transaction::query()
-            ->where('transaction_type_id', 4)
-            ->whereIn('checkin_detail_id', $checkinIds)
-            ->distinct()
-            ->pluck('room_id');
-
-        $damagedRooms = \App\Models\Room::query()
-            ->where('branch_id', auth()->user()->branch_id)
-            ->whereIn('id', $damagedRoomIds)
-            ->with('type')
-            ->get()
-            ->groupBy(fn($r) => $r->type?->name ?? 'Unknown')
-            ->map(fn($items) => $items->count());
-
-        $underRepairCounts = $allTypes->map(function ($type) use ($damagedRooms) {
-            return [
-                'label' => $type->name,
-                'value' => (int) ($damagedRooms[$type->name] ?? 0),
-            ];
-        })->values()->all();
-
-        $checkinBuckets  = $this->twoShiftBucketsForFilteredDetails($checkinIds, 'check_in_at', false);
-        $checkoutBuckets = $this->twoShiftBucketsForFilteredDetails($checkinIds, 'check_out_at', true);
-
+    $guestPerType = $allTypes->map(function ($type) use ($guestCounts) {
         return [
-            'guest_per_accommodation' => $guestPerType,
-            'unoccupied_rooms'        => $unoccupiedPerType,
-            'under_repair_rooms'      => $underRepairCounts,
-            'group_checkin_time'      => $checkinBuckets,
-            'group_checkout_time'     => $checkoutBuckets,
+            'label' => $type->name,
+            'value' => (int) ($guestCounts[$type->name] ?? 0),
         ];
-    }
+    })->values()->all();
 
-    private function twoShiftBucketsForFilteredDetails($checkinIds, string $column, bool $requireIsCheckout = false): array
-    {
-        $q = CheckinDetail::query()
-            ->whereIn('id', $checkinIds)
-            ->whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))
-            ->when($requireIsCheckout, fn($q) => $q->where('is_check_out', true))
-            ->whereNotNull($column);
+    [$start, $end] = $this->shiftWindow();
 
-        $am = (clone $q)
-            ->whereTime(DB::raw("TIME($column)"), '>=', '08:00:00')
-            ->whereTime(DB::raw("TIME($column)"), '<', '20:00:00')
-            ->count();
+    $occupiedRoomIds = CheckinDetail::query()
+        ->when($this->frontdesk, fn($q, $f) => $q->where('frontdesk_id', $f))
+        ->whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))
+        ->where(function ($q) use ($start, $end) {
+            $q->where('check_in_at', '<', $end)
+              ->where(function ($q2) use ($start) {
+                  $q2->whereNull('check_out_at')
+                     ->orWhere('check_out_at', '>', $start);
+              });
+        })
+        ->distinct()
+        ->pluck('room_id');
 
-        $pm = (clone $q)
-            ->where(function ($sub) use ($column) {
-                $sub->whereTime(DB::raw("TIME($column)"), '>=', '20:00:00')
-                    ->orWhereTime(DB::raw("TIME($column)"), '<', '08:00:00');
-            })
-            ->count();
+    $allRooms = \App\Models\Room::query()
+        ->where('branch_id', auth()->user()->branch_id)
+        ->with('type')
+        ->get();
 
+    $unoccupiedRooms = $allRooms->whereNotIn('id', $occupiedRoomIds);
+
+    $unoccupiedCounts = $unoccupiedRooms
+        ->groupBy(fn($r) => $r->type?->name ?? 'Unknown')
+        ->map(fn($items) => $items->count());
+
+    $unoccupiedPerType = $allTypes->map(function ($type) use ($unoccupiedCounts) {
         return [
-            ['label' => '8:00 AM - 8:00 PM', 'value' => (int) $am],
-            ['label' => '8:00 PM - 8:00 AM', 'value' => (int) $pm],
+            'label' => $type->name,
+            'value' => (int) ($unoccupiedCounts[$type->name] ?? 0),
         ];
-    }
+    })->values()->all();
+
+    $damagedRoomIds = Transaction::query()
+        ->where('transaction_type_id', 4)
+        ->whereIn('checkin_detail_id', $effectiveCheckinIds)
+        ->distinct()
+        ->pluck('room_id');
+
+    $damagedRooms = \App\Models\Room::query()
+        ->where('branch_id', auth()->user()->branch_id)
+        ->whereIn('id', $damagedRoomIds)
+        ->with('type')
+        ->get()
+        ->groupBy(fn($r) => $r->type?->name ?? 'Unknown')
+        ->map(fn($items) => $items->count());
+
+    $underRepairCounts = $allTypes->map(function ($type) use ($damagedRooms) {
+        return [
+            'label' => $type->name,
+            'value' => (int) ($damagedRooms[$type->name] ?? 0),
+        ];
+    })->values()->all();
+
+   $checkinBuckets  = $this->twoShiftBucketsForFilteredDetails($effectiveCheckinIds, 'check_in_at', false);
+$checkoutBuckets = $this->twoShiftBucketsForFilteredDetails($effectiveCheckinIds, 'check_out_at', true);
+    return [
+        'guest_per_accommodation' => $guestPerType,
+        'unoccupied_rooms'        => $unoccupiedPerType,
+        'under_repair_rooms'      => $underRepairCounts,
+        'group_checkin_time'      => $checkinBuckets,
+        'group_checkout_time'     => $checkoutBuckets,
+    ];
+}
+
+private function twoShiftBucketsForFilteredDetails($checkinIds, string $column, bool $requireIsCheckout = false): array
+{
+    $q = CheckinDetail::query()
+        ->whereIn('id', $checkinIds)
+        ->whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))
+        ->when($requireIsCheckout, fn($q) => $q->where('is_check_out', true))
+        ->whereNotNull($column);
+
+    $am = (clone $q)
+        ->whereTime(DB::raw("TIME($column)"), '>=', '08:00:00')
+        ->whereTime(DB::raw("TIME($column)"), '<', '20:00:00')
+        ->count();
+
+    $pm = (clone $q)
+        ->where(function ($sub) use ($column) {
+            $sub->whereTime(DB::raw("TIME($column)"), '>=', '20:00:00')
+                ->orWhereTime(DB::raw("TIME($column)"), '<', '08:00:00');
+        })
+        ->count();
+
+    return [
+        ['label' => '8:00 AM - 8:00 PM', 'value' => (int) $am],
+        ['label' => '8:00 PM - 8:00 AM', 'value' => (int) $pm],
+    ];
+}
 
     public function resetFilters()
     {

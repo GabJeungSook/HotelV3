@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\BackOffice\Reports;
 
 use App\Models\ShiftLog;
+use App\Models\Transaction;
 use Carbon\Carbon;
 use Livewire\Component;
 
@@ -14,7 +15,7 @@ class FrontdeskReport extends Component
     public function mount()
     {
         $this->date = now()->toDateString();
-        $this->shift = "AM";
+        $this->shift = 'PM';
     }
 
     public function resetFilters()
@@ -23,20 +24,19 @@ class FrontdeskReport extends Component
         $this->date = now()->toDateString();
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Shift Summary
+    |--------------------------------------------------------------------------
+    */
     public function getShiftSummaryProperty()
     {
-        $query = ShiftLog::query()
-            ->with(['frontdesk']);
-
-        if ($this->shift) {
-            $query->where('shift', $this->shift);
-        }
-
-        if ($this->date) {
-            $query->whereDate('time_out', $this->date);
-        }
-
-        $logs = $query->orderBy('time_in')->get();
+        $logs = ShiftLog::query()
+            ->with('frontdesk')
+            ->where('shift', $this->shift)
+            ->whereDate('time_out', $this->date)
+            ->orderBy('time_in')
+            ->get();
 
         if ($logs->isEmpty()) {
             return [
@@ -46,17 +46,15 @@ class FrontdeskReport extends Component
             ];
         }
 
-        $closedLogs = $logs->filter(fn ($log) => !empty($log->time_out));
-
-        $outgoingNames = $closedLogs
+        $outgoingNames = $logs
             ->pluck('frontdesk.name')
             ->filter()
             ->unique()
             ->values()
             ->all();
 
-        $firstLog = $logs->sortBy('time_in')->first();
-        $latestClosedLog = $closedLogs->sortByDesc('time_out')->first();
+        $firstLog = $logs->first();
+        $lastLog = $logs->sortByDesc('time_out')->first();
 
         return [
             'frontdesk_outgoing' => $this->formatNames($outgoingNames),
@@ -65,8 +63,8 @@ class FrontdeskReport extends Component
                 ? Carbon::parse($firstLog->time_in)->format('M d, Y h:i A')
                 : '-',
 
-            'shift_closed' => $latestClosedLog?->time_out
-                ? Carbon::parse($latestClosedLog->time_out)->format('M d, Y h:i A')
+            'shift_closed' => $lastLog?->time_out
+                ? Carbon::parse($lastLog->time_out)->format('M d, Y h:i A')
                 : '-',
         ];
     }
@@ -75,167 +73,355 @@ class FrontdeskReport extends Component
     {
         $names = array_values(array_filter($names));
 
-        if (count($names) === 0) {
-            return '-';
-        }
-
-        if (count($names) === 1) {
-            return $names[0];
-        }
-
-        if (count($names) === 2) {
-            return $names[0] . ' & ' . $names[1];
-        }
+        if (count($names) === 0) return '-';
+        if (count($names) === 1) return $names[0];
+        if (count($names) === 2) return $names[0].' & '.$names[1];
 
         $last = array_pop($names);
 
-        return implode(', ', $names) . ' & ' . $last;
+        return implode(', ', $names).' & '.$last;
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Cash Drawer Table
+    |--------------------------------------------------------------------------
+    */
     public function getCashDrawerRowsProperty()
-{
-    /*
-    |--------------------------------------------------------------------------
-    | Current shift logs (based on filters)
-    |--------------------------------------------------------------------------
-    */
-    $currentShiftLogs = ShiftLog::query()
-        ->when($this->shift, fn ($q) => $q->where('shift', $this->shift))
-        ->when($this->date, fn ($q) => $q->whereDate('time_out', $this->date))
-        ->orderBy('time_in')
-        ->get();
+    {
+        /*
+        |-------------------------------------------------------------
+        | Current shift logs
+        |-------------------------------------------------------------
+        */
+        $shiftLogs = ShiftLog::query()
+            ->where('shift', $this->shift)
+            ->whereDate('time_out', $this->date)
+            ->get();
 
-    if ($currentShiftLogs->isEmpty()) {
-        return [];
-    }
+        if ($shiftLogs->isEmpty()) {
+            return [];
+        }
 
-    $currentShiftLogIds = $currentShiftLogs->pluck('id')->all();
-    $currentShiftStart = optional($currentShiftLogs->sortBy('time_in')->first())->time_in;
+        $shiftLogIds = $shiftLogs->pluck('id');
 
-    /*
-    |--------------------------------------------------------------------------
-    | Current shift totals
-    |--------------------------------------------------------------------------
-    */
-    $openingCash = (float) (optional($currentShiftLogs->first())->beginning_cash ?? 0);
+        /*
+        |-------------------------------------------------------------
+        | Determine previous shift
+        |-------------------------------------------------------------
+        */
+        $previousShift = $this->shift === 'AM' ? 'PM' : 'AM';
 
-    $expenses = (float) $currentShiftLogs->sum(function ($log) {
-        return (float) ($log->total_expenses ?? 0);
-    });
+        /*
+        |-------------------------------------------------------------
+        | Opening Cash
+        |-------------------------------------------------------------
+        */
+        $openingCash = (float) ($shiftLogs->first()->beginning_cash ?? 0);
 
-    $remittances = (float) $currentShiftLogs->sum(function ($log) {
-        return (float) ($log->total_remittances ?? 0);
-    });
+        /*
+        |-------------------------------------------------------------
+        | Expenses & Remittances
+        |-------------------------------------------------------------
+        */
+        $expenses = (float) $shiftLogs->sum('total_expenses');
+        $remittances = (float) $shiftLogs->sum('total_remittances');
 
-    /*
-    |--------------------------------------------------------------------------
-    | Current shift deposit transactions
-    |--------------------------------------------------------------------------
-    */
-    $currentDepositTransactions = \App\Models\Transaction::query()
-        ->whereIn('shift_log_id', $currentShiftLogIds)
-        ->where('transaction_type_id', 2);
-
-    $keyRemoteDepositAmount = (float) (clone $currentDepositTransactions)
-        ->where('remarks', 'Deposit From Check In (Room Key & TV Remote)')
-        ->sum('payable_amount');
-
-    $otherDepositsAmount = (float) (clone $currentDepositTransactions)
-        ->where(function ($q) {
-            $q->whereNull('remarks')
-              ->orWhere('remarks', '!=', 'Deposit From Check In (Room Key & TV Remote)');
-        })
-        ->sum('payable_amount');
-
-    /*
-    |--------------------------------------------------------------------------
-    | Strict previous shift batch
-    |--------------------------------------------------------------------------
-    | Find the latest time_out before the current shift started,
-    | then get all shift logs with that exact time_out.
-    |--------------------------------------------------------------------------
-    */
-    $previousShiftEnd = ShiftLog::query()
-        ->whereNotNull('time_out')
-        ->where('time_out', '<', $currentShiftStart)
-        ->max('time_out');
-
-    $previousShiftLogIds = [];
-
-    if ($previousShiftEnd) {
-        $previousShiftLogIds = ShiftLog::query()
-            ->where('time_out', $previousShiftEnd)
-            ->pluck('id')
-            ->all();
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Previous shift forwarded deposit transactions
-    |--------------------------------------------------------------------------
-    | Only from the immediate previous shift
-    | Only guests not yet checked out
-    |--------------------------------------------------------------------------
-    */
-    $keyRemoteDepositForwarded = 0;
-    $otherDepositsForwarded = 0;
-
-    if (!empty($previousShiftLogIds)) {
-        $previousForwardedTransactions = \App\Models\Transaction::query()
-            ->whereIn('shift_log_id', $previousShiftLogIds)
+        /*
+        |-------------------------------------------------------------
+        | Current Shift Deposits
+        |-------------------------------------------------------------
+        */
+        $currentTransactions = Transaction::query()
+            ->whereIn('shift_log_id', $shiftLogIds)
             ->where('transaction_type_id', 2)
-            ->whereHas('checkin_detail', function ($q) {
-                $q->where('is_check_out', false);
-            });
+            ->where('shift', $this->shift);
 
-        $keyRemoteDepositForwarded = (float) (clone $previousForwardedTransactions)
+        $keyRemoteDeposit = (clone $currentTransactions)
             ->where('remarks', 'Deposit From Check In (Room Key & TV Remote)')
             ->sum('payable_amount');
 
-        $otherDepositsForwarded = (float) (clone $previousForwardedTransactions)
+        $otherDeposits = (clone $currentTransactions)
             ->where(function ($q) {
                 $q->whereNull('remarks')
                   ->orWhere('remarks', '!=', 'Deposit From Check In (Room Key & TV Remote)');
             })
             ->sum('payable_amount');
+
+        /*
+        |-------------------------------------------------------------
+        | Forwarded Deposits (previous shift guests still checked in)
+        |-------------------------------------------------------------
+        */
+        $forwardedTransactions = Transaction::query()
+            ->where('transaction_type_id', 2)
+            ->where('shift', $previousShift)
+            ->whereHas('checkin_details', function ($q) {
+                $q->where('is_check_out', false);
+            });
+
+        $keyRemoteForwarded = (clone $forwardedTransactions)
+            ->where('remarks', 'Deposit From Check In (Room Key & TV Remote)')
+            ->sum('payable_amount');
+
+        $otherForwarded = (clone $forwardedTransactions)
+            ->where(function ($q) {
+                $q->whereNull('remarks')
+                  ->orWhere('remarks', '!=', 'Deposit From Check In (Room Key & TV Remote)');
+            })
+            ->sum('payable_amount');
+
+        return [
+            [
+                'description' => 'Opening Cash',
+                'amount' => $openingCash,
+                'forwarded_amount' => null,
+                'total_amount' => $openingCash,
+                'remarks' => '',
+            ],
+            [
+                'description' => 'Key / Remote Deposit',
+                'amount' => $keyRemoteDeposit,
+                'forwarded_amount' => $keyRemoteForwarded,
+                'total_amount' => $keyRemoteDeposit + $keyRemoteForwarded,
+                'remarks' => 'Deposit From Check In (Room Key & TV Remote)',
+            ],
+            [
+                'description' => 'Other Deposits',
+                'amount' => $otherDeposits,
+                'forwarded_amount' => $otherForwarded,
+                'total_amount' => $otherDeposits + $otherForwarded,
+                'remarks' => 'Other deposits',
+            ],
+            [
+                'description' => 'Expenses',
+                'amount' => $expenses,
+                'forwarded_amount' => null,
+                'total_amount' => $expenses,
+                'remarks' => '',
+            ],
+            [
+                'description' => 'Remittances',
+                'amount' => $remittances,
+                'forwarded_amount' => null,
+                'total_amount' => $remittances,
+                'remarks' => '',
+            ],
+        ];
     }
+
+    public function getFrontdeskOperationRowsProperty()
+{
+    $shiftLogs = ShiftLog::query()
+        ->where('shift', $this->shift)
+        ->whereDate('time_out', $this->date)
+        ->get();
+
+    if ($shiftLogs->isEmpty()) {
+        return [];
+    }
+
+    $shiftLogIds = $shiftLogs->pluck('id');
+
+    $baseTransactions = \App\Models\Transaction::query()
+        ->whereIn('shift_log_id', $shiftLogIds)
+        ->where('shift', $this->shift);
+
+    $definitions = [
+        [
+            'description' => 'New Check-In',
+            'transaction_type_id' => 1,
+            'remarks' => '',
+        ],
+        [
+            'description' => 'Extension',
+            'transaction_type_id' => 6,
+            'remarks' => '',
+        ],
+        [
+            'description' => 'Damage Charges',
+            'transaction_type_id' => 4,
+            'remarks' => '',
+        ],
+        [
+            'description' => 'Food & Beverages',
+            'transaction_type_id' => 9,
+            'remarks' => '',
+        ],
+        [
+            'description' => 'Amenities',
+            'transaction_type_id' => 8,
+            'remarks' => '',
+        ],
+        [
+            'description' => 'Transfer Room',
+            'transaction_type_id' => 7,
+            'remarks' => '',
+        ],
+    ];
+
+    return collect($definitions)->map(function ($item) use ($baseTransactions) {
+        $query = (clone $baseTransactions)
+            ->where('transaction_type_id', $item['transaction_type_id']);
+
+        return [
+            'description' => $item['description'],
+            'total_rooms' => (clone $query)->count(),
+            'amount' => (float) (clone $query)->sum('payable_amount'),
+            'remarks' => $item['remarks'],
+        ];
+    })->all();
+}
+
+public function getRoomActivityRowsProperty()
+{
+    $shiftLogs = ShiftLog::query()
+        ->where('shift', $this->shift)
+        ->whereDate('time_out', $this->date)
+        ->get();
+
+    if ($shiftLogs->isEmpty()) {
+        return [];
+    }
+
+    $shiftLogIds = $shiftLogs->pluck('id');
+    $previousShift = $this->shift === 'AM' ? 'PM' : 'AM';
+    $formattedShiftDate = Carbon::parse($this->date)->format('F j, Y');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Check-In (Forwarded)
+    |--------------------------------------------------------------------------
+    */
+    $forwardedCheckIns = \App\Models\Transaction::query()
+        ->where('transaction_type_id', 1)
+        ->where('shift', $previousShift)
+        ->whereHas('checkin_details', function ($q) {
+            $q->where('is_check_out', false);
+        });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Check-In (Current)
+    |--------------------------------------------------------------------------
+    */
+    $currentCheckIns = \App\Models\Transaction::query()
+        ->whereIn('shift_log_id', $shiftLogIds)
+        ->where('shift', $this->shift)
+        ->where('transaction_type_id', 1);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Check-Out (Current)
+    |--------------------------------------------------------------------------
+    */
+  $currentCheckOuts = \App\Models\CheckinDetail::query()
+        ->whereHas('checkOutGuestReports', function ($q) use ($formattedShiftDate) {
+            $q->where('shift', $this->shift)
+              ->where('shift_date', $formattedShiftDate);
+        });
 
     return [
         [
-            'description' => 'Opening Cash',
-            'amount' => $openingCash,
-            'forwarded_amount' => null,
-            'total_amount' => $openingCash,
-            'remarks' => '',
+            'description' => 'Check-In (Forwarded)',
+            'number_of_rooms' => (clone $forwardedCheckIns)->count(),
+            'amount' => (float) (clone $forwardedCheckIns)->sum('payable_amount'),
         ],
         [
-            'description' => 'Key / Remote Deposit',
-            'amount' => $keyRemoteDepositAmount,
-            'forwarded_amount' => $keyRemoteDepositForwarded,
-            'total_amount' => $keyRemoteDepositAmount + $keyRemoteDepositForwarded,
-            'remarks' => 'Deposit From Check In (Room Key & TV Remote)',
+            'description' => 'Check-In (Current)',
+            'number_of_rooms' => (clone $currentCheckIns)->count(),
+            'amount' => (float) (clone $currentCheckIns)->sum('payable_amount'),
         ],
         [
-            'description' => 'Other Deposits',
-            'amount' => $otherDepositsAmount,
-            'forwarded_amount' => $otherDepositsForwarded,
-            'total_amount' => $otherDepositsAmount + $otherDepositsForwarded,
-            'remarks' => 'Other deposits',
+            'description' => 'Check-Out',
+            'number_of_rooms' => (clone $currentCheckOuts)->count(),
+            'amount' => 0,
         ],
-        [
-            'description' => 'Expenses',
-            'amount' => $expenses,
-            'forwarded_amount' => null,
-            'total_amount' => $expenses,
-            'remarks' => '',
-        ],
-        [
-            'description' => 'Remittances',
-            'amount' => $remittances,
-            'forwarded_amount' => null,
-            'total_amount' => $remittances,
-            'remarks' => '',
-        ],
+    ];
+}
+
+public function getCashReconciliationProperty()
+{
+    $shiftLogs = ShiftLog::query()
+        ->where('shift', $this->shift)
+        ->whereDate('time_out', $this->date)
+        ->get();
+
+    if ($shiftLogs->isEmpty()) {
+        return [
+            'expected_cash' => 0,
+            'actual_cash' => 0,
+            'difference' => 0,
+        ];
+    }
+
+    $shiftLogIds = $shiftLogs->pluck('id');
+
+    $expectedCash = (float) \App\Models\Transaction::query()
+        ->whereIn('shift_log_id', $shiftLogIds)
+        ->whereNotIn('transaction_type_id', [ 5])
+        ->sum('payable_amount');
+
+    $actualCash = (float) $shiftLogs->sum(function ($log) {
+        return (float) ($log->end_cash ?? 0);
+    });
+
+    return [
+        'expected_cash' => $expectedCash,
+        'actual_cash' => $actualCash,
+        'difference' => $expectedCash - $actualCash,
+    ];
+}
+
+public function getFinalSalesProperty()
+{
+    $shiftLogs = ShiftLog::query()
+        ->where('shift', $this->shift)
+        ->whereDate('time_out', $this->date)
+        ->get();
+
+    if ($shiftLogs->isEmpty()) {
+        return [
+            'gross_sales' => 0,
+            'expenses' => 0,
+            'discounts' => 0,
+            'net_sales' => 0,
+        ];
+    }
+
+    $shiftLogIds = $shiftLogs->pluck('id');
+
+    $currentTransactions = \App\Models\Transaction::query()
+        ->whereIn('shift_log_id', $shiftLogIds)
+        ->where('shift', $this->shift);
+
+    $grossSales = (float) (clone $currentTransactions)
+        ->whereNotIn('transaction_type_id', [2, 5])
+        ->sum('payable_amount');
+
+    $expenses = (float) $shiftLogs->sum(function ($log) {
+        return (float) ($log->total_expenses ?? 0);
+    });
+
+    $discountCheckinDetailIds = (clone $currentTransactions)
+        ->whereNotNull('checkin_detail_id')
+        ->distinct()
+        ->pluck('checkin_detail_id');
+
+   $discountCheckinDetails = \App\Models\CheckinDetail::query()
+    ->with('guest')
+    ->whereIn('id', $discountCheckinDetailIds)
+    ->get();
+
+$discounts = (float) $discountCheckinDetails->sum(function ($checkinDetail) {
+    return (float) ($checkinDetail->guest->discount_amount ?? 0);
+});
+
+    return [
+        'gross_sales' => $grossSales,
+        'expenses' => $expenses,
+        'discounts' => $discounts,
+        'net_sales' => $grossSales - $expenses - $discounts,
     ];
 }
 
@@ -244,6 +430,10 @@ class FrontdeskReport extends Component
         return view('livewire.back-office.reports.frontdesk-report', [
             'shiftSummary' => $this->shiftSummary,
             'cashDrawerRows' => $this->cashDrawerRows,
+            'frontdeskOperationRows' => $this->frontdeskOperationRows,
+            'roomActivityRows' => $this->roomActivityRows,
+            'cashReconciliation' => $this->cashReconciliation,
+            'finalSales' => $this->finalSales,
         ]);
     }
 }
