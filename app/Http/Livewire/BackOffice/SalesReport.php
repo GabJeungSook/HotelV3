@@ -27,6 +27,7 @@ class SalesReport extends Component
     public $date_to;
     public $shift;
     public $frontdesk;
+    public $frontdesk_name;
 
     public $transactions; // collection of grouped by room
     public array $groups = []; // NEW: for uniform grouped layout
@@ -397,6 +398,8 @@ private function applySalesTypeFilter($query, string $column = 'check_out_at')
 
 public function generateReport()
 {
+    $frontdesk_id = Frontdesk::find($this->frontdesk);
+    $this->frontdesk_name = $frontdesk_id?->name;
     $detailsQuery = CheckinDetail::query()
         ->with([
             'room.type',

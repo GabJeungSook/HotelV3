@@ -1,5 +1,5 @@
 <div class="max-w-full mx-auto py-8 px-4 sm:px-6 lg:px-8">
-    <style>
+    {{-- <style>
 @page {
     size: A4 landscape;
     margin: 12mm;
@@ -28,7 +28,7 @@
         overflow-wrap: break-word;
     }
 }
-</style>
+</style> --}}
     {{-- Filters --}}
     <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 p-4 mb-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -253,8 +253,42 @@
             </div>
         </div>
 
-            {{-- Room Summary --}}
-    <div class="p-6 border-t border-gray-200">
+        
+        {{-- Room Summary --}}
+        <div class="flex justify-end items-end gap-2 border-t border-gray-200 p-6">
+                <button @click="printOut($refs.printContainer.outerHTML);" type="button"
+                class="w-full md:w-auto inline-flex justify-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
+                Print
+            </button>
+        </div>
+        {{-- printable area --}}
+        <div  x-ref="printContainer">
+                    <div class="p-6 ">
+        {{-- Header --}}
+        <div class="border-t py-6 grid grid-cols-2 gap-y-4 text-sm">
+            <div class="font-medium text-gray-600">
+                Frontdesk:
+            </div>
+            <div class="font-semibold text-gray-900">
+                {{ $frontdesk_name ?? '-' }}
+            </div>
+
+            <div class="font-medium text-gray-600">
+                Date:
+            </div>
+            <div class="font-semibold text-gray-900">
+                {{ \Carbon\Carbon::parse($date_from)->format('F d, Y'). ' - ' .\Carbon\Carbon::parse($date_to)->format('F d, Y') ?? '-' }}
+            </div>
+
+            <div class="font-medium text-gray-600">
+                Shift:
+            </div>
+            <div class="font-semibold text-gray-900">
+                {{ $shift ?? '-' }}
+            </div>
+        </div>
+            
+
     <div class="text-center font-semibold text-gray-900 mb-4">ROOM SUMMARY</div>
 
     <div class="overflow-x-auto">
@@ -304,6 +338,7 @@
         </div>
     </div>
 </div>
+
         {{-- Reports Summary --}}
 <div class="p-6 border-t border-gray-200">
     <div class="text-center font-semibold text-gray-900 mb-4">
@@ -414,5 +449,10 @@
 
 
 </div>
+
+
+        </div>
+
+
     </div>
 </div>
