@@ -287,57 +287,57 @@ class SalesReport extends Component
         return null;
     }
 
-    private function buildSalesRooms($details, $txRowsByDetail): array
-    {
-        $rooms = [];
+   private function buildSalesRooms($details, $txRowsByDetail): array
+{
+    $rooms = [];
 
-        $groupedByRoom = $details
-            ->groupBy('room_id')
-            ->sortBy(function ($items) {
-                return (int) ($items->first()?->room?->number ?? PHP_INT_MAX);
-            });
+    $groupedByRoom = $details
+        ->groupBy('room_id')
+        ->sortBy(function ($items) {
+            return (int) ($items->first()?->room?->number ?? PHP_INT_MAX);
+        });
 
-        foreach ($groupedByRoom as $roomId => $roomDetails) {
-            $room = $roomDetails->first()?->room;
-            $roomRows = [];
+    foreach ($groupedByRoom as $roomId => $roomDetails) {
+        $room = $roomDetails->first()?->room;
+        $roomRows = [];
 
-            foreach ($roomDetails as $detail) {
-                $guest = $detail->guest;
-                $rate = $detail->rate;
-                $frontdesk = $detail->frontdesk;
+        foreach ($roomDetails as $detail) {
+            $guest = $detail->guest;
+            $rate = $detail->rate;
 
-                $baseGuestName = strtoupper($guest?->name ?? '—');
+            $baseGuestName = strtoupper($guest?->name ?? '—');
 
-                $roomAmount = $guest?->is_long_stay
-                    ? (float) ($rate?->amount ?? 0) * (int) ($guest?->number_of_days ?? 1)
-                    : (float) ($rate?->amount ?? 0);
+            $roomAmount = $guest?->is_long_stay
+                ? (float) ($rate?->amount ?? 0) * (int) ($guest?->number_of_days ?? 1)
+                : (float) ($rate?->amount ?? 0);
 
-                $detailTxs = collect($txRowsByDetail[$detail->id] ?? []);
+            $detailTxs = collect($txRowsByDetail[$detail->id] ?? [])->sortBy('created_at')->values();
 
-                $baseTx = $detailTxs
-                    ->where('transaction_type_id', 2)
-                    ->sortBy('created_at')
-                    ->first();
+            $meta = [
+                'room_type'   => $room?->type?->name ?? '—',
+                'guest_name'  => $baseGuestName,
+                'check_in'    => $detail->check_in_at ? Carbon::parse($detail->check_in_at)->format('m-d-Y h:iA') : '—',
+                'check_out'   => $detail->check_out_at ? Carbon::parse($detail->check_out_at)->format('m-d-Y h:iA') : '—',
+                'initial_hrs' => $detail->hours_stayed
+                    ? ($guest?->is_long_stay
+                        ? (($detail->hours_stayed * (int) ($guest?->number_of_days ?? 1)) . ' hrs')
+                        : ($detail->hours_stayed . ' hrs'))
+                    : '—',
+            ];
 
-                $defaultShift = $baseTx?->resolved_shift
-                    ?? optional($detailTxs->sortBy('created_at')->first())->resolved_shift
-                    ?? '—';
+            /*
+            |--------------------------------------------------------------------------
+            | BASE ROOM ROW
+            |--------------------------------------------------------------------------
+            | Only show this if the filtered transactions still contain the base tx.
+            | Assumes base/check-in room transaction_type_id = 2
+            |--------------------------------------------------------------------------
+            */
+            $baseTx = $detailTxs
+                ->where('transaction_type_id', 1)
+                ->first();
 
-                $meta = [
-                    'room_type'      => $room?->type?->name ?? '—',
-                    'guest_name'     => $baseGuestName,
-                    'check_in'       => $detail->check_in_at ? Carbon::parse($detail->check_in_at)->format('m-d-Y h:iA') : '—',
-                    'check_out'      => $detail->check_out_at ? Carbon::parse($detail->check_out_at)->format('m-d-Y h:iA') : '—',
-                    'initial_hrs'    => $detail->hours_stayed
-                        ? ($guest?->is_long_stay
-                            ? (($detail->hours_stayed * (int) ($guest?->number_of_days ?? 1)) . ' hrs')
-                            : ($detail->hours_stayed . ' hrs'))
-                        : '—',
-                    'frontdesk_name' => strtoupper($frontdesk?->name ?? '—'),
-                    'shift'          => $defaultShift,
-                ];
-
-                // Base room row
+            if ($baseTx) {
                 $roomRows[] = [
                     'detail_id'         => $detail->id,
                     'row_type'          => 'room_amount',
@@ -353,182 +353,213 @@ class SalesReport extends Component
                     'food_amount'       => 0,
                     'damages_amount'    => 0,
                     'transfer_amount'   => 0,
-                    'frontdesk_name'    => $meta['frontdesk_name'],
-                    'shift'             => $meta['shift'],
+                    'frontdesk_name'    => strtoupper($baseTx->resolved_frontdesk_name ?? '—'),
+                    'shift'             => strtoupper($baseTx->resolved_shift ?? $baseTx->shift ?? '—'),
                     'total'             => $roomAmount,
                 ];
+            }
 
-                $extendTxs = $detailTxs
-                    ->where('transaction_type_id', 6)
-                    ->values();
+            /*
+            |--------------------------------------------------------------------------
+            | EXTEND
+            |--------------------------------------------------------------------------
+            | Group by frontdesk + shift so forwarded transactions stay separated.
+            |--------------------------------------------------------------------------
+            */
+            $extendTxs = $detailTxs
+                ->where('transaction_type_id', 6)
+                ->values();
 
-                if ($extendTxs->isNotEmpty()) {
-                    $extendByFrontdesk = $extendTxs
-                        ->groupBy(fn($tx) => ($tx->resolved_frontdesk_id ?: 'unknown') . '|' . ($tx->resolved_shift ?: '—'))
-                        ->map(function ($group) {
-                            $first = $group->sortBy('created_at')->first();
+            if ($extendTxs->isNotEmpty()) {
+                $extendByFrontdeskAndShift = $extendTxs
+                    ->groupBy(fn($tx) => ($tx->resolved_frontdesk_id ?: 'unknown') . '|' . strtoupper($tx->resolved_shift ?? $tx->shift ?? '—'))
+                    ->map(function ($group) {
+                        $first = $group->sortBy('created_at')->first();
 
-                            return [
-                                'frontdesk_id'   => $first->resolved_frontdesk_id,
-                                'frontdesk_name' => $first->resolved_frontdesk_name ?? '—',
-                                'shift'          => $first->resolved_shift ?? '—',
-                                'amount'         => (float) $group->sum('payable_amount'),
-                                'first_paid_at'  => optional($group->sortBy('created_at')->first())->created_at,
-                            ];
-                        })
-                        ->sortBy('first_paid_at')
-                        ->values();
-
-                    $isForwardedExtend = $extendByFrontdesk->count() > 1;
-
-                    foreach ($extendByFrontdesk as $extendGroup) {
-                        $roomRows[] = [
-                            'detail_id'         => $detail->id,
-                            'row_type'          => 'extend',
-                            'number'            => $room?->number ?? '—',
-                            'room_type'         => '-',
-                            'guest_name'        => $isForwardedExtend ? 'FWD ' . $baseGuestName : '-',
-                            'check_in'          => '-',
-                            'check_out'         => '-',
-                            'initial_hrs'       => '-',
-                            'room_amount'       => 0,
-                            'extend_amount'     => (float) $extendGroup['amount'],
-                            'amenities_amount'  => 0,
-                            'food_amount'       => 0,
-                            'damages_amount'    => 0,
-                            'transfer_amount'   => 0,
-                            'frontdesk_name'    => $extendGroup['frontdesk_name'],
-                            'shift'             => $extendGroup['shift'],
-                            'total'             => (float) $extendGroup['amount'],
+                        return [
+                            'frontdesk_name' => strtoupper($first->resolved_frontdesk_name ?? '—'),
+                            'shift'          => strtoupper($first->resolved_shift ?? $first->shift ?? '—'),
+                            'amount'         => (float) $group->sum('payable_amount'),
+                            'first_paid_at'  => $first->created_at,
                         ];
-                    }
-                }
-
-                $amenitiesTxs = $detailTxs
-                    ->where('transaction_type_id', 8)
+                    })
+                    ->sortBy('first_paid_at')
                     ->values();
 
-                $amenitiesAmount = (float) $amenitiesTxs->sum('payable_amount');
+                $isForwardedExtend = $extendByFrontdeskAndShift->count() > 1;
 
-                if ($amenitiesAmount > 0) {
+                foreach ($extendByFrontdeskAndShift as $extendGroup) {
                     $roomRows[] = [
                         'detail_id'         => $detail->id,
-                        'row_type'          => 'amenities',
+                        'row_type'          => 'extend',
                         'number'            => $room?->number ?? '—',
                         'room_type'         => '-',
-                        'guest_name'        => '-',
+                        'guest_name'        => $isForwardedExtend ? 'FWD ' . $baseGuestName : '-',
                         'check_in'          => '-',
                         'check_out'         => '-',
                         'initial_hrs'       => '-',
                         'room_amount'       => 0,
-                        'extend_amount'     => 0,
-                        'amenities_amount'  => $amenitiesAmount,
-                        'food_amount'       => 0,
-                        'damages_amount'    => 0,
-                        'transfer_amount'   => 0,
-                        'frontdesk_name'    => $meta['frontdesk_name'],
-                        'shift'             => strtoupper(optional($amenitiesTxs->sortBy('created_at')->first())->resolved_shift ?? $meta['shift']),
-                        'total'             => $amenitiesAmount,
-                    ];
-                }
-
-                $foodTxs = $detailTxs
-                    ->where('transaction_type_id', 9)
-                    ->values();
-
-                $foodAmount = (float) $foodTxs->sum('payable_amount');
-
-                if ($foodAmount > 0) {
-                    $roomRows[] = [
-                        'detail_id'         => $detail->id,
-                        'row_type'          => 'food',
-                        'number'            => $room?->number ?? '—',
-                        'room_type'         => '-',
-                        'guest_name'        => '-',
-                        'check_in'          => '-',
-                        'check_out'         => '-',
-                        'initial_hrs'       => '-',
-                        'room_amount'       => 0,
-                        'extend_amount'     => 0,
-                        'amenities_amount'  => 0,
-                        'food_amount'       => $foodAmount,
-                        'damages_amount'    => 0,
-                        'transfer_amount'   => 0,
-                        'frontdesk_name'    => $meta['frontdesk_name'],
-                        'shift'             => strtoupper(optional($foodTxs->sortBy('created_at')->first())->resolved_shift ?? $meta['shift']),
-                        'total'             => $foodAmount,
-                    ];
-                }
-
-                $damagesTxs = $detailTxs
-                    ->where('transaction_type_id', 4)
-                    ->values();
-
-                $damagesAmount = (float) $damagesTxs->sum('payable_amount');
-
-                if ($damagesAmount > 0) {
-                    $roomRows[] = [
-                        'detail_id'         => $detail->id,
-                        'row_type'          => 'damages',
-                        'number'            => $room?->number ?? '—',
-                        'room_type'         => '-',
-                        'guest_name'        => '-',
-                        'check_in'          => '-',
-                        'check_out'         => '-',
-                        'initial_hrs'       => '-',
-                        'room_amount'       => 0,
-                        'extend_amount'     => 0,
-                        'amenities_amount'  => 0,
-                        'food_amount'       => 0,
-                        'damages_amount'    => $damagesAmount,
-                        'transfer_amount'   => 0,
-                        'frontdesk_name'    => $meta['frontdesk_name'],
-                        'shift'             => strtoupper(optional($damagesTxs->sortBy('created_at')->first())->resolved_shift ?? $meta['shift']),
-                        'total'             => $damagesAmount,
-                    ];
-                }
-
-                $transferTxs = $detailTxs
-                    ->where('transaction_type_id', 7)
-                    ->values();
-
-                $transferAmount = (float) $transferTxs->sum('payable_amount');
-
-                if ($transferAmount > 0) {
-                    $roomRows[] = [
-                        'detail_id'         => $detail->id,
-                        'row_type'          => 'transfer',
-                        'number'            => $room?->number ?? '—',
-                        'room_type'         => '-',
-                        'guest_name'        => '-',
-                        'check_in'          => '-',
-                        'check_out'         => '-',
-                        'initial_hrs'       => '-',
-                        'room_amount'       => 0,
-                        'extend_amount'     => 0,
+                        'extend_amount'     => (float) $extendGroup['amount'],
                         'amenities_amount'  => 0,
                         'food_amount'       => 0,
                         'damages_amount'    => 0,
-                        'transfer_amount'   => $transferAmount,
-                        'frontdesk_name'    => $meta['frontdesk_name'],
-                        'shift'             => strtoupper(optional($transferTxs->sortBy('created_at')->first())->resolved_shift ?? $meta['shift']),
-                        'total'             => $transferAmount,
+                        'transfer_amount'   => 0,
+                        'frontdesk_name'    => $extendGroup['frontdesk_name'],
+                        'shift'             => $extendGroup['shift'],
+                        'total'             => (float) $extendGroup['amount'],
                     ];
                 }
             }
 
-            if (count($roomRows) > 0) {
-                $rooms[] = [
-                    'room_id'     => $roomId,
-                    'room_number' => $room?->number ?? '—',
-                    'rowspan'     => count($roomRows),
-                    'rows'        => $roomRows,
+            /*
+            |--------------------------------------------------------------------------
+            | AMENITIES
+            |--------------------------------------------------------------------------
+            */
+            $amenitiesTxs = $detailTxs
+                ->where('transaction_type_id', 8)
+                ->values();
+
+            $amenitiesAmount = (float) $amenitiesTxs->sum('payable_amount');
+            $amenitiesFirstTx = $amenitiesTxs->sortBy('created_at')->first();
+
+            if ($amenitiesAmount > 0) {
+                $roomRows[] = [
+                    'detail_id'         => $detail->id,
+                    'row_type'          => 'amenities',
+                    'number'            => $room?->number ?? '—',
+                    'room_type'         => '-',
+                    'guest_name'        => '-',
+                    'check_in'          => '-',
+                    'check_out'         => '-',
+                    'initial_hrs'       => '-',
+                    'room_amount'       => 0,
+                    'extend_amount'     => 0,
+                    'amenities_amount'  => $amenitiesAmount,
+                    'food_amount'       => 0,
+                    'damages_amount'    => 0,
+                    'transfer_amount'   => 0,
+                    'frontdesk_name'    => strtoupper($amenitiesFirstTx->resolved_frontdesk_name ?? '—'),
+                    'shift'             => strtoupper($amenitiesFirstTx->resolved_shift ?? $amenitiesFirstTx->shift ?? '—'),
+                    'total'             => $amenitiesAmount,
+                ];
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | FOOD
+            |--------------------------------------------------------------------------
+            */
+            $foodTxs = $detailTxs
+                ->where('transaction_type_id', 9)
+                ->values();
+
+            $foodAmount = (float) $foodTxs->sum('payable_amount');
+            $foodFirstTx = $foodTxs->sortBy('created_at')->first();
+
+            if ($foodAmount > 0) {
+                $roomRows[] = [
+                    'detail_id'         => $detail->id,
+                    'row_type'          => 'food',
+                    'number'            => $room?->number ?? '—',
+                    'room_type'         => '-',
+                    'guest_name'        => '-',
+                    'check_in'          => '-',
+                    'check_out'         => '-',
+                    'initial_hrs'       => '-',
+                    'room_amount'       => 0,
+                    'extend_amount'     => 0,
+                    'amenities_amount'  => 0,
+                    'food_amount'       => $foodAmount,
+                    'damages_amount'    => 0,
+                    'transfer_amount'   => 0,
+                    'frontdesk_name'    => strtoupper($foodFirstTx->resolved_frontdesk_name ?? '—'),
+                    'shift'             => strtoupper($foodFirstTx->resolved_shift ?? $foodFirstTx->shift ?? '—'),
+                    'total'             => $foodAmount,
+                ];
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | DAMAGES
+            |--------------------------------------------------------------------------
+            */
+            $damagesTxs = $detailTxs
+                ->where('transaction_type_id', 4)
+                ->values();
+
+            $damagesAmount = (float) $damagesTxs->sum('payable_amount');
+            $damagesFirstTx = $damagesTxs->sortBy('created_at')->first();
+
+            if ($damagesAmount > 0) {
+                $roomRows[] = [
+                    'detail_id'         => $detail->id,
+                    'row_type'          => 'damages',
+                    'number'            => $room?->number ?? '—',
+                    'room_type'         => '-',
+                    'guest_name'        => '-',
+                    'check_in'          => '-',
+                    'check_out'         => '-',
+                    'initial_hrs'       => '-',
+                    'room_amount'       => 0,
+                    'extend_amount'     => 0,
+                    'amenities_amount'  => 0,
+                    'food_amount'       => 0,
+                    'damages_amount'    => $damagesAmount,
+                    'transfer_amount'   => 0,
+                    'frontdesk_name'    => strtoupper($damagesFirstTx->resolved_frontdesk_name ?? '—'),
+                    'shift'             => strtoupper($damagesFirstTx->resolved_shift ?? $damagesFirstTx->shift ?? '—'),
+                    'total'             => $damagesAmount,
+                ];
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | TRANSFER
+            |--------------------------------------------------------------------------
+            */
+            $transferTxs = $detailTxs
+                ->where('transaction_type_id', 7)
+                ->values();
+
+            $transferAmount = (float) $transferTxs->sum('payable_amount');
+            $transferFirstTx = $transferTxs->sortBy('created_at')->first();
+
+            if ($transferAmount > 0) {
+                $roomRows[] = [
+                    'detail_id'         => $detail->id,
+                    'row_type'          => 'transfer',
+                    'number'            => $room?->number ?? '—',
+                    'room_type'         => '-',
+                    'guest_name'        => '-',
+                    'check_in'          => '-',
+                    'check_out'         => '-',
+                    'initial_hrs'       => '-',
+                    'room_amount'       => 0,
+                    'extend_amount'     => 0,
+                    'amenities_amount'  => 0,
+                    'food_amount'       => 0,
+                    'damages_amount'    => 0,
+                    'transfer_amount'   => $transferAmount,
+                    'frontdesk_name'    => strtoupper($transferFirstTx->resolved_frontdesk_name ?? '—'),
+                    'shift'             => strtoupper($transferFirstTx->resolved_shift ?? $transferFirstTx->shift ?? '—'),
+                    'total'             => $transferAmount,
                 ];
             }
         }
 
-        return $rooms;
+        if (count($roomRows) > 0) {
+            $rooms[] = [
+                'room_id'     => $roomId,
+                'room_number' => $room?->number ?? '—',
+                'rowspan'     => count($roomRows),
+                'rows'        => $roomRows,
+            ];
+        }
     }
+
+    return $rooms;
+}
 
     private function buildSummary(): array
     {
