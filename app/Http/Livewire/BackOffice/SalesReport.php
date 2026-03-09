@@ -223,7 +223,7 @@ class SalesReport extends Component
         // include base room tx type too so base row can display transaction shift
         $txRows = Transaction::query()
             ->whereIn('checkin_detail_id', $detailIds)
-            ->whereIn('transaction_type_id', [2, 4, 6, 7, 8, 9])
+            ->whereIn('transaction_type_id', [1, 4, 6, 7, 8, 9])
             ->select([
                 'id',
                 'checkin_detail_id',
