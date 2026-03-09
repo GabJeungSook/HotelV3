@@ -154,9 +154,7 @@ class SalesReport extends Component
             return;
         }
 
-        $query->whereHas('shift_log', function ($q) {
-            $q->where('shift', $this->shift);
-        });
+        $query->where('shift', $this->shift);
     }
 
     private function shiftWindow(): array
@@ -224,7 +222,7 @@ class SalesReport extends Component
 
         // include base room tx type too so base row can display transaction shift
         $txRows = Transaction::query()
-            ->with(['shift_log.frontdesk'])
+                ->with('shift_log')
             ->whereIn('checkin_detail_id', $detailIds)
             ->whereIn('transaction_type_id', [1, 4, 6, 7, 8, 9])
             ->select([
@@ -233,7 +231,6 @@ class SalesReport extends Component
                 'transaction_type_id',
                 'payable_amount',
                 'assigned_frontdesk_id',
-                'shift_log_id',
                 'created_at',
                 'shift',
             ]);
@@ -245,12 +242,14 @@ class SalesReport extends Component
             ->orderBy('created_at')
             ->get()
             ->map(function ($tx) use ($frontdeskMap) {
-               $shiftFrontdesk = $tx->shift_log?->frontdesk;
+                $frontdeskId = $this->extractAssignedFrontdeskId($tx->assigned_frontdesk_id);
 
-                $tx->resolved_frontdesk_id = $shiftFrontdesk?->id;
-                $tx->resolved_frontdesk_name = strtoupper($shiftFrontdesk?->name ?? '—');
+                $tx->resolved_frontdesk_id = $frontdeskId;
+                $tx->resolved_frontdesk_name = $frontdeskId
+                    ? strtoupper($frontdeskMap[$frontdeskId] ?? '—')
+                    : '—';
 
-                $tx->resolved_shift = strtoupper($tx->shift_log?->shift ?? '—');
+                $tx->resolved_shift = strtoupper($tx->shift ?? '—');
 
                 return $tx;
             })
