@@ -591,9 +591,16 @@ if ($transferAmount > 0) {
         });
 
         $checkinIds = (clone $tx)->distinct()->pluck('checkin_detail_id')->values();
+        $transferredCheckinIds = Transaction::query()
+        ->where('transaction_type_id', 7)
+        ->whereIn('checkin_detail_id', $checkinIds)
+        ->distinct()
+        ->pluck('checkin_detail_id');
+
+        $guestCheckinIds = $checkinIds->diff($transferredCheckinIds)->values();
 
         $details = CheckinDetail::query()
-            ->whereIn('id', $checkinIds)
+            ->whereIn('id', $guestCheckinIds)
             ->with(['room.type', 'guest'])
             ->get();
 
