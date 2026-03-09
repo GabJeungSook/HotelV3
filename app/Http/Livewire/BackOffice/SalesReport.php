@@ -224,7 +224,7 @@ class SalesReport extends Component
 
         // include base room tx type too so base row can display transaction shift
         $txRows = Transaction::query()
-            ->with('shift_log')
+            ->with(['shift_log.frontdesk'])
             ->whereIn('checkin_detail_id', $detailIds)
             ->whereIn('transaction_type_id', [1, 4, 6, 7, 8, 9])
             ->select([
@@ -244,14 +244,12 @@ class SalesReport extends Component
             ->orderBy('created_at')
             ->get()
             ->map(function ($tx) use ($frontdeskMap) {
-                $frontdeskId = $this->extractAssignedFrontdeskId($tx->assigned_frontdesk_id);
+               $shiftFrontdesk = $tx->shift_log?->frontdesk;
 
-                $tx->resolved_frontdesk_id = $frontdeskId;
-                $tx->resolved_frontdesk_name = $frontdeskId
-                    ? strtoupper($frontdeskMap[$frontdeskId] ?? '—')
-                    : '—';
+                $tx->resolved_frontdesk_id = $shiftFrontdesk?->id;
+                $tx->resolved_frontdesk_name = strtoupper($shiftFrontdesk?->name ?? '—');
 
-                $tx->resolved_shift = strtoupper($tx->shift_log?->shift ?? $tx->shift ?? '—');
+                $tx->resolved_shift = strtoupper($tx->shift_log?->shift ?? '—');
 
                 return $tx;
             })
