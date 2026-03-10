@@ -87,7 +87,7 @@
             <h1 class="text-center font-bold uppercase mb-4">DAILY SHIFT SUMMARY REPORT</h1>
 
             <div class="space-y-1 mb-6 ml-4 text-[13px]">
-                <p>Frontdesk (Outgoing): Hanah and Kathleen</p>
+                <p>Frontdesk (Outgoing): Hannah and Kathleen</p>
                 <p>Frontdesk (Incoming): Jeneath and Ruby Gold</p>
                 <p>Shift Opened: March 08, 2026 08:03 PM</p>
                 <p>Shift Closed: March 09, 2026 07:27 AM</p>
