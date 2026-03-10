@@ -216,8 +216,8 @@
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Other deposit</td>
-                            <td class="border border-black px-2 py-1">₱ 3,623</td>
                             <td class="border border-black px-2 py-1">-</td>
+                            <td class="border border-black px-2 py-1">₱ 3,623</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Expenses</td>
