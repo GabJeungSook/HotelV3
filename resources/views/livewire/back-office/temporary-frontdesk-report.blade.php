@@ -32,7 +32,20 @@
                 </select>
 
                 <div class="flex items-end gap-2">
-                    <button type="button" onclick="window.print()" class="w-full md:w-auto inline-flex justify-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">Print</button>
+                <a href="{{ asset('raw-files/PM SALES DATA- March 8-9, 2026.xlsx') }}"
+                download
+                class="w-full md:w-auto inline-flex items-center gap-2 justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 transition">
+
+                    <!-- Download Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 16v-8m0 8l-3-3m3 3l3-3M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
+                    </svg>
+
+                    Download Raw File
+                </a>                 
+                <button type="button" onclick="window.print()" class="w-full md:w-auto inline-flex justify-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">Print</button>
                 </div>
             </div>
 
