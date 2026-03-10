@@ -36,21 +36,22 @@
                 </div>
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">From</label>
-                <input disabled type="date" class="w-full rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
+            <div >
+                {{-- <label class="block text-sm font-medium text-gray-700 mb-1">From</label> --}}
+                <input hidden disabled type="date" class="w-full rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">To</label>
-                <input disabled type="date" class="w-full rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
+            <div >
+                {{-- <label class="block text-sm font-medium text-gray-700 mb-1">To</label> --}}
+                <input hidden disabled type="date" class="w-full rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
             </div>
 
             <div class="flex flex-col gap-3">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Shift</label>
                     <select disabled class="w-full rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
-                        <option selected>PM</option>
+                        <option selected>PM SHIFT - March 8-9, 2026</option>
+                        <option>AM SHIFT - March 8-9, 2026</option>
                     </select>
                 </div>
 
