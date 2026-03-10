@@ -130,7 +130,7 @@
                                 <div class="font-bold">Key/Remote Deposit</div>
                                 <div>(Room occupied receive)</div>
                             </td>
-                            <td class="border border-black px-2 py-1 align-top">₱ 9,400</td>
+                            <td class="border border-black px-2 py-1 align-top">-</td>
                             <td class="border border-black px-2 py-1 align-top">-</td>
                         </tr>
                         <tr>
@@ -138,7 +138,7 @@
                                 <div class="font-bold">Other Deposit</div>
                                 <div>(Total client other deposit received)</div>
                             </td>
-                            <td class="border border-black px-2 py-1 align-top">₱ 3,623</td>
+                            <td class="border border-black px-2 py-1 align-top">-</td>
                             <td class="border border-black px-2 py-1 align-top">-</td>
                         </tr>
                         <tr>
@@ -217,7 +217,7 @@
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Other deposit</td>
                             <td class="border border-black px-2 py-1">-</td>
-                            <td class="border border-black px-2 py-1 font-bold">₱ 3,623</td>
+                            <td class="border border-black px-2 py-1">-</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Expenses</td>
@@ -287,11 +287,11 @@
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Other Deposit</td>
-                            <td class="border border-black px-2 py-1" colspan="2">₱ 3,623</td>
+                            <td class="border border-black px-2 py-1" colspan="2"></td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Net Sales</td>
-                            <td class="border border-black px-2 py-1 font-bold" colspan="2">₱ 32,967.00</td>
+                            <td class="border border-black px-2 py-1 font-bold" colspan="2">₱ 36,008.00</td>
                         </tr>
                     </tbody>
                 </table>
@@ -331,7 +331,7 @@
                                 <div class="font-bold">Opening Cash</div>
                                 <div>(Net Sales Receive from previous Shift)</div>
                             </td>
-                            <td class="border border-black px-2 py-1 align-top font-bold">₱ 32,967.00</td>
+                            <td class="border border-black px-2 py-1 align-top font-bold">₱ 36,008.00</td>
                             <td class="border border-black px-2 py-1 align-top">-</td>
                         </tr>
                         <tr>
@@ -347,12 +347,12 @@
                                 <div class="font-bold">Other Deposit</div>
                                 <div>(Total client other deposit received)</div>
                             </td>
-                            <td class="border border-black px-2 py-1 align-top">₱ 3,623</td>
+                            <td class="border border-black px-2 py-1 align-top">-</td>
                             <td class="border border-black px-2 py-1 align-top">-</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Total Cash Received</td>
-                            <td class="border border-black px-2 py-1 font-bold">₱ 45,990.00</td>
+                            <td class="border border-black px-2 py-1 font-bold">₱ 45,716.00</td>
                             <td class="border border-black px-2 py-1">-</td>
                         </tr>
                     </tbody>
@@ -421,7 +421,7 @@
                                 <div>(Current room occupied at the end shift)</div>
                             </td>
                             <td class="border border-black px-2 py-1 align-top">3</td>
-                            <td class="border border-black px-2 py-1 align-top font-bold">₱ 600.00</td>
+                            <td class="border border-black px-2 py-1 align-top font-bold">₱ 600</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Total Check-out</td>
@@ -431,7 +431,7 @@
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Other deposit</td>
                             <td class="border border-black px-2 py-1"></td>
-                            <td class="border border-black px-2 py-1 font-bold">₱ 8,032</td>
+                            <td class="border border-black px-2 py-1"></td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Expenses</td>
@@ -504,14 +504,9 @@
                             <td class="border border-black px-2 py-1">₱ 600.00</td>
                             <td class="border border-black px-2 py-1"></td>
                         </tr>
-                          <tr>
-                            <td class="border border-black px-2 py-1 font-bold">Other Deposits</td>
-                            <td class="border border-black px-2 py-1">₱ 8,032.00</td>
-                            <td class="border border-black px-2 py-1"></td>
-                        </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Net Sales</td>
-                            <td class="border border-black px-2 py-1 font-bold">₱ 32,241.00</td>
+                            <td class="border border-black px-2 py-1 font-bold">₱ 40,273.00</td>
                             <td class="border border-black px-2 py-1"></td>
                         </tr>
                     </tbody>
