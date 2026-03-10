@@ -173,6 +173,13 @@ class Main extends Component
             ->where('roomboy_id', auth()->user()->id)
             ->orderBy('id', 'desc')
             ->first();
+        
+        if($room->started_cleaning_at == null)
+            {
+                    $room->update([
+                        'started_cleaning_at' => now()->subMinutes(16),
+                    ]);
+            }
 
         if (now()->diffInMinutes($room->started_cleaning_at) < 15) {
             $this->dialog()->error(
@@ -254,6 +261,13 @@ class Main extends Component
             'id',
             $this->override_cleaning_id
         )->first();
+
+         if($room->started_cleaning_at == null)
+            {
+                    $room->update([
+                        'started_cleaning_at' => now()->subMinutes(16),
+                    ]);
+            }
 
         $record_count = RoomBoyReport::where('roomboy_id', auth()->user()->id)
             ->whereDate('created_at', now())
