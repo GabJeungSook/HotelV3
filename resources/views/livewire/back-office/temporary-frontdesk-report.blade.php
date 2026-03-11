@@ -147,7 +147,7 @@
                         <tr>
                             <td class="border border-black px-2 py-1 align-top">
                                 <div class="font-bold">Client Deposit</div>
-                                <div>(Total client other deposit received)</div>
+                                <div>(Total client deposit received)</div>
                             </td>
                             <td class="border border-black px-2 py-1 align-top">-</td>
                             <td class="border border-black px-2 py-1 align-top">-</td>
@@ -356,7 +356,7 @@
                         <tr>
                             <td class="border border-black px-2 py-1 align-top">
                                 <div class="font-bold">Client Deposit</div>
-                                <div>(Total client other deposit received)</div>
+                                <div>(Total client deposit received)</div>
                             </td>
                             <td class="border border-black px-2 py-1 align-top">-</td>
                             <td class="border border-black px-2 py-1 align-top">-</td>
@@ -573,7 +573,7 @@
                         <tr>
                             <td class="border border-black px-2 py-1 align-top">
                                 <div class="font-bold">Client Deposit</div>
-                                <div>(Total client other deposit received)</div>
+                                <div>(Total client deposit received)</div>
                             </td>
                             <td class="border border-black px-2 py-1 align-top">-</td>
                             <td class="border border-black px-2 py-1 align-top">-</td>
