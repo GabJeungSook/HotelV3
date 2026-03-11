@@ -146,7 +146,7 @@
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 align-top">
-                                <div class="font-bold">Other Deposit</div>
+                                <div class="font-bold">Client Deposit</div>
                                 <div>(Total client other deposit received)</div>
                             </td>
                             <td class="border border-black px-2 py-1 align-top">-</td>
@@ -226,7 +226,7 @@
                             <td class="border border-black px-2 py-1 font-bold">₱ 9,000</td>
                         </tr>
                         <tr>
-                            <td class="border border-black px-2 py-1 font-bold">Other deposit</td>
+                            <td class="border border-black px-2 py-1 font-bold">Client Deposit</td>
                             <td class="border border-black px-2 py-1">-</td>
                             <td class="border border-black px-2 py-1">-</td>
                         </tr>
@@ -297,7 +297,7 @@
                             <td class="border border-black px-2 py-1" colspan="2">₱ 9,400.00</td>
                         </tr>
                         <tr>
-                            <td class="border border-black px-2 py-1 font-bold">Other Deposit</td>
+                            <td class="border border-black px-2 py-1 font-bold">Client Deposit</td>
                             <td class="border border-black px-2 py-1" colspan="2"></td>
                         </tr>
                         <tr>
@@ -355,7 +355,7 @@
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 align-top">
-                                <div class="font-bold">Other Deposit</div>
+                                <div class="font-bold">Client Deposit</div>
                                 <div>(Total client other deposit received)</div>
                             </td>
                             <td class="border border-black px-2 py-1 align-top">-</td>
@@ -441,7 +441,7 @@
                             <td class="border border-black px-2 py-1 font-bold">₱ 21,400.00</td>
                         </tr>
                         <tr>
-                            <td class="border border-black px-2 py-1 font-bold">Other deposit</td>
+                            <td class="border border-black px-2 py-1 font-bold">Client Deposit</td>
                             <td class="border border-black px-2 py-1"></td>
                             <td class="border border-black px-2 py-1"></td>
                         </tr>
@@ -572,7 +572,7 @@
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 align-top">
-                                <div class="font-bold">Other Deposit</div>
+                                <div class="font-bold">Client Deposit</div>
                                 <div>(Total client other deposit received)</div>
                             </td>
                             <td class="border border-black px-2 py-1 align-top">-</td>
@@ -666,7 +666,7 @@
                             <td class="border border-black px-2 py-1 font-bold">₱ 7,600.00</td>
                         </tr>
                         <tr>
-                            <td class="border border-black px-2 py-1 font-bold">Other deposit</td>
+                            <td class="border border-black px-2 py-1 font-bold">Client Deposit</td>
                             <td class="border border-black px-2 py-1"></td>
                             <td class="border border-black px-2 py-1"></td>
                         </tr>
