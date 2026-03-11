@@ -118,6 +118,10 @@
                 <input type="checkbox" wire:model.live="showTransfer" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
                 <span class="text-gray-700">Transfer Room</span>
             </label>
+            <label class="inline-flex items-center gap-2 text-sm">
+                <input type="checkbox" wire:model.live="showDeposits" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                <span class="text-gray-700">Client Deposit</span>
+            </label>
         </div>
     </div>
 
@@ -153,6 +157,11 @@
                     @endif
                     @if($showTransfer)
                         <th class="border border-gray-300 px-2 py-2 text-left text-sm font-semibold text-gray-800 w-36">TRANSFER</th>
+                    @endif
+                    @if($showDeposits)
+                    <th class="border border-gray-300 px-2 py-2 text-left text-sm font-semibold text-gray-800 w-36">
+                        CLIENT DEPOSIT
+                    </th>
                     @endif
 
                     <th class="border border-gray-300 px-2 py-2 text-left text-sm font-semibold text-gray-800 w-56">FRONTDESK</th>
@@ -210,6 +219,11 @@
                                     ₱ {{ number_format($row['transfer_amount'], 2) }}
                                 </td>
                             @endif
+                            @if($showDeposits)
+                        <td class="border border-gray-300 px-2 py-3 text-sm text-gray-900">
+                            ₱ {{ number_format($row['deposit_amount'], 2) }}
+                        </td>
+                        @endif
 
                             <td class="border border-gray-300 px-3 py-2 text-sm text-gray-900">{{ $row['frontdesk_name'] }}</td>
                             <td class="border border-gray-300 px-3 py-2 text-sm text-gray-900">{{ $row['shift'] }}</td>
@@ -220,7 +234,7 @@
                     @endforeach
                 @empty
                     <tr>
-                        <td colspan="{{ 10 + ($showExtend?1:0)+($showAmenities?1:0)+($showFood?1:0)+($showDamages?1:0)+($showTransfer?1:0) }}"
+                        <td colspan="{{ 10 + ($showExtend?1:0)+($showAmenities?1:0)+($showFood?1:0)+($showDamages?1:0)+($showTransfer?1:0)+($showDeposits?1:0) }}"
                             class="border border-gray-300 px-2 py-6 text-sm text-center text-gray-500">
                             No sales records found for the selected filters.
                         </td>

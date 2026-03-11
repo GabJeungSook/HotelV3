@@ -17,8 +17,8 @@ class SalesReport extends Component
     public bool $showAmenities = true;
     public bool $showFood = true;
     public bool $showDamages = true;
-    public bool $showDeposits = true;
     public bool $showTransfer = true;
+    public bool $showDeposits = true;
 
     public float $totalSales = 0;
 
@@ -61,6 +61,7 @@ class SalesReport extends Component
     public function updatedShowFood()     { $this->recomputeTotals(); }
     public function updatedShowDamages()  { $this->recomputeTotals(); }
     public function updatedShowTransfer() { $this->recomputeTotals(); }
+    public function updatedShowDeposits() { $this->recomputeTotals(); }
 
     private function recomputeTotals(): void
     {
@@ -82,6 +83,7 @@ class SalesReport extends Component
                         'food'        => $this->showFood,
                         'damages'     => $this->showDamages,
                         'transfer'    => $this->showTransfer,
+                        'deposit' => $this->showDeposits,
                         default       => true,
                     };
                 })
@@ -97,6 +99,7 @@ class SalesReport extends Component
                         + (float) $row['food_amount']
                         + (float) $row['damages_amount']
                         + (float) $row['transfer_amount'];
+                        + (float) $row['deposit_amount'];
 
                     $visibleRows[$idx]['total'] = $lineTotal;
                     $grandTotal += $lineTotal;
@@ -224,7 +227,7 @@ class SalesReport extends Component
         $txRows = Transaction::query()
                 ->with('shift_log')
             ->whereIn('checkin_detail_id', $detailIds)
-            ->whereIn('transaction_type_id', [1, 4, 6, 7, 8, 9])
+            ->whereIn('transaction_type_id', [1, 2, 4, 6, 7, 8, 9])
             ->select([
                 'id',
                 'checkin_detail_id',
@@ -233,7 +236,9 @@ class SalesReport extends Component
                 'assigned_frontdesk_id',
                 'created_at',
                 'shift',
+                'remarks',
             ]);
+
 
         $this->applyTransactionDateFilters($txRows, 'created_at');
         $this->applyShiftFilter($txRows);
@@ -243,7 +248,7 @@ class SalesReport extends Component
             ->get()
             ->map(function ($tx) use ($frontdeskMap) {
                 $frontdeskId = $this->extractAssignedFrontdeskId($tx->assigned_frontdesk_id);
-
+                $tx->remarks != 'Deposit From Check In (Room Key & TV Remote)';
                 $tx->resolved_frontdesk_id = $frontdeskId;
                 $tx->resolved_frontdesk_name = $frontdeskId
                     ? strtoupper($frontdeskMap[$frontdeskId] ?? '—')
@@ -358,6 +363,7 @@ if (!$this->shift || $baseTx) {
         'food_amount'       => 0,
         'damages_amount'    => 0,
         'transfer_amount'   => 0,
+        'deposit_amount' => 0,
         'frontdesk_name'    => $baseTx
             ? strtoupper($baseTx->resolved_frontdesk_name ?? $meta['frontdesk_name'])
             : $meta['frontdesk_name'],
@@ -436,6 +442,7 @@ if ($extendAmount > 0) {
         'food_amount'       => 0,
         'damages_amount'    => 0,
         'transfer_amount'   => 0,
+        'deposit_amount' => 0,
         'frontdesk_name'    => strtoupper($extendFirstTx?->resolved_frontdesk_name ?? '—'),
         'shift'             => strtoupper($extendFirstTx?->resolved_shift ?? '—'),
         'total'             => $extendAmount,
@@ -466,6 +473,7 @@ if ($amenitiesAmount > 0) {
         'food_amount'       => 0,
         'damages_amount'    => 0,
         'transfer_amount'   => 0,
+        'deposit_amount' => 0,
         'frontdesk_name'    => strtoupper($amenitiesFirstTx?->resolved_frontdesk_name ?? '—'),
         'shift'             => strtoupper($amenitiesFirstTx?->resolved_shift ?? '—'),
         'total'             => $amenitiesAmount,
@@ -496,6 +504,7 @@ if ($foodAmount > 0) {
         'food_amount'       => $foodAmount,
         'damages_amount'    => 0,
         'transfer_amount'   => 0,
+        'deposit_amount' => 0,
         'frontdesk_name'    => strtoupper($foodFirstTx?->resolved_frontdesk_name ?? '—'),
         'shift'             => strtoupper($foodFirstTx?->resolved_shift ?? '—'),
         'total'             => $foodAmount,
@@ -526,6 +535,7 @@ if ($damagesAmount > 0) {
         'food_amount'       => 0,
         'damages_amount'    => $damagesAmount,
         'transfer_amount'   => 0,
+        'deposit_amount' => 0,
         'frontdesk_name'    => strtoupper($damagesFirstTx?->resolved_frontdesk_name ?? '—'),
         'shift'             => strtoupper($damagesFirstTx?->resolved_shift ?? '—'),
         'total'             => $damagesAmount,
@@ -556,9 +566,43 @@ if ($transferAmount > 0) {
         'food_amount'       => 0,
         'damages_amount'    => 0,
         'transfer_amount'   => $transferAmount,
+        'deposit_amount' => 0,
         'frontdesk_name'    => strtoupper($transferFirstTx?->resolved_frontdesk_name ?? '—'),
         'shift'             => strtoupper($transferFirstTx?->resolved_shift ?? '—'),
         'total'             => $transferAmount,
+    ];
+}
+$depositTxs = $detailTxs
+    ->where('transaction_type_id', 2)
+    ->filter(function ($tx) {
+        return trim((string) $tx->remarks) !== 'Deposit From Check In (Room Key & TV Remote)';
+    })
+    ->sortBy('created_at')
+    ->values();
+
+$depositAmount = (float) $depositTxs->sum('payable_amount');
+$depositFirstTx = $depositTxs->first();
+
+if ($depositAmount > 0) {
+    $roomRows[] = [
+        'detail_id'         => $detail->id,
+        'row_type'          => 'deposit',
+        'number'            => $room?->number ?? '—',
+        'room_type'         => $meta['room_type'],
+        'guest_name'        => $meta['guest_name'],
+        'check_in'          => $meta['check_in'],
+        'check_out'         => $meta['check_out'],
+        'initial_hrs'       => $meta['initial_hrs'],
+        'room_amount'       => 0,
+        'extend_amount'     => 0,
+        'amenities_amount'  => 0,
+        'food_amount'       => 0,
+        'damages_amount'    => 0,
+        'transfer_amount'   => 0,
+        'deposit_amount'    => $depositAmount,
+        'frontdesk_name'    => strtoupper($depositFirstTx?->resolved_frontdesk_name ?? '—'),
+        'shift'             => strtoupper($depositFirstTx?->resolved_shift ?? '—'),
+        'total'             => $depositAmount,
     ];
 }
             }
