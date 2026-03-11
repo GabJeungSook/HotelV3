@@ -471,7 +471,7 @@
                     <tbody>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Expected Cash</td>
-                            <td class="border border-black px-2 py-1" colspan="2">₱ 93,867.00</td>
+                            <td class="border border-black px-2 py-1" colspan="2">₱ 92,132.00</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Actual Cash</td>
@@ -479,7 +479,7 @@
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold text-red-600">Difference</td>
-                            <td class="border border-black px-2 py-1 text-red-600 font-bold" colspan="2">₱ 7,273.00</td>
+                            <td class="border border-black px-2 py-1 text-red-600 font-bold" colspan="2">₱ 5,538.00</td>
                         </tr>
                     </tbody>
                 </table>
