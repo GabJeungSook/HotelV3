@@ -307,6 +307,102 @@ public function mount(): void
                 'net_sales' => '₱ -35,778.00',
             ],
         ],
+        7 => [
+            'label' => 'PM SHIFT - March 11 - 12, 2026',
+            'raw_file' => 'raw-files/PM SALES DATA- March 11-12, 2026.xlsx',
+
+            'frontdesk_outgoing' => 'Jinky Obag',
+            'frontdesk_incoming' => 'Jeneath Lecias',
+            'shift_opened' => 'March 11, 2026 8:21 PM',
+            'shift_closed' => 'March 12, 2026 8:16 AM',
+
+            'cash_drawer' => [
+                ['description' => 'Opening Cash', 'sub' => '(Net Sales Receive from previous Shift)', 'amount' => '₱ -35,778.00', 'remark' => '-'],
+                ['description' => 'Key/Remote Deposit', 'sub' => '(Room occupied receive)', 'amount' => '₱ 21,600.00', 'remark' => '-'],
+                ['description' => 'Client Deposit', 'sub' => '(Total client deposit received)', 'amount' => '₱ 7,300.00', 'remark' => '-'],
+                ['description' => 'Forwarding Balance', 'sub' => '(From previous Shift)', 'amount' => '₱ 186,963.00', 'remark' => '-'],
+            ],
+            'cash_drawer_total' => [
+                'amount' => '₱ 160,094.00 <span class="text-red-600">(19,991.00)</span>',
+                'remark' => '-',
+            ],
+
+            'frontdesk_operation' => [
+                ['description' => 'New Check-in', 'sub' => '(Total New Check-in)', 'number' => '111', 'amount' => '₱ 51,352.00'],
+                ['description' => 'Extension', 'sub' => null, 'number' => '', 'amount' => '₱ 784.00'],
+                ['description' => 'Transfer', 'sub' => null, 'number' => '-', 'amount' => '-'],
+                ['description' => 'Miscellaneous charges', 'sub' => null, 'number' => '', 'amount' => '-'],
+                ['description' => 'Food', 'sub' => null, 'number' => '', 'amount' => '-'],
+                ['description' => 'Drink', 'sub' => null, 'number' => '-', 'amount' => '-'],
+                ['description' => 'Key/Remote Deposit', 'sub' => '(Current room occupied at the end shift)', 'number' => '50', 'amount' => '₱ 10,000.00'],
+                ['description' => 'Total Check-out', 'sub' => null, 'number' => '61', 'amount' => '₱ 12,200.00'],
+                ['description' => 'Guest Deposit', 'sub' => null, 'number' => '', 'amount' => '₱ 10,184.00'],
+                ['description' => 'Expenses', 'sub' => null, 'number' => '', 'amount' => '₱ 6,697.00'],
+                ['description' => 'Remittance', 'sub' => null, 'number' => '', 'amount' => '-'],
+            ],
+
+            'cash_reconciliation' => [
+                'expected_cash' => '₱ 216,808.00',
+                'actual_cash' => '₱ 205,760.00',
+                'difference' => '₱ 11,048.00',
+            ],
+
+            'final_sales' => [
+                'gross_sales' => '₱ 52,136.00',
+                'expenses' => '₱ 6,697.00',
+                'discounts' => '-',
+                'remittance' => '-',
+                'net_sales' => '₱ 45,439.00',
+            ],
+        ],
+        8 => [
+            'label' => 'AM SHIFT - March 12, 2026',
+            'raw_file' => 'raw-files/AM SALES DATA- March 12, 2026.xlsx',
+
+            'frontdesk_outgoing' => 'Jeneath Lecias',
+            'frontdesk_incoming' => 'Jinky Obag and Ruby Gold',
+            'shift_opened' => 'March 12, 2026 08:17 AM',
+            'shift_closed' => 'March 12, 2026 08:20 AM',
+
+            'cash_drawer' => [
+                ['description' => 'Opening Cash', 'sub' => '(Net Sales Receive from previous Shift)', 'amount' => '₱ 45,439.00', 'remark' => '-'],
+                ['description' => 'Key/Remote Deposit', 'sub' => '(Room occupied receive)', 'amount' => '₱ 16,000.00', 'remark' => '-'],
+                ['description' => 'Client Deposit', 'sub' => '(Total client deposit received)', 'amount' => '₱ 15,542.00', 'remark' => '-'],
+                ['description' => 'Forwarding Balance', 'sub' => '(From previous Shift)', 'amount' => '₱ 151,185.00', 'remark' => '-'],
+            ],
+            'cash_drawer_total' => [
+                'amount' => '₱ 160,094.00 <span class="text-red-600">(68,072.00)</span>',
+                'remark' => '-',
+            ],
+
+            'frontdesk_operation' => [
+                ['description' => 'New Check-in', 'sub' => '(Total New Check-in)', 'number' => '193', 'amount' => '₱ 111,552.00'],
+                ['description' => 'Extension', 'sub' => null, 'number' => '', 'amount' => '₱ 448.00'],
+                ['description' => 'Transfer', 'sub' => null, 'number' => '-', 'amount' => '-'],
+                ['description' => 'Miscellaneous charges', 'sub' => null, 'number' => '', 'amount' => '₱ 500.00'],
+                ['description' => 'Food', 'sub' => null, 'number' => '', 'amount' => '-'],
+                ['description' => 'Drink', 'sub' => null, 'number' => '-', 'amount' => '-'],
+                ['description' => 'Key/Remote Deposit', 'sub' => '(Current room occupied at the end shift)', 'number' => '80', 'amount' => '₱ 16,000.00'],
+                ['description' => 'Total Check-out', 'sub' => null, 'number' => '113', 'amount' => '₱ 22,600.00'],
+                ['description' => 'Guest Deposit', 'sub' => null, 'number' => '', 'amount' => '₱ 15,542.00'],
+                ['description' => 'Expenses', 'sub' => null, 'number' => '', 'amount' => '-'],
+                ['description' => 'Remittance', 'sub' => null, 'number' => '', 'amount' => '-'],
+            ],
+
+            'cash_reconciliation' => [
+                'expected_cash' => '₱ 340,666.00',
+                'actual_cash' => '₱ 16,000.94',
+                'difference' => '₱ 324,665.06',
+            ],
+
+            'final_sales' => [
+                'gross_sales' => '₱ 112,500.00',
+                'expenses' => '₱ 23,500.00',
+                'discounts' => '-',
+                'remittance' => '₱ 100,000.00',
+                'net_sales' => '₱ -11,000.00',
+            ],
+        ],
     ];
 }
 
