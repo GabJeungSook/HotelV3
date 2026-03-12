@@ -300,10 +300,10 @@
                             <td class="border border-black px-2 py-1 font-bold">Gross Sales</td>
                             <td class="border border-black px-2 py-1" colspan="2">₱ 34,496.00</td>
                         </tr>
-                         <tr>
+                         {{-- <tr>
                             <td class="border border-black px-2 py-1 font-bold">Forwarding Balance</td>
                             <td class="border border-black px-2 py-1" colspan="2">₱ 0.00</td>
-                        </tr>
+                        </tr> --}}
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Expenses</td>
                             <td class="border border-black px-2 py-1" colspan="2">-</td>
@@ -533,10 +533,10 @@
                             <td class="border border-black px-2 py-1 font-bold">Gross Sales</td>
                             <td class="border border-black px-2 py-1" colspan="2">₱ 49,553.00</td>
                         </tr>
-                         <tr>
+                         {{-- <tr>
                             <td class="border border-black px-2 py-1 font-bold">Forwarding Balance</td>
                             <td class="border border-black px-2 py-1" colspan="2">₱ 0.00</td>
-                        </tr>
+                        </tr> --}}
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Expenses</td>
                             <td class="border border-black px-2 py-1" colspan="2">₱ 9,407.00</td>
