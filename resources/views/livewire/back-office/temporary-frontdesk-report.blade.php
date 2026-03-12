@@ -723,7 +723,7 @@
                     <tbody>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Expected Cash</td>
-                            <td class="border border-black px-2 py-1" colspan="2">₱ 127,354.00</td>
+                            <td class="border border-black px-2 py-1" colspan="2">₱ 115,402.00</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Actual Cash</td>
@@ -731,7 +731,7 @@
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold text-red-600">Difference</td>
-                            <td class="border border-black px-2 py-1 text-red-600" colspan="2">₱ 21,359.00</td>
+                            <td class="border border-black px-2 py-1 text-red-600" colspan="2">₱ 9,407.00</td>
                         </tr>
                     </tbody>
                 </table>
@@ -764,7 +764,7 @@
                     <tbody>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Gross Sales</td>
-                            <td class="border border-black px-2 py-1" colspan="2">₱ 34,359.00</td>
+                            <td class="border border-black px-2 py-1" colspan="2">₱ 30,420.00</td>
                         </tr>
                          {{-- <tr>
                             <td class="border border-black px-2 py-1 font-bold">Forwarding Balance</td>
@@ -784,7 +784,7 @@
                         </tr> --}}
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Guest Deposit</td>
-                            <td class="border border-black px-2 py-1" colspan="2">₱ 3,939.00</td>
+                            <td class="border border-black px-2 py-1" colspan="2">-</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Remittance</td>
