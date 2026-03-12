@@ -316,10 +316,10 @@
                             <td class="border border-black px-2 py-1 font-bold align-top">Key/ Remote<br>Deposit</td>
                             <td class="border border-black px-2 py-1" colspan="2">₱ 11,600.00</td>
                         </tr> --}}
-                        <tr>
+                        {{-- <tr>
                             <td class="border border-black px-2 py-1 font-bold">Guest Deposit</td>
                             <td class="border border-black px-2 py-1" colspan="2">-</td>
-                        </tr>
+                        </tr> --}}
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Remittance</td>
                             <td class="border border-black px-2 py-1" colspan="2">-</td>
@@ -549,10 +549,10 @@
                             <td class="border border-black px-2 py-1 font-bold align-top">Key/ Remote<br>Deposit</td>
                             <td class="border border-black px-2 py-1" colspan="2">₱ 17,800.00</td>
                         </tr> --}}
-                        <tr>
+                        {{-- <tr>
                             <td class="border border-black px-2 py-1 font-bold">Guest Deposit</td>
                             <td class="border border-black px-2 py-1" colspan="2">-</td>
-                        </tr>
+                        </tr> --}}
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Remittance</td>
                             <td class="border border-black px-2 py-1" colspan="2">-</td>
@@ -782,10 +782,10 @@
                             <td class="border border-black px-2 py-1 font-bold align-top">Key/ Remote<br>Deposit</td>
                             <td class="border border-black px-2 py-1" colspan="2">₱ 17,800.00</td>
                         </tr> --}}
-                        <tr>
+                        {{-- <tr>
                             <td class="border border-black px-2 py-1 font-bold">Guest Deposit</td>
                             <td class="border border-black px-2 py-1" colspan="2">-</td>
-                        </tr>
+                        </tr> --}}
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Remittance</td>
                             <td class="border border-black px-2 py-1" colspan="2">-</td>
