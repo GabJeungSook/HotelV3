@@ -263,10 +263,10 @@ public function mount(): void
             'label' => 'AM SHIFT - March 11, 2026',
             'raw_file' => 'raw-files/AM SALES DATA- March 11, 2026.xlsx',
 
-            'frontdesk_outgoing' => 'Jeneath Lecias and Ruby Gold',
-            'frontdesk_incoming' => 'Hannah and Jinky Obag',
-            'shift_opened' => 'March 10, 2026 - 8:37 AM',
-            'shift_closed' => 'March 10, 2026 - 8:37 PM',
+            'frontdesk_outgoing' => 'Jeneath Lecias and Seanne Karylle',
+            'frontdesk_incoming' => 'Ruby Gold and Jinky Obag',
+            'shift_opened' => 'March 11, 2026 8:21 AM',
+            'shift_closed' => 'March 11, 2026 8:16 PM',
 
             'cash_drawer' => [
                 ['description' => 'Opening Cash', 'sub' => '(Net Sales Receive from previous Shift)', 'amount' => '₱ 36,122.00', 'remark' => '-'],
