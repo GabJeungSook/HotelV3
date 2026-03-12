@@ -298,7 +298,7 @@
                     <tbody>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Gross Sales</td>
-                            <td class="border border-black px-2 py-1" colspan="2">₱ 46,096.00</td>
+                            <td class="border border-black px-2 py-1" colspan="2">₱ 34,496.00</td>
                         </tr>
                          <tr>
                             <td class="border border-black px-2 py-1 font-bold">Forwarding Balance</td>
@@ -312,10 +312,10 @@
                             <td class="border border-black px-2 py-1 font-bold">Discounts</td>
                             <td class="border border-black px-2 py-1" colspan="2">-</td>
                         </tr>
-                        <tr>
+                        {{-- <tr>
                             <td class="border border-black px-2 py-1 font-bold align-top">Key/ Remote<br>Deposit</td>
                             <td class="border border-black px-2 py-1" colspan="2">₱ 11,600.00</td>
-                        </tr>
+                        </tr> --}}
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Guest Deposit</td>
                             <td class="border border-black px-2 py-1" colspan="2">-</td>
@@ -531,7 +531,7 @@
                     <tbody>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Gross Sales</td>
-                            <td class="border border-black px-2 py-1" colspan="2">₱ 67,353.00</td>
+                            <td class="border border-black px-2 py-1" colspan="2">₱ 49,553.00</td>
                         </tr>
                          <tr>
                             <td class="border border-black px-2 py-1 font-bold">Forwarding Balance</td>
@@ -545,10 +545,10 @@
                             <td class="border border-black px-2 py-1 font-bold">Discounts</td>
                             <td class="border border-black px-2 py-1" colspan="2">-</td>
                         </tr>
-                        <tr>
+                        {{-- <tr>
                             <td class="border border-black px-2 py-1 font-bold align-top">Key/ Remote<br>Deposit</td>
                             <td class="border border-black px-2 py-1" colspan="2">₱ 17,800.00</td>
-                        </tr>
+                        </tr> --}}
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Guest Deposit</td>
                             <td class="border border-black px-2 py-1" colspan="2">-</td>
