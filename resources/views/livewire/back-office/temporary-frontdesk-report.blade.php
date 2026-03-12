@@ -695,7 +695,7 @@
                          <tr>
                             <td class="border border-black px-2 py-1 font-bold">Guest Deposit</td>
                             <td class="border border-black px-2 py-1"></td>
-                            <td class="border border-black px-2 py-1 font-bold">₱ 3,939.00</td>
+                            <td class="border border-black px-2 py-1 font-bold">-</td>
                         </tr>
                          <tr>
                             <td class="border border-black px-2 py-1 font-bold">Expenses</td>
