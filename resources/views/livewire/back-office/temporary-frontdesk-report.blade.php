@@ -1009,7 +1009,7 @@
                     <tbody>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Gross Sales</td>
-                            <td class="border border-black px-2 py-1" colspan="2">₱ 60,197.00</td>
+                            <td class="border border-black px-2 py-1" colspan="2">₱ 60,917.00</td>
                         </tr>
                          {{-- <tr>
                             <td class="border border-black px-2 py-1 font-bold">Forwarding Balance</td>
