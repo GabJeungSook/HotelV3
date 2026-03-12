@@ -87,7 +87,7 @@
                     <select wire:model="filter" class="w-full rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="1" selected>PM SHIFT - March 8-9, 2026</option>
                         <option value="2">AM SHIFT - March 9, 2026</option>
-                        <option value="3">PM SHIFT - March 9-10, 2026</option>
+                        {{-- <option value="3">PM SHIFT - March 9-10, 2026</option> --}}
                     </select>
                 </div>
 
