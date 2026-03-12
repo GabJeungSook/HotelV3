@@ -152,10 +152,18 @@
                             <td class="border border-black px-2 py-1 align-top">-</td>
                             <td class="border border-black px-2 py-1 align-top">-</td>
                         </tr>
+                          <tr>
+                            <td class="border border-black px-2 py-1 align-top">
+                                <div class="font-bold">Forwarding Balance</div>
+                                <div>(From previous Shift)</div>
+                            </td>
+                            <td class="border border-black px-2 py-1 align-top">-</td>
+                            <td class="border border-black px-2 py-1 align-top">-</td>
+                        </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Total Cash Received</td>
-                            <td class="border border-black px-2 py-1">-</td>
-                            <td class="border border-black px-2 py-1">-</td>
+                            <td class="border border-black px-2 py-1 font-bold">₱ 1.00</td>
+                            <td class="border border-black px-2 py-1"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -177,68 +185,61 @@
                                 <div class="font-bold">New Check-in</div>
                                 <div>(Total New Check-in)</div>
                             </td>
-                            <td class="border border-black px-2 py-1 align-top">92</td>
-                            <td class="border border-black px-2 py-1 align-top font-bold">₱ 34,440.00</td>
+                            <td class="border border-black px-2 py-1 align-top">86</td>
+                            <td class="border border-black px-2 py-1 align-top font-bold">₱ 32,424.00</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Extension</td>
-                            <td class="border border-black px-2 py-1">7</td>
-                            <td class="border border-black px-2 py-1">₱ 1,568</td>
+                            <td class="border border-black px-2 py-1"></td>
+                            <td class="border border-black px-2 py-1">₱ 1,456</td>
+                        </tr>
+                         <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Transfer</td>
+                            <td class="border border-black px-2 py-1"></td>
+                            <td class="border border-black px-2 py-1">-</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Miscellaneous charges</td>
                             <td class="border border-black px-2 py-1"></td>
-                            <td class="border border-black px-2 py-1">₱ 300</td>
+                            <td class="border border-black px-2 py-1">₱ 340</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Food</td>
                             <td class="border border-black px-2 py-1"></td>
-                            <td class="border border-black px-2 py-1">₱ 282</td>
+                            <td class="border border-black px-2 py-1">₱ 276</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Drink</td>
                             <td class="border border-black px-2 py-1">-</td>
                             <td class="border border-black px-2 py-1">-</td>
                         </tr>
-                    </tbody>
-                </table>
-
-                <table class="w-full border-collapse table-fixed border border-black text-[13px]">
-                    <thead>
-                        <tr>
-                            <th class="border border-black px-2 py-1 text-left font-bold w-[50%]">Description</th>
-                            <th class="border border-black px-2 py-1 text-left font-bold w-[16%]">Number</th>
-                            <th class="border border-black px-2 py-1 text-left font-bold w-[34%]">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
                         <tr>
                             <td class="border border-black px-2 py-1 align-top">
                                 <div class="font-bold">Key/Remote Deposit</div>
                                 <div>(Current room occupied at the end shift)</div>
                             </td>
-                            <td class="border border-black px-2 py-1 align-top">47</td>
-                            <td class="border border-black px-2 py-1 align-top font-bold">₱ 9,400</td>
+                            <td class="border border-black px-2 py-1 align-top">58</td>
+                            <td class="border border-black px-2 py-1 align-top font-bold">₱ 11,600</td>
                         </tr>
-                        <tr>
+                          <tr>
                             <td class="border border-black px-2 py-1 font-bold">Total Check-out</td>
-                            <td class="border border-black px-2 py-1">45</td>
-                            <td class="border border-black px-2 py-1 font-bold">₱ 9,000</td>
+                            <td class="border border-black px-2 py-1">28</td>
+                            <td class="border border-black px-2 py-1 font-bold">₱ 5,600.00</td>
                         </tr>
-                        <tr>
-                            <td class="border border-black px-2 py-1 font-bold">Client Deposit</td>
-                            <td class="border border-black px-2 py-1">-</td>
-                            <td class="border border-black px-2 py-1">-</td>
-                        </tr>
-                        <tr>
-                            <td class="border border-black px-2 py-1 font-bold">Expenses</td>
-                            <td class="border border-black px-2 py-1">-</td>
-                            <td class="border border-black px-2 py-1">-</td>
-                        </tr>
-                        <tr>
-                            <td class="border border-black px-2 py-1 font-bold">Remittance</td>
-                            <td class="border border-black px-2 py-1">-</td>
+                         <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Guest Deposit</td>
                             <td class="border border-black px-2 py-1"></td>
+                            <td class="border border-black px-2 py-1 font-bold">-</td>
+                        </tr>
+                         <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Expenses</td>
+                            <td class="border border-black px-2 py-1"></td>
+                            <td class="border border-black px-2 py-1 font-bold">-</td>
+                        </tr>
+                         <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Remittance</td>
+                            <td class="border border-black px-2 py-1"></td>
+                            <td class="border border-black px-2 py-1 font-bold">-</td>
                         </tr>
                     </tbody>
                 </table>
@@ -256,7 +257,7 @@
                     <tbody>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Expected Cash</td>
-                            <td class="border border-black px-2 py-1" colspan="2">₱ 45,991.00</td>
+                            <td class="border border-black px-2 py-1" colspan="2">₱ 46,097.00</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Actual Cash</td>
@@ -264,10 +265,25 @@
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold text-red-600">Difference</td>
-                            <td class="border border-black px-2 py-1 text-red-600" colspan="2">₱ 275.00</td>
+                            <td class="border border-black px-2 py-1 text-red-600" colspan="2">₱ 381.00</td>
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <div class="pt-4 pl-2">
+                <div class="text-[14px] font-bold mb-2">(Forwarding Computation)</div>
+                <div class="text-[14px] font-bold mb-2">Expected Cash computation: </div>
+                <div class="text-[14px] font-normal mb-2">(Opening Cash + New Check-in + Extension, Transfer Room, Miscellaneous charges, Food, Drinks, Key Remote Deposit, Guest Deposit) - (Expenses and Remittance)</div>
+            </div>
+            <div class="pt-4 pl-2">
+                <div class="text-[14px] font-bold mb-2">(Backforwarding Computation)</div>
+                <div class="text-[14px] font-bold mb-2">Expected Cash computation: </div>
+                <div class="text-[14px] font-normal mb-2">(Netsales + Guest Deposit+  Remote Key Deposit + Opening Cash) - (Expenses, and Remittance)</div>
+            </div>
+             <div class="pt-4 pl-2">
+                <div class="text-[14px] mb-2"><span class="font-bold italic">Note:</span> <span>(Perform forward and backward computations to countercheck and ensure that the results are correct.)
+                </span> </div>
             </div>
 
             <div>
@@ -282,7 +298,11 @@
                     <tbody>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Gross Sales</td>
-                            <td class="border border-black px-2 py-1" colspan="2">₱ 45,990.00</td>
+                            <td class="border border-black px-2 py-1" colspan="2">₱ 46,096.00</td>
+                        </tr>
+                         <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Forwarding Balance</td>
+                            <td class="border border-black px-2 py-1" colspan="2">₱ 0.00</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Expenses</td>
@@ -294,15 +314,19 @@
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold align-top">Key/ Remote<br>Deposit</td>
-                            <td class="border border-black px-2 py-1" colspan="2">₱ 9,400.00</td>
+                            <td class="border border-black px-2 py-1" colspan="2">₱ 11,600.00</td>
                         </tr>
                         <tr>
-                            <td class="border border-black px-2 py-1 font-bold">Client Deposit</td>
-                            <td class="border border-black px-2 py-1" colspan="2"></td>
+                            <td class="border border-black px-2 py-1 font-bold">Guest Deposit</td>
+                            <td class="border border-black px-2 py-1" colspan="2">-</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Remittance</td>
+                            <td class="border border-black px-2 py-1" colspan="2">-</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Net Sales</td>
-                            <td class="border border-black px-2 py-1 font-bold" colspan="2">₱ 36,590.00</td>
+                            <td class="border border-black px-2 py-1 font-bold" colspan="2">₱ 34,496.00</td>
                         </tr>
                     </tbody>
                 </table>
@@ -320,10 +344,10 @@
             <h1 class="text-center font-bold uppercase">DAILY SHIFT SUMMARY REPORT</h1>
 
             <div class="space-y-1 text-[13px]">
-                <p>Frontdesk (Outgoing): Jeneath</p>
-                <p>Frontdesk (Incoming): Kathleen Drew</p>
-                <p>Shift Opened: March 09, 2026 07:28 AM</p>
-                <p>Shift Closed: March 09, 2026 08:57 PM</p>
+                <p>Frontdesk (Outgoing): Jeneath Lecias</p>
+                <p>Frontdesk (Incoming): Kathleen Drew and Hannah</p>
+                <p>Shift Opened: March 9, 2026 - 07:28 AM</p>
+                <p>Shift Closed: March 9, 2026 - 08:57 PM</p>
             </div>
 
             <div>
@@ -342,7 +366,7 @@
                                 <div class="font-bold">Opening Cash</div>
                                 <div>(Net Sales Receive from previous Shift)</div>
                             </td>
-                            <td class="border border-black px-2 py-1 align-top font-bold">₱ 36,590.00</td>
+                            <td class="border border-black px-2 py-1 align-top font-bold">₱ 34,496.00</td>
                             <td class="border border-black px-2 py-1 align-top">-</td>
                         </tr>
                         <tr>
@@ -350,7 +374,7 @@
                                 <div class="font-bold">Key/Remote Deposit</div>
                                 <div>(Room occupied receive)</div>
                             </td>
-                            <td class="border border-black px-2 py-1 align-top">₱ 9,400.00</td>
+                            <td class="border border-black px-2 py-1 align-top">₱ 11,600.00</td>
                             <td class="border border-black px-2 py-1 align-top">-</td>
                         </tr>
                         <tr>
@@ -361,10 +385,17 @@
                             <td class="border border-black px-2 py-1 align-top">-</td>
                             <td class="border border-black px-2 py-1 align-top">-</td>
                         </tr>
+                         <tr>
+                            <td class="border border-black px-2 py-1 align-top">
+                                <div class="font-bold">Forwarding Balance</div>
+                                <div>(From previous Shift)</div>
+                            </td>
+                            <td class="border border-black px-2 py-1 align-top">₱ 1.00</td>
+                            <td class="border border-black px-2 py-1 align-top">-</td>
+                        </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Total Cash Received</td>
-                            <div>(Beginning Cash)</div>
-                            <td class="border border-black px-2 py-1 font-bold">₱  45,716.00 <span class="text-red-600">(-275)</span></td>
+                            <td class="border border-black px-2 py-1">₱ 45, 716 <span class="text-red-600">(381)</span></td>
                             <td class="border border-black px-2 py-1">-</td>
                         </tr>
                     </tbody>
@@ -388,72 +419,60 @@
                                 <div>(Total New Check-in)</div>
                             </td>
                             <td class="border border-black px-2 py-1 align-top">120</td>
-                            <td class="border border-black px-2 py-1 align-top font-bold">₱49,112.00</td>
+                            <td class="border border-black px-2 py-1 align-top font-bold">₱ 49, 112.00</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Extension</td>
-                            <td class="border border-black px-2 py-1">-</td>
-                            <td class="border border-black px-2 py-1">₱3,136.00</td>
+                            <td class="border border-black px-2 py-1"></td>
+                            <td class="border border-black px-2 py-1">₱ 336.00</td>
                         </tr>
-                        <tr>
-                            <td class="border border-black px-2 py-1 font-bold">Transfer Room</td>
+                         <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Transfer</td>
                             <td class="border border-black px-2 py-1">-</td>
                             <td class="border border-black px-2 py-1">-</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Miscellaneous charges</td>
-                            <td class="border border-black px-2 py-1">-</td>
-                            <td class="border border-black px-2 py-1">₱ 600.00</td>
+                            <td class="border border-black px-2 py-1"></td>
+                            <td class="border border-black px-2 py-1">₱ 50.00</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Food</td>
                             <td class="border border-black px-2 py-1"></td>
-                            <td class="border border-black px-2 py-1">₱ 100.00</td>
+                            <td class="border border-black px-2 py-1">₱ 55.00</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Drink</td>
                             <td class="border border-black px-2 py-1">-</td>
                             <td class="border border-black px-2 py-1">-</td>
                         </tr>
-                    </tbody>
-                </table>
-
-                <table class="w-full border-collapse table-fixed border border-black text-[13px]">
-                    <thead>
-                        <tr>
-                            <th class="border border-black px-2 py-1 text-left font-bold w-[50%]">Description</th>
-                            <th class="border border-black px-2 py-1 text-left font-bold w-[16%]">Number</th>
-                            <th class="border border-black px-2 py-1 text-left font-bold w-[34%]">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
                         <tr>
                             <td class="border border-black px-2 py-1 align-top">
                                 <div class="font-bold">Key/Remote Deposit</div>
                                 <div>(Current room occupied at the end shift)</div>
                             </td>
-                            <td class="border border-black px-2 py-1 align-top">13</td>
-                            <td class="border border-black px-2 py-1 align-top font-bold">₱ 2,600</td>
+                            <td class="border border-black px-2 py-1 align-top">89</td>
+                            <td class="border border-black px-2 py-1 align-top font-bold">₱ 17,800.00</td>
                         </tr>
-                        <tr>
+                          <tr>
                             <td class="border border-black px-2 py-1 font-bold">Total Check-out</td>
-                            <td class="border border-black px-2 py-1">107</td>
-                            <td class="border border-black px-2 py-1 font-bold">₱ 21,400.00</td>
+                            <td class="border border-black px-2 py-1">31</td>
+                            <td class="border border-black px-2 py-1 font-bold">₱ 6,200.00</td>
                         </tr>
-                        <tr>
-                            <td class="border border-black px-2 py-1 font-bold">Client Deposit</td>
+                         <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Guest Deposit</td>
                             <td class="border border-black px-2 py-1"></td>
-                            <td class="border border-black px-2 py-1"></td>
+                            <td class="border border-black px-2 py-1 font-bold">-</td>
                         </tr>
-                        <tr>
+                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Expenses</td>
-                            <td class="border border-black px-2 py-1">-</td>
-                            <td class="border border-black px-2 py-1">₱ 9,407.00</td>
+                            <td class="border border-black px-2 py-1"></td>
+                            <td class="border border-black px-2 py-1 font-bold">₱ 9,407.00</td>
                         </tr>
-                        <tr>
+                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Remittance</td>
-                            <td class="border border-black px-2 py-1">-</td>
-                            <td class="border border-black px-2 py-1">-</td>
+                            <td class="border border-black px-2 py-1"></td>
+                            <td class="border border-black px-2 py-1 font-bold">-</td>
                         </tr>
                     </tbody>
                 </table>
@@ -471,7 +490,7 @@
                     <tbody>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Expected Cash</td>
-                            <td class="border border-black px-2 py-1" colspan="2">₱ 92,132.00</td>
+                            <td class="border border-black px-2 py-1" colspan="2">₱ 92,443.00</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Actual Cash</td>
@@ -479,10 +498,25 @@
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold text-red-600">Difference</td>
-                            <td class="border border-black px-2 py-1 text-red-600 font-bold" colspan="2">₱ 5,538.00</td>
+                            <td class="border border-black px-2 py-1 text-red-600" colspan="2">₱ 5,849.00</td>
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <div class="pt-4 pl-2">
+                <div class="text-[14px] font-bold mb-2">(Forwarding Computation)</div>
+                <div class="text-[14px] font-bold mb-2">Expected Cash computation: </div>
+                <div class="text-[14px] font-normal mb-2">(Opening Cash + New Check-in + Extension, Transfer Room, Miscellaneous charges, Food, Drinks, Key Remote Deposit, Guest Deposit) - (Expenses and Remittance)</div>
+            </div>
+            <div class="pt-4 pl-2">
+                <div class="text-[14px] font-bold mb-2">(Backforwarding Computation)</div>
+                <div class="text-[14px] font-bold mb-2">Expected Cash computation: </div>
+                <div class="text-[14px] font-normal mb-2">(Netsales + Guest Deposit+  Remote Key Deposit + Opening Cash) - (Expenses, and Remittance)</div>
+            </div>
+             <div class="pt-4 pl-2">
+                <div class="text-[14px] mb-2"><span class="font-bold italic">Note:</span> <span>(Perform forward and backward computations to countercheck and ensure that the results are correct.)
+                </span> </div>
             </div>
 
             <div>
@@ -490,36 +524,42 @@
                 <table class="w-full border-collapse table-fixed border border-black text-[13px]">
                     <thead>
                         <tr>
-                            <th class="border border-black px-2 py-1 text-left font-bold w-[40%]">Description</th>
-                            <th class="border border-black px-2 py-1 text-left font-bold w-[25%]">Number</th>
-                            <th class="border border-black px-2 py-1 text-left font-bold w-[35%]">Amount</th>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[55%]">Description</th>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[45%]" colspan="2">Amount</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Gross Sales</td>
-                            <td class="border border-black px-2 py-1">₱ 52,958.00</td>
-                            <td class="border border-black px-2 py-1"></td>
+                            <td class="border border-black px-2 py-1" colspan="2">₱ 67,353.00</td>
+                        </tr>
+                         <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Forwarding Balance</td>
+                            <td class="border border-black px-2 py-1" colspan="2">₱ 0.00</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Expenses</td>
-                            <td class="border border-black px-2 py-1">₱ 9,407.00</td>
-                            <td class="border border-black px-2 py-1"></td>
+                            <td class="border border-black px-2 py-1" colspan="2">₱ 9,407.00</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Discounts</td>
-                            <td class="border border-black px-2 py-1"></td>
-                            <td class="border border-black px-2 py-1"></td>
+                            <td class="border border-black px-2 py-1" colspan="2">-</td>
                         </tr>
                         <tr>
-                            <td class="border border-black px-2 py-1 font-bold">Key/Remote Deposit</td>
-                            <td class="border border-black px-2 py-1">₱ 2,600.00</td>
-                            <td class="border border-black px-2 py-1"></td>
+                            <td class="border border-black px-2 py-1 font-bold align-top">Key/ Remote<br>Deposit</td>
+                            <td class="border border-black px-2 py-1" colspan="2">₱ 17,800.00</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Guest Deposit</td>
+                            <td class="border border-black px-2 py-1" colspan="2">-</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Remittance</td>
+                            <td class="border border-black px-2 py-1" colspan="2">-</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Net Sales</td>
-                            <td class="border border-black px-2 py-1 font-bold">₱ 40,951.00</td>
-                            <td class="border border-black px-2 py-1"></td>
+                            <td class="border border-black px-2 py-1 font-bold" colspan="2">₱ 40,146.00</td>
                         </tr>
                     </tbody>
                 </table>
@@ -527,7 +567,7 @@
 
             <div class="pt-16 pl-2">
                 <div class="text-[14px] mb-16">Certified and Correct:</div>
-                <div class="w-48 border-b mt-10 border-black"></div>
+                <div class="w-64 border-b mt-10 border-black"></div>
             </div>
         </div>
     </div>
