@@ -1037,7 +1037,7 @@
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Net Sales</td>
-                            <td class="border border-black px-2 py-1 font-bold" colspan="2">₱ 45,058.20</td>
+                            <td class="border border-black px-2 py-1 font-bold" colspan="2">₱ 45,778.20</td>
                         </tr>
                     </tbody>
                 </table>
