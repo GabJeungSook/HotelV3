@@ -23,7 +23,15 @@ class SalesReport extends Component
     public float $totalSales = 0;
 
     public $date_from;
+    public $time_from;
+
     public $date_to;
+    public $time_to;
+    public $startDate;
+public $endDate;
+
+public $startTime;
+public $endTime;
     public $shift;
     public $frontdesk;
     public $frontdesk_name;
@@ -52,6 +60,12 @@ class SalesReport extends Component
         $this->expensesRows = collect();
         $this->expensesTotal = 0;
         $this->roomSummary = [];
+
+        $this->date_from = now()->toDateString();
+        $this->date_to = now()->toDateString();
+
+        $this->time_from = '08:00';
+        $this->time_to = '20:00';
 
         $this->generateReport();
     }
@@ -260,8 +274,28 @@ class SalesReport extends Component
             })
             ->groupBy('checkin_detail_id');
 
-        $this->salesRoomsRaw = $this->buildSalesRooms($details, $txRows);
-        $this->applySalesVisibilityAndTotals();
+        // $this->salesRoomsRaw = $this->buildSalesRooms($details, $txRows);
+        // $this->applySalesVisibilityAndTotals();
+             $this->startDateTime = null;
+            $this->endDateTime = null;
+
+        // Ensure time format works with SQL TIME()
+            if ($this->time_from) {
+                $this->startTime = $this->time_from . ':00';
+            }
+
+            if ($this->time_to) {
+                $this->endTime = $this->time_to . ':59';
+            }
+
+            // Date filters
+            $this->startDate = $this->date_from;
+            $this->endDate = $this->date_to;
+
+            $this->salesRooms = $this->buildSalesRows();
+
+            $this->totalSales = collect($this->salesRooms)->sum('total');
+
 
         $this->summary = $this->buildSummary();
         $this->buildExpensesSummary();
@@ -292,6 +326,143 @@ class SalesReport extends Component
 
         return null;
     }
+
+private function buildSalesRows(): array
+{
+    // $start = null;
+    // $end = null;
+
+    // if ($this->date_from && $this->time_from) {
+    //     $start = Carbon::parse($this->date_from . ' ' . $this->time_from);
+    // }
+
+    // if ($this->date_to && $this->time_to) {
+    //     $end = Carbon::parse($this->date_to . ' ' . $this->time_to);
+    // }
+    $rows = DB::table('transactions as tr')
+        ->join('shift_logs as sl', 'sl.id', '=', 'tr.shift_log_id')
+
+        ->leftJoin('checkin_details as cd', 'cd.id', '=', 'tr.checkin_detail_id')
+        ->leftJoin('guests as g', 'g.id', '=', 'tr.guest_id')
+        ->leftJoin('rooms as r', 'r.id', '=', 'tr.room_id')
+        ->leftJoin('types as t', 't.id', '=', 'r.type_id')
+        ->leftJoin('transaction_types as tt', 'tt.id', '=', 'tr.transaction_type_id')
+        ->leftJoin('users as u', 'u.id', '=', 'sl.frontdesk_id')
+        ->when($this->startDate && $this->endDate, function ($query) {
+
+            $query->whereBetween(DB::raw('DATE(tr.created_at)'), [
+                $this->startDate,
+                $this->endDate
+            ]);
+
+        })
+
+        ->when($this->startTime && $this->endTime, function ($query) {
+
+            $query->whereBetween(DB::raw('TIME(tr.created_at)'), [
+                $this->startTime,
+                $this->endTime
+            ]);
+
+        })
+->selectRaw('
+    r.number as room_no,
+    t.name as room_type,
+    g.name as guest_name,
+    cd.check_in_at,
+    cd.check_out_at,
+    cd.hours_stayed as initial_hrs,
+
+    CASE WHEN tt.name = "Check In" 
+        THEN tr.payable_amount ELSE 0 END as room_amount,
+
+    CASE WHEN tt.name = "Extend" 
+        THEN tr.payable_amount ELSE 0 END as extend_amount,
+
+    CASE WHEN tt.name = "Amenities" 
+        THEN tr.payable_amount ELSE 0 END as amenities_amount,
+
+    CASE WHEN tt.name = "Food and Beverages" 
+        THEN tr.payable_amount ELSE 0 END as food_amount,
+
+    CASE WHEN tt.name = "Damage Charges" 
+        THEN tr.payable_amount ELSE 0 END as damages_amount,
+
+    CASE WHEN tt.name = "Transfer Room" 
+        THEN tr.payable_amount ELSE 0 END as transfer_amount,
+
+    CASE 
+        WHEN tt.name = "Deposit"
+        AND tr.remarks = "Deposit From Check In (Room Key & TV Remote)"
+        THEN tr.payable_amount
+        ELSE 0
+    END as room_deposit,
+
+    CASE 
+        WHEN tt.name = "Deposit"
+        AND (
+            tr.remarks IS NULL
+            OR tr.remarks != "Deposit From Check In (Room Key & TV Remote)"
+        )
+        THEN tr.payable_amount
+        ELSE 0
+    END as client_deposit,
+
+    CASE
+        WHEN tr.transaction_type_id NOT IN (5)
+        THEN tr.payable_amount
+        ELSE 0
+    END as total,
+    u.name,
+    tr.created_at
+')
+
+        ->orderBy('r.number')
+->orderBy('tr.created_at')  
+
+        ->get()
+
+        ->map(function ($r) {
+
+            return [
+                'room_number' => $r->room_no,
+                'room_type' => $r->room_type ?? '—',
+                'guest_name' => strtoupper($r->guest_name ?? '—'),
+
+                'check_in' => $r->check_in_at
+                    ? \Carbon\Carbon::parse($r->check_in_at)->format('m-d-Y h:iA')
+                    : '—',
+
+                'check_out' => $r->check_out_at
+                    ? \Carbon\Carbon::parse($r->check_out_at)->format('m-d-Y h:iA')
+                    : '—',
+
+                'initial_hrs' => $r->initial_hrs
+                    ? $r->initial_hrs . ' hrs'
+                    : '—',
+
+                'room_amount' => (float) $r->room_amount,
+                'extend_amount' => (float) $r->extend_amount,
+                'amenities_amount' => (float) $r->amenities_amount,
+                'food_amount' => (float) $r->food_amount,
+                'damages_amount' => (float) $r->damages_amount,
+                'transfer_amount' => (float) $r->transfer_amount,
+
+                'room_deposit' => (float) $r->room_deposit,
+                'client_deposit' => (float) $r->client_deposit,
+
+                'total' => (float) $r->total,
+                'created_at' => $r->created_at
+                    ? \Carbon\Carbon::parse($r->created_at)->format('m-d-Y h:iA')
+                    : '—',
+                'frontdesk' => $r->name,
+            ];
+        })
+
+        ->toArray();
+
+    return $rows;
+}
 
     private function buildSalesRooms($details, $txRowsByDetail): array
     {

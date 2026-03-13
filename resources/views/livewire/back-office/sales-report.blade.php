@@ -34,7 +34,7 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
 
             {{-- Frontdesk --}}
-            <div class="flex flex-col gap-3">
+            {{-- <div class="flex flex-col gap-3">
                 <label class="block text-sm font-medium text-gray-700">Frontdesk</label>
                 <select wire:model.defer="frontdesk"
                         class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
@@ -50,7 +50,7 @@
                         Print
                     </button>
                 </div>
-            </div>
+            </div> --}}
 
             {{-- Date From --}}
             <div>
@@ -65,10 +65,24 @@
                 <input type="date" wire:model.defer="date_to"
                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
             </div>
+            {{-- Time From --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Time From</label>
+                <input type="time"
+                    wire:model.defer="time_from"
+                    class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm">
+            </div>
+            {{-- Time To --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Time To</label>
+                <input type="time"
+                    wire:model.defer="time_to"
+                    class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm">
+            </div>
 
             {{-- Shift + Buttons --}}
             <div class="flex flex-col gap-3">
-                <div>
+                {{-- <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Shift</label>
                     <select wire:model.defer="shift"
                             class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
@@ -76,7 +90,7 @@
                         <option value="AM">AM</option>
                         <option value="PM">PM</option>
                     </select>
-                </div>
+                </div> --}}
 
                 <div class="flex items-end gap-2">
                     <button wire:click="generateReport" type="button"
@@ -158,27 +172,29 @@
                     @if($showTransfer)
                         <th class="border border-gray-300 px-2 py-2 text-left text-sm font-semibold text-gray-800 w-36">TRANSFER</th>
                     @endif
-                    @if($showDeposits)
+                    {{-- @if($showDeposits)
                     <th class="border border-gray-300 px-2 py-2 text-left text-sm font-semibold text-gray-800 w-36">
                         CLIENT DEPOSIT
                     </th>
                     @endif
 
                     <th class="border border-gray-300 px-2 py-2 text-left text-sm font-semibold text-gray-800 w-56">FRONTDESK</th>
-                    <th class="border border-gray-300 px-2 py-2 text-left text-sm font-semibold text-gray-800 w-24">SHIFT</th>
+                    <th class="border border-gray-300 px-2 py-2 text-left text-sm font-semibold text-gray-800 w-24">SHIFT</th> --}}
+                    <th class="border border-gray-300 px-2 py-2 text-left text-sm font-semibold text-gray-800 w-56">ROOM DEPOSIT</th>
+                    <th class="border border-gray-300 px-2 py-2 text-left text-sm font-semibold text-gray-800 w-24">CLIENT DEPOSIT</th> 
+                    <th class="border border-gray-300 px-2 py-2 text-left text-sm font-semibold text-gray-800 w-40">FRONTDESK</th>
+                    <th class="border border-gray-300 px-2 py-2 text-left text-sm font-semibold text-gray-800 w-40">TRANSACTION DATE</th>
                     <th class="border border-gray-300 px-2 py-2 text-left text-sm font-semibold text-gray-800 w-40">TOTAL</th>
                 </tr>
             </thead>
 
             <tbody>
-                @forelse($salesRooms as $room)
-                    @foreach($room['rows'] as $index => $row)
+                @forelse($salesRooms as $row)
+                    {{-- @foreach($room['rows'] as $index => $row) --}}
                         <tr>
-                            @if($index === 0)
-                                <td rowspan="{{ $room['rowspan'] }}" class="border border-gray-300 px-2 py-3 text-sm text-gray-900 align-top font-semibold">
-                                    {{ $room['room_number'] }}
-                                </td>
-                            @endif
+                           <td class="border border-gray-300 px-2 py-3 text-sm font-semibold">
+                                {{ $row['room_number'] }}
+                            </td>
 
                             <td class="border border-gray-300 px-2 py-3 text-sm text-gray-900">{{ $row['room_type'] }}</td>
                             <td class="border border-gray-300 px-2 py-3 text-sm text-gray-900">{{ $row['guest_name'] }}</td>
@@ -219,22 +235,27 @@
                                     ₱ {{ number_format($row['transfer_amount'], 2) }}
                                 </td>
                             @endif
-                            @if($showDeposits)
+                            {{-- @if($showDeposits)
                         <td class="border border-gray-300 px-2 py-3 text-sm text-gray-900">
                             ₱ {{ number_format($row['deposit_amount'], 2) }}
                         </td>
-                        @endif
+                        @endif --}}
 
-                            <td class="border border-gray-300 px-3 py-2 text-sm text-gray-900">{{ $row['frontdesk_name'] }}</td>
-                            <td class="border border-gray-300 px-3 py-2 text-sm text-gray-900">{{ $row['shift'] }}</td>
+                            {{-- <td class="border border-gray-300 px-3 py-2 text-sm text-gray-900">{{ $row['frontdesk_name'] }}</td>
+                            <td class="border border-gray-300 px-3 py-2 text-sm text-gray-900">{{ $row['shift'] }}</td> --}}
+                            <td class="border border-gray-300 px-3 py-2 text-sm text-gray-900">₱ {{ number_format($row['room_deposit'], 2) }}</td>
+                            <td class="border border-gray-300 px-3 py-2 text-sm text-gray-900">₱ {{ number_format($row['client_deposit'], 2) }}</td>
+                            <td class="border border-gray-300 px-3 py-2 text-sm text-gray-900">{{$row['frontdesk'] }}</td>
+                            <td class="border border-gray-300 px-3 py-2 text-sm text-gray-900">{{$row['created_at'] }}</td>
                             <td class="border border-gray-300 px-3 py-2 text-sm text-gray-900 font-semibold">
                                 ₱ {{ number_format($row['total'], 2) }}
                             </td>
+
                         </tr>
-                    @endforeach
+                    {{-- @endforeach --}}
                 @empty
                     <tr>
-                        <td colspan="{{ 10 + ($showExtend?1:0)+($showAmenities?1:0)+($showFood?1:0)+($showDamages?1:0)+($showTransfer?1:0)+($showDeposits?1:0) }}"
+                        <td colspan="17"
                             class="border border-gray-300 px-2 py-6 text-sm text-center text-gray-500">
                             No sales records found for the selected filters.
                         </td>
@@ -291,7 +312,11 @@
                 Date:
             </div>
             <div class="font-semibold text-gray-900">
-                {{ \Carbon\Carbon::parse($date_from)->format('F d, Y'). ' - ' .\Carbon\Carbon::parse($date_to)->format('F d, Y') ?? '-' }}
+                {{ 
+                $startDateTime && $endDateTime
+                    ? $startDateTime->format('M d Y h:i A') . ' - ' . $endDateTime->format('M d Y h:i A')
+                    : '-'
+                }}
             </div>
 
             <div class="font-medium text-gray-600">
