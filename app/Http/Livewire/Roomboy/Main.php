@@ -225,6 +225,7 @@ class Main extends Component
 
             $room->update([
                 'status' => 'Available',
+                'is_priority' => 1,
                 'started_cleaning_at' => null,
                 'time_to_clean' => null,
             ]);
@@ -321,6 +322,7 @@ class Main extends Component
 
             $room->update([
                 'status' => 'Available',
+                'is_priority' => 1,
                 'started_cleaning_at' => null,
                 'time_to_clean' => null,
             ]);
