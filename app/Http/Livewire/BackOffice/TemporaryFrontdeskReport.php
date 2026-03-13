@@ -227,7 +227,7 @@ public function mount(): void
                 ['description' => 'Forwarding Balance', 'sub' => '(From previous Shift)', 'amount' => '₱ 105,063.00', 'remark' => '-'],
             ],
             'cash_drawer_total' => [
-                'amount' => '₱ 196,543.00 <span class="text-red-600">(98,052.20)</span>',
+                'amount' => '₱ 196,543.00 <span class="text-red-600">(11,896.00) excess</span>',
                 'remark' => '-',
             ],
 
@@ -247,8 +247,8 @@ public function mount(): void
 
             'cash_reconciliation' => [
                 'expected_cash' => '₱ 200,269.20',
-                'actual_cash' => '₱ 105,995.00',
-                'difference' => '₱ 94,274.20',
+                'actual_cash' => '₱ 228,889',
+                'difference' => '₱ 28,619.80',
             ],
 
             'final_sales' => [
