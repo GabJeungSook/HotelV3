@@ -227,7 +227,7 @@ public function mount(): void
                 ['description' => 'Forwarding Balance', 'sub' => '(From previous Shift)', 'amount' => '₱ 105,063.00', 'remark' => '-'],
             ],
             'cash_drawer_total' => [
-                'amount' => '₱ 86,595.00 <span class="text-red-600">(98,052.2)</span>',
+                'amount' => '₱ 196,543.00 <span class="text-red-600">(98,052.20)</span>',
                 'remark' => '-',
             ],
 
