@@ -193,12 +193,12 @@ public function mount(): void
                 ['description' => 'Key/Remote Deposit', 'sub' => '(Current room occupied at the end shift)', 'number' => '111', 'amount' => '₱ 22,200.00'],
                 ['description' => 'Total Check-out', 'sub' => null, 'number' => '42', 'amount' => '₱ 8,400.00'],
                 ['description' => 'Guest Deposit', 'sub' => null, 'number' => '', 'amount' => '₱ 11,606.00'],
-                ['description' => 'Expenses', 'sub' => null, 'number' => '', 'amount' => '₱ 15,138.00'],
+                ['description' => 'Expenses', 'sub' => null, 'number' => '', 'amount' => '₱ 15,138.80'],
                 ['description' => 'Remittance', 'sub' => null, 'number' => '', 'amount' => '-'],
             ],
 
             'cash_reconciliation' => [
-                'expected_cash' => '₱ 184,647.00',
+                'expected_cash' => '₱ 184,647.20',
                 'actual_cash' => '₱ 196,543.00',
                 'difference' => '₱ 11,896.00',
             ],
