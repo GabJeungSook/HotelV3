@@ -272,10 +272,10 @@ public function mount(): void
                 ['description' => 'Opening Cash', 'sub' => '(Net Sales Receive from previous Shift)', 'amount' => '₱ 36,122.00', 'remark' => '-'],
                 ['description' => 'Key/Remote Deposit', 'sub' => '(Room occupied receive)', 'amount' => '₱ 6,600.00', 'remark' => '-'],
                 ['description' => 'Client Deposit', 'sub' => '(Total client deposit received)', 'amount' => '₱ 6,706.00', 'remark' => '-'],
-                ['description' => 'Forwarding Balance', 'sub' => '(From previous Shift)', 'amount' => '₱ 105,063.00', 'remark' => '-'],
+                ['description' => 'Forwarding Balance', 'sub' => '(From previous Shift)', 'amount' => '₱ 150,841.00', 'remark' => '-'],
             ],
             'cash_drawer_total' => [
-                'amount' => '₱ 114,444.50 <span class="text-red-600">(40,046.50)</span>',
+                'amount' => '₱ 228,889.20 <span class="text-red-600">(+28,619.80)</span>',
                 'remark' => '-',
             ],
 
