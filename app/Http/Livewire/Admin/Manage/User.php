@@ -28,7 +28,7 @@ class User extends Component implements Tables\Contracts\HasTable
     public $edit_modal = false;
     public $search;
     public $name, $email, $password, $role, $user_id;
-    public $branch_id;
+    public $branch_id = 1;
 
     public function render()
     {
