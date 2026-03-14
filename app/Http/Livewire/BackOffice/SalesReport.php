@@ -359,15 +359,14 @@ private function buildSalesRows(): array
         ->when($this->frontdesk, function ($query) {
             $query->where('u.id', $this->frontdesk);
         })
+        ->when($this->startTime && $this->endTime, function ($query) {
 
-        // ->when($this->startTime && $this->endTime, function ($query) {
+            $query->whereBetween(DB::raw('TIME(tr.created_at)'), [
+                $this->startTime,
+                $this->endTime
+            ]);
 
-        //     $query->whereBetween(DB::raw('TIME(tr.created_at)'), [
-        //         $this->startTime,
-        //         $this->endTime
-        //     ]);
-
-        // })
+        })
 ->selectRaw('
     r.number as room_no,
     t.name as room_type,

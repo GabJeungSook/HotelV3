@@ -31,7 +31,7 @@
 </style> --}}
     {{-- Filters --}}
     <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 p-4 mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-5 md:grid-cols-5 gap-4">
 
             {{-- Frontdesk --}}
             <div class="flex flex-col gap-1">
@@ -44,7 +44,7 @@
                     @endforeach
                 </select>
 
-                  <div class="flex items-end gap-2 mt-3">
+                  {{-- <div class="flex items-end gap-2 mt-3">
                     <button wire:click="generateReport" type="button"
                             class="w-full md:w-auto inline-flex justify-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
                         Apply
@@ -54,7 +54,7 @@
                             class="w-full md:w-auto inline-flex justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
                         Reset
                     </button>
-                </div>
+                </div> --}}
 
                  {{-- <div class="flex items-end gap-2">
                     <button @click="printOut($refs.printContainer.outerHTML);" type="button"
@@ -66,31 +66,43 @@
 
             {{-- Date From --}}
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">From</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Date From</label>
                 <input type="date" wire:model.defer="date_from"
                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
             </div>
 
             {{-- Date To --}}
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">To</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Date To</label>
                 <input type="date" wire:model.defer="date_to"
                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
             </div>
             {{-- Time From --}}
-            {{-- <div>
+            <div>
                 <label class="block text-sm font-medium text-gray-700">Time From</label>
                 <input type="time"
                     wire:model.defer="time_from"
                     class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm">
-            </div> --}}
+            </div>
             {{-- Time To --}}
-            {{-- <div>
+            <div>
                 <label class="block text-sm font-medium text-gray-700">Time To</label>
                 <input type="time"
                     wire:model.defer="time_to"
                     class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm">
-            </div> --}}
+
+                      <div class="flex justify-end items-end gap-2 mt-3">
+                    <button wire:click="generateReport" type="button"
+                            class="w-full md:w-auto inline-flex justify-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
+                        Apply
+                    </button>
+
+                    <button wire:click="resetFilters" type="button"
+                            class="w-full md:w-auto inline-flex justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Reset
+                    </button>
+                </div>
+            </div>
 
             {{-- Shift + Buttons --}}
             <div class="flex flex-col gap-3">
@@ -119,7 +131,7 @@
         </div>
 
         {{-- Column Toggles (still uniform; placed under filters) --}}
-        <div class="mt-4 flex flex-wrap gap-4">
+        {{-- <div class="mt-4 flex flex-wrap gap-4">
             <label class="inline-flex items-center gap-2 text-sm">
                 <input type="checkbox" wire:model.live="showExtend" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
                 <span class="text-gray-700">Extend</span>
@@ -148,7 +160,7 @@
                 <input type="checkbox" wire:model.live="showDeposits" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
                 <span class="text-gray-700">Client Deposit</span>
             </label>
-        </div>
+        </div> --}}
     </div>
 
     {{-- Report --}}
