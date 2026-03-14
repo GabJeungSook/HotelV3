@@ -417,6 +417,7 @@ private function buildSalesRows(): array
         ELSE 0
     END as total,
     u.name,
+    tt.name as transaction_type,
     tr.created_at
 ')
 
@@ -431,7 +432,7 @@ private function buildSalesRows(): array
                 'room_number' => $r->room_no,
                 'room_type' => $r->room_type ?? '—',
                 'guest_name' => strtoupper($r->guest_name ?? '—'),
-
+                'type' => $r->transaction_type,
                 'check_in' => $r->check_in_at
                     ? \Carbon\Carbon::parse($r->check_in_at)->format('m-d-Y h:iA')
                     : '—',
