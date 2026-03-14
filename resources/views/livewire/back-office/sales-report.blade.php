@@ -177,6 +177,7 @@
                     <th class="border border-gray-300 px-2 py-2 text-left text-sm font-semibold text-gray-800 w-28">ROOM #</th>
                     <th class="border border-gray-300 px-2 py-2 text-left text-sm font-semibold text-gray-800 w-56">ROOM TYPE</th>
                     <th class="border border-gray-300 px-2 py-2 text-left text-sm font-semibold text-gray-800 w-64">GUEST NAME</th>
+                    <th class="border border-gray-300 px-2 py-2 text-left text-sm font-semibold text-gray-800 w-28">TYPE</th>
                     <th class="border border-gray-300 px-2 py-2 text-left text-sm font-semibold text-gray-800">CHECK-IN</th>
                     <th class="border border-gray-300 px-2 py-2 text-left text-sm font-semibold text-gray-800">CHECK-OUT</th>
                     <th class="border border-gray-300 px-2 py-2 text-left text-sm font-semibold text-gray-800 w-32">INITIAL HRS</th>
@@ -223,6 +224,7 @@
 
                             <td class="border border-gray-300 px-2 py-3 text-sm text-gray-900">{{ $row['room_type'] }}</td>
                             <td class="border border-gray-300 px-2 py-3 text-sm text-gray-900">{{ $row['guest_name'] }}</td>
+                            <td class="border border-gray-300 px-2 py-3 text-sm text-gray-900">{{ $row['type'] }}</td>
                             <td class="border border-gray-300 px-2 py-3 text-sm text-gray-900">{{ $row['check_in'] }}</td>
                             <td class="border border-gray-300 px-2 py-3 text-sm text-gray-900">{{ $row['check_out'] }}</td>
                             <td class="border border-gray-300 px-2 py-3 text-sm text-gray-900">{{ $row['initial_hrs'] }}</td>
