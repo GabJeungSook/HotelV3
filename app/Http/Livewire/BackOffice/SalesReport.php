@@ -407,6 +407,7 @@ private function buildSalesRows(): array
             tr.remarks IS NULL
             OR tr.remarks != "Deposit From Check In (Room Key & TV Remote)"
         )
+        AND (cd.is_check_out = 0 OR cd.is_check_out IS NULL)
         THEN tr.payable_amount
         ELSE 0
     END as client_deposit,
