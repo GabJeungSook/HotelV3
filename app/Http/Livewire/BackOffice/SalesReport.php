@@ -394,10 +394,11 @@ private function buildSalesRows(): array
         THEN tr.payable_amount ELSE 0 END as transfer_amount,
 
     CASE 
-        WHEN tt.name = "Deposit"
-        AND tr.remarks = "Deposit From Check In (Room Key & TV Remote)"
-        THEN tr.payable_amount
-        ELSE 0
+    WHEN tt.name = "Deposit"
+    AND tr.remarks = "Deposit From Check In (Room Key & TV Remote)"
+    AND (cd.is_check_out = 0 OR cd.is_check_out IS NULL)
+    THEN tr.payable_amount
+    ELSE 0
     END as room_deposit,
 
     CASE 
