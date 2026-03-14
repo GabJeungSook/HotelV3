@@ -30,7 +30,7 @@
   <small  class="flex justify-center mt-3 font-medium text-red-600">*Input QR Code Here*</small>
 </div>
 
-<div class="fixed bottom-10 right-0 left-0">
+<div class="fixed bottom-20 right-0 left-0">
   <div class="flex justify-center">
     @if ($qr_code)
      <button 
