@@ -31,7 +31,7 @@
 </style> --}}
     {{-- Filters --}}
     <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 p-4 mb-6">
-        <div class="grid grid-cols-5 md:grid-cols-5 gap-4">
+        <div class="grid grid-cols-3 md:grid-cols-3 gap-4">
 
             {{-- Frontdesk --}}
             <div class="flex flex-col gap-1">
@@ -76,22 +76,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Date To</label>
                 <input type="date" wire:model.defer="date_to"
                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
-            </div>
-            {{-- Time From --}}
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Time From</label>
-                <input type="time"
-                    wire:model.defer="time_from"
-                    class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm">
-            </div>
-            {{-- Time To --}}
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Time To</label>
-                <input type="time"
-                    wire:model.defer="time_to"
-                    class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm">
-
-                      <div class="flex justify-end items-end gap-2 mt-3">
+            <div class="flex justify-end items-end gap-2 mt-3">
                     <button wire:click="generateReport" type="button"
                             class="w-full md:w-auto inline-flex justify-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
                         Apply
@@ -103,6 +88,22 @@
                     </button>
                 </div>
             </div>
+            {{-- Time From --}}
+            {{-- <div>
+                <label class="block text-sm font-medium text-gray-700">Time From</label>
+                <input type="time"
+                    wire:model.defer="time_from"
+                    class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm">
+            </div> --}}
+            {{-- Time To --}}
+            {{-- <div>
+                <label class="block text-sm font-medium text-gray-700">Time To</label>
+                <input type="time"
+                    wire:model.defer="time_to"
+                    class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm">
+
+                      
+            </div> --}}
 
             {{-- Shift + Buttons --}}
             <div class="flex flex-col gap-3">
