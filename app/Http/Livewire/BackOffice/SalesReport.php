@@ -356,15 +356,18 @@ private function buildSalesRows(): array
             ]);
 
         })
-
-        ->when($this->startTime && $this->endTime, function ($query) {
-
-            $query->whereBetween(DB::raw('TIME(tr.created_at)'), [
-                $this->startTime,
-                $this->endTime
-            ]);
-
+        ->when($this->frontdesk, function ($query) {
+            $query->where('u.id', $this->frontdesk);
         })
+
+        // ->when($this->startTime && $this->endTime, function ($query) {
+
+        //     $query->whereBetween(DB::raw('TIME(tr.created_at)'), [
+        //         $this->startTime,
+        //         $this->endTime
+        //     ]);
+
+        // })
 ->selectRaw('
     r.number as room_no,
     t.name as room_type,
@@ -409,7 +412,7 @@ private function buildSalesRows(): array
     END as client_deposit,
 
     CASE
-        WHEN tr.transaction_type_id NOT IN (5)
+        WHEN tr.transaction_type_id NOT IN (2, 5)
         THEN tr.payable_amount
         ELSE 0
     END as total,
@@ -417,7 +420,7 @@ private function buildSalesRows(): array
     tr.created_at
 ')
 
-        ->orderBy('r.number')
+        ->orderBy('r.id')
 ->orderBy('tr.created_at')  
 
         ->get()
