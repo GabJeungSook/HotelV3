@@ -282,7 +282,7 @@
                     {{-- @endforeach --}}
                 @empty
                     <tr>
-                        <td colspan="17"
+                        <td colspan="18"
                             class="border border-gray-300 px-2 py-6 text-sm text-center text-gray-500">
                             No sales records found for the selected filters.
                         </td>

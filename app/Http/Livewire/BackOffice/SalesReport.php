@@ -343,6 +343,9 @@ private function buildSalesRows(): array
         ->join('shift_logs as sl', 'sl.id', '=', 'tr.shift_log_id')
 
         ->leftJoin('checkin_details as cd', 'cd.id', '=', 'tr.checkin_detail_id')
+        ->leftJoin('check_out_guest_reports as cg', 'cg.checkin_details_id', '=', 'cd.id')
+        ->leftJoin('frontdesks as fci', 'fci.id', '=', 'cd.frontdesk_id')
+        ->leftJoin('frontdesks as fco', 'fco.id', '=', 'cg.frontdesk_id')
         ->leftJoin('guests as g', 'g.id', '=', 'tr.guest_id')
         ->leftJoin('rooms as r', 'r.id', '=', 'tr.room_id')
         ->leftJoin('types as t', 't.id', '=', 'r.type_id')
@@ -394,20 +397,22 @@ private function buildSalesRows(): array
         THEN tr.payable_amount ELSE 0 END as transfer_amount,
 
     CASE 
-    WHEN tt.name = "Deposit"
-    AND tr.remarks = "Deposit From Check In (Room Key & TV Remote)"
-    AND (cd.is_check_out = 0 OR cd.is_check_out IS NULL)
-    THEN tr.payable_amount
-    ELSE 0
+        WHEN tt.name = "Deposit"
+        AND tr.remarks = "Deposit From Check In (Room Key & TV Remote)"
+        AND fci.user_id = u.id
+        AND (fco.user_id IS NULL OR fco.user_id != u.id)
+        THEN tr.payable_amount
+        ELSE 0
     END as room_deposit,
-
+    
     CASE 
         WHEN tt.name = "Deposit"
         AND (
             tr.remarks IS NULL
             OR tr.remarks != "Deposit From Check In (Room Key & TV Remote)"
         )
-        AND (cd.is_check_out = 0 OR cd.is_check_out IS NULL)
+        AND fci.user_id = u.id
+        AND (fco.user_id IS NULL OR fco.user_id != u.id)
         THEN tr.payable_amount
         ELSE 0
     END as client_deposit,
