@@ -9,6 +9,17 @@ Route::prefix('back-office')
         Route::get('/sales', function () {
             return view('back-office.sales');
         })->name('back-office.sales');
+        Route::get('/shift-reports', function () {
+            return view('back-office.frontdesk-shift-table');
+        })->name('back-office.frontdesk-shift-table');
+         Route::get('/shift-report-form', function () {
+            return view('back-office.frontdesk-shift-form');
+        })->name('back-office.frontdesk-shift-form');
+
+        Route::get('/shift-report-form-edit/{id}', function ($id) {
+            return view('back-office.frontdesk-shift-edit', compact('id'));
+        })->name('back-office.frontdesk-shift-edit');
+
         // Route::get('/expenses', function () {
         //     return view('back-office.expenses');
         // })->name('back-office.expenses');

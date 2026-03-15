@@ -136,6 +136,8 @@ class Amenities extends Component implements Tables\Contracts\HasTable
         ];
     }
 
+    
+
     public function saveRequest()
     {
         $this->validate([
