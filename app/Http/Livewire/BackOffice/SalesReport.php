@@ -398,7 +398,7 @@ private function buildSalesRows(): array
         )
         THEN tr.payable_amount
         ELSE 0
-    END as room_deposit
+    END as room_deposit,
 
     CASE
         WHEN tt.name = "Deposit"
