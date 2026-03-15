@@ -329,16 +329,7 @@ public $endTime;
 
 private function buildSalesRows(): array
 {
-    // $start = null;
-    // $end = null;
 
-    // if ($this->date_from && $this->time_from) {
-    //     $start = Carbon::parse($this->date_from . ' ' . $this->time_from);
-    // }
-
-    // if ($this->date_to && $this->time_to) {
-    //     $end = Carbon::parse($this->date_to . ' ' . $this->time_to);
-    // }
     $rows = DB::table('transactions as tr')
         ->join('shift_logs as sl', 'sl.id', '=', 'tr.shift_log_id')
 
@@ -401,9 +392,13 @@ private function buildSalesRows(): array
         AND tr.remarks = "Deposit From Check In (Room Key & TV Remote)"
         AND fci.user_id = u.id
         AND (fco.user_id IS NULL OR fco.user_id != u.id)
+        AND (
+            cg.created_at IS NULL
+            OR DATE(cg.created_at) NOT BETWEEN "' . $this->startDate . '" AND "' . $this->endDate . '"
+        )
         THEN tr.payable_amount
         ELSE 0
-    END as room_deposit,
+    END as room_deposit
 
     CASE
         WHEN tt.name = "Deposit"
@@ -413,6 +408,10 @@ private function buildSalesRows(): array
         )
         AND fci.user_id = u.id
         AND (fco.user_id IS NULL OR fco.user_id != u.id)
+         AND (
+            cg.created_at IS NULL
+            OR DATE(cg.created_at) NOT BETWEEN "' . $this->startDate . '" AND "' . $this->endDate . '"
+        )
         THEN tr.payable_amount
         ELSE 0
     END as client_deposit,
