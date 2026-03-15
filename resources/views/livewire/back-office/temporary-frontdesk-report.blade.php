@@ -108,9 +108,9 @@
                         <tr>
                             <td class="border border-black px-2 py-1 align-top">
                                 <div class="font-bold">{{ $row['description'] }}</div>
-                                {{-- @if($row['sub'])
-                                <div>{{ $row['sub'] }}</div>
-                                @endif --}}
+                                @if($row['sub'])
+                                <div>({{ $row['sub'] }})</div>
+                                @endif
                             </td>
                             <td class="border border-black px-2 py-1 align-top @if($row['is_bold'] ?? false) font-bold @endif">{!! $row['amount'] !!}</td>
                             <td class="border border-black px-2 py-1 align-top">{!! $row['remark'] !!}</td>
@@ -141,9 +141,9 @@
                         <tr>
                             <td class="border border-black px-2 py-1  font-bold">
                                 <div class="font-bold">{{ $row['description'] }}</div>
-                                {{-- @if($row['sub'])
-                                <div>{{ $row['sub'] }}</div>
-                                @endif --}}
+                                @if($row['sub'])
+                                <div class="font-normal">({{ $row['sub'] }})</div>
+                                @endif
                             </td>
                             <td class="border border-black px-2 py-1 ">{!! $row['number'] !!}</td>
                             <td class="border border-black px-2 py-1 font-bold">{!! $row['amount'] !!}</td>
@@ -167,9 +167,9 @@
                         <tr>
                             <td class="border border-black px-2 py-1  font-bold">
                                 <div class="font-bold">{{ $row['description'] }}</div>
-                                {{-- @if($row['sub'])
-                                <div>{{ $row['sub'] }}</div>
-                                @endif --}}
+                                @if($row['sub'])
+                                <div class="font-normal">({{ $row['sub'] }})</div>
+                                @endif
                             </td>
                             <td class="border border-black px-2 py-1 ">{!! $row['number'] !!}</td>
                             <td class="border border-black px-2 py-1 font-bold">{!! $row['amount'] !!}</td>
@@ -194,7 +194,7 @@
                             <td class="border border-black px-2 py-1 font-bold">Gross Sales</td>
                             <td class="border border-black px-2 py-1" colspan="2">{{ $shift['final_sales']['gross_sales'] }}</td>
                         </tr>
-                        
+
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Refund</td>
                             <td class="border border-black px-2 py-1" colspan="2">{{ $shift['final_sales']['refund'] }}</td>
@@ -230,7 +230,7 @@
                             <td class="border border-black px-2 py-1 font-bold">Opening Cash</td>
                             <td class="border border-black px-2 py-1" colspan="2">{{ $shift['cash_position_summary']['opening_cash'] }}</td>
                         </tr>
-                        
+
                         <tr>
                             <td class="border border-black px-2 py-1 font-bold">Forwarded Balance</td>
                             <td class="border border-black px-2 py-1" colspan="2">{{ $shift['cash_position_summary']['forwarded_balance'] }}</td>

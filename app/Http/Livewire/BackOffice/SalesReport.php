@@ -378,25 +378,25 @@ private function buildSalesRows(): array
     cd.check_out_at,
     cd.hours_stayed as initial_hrs,
 
-    CASE WHEN tt.name = "Check In" 
+    CASE WHEN tt.name = "Check In"
         THEN tr.payable_amount ELSE 0 END as room_amount,
 
-    CASE WHEN tt.name = "Extend" 
+    CASE WHEN tt.name = "Extend"
         THEN tr.payable_amount ELSE 0 END as extend_amount,
 
-    CASE WHEN tt.name = "Amenities" 
+    CASE WHEN tt.name = "Amenities"
         THEN tr.payable_amount ELSE 0 END as amenities_amount,
 
-    CASE WHEN tt.name = "Food and Beverages" 
+    CASE WHEN tt.name = "Food and Beverages"
         THEN tr.payable_amount ELSE 0 END as food_amount,
 
-    CASE WHEN tt.name = "Damage Charges" 
+    CASE WHEN tt.name = "Damage Charges"
         THEN tr.payable_amount ELSE 0 END as damages_amount,
 
-    CASE WHEN tt.name = "Transfer Room" 
+    CASE WHEN tt.name = "Transfer Room"
         THEN tr.payable_amount ELSE 0 END as transfer_amount,
 
-    CASE 
+    CASE
         WHEN tt.name = "Deposit"
         AND tr.remarks = "Deposit From Check In (Room Key & TV Remote)"
         AND fci.user_id = u.id
@@ -404,8 +404,8 @@ private function buildSalesRows(): array
         THEN tr.payable_amount
         ELSE 0
     END as room_deposit,
-    
-    CASE 
+
+    CASE
         WHEN tt.name = "Deposit"
         AND (
             tr.remarks IS NULL
@@ -428,7 +428,7 @@ private function buildSalesRows(): array
 ')
 
 ->orderBy('r.id')
-->orderBy('tr.created_at')  
+->orderBy('tr.created_at')
 
         ->get()
 

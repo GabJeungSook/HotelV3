@@ -73,7 +73,7 @@ public function mount(): void
     //             ['description' => 'Expenses', 'sub' => null, 'number' => '-', 'amount' => '-'],
     //         ],
 
-            
+
     //         'final_sales' => [
     //             'gross_sales' => '-',
     //             'refund' => '-',
@@ -495,6 +495,7 @@ private function loadShift()
 
             [
                 'description' => 'Opening Cash',
+                'sub' => 'Net Sales Receive from previous Shift',
                 'amount' => $this->pesoWithSub(
                     $s->opening_cash_amount,
                     $s->opening_cash_sub_amount
@@ -504,6 +505,7 @@ private function loadShift()
 
             [
                 'description' => 'Key Deposit',
+                'sub' => 'Room occupied receive',
                 'amount' => $this->pesoWithSub(
                     $s->key_amount,
                     $s->key_sub_amount
@@ -513,6 +515,7 @@ private function loadShift()
 
             [
                 'description' => 'Guest Deposit',
+                'sub' => 'Total client other deposit received',
                 'amount' => $this->pesoWithSub(
                     $s->guest_deposit_amount,
                     $s->guest_deposit_sub_amount
@@ -522,6 +525,7 @@ private function loadShift()
 
             [
                 'description' => 'Forwarding Balance',
+                'sub' => 'From previous Shift',
                 'amount' => $this->pesoWithSub(
                     $s->forwarding_balance_amount,
                     $s->forwarding_balance_sub_amount
@@ -543,48 +547,56 @@ private function loadShift()
 
             [
                 'description' => 'New Check-in',
+                'sub' => 'Total New Check-in',
                 'number' => $s->new_check_in_number,
                 'amount' => $this->peso($s->new_check_in_amount)
             ],
 
             [
                 'description' => 'Extension',
+                'sub' => '',
                 'number' => $s->extension_number,
                 'amount' => $this->peso($s->extension_amount)
             ],
 
             [
                 'description' => 'Transfer',
+                'sub' => '',
                 'number' => $s->transfer_number,
                 'amount' => $this->peso($s->transfer_amount)
             ],
 
             [
                 'description' => 'Miscellaneous',
+                'sub' => '',
                 'number' => $s->miscellaneous_number,
                 'amount' => $this->peso($s->miscellaneous_amount)
             ],
 
             [
                 'description' => 'Food',
+                'sub' => '',
                 'number' => $s->food_number,
                 'amount' => $this->peso($s->food_amount)
             ],
 
             [
                 'description' => 'Drink',
+                'sub' => '',
                 'number' => $s->drink_number,
                 'amount' => $this->peso($s->drink_amount)
             ],
 
             [
                 'description' => 'Others',
+                'sub' => 'Foods and Drinks from POS',
                 'number' => $s->other_number,
                 'amount' => $this->peso($s->other_amount)
             ],
 
             [
                 'description' => 'Total',
+                'sub' => '',
                 'number' => $s->total_number,
                 'amount' => $this->peso($s->total_amount),
                 'is_bold' => true
@@ -592,7 +604,7 @@ private function loadShift()
         ],
 
         // FRONTDESK OPERATION B
-        ['description' => 'Forwarded Room Check-In', 'sub' => '(Previous Shift)', 'number' => '-', 'amount' => '-'],
+        // ['description' => 'Forwarded Room Check-In', 'sub' => '(Previous Shift)', 'number' => '-', 'amount' => '-'],
     //             ['description' => 'Key/Remote Deposit', 'sub' => '(Current room occupied at the end shift)', 'number' => '-', 'amount' => '-'],
     //             ['description' => 'Forwarded Room Guest Deposit', 'sub' => '(Previous Shift)', 'number' => '-', 'amount' => '-'],
     //             ['description' => 'Guest Deposit', 'sub' => '(Current room occupied at the end shift)', 'number' => '-', 'amount' => '-'],
@@ -602,36 +614,42 @@ private function loadShift()
 
             [
                 'description' => 'Forwarded Room Check-In',
+                'sub' => 'Previous Shift',
                 'number' => $s->forwarded_room_check_in_number,
                 'amount' => $this->peso($s->forwarded_room_check_in_amount)
             ],
 
             [
                 'description' => 'Key/Remote Deposit',
+                'sub' => 'Current room occupied at the end shift',
                 'number' => $s->key_remote_number,
                 'amount' => $this->peso($s->key_remote_amount)
             ],
 
             [
                 'description' => 'Forwarded Room Guest Deposit',
+                'sub' => 'Current room occupied at the end shift',
                 'number' => $s->forwarded_guest_deposit_number,
                 'amount' => $this->peso($s->forwarded_guest_deposit_amount)
             ],
 
             [
                 'description' => 'Guest Deposit',
+                'sub' => '',
                 'number' => $s->current_guest_deposit_number,
                 'amount' => $this->peso($s->current_guest_deposit_amount)
             ],
 
             [
                 'description' => 'Total Check-Out',
+                'sub' => '',
                 'number' => $s->total_check_out_number,
                 'amount' => $this->peso($s->total_check_out_number)
             ],
 
             [
                 'description' => 'Expenses',
+                'sub' => '',
                 'number' => $s->expenses_number,
                 'amount' => $this->peso($s->expenses_amount)
             ],
@@ -668,7 +686,7 @@ public function getSelectedShiftProperty(): array
     return $this->shifts[$this->filter] ?? [];
 }
 
-    
+
     public function render()
     {
         return view('livewire.back-office.temporary-frontdesk-report');

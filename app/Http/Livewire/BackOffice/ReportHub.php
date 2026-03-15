@@ -49,10 +49,10 @@ class ReportHub extends Component
                 'label' => 'Inventory Report',
                 'component' => 'back-office.inventory-report',
             ],
-            // 'frontdesk' => [
-            //     'label' => 'Frontdesk Report',
-            //     'component' => 'back-office.temporary-frontdesk-report',
-            // ],
+            'frontdesk' => [
+                'label' => 'Frontdesk Report',
+                'component' => 'back-office.temporary-frontdesk-report',
+            ],
         ];
     }
 

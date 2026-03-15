@@ -216,7 +216,7 @@
 
                 <span>Remittance</span>
               </a>
-              <a href="{{ $isBeginningCash ? '#' : route('frontdesk.point-of-sale') }}"
+              {{-- <a href="{{ $isBeginningCash ? '#' : route('frontdesk.point-of-sale') }}"
                 class="text-gray-500 fill-gray-500 group inline-flex items-center rounded-md bg-white text-base font-medium hover:text-gray-900 "
                 aria-expanded="false">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24" class="mr-2">
@@ -224,7 +224,7 @@
                 </svg>
 
                 <span>Point of Sale</span>
-              </a>
+              </a> --}}
 
               {{-- <a href="{{ route('frontdesk.food-inventory') }}"
               class="text-gray-500 fill-gray-400 group inline-flex items-center rounded-md bg-white text-base font-medium hover:text-gray-800 "
