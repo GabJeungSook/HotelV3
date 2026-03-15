@@ -150,4 +150,11 @@ Route::prefix('frontdesk')
                 return view('frontdesk.select-frontdesk');
             }
         })->name('frontdesk.remittance-report');
+        Route::get('/frontdesk-point-of-sale', function () {
+            if (auth()->user()->cash_drawer_id != null) {
+                return view('frontdesk.point-of-sale');
+            } else {
+                return view('frontdesk.select-frontdesk');
+            }
+        })->name('frontdesk.point-of-sale');
     });

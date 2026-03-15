@@ -427,7 +427,7 @@ private function buildSalesRows(): array
     tr.created_at
 ')
 
-        ->orderBy('r.id')
+->orderBy('r.id')
 ->orderBy('tr.created_at')  
 
         ->get()

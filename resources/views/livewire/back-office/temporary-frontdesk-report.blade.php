@@ -100,7 +100,7 @@
                         <tr>
                             <th class="border border-black px-2 py-1 text-left font-bold w-[39%]">Description</th>
                             <th class="border border-black px-2 py-1 text-left font-bold w-[27%]">Amount</th>
-                            <th class="border border-black px-2 py-1 text-left font-bold w-[34%]">Remark</th>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[34%]">Remarks</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -108,9 +108,9 @@
                         <tr>
                             <td class="border border-black px-2 py-1 align-top">
                                 <div class="font-bold">{{ $row['description'] }}</div>
-                                @if($row['sub'])
+                                {{-- @if($row['sub'])
                                 <div>{{ $row['sub'] }}</div>
-                                @endif
+                                @endif --}}
                             </td>
                             <td class="border border-black px-2 py-1 align-top @if($row['is_bold'] ?? false) font-bold @endif">{!! $row['amount'] !!}</td>
                             <td class="border border-black px-2 py-1 align-top">{!! $row['remark'] !!}</td>
@@ -127,7 +127,8 @@
 
             <div>
                 <div class="mb-2 text-[15px]">2.&nbsp;&nbsp;&nbsp;&nbsp;Frontdesk Operation</div>
-                <table class="w-full border-collapse table-fixed border border-black text-[15px] mb-8">
+                <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a.&nbsp;&nbsp;&nbsp;&nbsp;Sales Summary</span>
+                <table class="w-full border-collapse table-fixed border border-black text-[15px] mt-3 mb-5">
                     <thead>
                         <tr>
                             <th class="border border-black px-2 py-1 text-left font-bold w-[50%]">Description</th>
@@ -136,18 +137,112 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($shift['frontdesk_operation'] as $row)
+                        @foreach($shift['frontdesk_operation_a'] as $row)
                         <tr>
-                            <td class="border border-black px-2 py-1 @if($row['sub']) align-top @endif @if($row['is_bold'] ?? false) font-bold @endif">
-                                <div class="@if($row['sub']) font-bold @endif">{{ $row['description'] }}</div>
-                                @if($row['sub'])
+                            <td class="border border-black px-2 py-1  font-bold">
+                                <div class="font-bold">{{ $row['description'] }}</div>
+                                {{-- @if($row['sub'])
                                 <div>{{ $row['sub'] }}</div>
-                                @endif
+                                @endif --}}
                             </td>
-                            <td class="border border-black px-2 py-1 @if($row['sub']) align-top @endif">{!! $row['number'] !!}</td>
-                            <td class="border border-black px-2 py-1 @if($row['sub']) align-top @endif @if($row['amount_bold'] ?? false) font-bold @endif">{!! $row['amount'] !!}</td>
+                            <td class="border border-black px-2 py-1 ">{!! $row['number'] !!}</td>
+                            <td class="border border-black px-2 py-1 font-bold">{!! $row['amount'] !!}</td>
                         </tr>
                         @endforeach
+                    </tbody>
+                </table>
+
+                {{-- Room status and deposit --}}
+                <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b.&nbsp;&nbsp;&nbsp;&nbsp;Room Status and Deposit</span>
+                <table class="w-full border-collapse table-fixed border border-black text-[15px] mt-3 mb-8">
+                    <thead>
+                        <tr>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[50%]">Description</th>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[16%]">Number</th>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[34%]">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($shift['frontdesk_operation_b'] as $row)
+                        <tr>
+                            <td class="border border-black px-2 py-1  font-bold">
+                                <div class="font-bold">{{ $row['description'] }}</div>
+                                {{-- @if($row['sub'])
+                                <div>{{ $row['sub'] }}</div>
+                                @endif --}}
+                            </td>
+                            <td class="border border-black px-2 py-1 ">{!! $row['number'] !!}</td>
+                            <td class="border border-black px-2 py-1 font-bold">{!! $row['amount'] !!}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- final sales --}}
+                <div>
+                <div class="mb-2 text-[15px]">3.&nbsp;&nbsp;&nbsp;&nbsp;Final Sales</div>
+                <table class="w-full border-collapse table-fixed border border-black text-[15px]">
+                    <thead>
+                        <tr>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[55%]">Description</th>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[45%]" colspan="2">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Gross Sales</td>
+                            <td class="border border-black px-2 py-1" colspan="2">{{ $shift['final_sales']['gross_sales'] }}</td>
+                        </tr>
+                        
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Refund</td>
+                            <td class="border border-black px-2 py-1" colspan="2">{{ $shift['final_sales']['refund'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Expenses</td>
+                            <td class="border border-black px-2 py-1" colspan="2">{{ $shift['final_sales']['expenses'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Discounts</td>
+                            <td class="border border-black px-2 py-1" colspan="2">{{ $shift['final_sales']['discounts'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Net Sales</td>
+                            <td class="border border-black px-2 py-1 font-bold" colspan="2">{{ $shift['final_sales']['net_sales'] }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- Cash Position Summary --}}
+                <div>
+                <div class="mb-2 text-[15px]">4.&nbsp;&nbsp;&nbsp;&nbsp;Cash Position Summary</div>
+                <table class="w-full border-collapse table-fixed border border-black text-[15px]">
+                    <thead>
+                        <tr>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[55%]">Description</th>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[45%]" colspan="2">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Opening Cash</td>
+                            <td class="border border-black px-2 py-1" colspan="2">{{ $shift['cash_position_summary']['opening_cash'] }}</td>
+                        </tr>
+                        
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Forwarded Balance</td>
+                            <td class="border border-black px-2 py-1" colspan="2">{{ $shift['cash_position_summary']['forwarded_balance'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Net Sales</td>
+                            <td class="border border-black px-2 py-1" colspan="2">{{ $shift['cash_position_summary']['net_sales'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Remittance</td>
+                            <td class="border border-black px-2 py-1" colspan="2">{{ $shift['cash_position_summary']['remittance'] }}</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -178,7 +273,7 @@
                 </table>
             </div>
 
-            <div class="pt-4 pl-2">
+            {{-- <div class="pt-4 pl-2">
                 <div class="text-[15px] font-bold mb-2">(Forwarding Computation)</div>
                 <div class="text-[15px] font-bold mb-2">Expected Cash computation: </div>
                 <div class="text-[15px] font-normal mb-2">(Opening Cash + New Check-in + Extension, Transfer Room, Miscellaneous charges, Food, Drinks, Key Remote Deposit, Guest Deposit) - (Expenses and Remittance)</div>
@@ -191,53 +286,7 @@
              <div class="pt-4 pl-2">
                 <div class="text-[15px] mb-2"><span class="font-bold italic">Note:</span> <span>(Perform forward and backward computations to countercheck and ensure that the results are correct.)
                 </span> </div>
-            </div>
-
-            <div>
-                <div class="mb-2 text-[15px]">4.&nbsp;&nbsp;&nbsp;&nbsp;Final Sales</div>
-                <table class="w-full border-collapse table-fixed border border-black text-[15px]">
-                    <thead>
-                        <tr>
-                            <th class="border border-black px-2 py-1 text-left font-bold w-[55%]">Description</th>
-                            <th class="border border-black px-2 py-1 text-left font-bold w-[45%]" colspan="2">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="border border-black px-2 py-1 font-bold">Gross Sales</td>
-                            <td class="border border-black px-2 py-1" colspan="2">{{ $shift['final_sales']['gross_sales'] }}</td>
-                        </tr>
-                         {{-- <tr>
-                            <td class="border border-black px-2 py-1 font-bold">Forwarding Balance</td>
-                            <td class="border border-black px-2 py-1" colspan="2">₱ 0.00</td>
-                        </tr> --}}
-                        <tr>
-                            <td class="border border-black px-2 py-1 font-bold">Expenses</td>
-                            <td class="border border-black px-2 py-1" colspan="2">{{ $shift['final_sales']['expenses'] }}</td>
-                        </tr>
-                        <tr>
-                            <td class="border border-black px-2 py-1 font-bold">Discounts</td>
-                            <td class="border border-black px-2 py-1" colspan="2">{{ $shift['final_sales']['discounts'] }}</td>
-                        </tr>
-                        {{-- <tr>
-                            <td class="border border-black px-2 py-1 font-bold align-top">Key/ Remote<br>Deposit</td>
-                            <td class="border border-black px-2 py-1" colspan="2">₱ 11,600.00</td>
-                        </tr> --}}
-                        {{-- <tr>
-                            <td class="border border-black px-2 py-1 font-bold">Guest Deposit</td>
-                            <td class="border border-black px-2 py-1" colspan="2">-</td>
-                        </tr> --}}
-                        <tr>
-                            <td class="border border-black px-2 py-1 font-bold">Remittance</td>
-                            <td class="border border-black px-2 py-1" colspan="2">{{ $shift['final_sales']['remittance'] }}</td>
-                        </tr>
-                        <tr>
-                            <td class="border border-black px-2 py-1 font-bold">Net Sales</td>
-                            <td class="border border-black px-2 py-1 font-bold" colspan="2">{{ $shift['final_sales']['net_sales'] }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            </div> --}}
 
             <div class="pt-16 pl-2">
                 <div class="text-[15px] mb-16">Certified and Correct:</div>
