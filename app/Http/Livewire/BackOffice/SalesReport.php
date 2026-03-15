@@ -394,7 +394,7 @@ private function buildSalesRows(): array
         AND (fco.user_id IS NULL OR fco.user_id != u.id)
         AND (
             cg.created_at IS NULL
-            OR DATE(cg.created_at) NOT BETWEEN "' . $this->startDate . '" AND "' . $this->endDate . '"
+            OR DATE(cg.created_at) BETWEEN "' . $this->startDate . '" AND "' . $this->endDate . '"
         )
         THEN tr.payable_amount
         ELSE 0
@@ -410,7 +410,7 @@ private function buildSalesRows(): array
         AND (fco.user_id IS NULL OR fco.user_id != u.id)
          AND (
             cg.created_at IS NULL
-            OR DATE(cg.created_at) NOT BETWEEN "' . $this->startDate . '" AND "' . $this->endDate . '"
+            OR DATE(cg.created_at) BETWEEN "' . $this->startDate . '" AND "' . $this->endDate . '"
         )
         THEN tr.payable_amount
         ELSE 0
