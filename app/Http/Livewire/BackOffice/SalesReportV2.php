@@ -153,9 +153,16 @@ class SalesReportV2 extends Component
             ->orderBy('tr.created_at')
             ->get();
 
-        return $query->map(function ($row) {
+        $dateFrom = $this->date_from ?? now()->toDateString();
+
+        return $query->map(function ($row) use ($dateFrom) {
             // Calculate total excluding deposits (type 2) and cashouts (type 5)
             $total = in_array($row->transaction_type_id, [2, 5]) ? 0 : (float) $row->payable_amount;
+
+            // Determine if guest is "Forwarded" (checked in before report date range)
+            $isForwarded = $row->check_in_at
+                ? Carbon::parse($row->check_in_at)->toDateString() < $dateFrom
+                : false;
 
             return [
                 'room_number' => $row->room_number ?? '—',
@@ -179,6 +186,7 @@ class SalesReportV2 extends Component
                     ? Carbon::parse($row->transaction_date)->format('m-d-Y h:iA')
                     : '—',
                 'total' => $total,
+                'is_forwarded' => $isForwarded,
             ];
         })->toArray();
     }

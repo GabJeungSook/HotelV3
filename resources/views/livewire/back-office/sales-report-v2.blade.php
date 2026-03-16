@@ -139,6 +139,7 @@
                         <th class="border border-gray-300 px-3 py-2 text-left text-xs font-semibold text-gray-700 uppercase">Room #</th>
                         <th class="border border-gray-300 px-3 py-2 text-left text-xs font-semibold text-gray-700 uppercase">Room Type</th>
                         <th class="border border-gray-300 px-3 py-2 text-left text-xs font-semibold text-gray-700 uppercase">Guest Name</th>
+                        <th class="border border-gray-300 px-3 py-2 text-center text-xs font-semibold text-gray-700 uppercase">Status</th>
                         <th class="border border-gray-300 px-3 py-2 text-left text-xs font-semibold text-gray-700 uppercase">Type</th>
                         <th class="border border-gray-300 px-3 py-2 text-left text-xs font-semibold text-gray-700 uppercase">Check-In</th>
                         <th class="border border-gray-300 px-3 py-2 text-left text-xs font-semibold text-gray-700 uppercase">Check-Out</th>
@@ -155,6 +156,13 @@
                             <td class="border border-gray-300 px-3 py-2 text-sm font-medium text-gray-900">{{ $row['room_number'] }}</td>
                             <td class="border border-gray-300 px-3 py-2 text-sm text-gray-700">{{ $row['room_type'] }}</td>
                             <td class="border border-gray-300 px-3 py-2 text-sm text-gray-700">{{ $row['guest_name'] }}</td>
+                            <td class="border border-gray-300 px-3 py-2 text-sm text-center">
+                                @if($row['is_forwarded'] ?? false)
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800">
+                                        FORWARDED
+                                    </span>
+                                @endif
+                            </td>
                             <td class="border border-gray-300 px-3 py-2 text-sm text-gray-700">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
                                     @switch($row['transaction_type_id'])
@@ -183,7 +191,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="11" class="border border-gray-300 px-3 py-8 text-center text-sm text-gray-500">
+                            <td colspan="12" class="border border-gray-300 px-3 py-8 text-center text-sm text-gray-500">
                                 No transactions found for guests occupying rooms in the selected date range.
                             </td>
                         </tr>
@@ -192,7 +200,7 @@
                 @if(count($salesRows) > 0)
                     <tfoot>
                         <tr class="bg-gray-100">
-                            <td colspan="10" class="border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-900 text-right">
+                            <td colspan="11" class="border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-900 text-right">
                                 TOTAL SALES:
                             </td>
                             <td class="border border-gray-300 px-3 py-2 text-sm font-bold text-gray-900 text-right">
