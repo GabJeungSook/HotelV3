@@ -390,8 +390,6 @@ private function buildSalesRows(): array
     CASE
         WHEN tt.name = "Deposit"
         AND tr.remarks = "Deposit From Check In (Room Key & TV Remote)"
-        AND fci.user_id = u.id
-        AND (fco.user_id IS NULL OR fco.user_id != u.id)
         AND (
             cg.created_at IS NULL
             OR DATE(cg.created_at) BETWEEN "' . $this->startDate . '" AND "' . $this->endDate . '"
@@ -406,8 +404,6 @@ private function buildSalesRows(): array
             tr.remarks IS NULL
             OR tr.remarks != "Deposit From Check In (Room Key & TV Remote)"
         )
-        AND fci.user_id = u.id
-        AND (fco.user_id IS NULL OR fco.user_id != u.id)
          AND (
             cg.created_at IS NULL
             OR DATE(cg.created_at) BETWEEN "' . $this->startDate . '" AND "' . $this->endDate . '"
