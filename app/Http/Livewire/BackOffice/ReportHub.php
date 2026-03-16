@@ -21,6 +21,10 @@ class ReportHub extends Component
                 'label' => 'Sales Report',
                 'component' => 'back-office.sales-report',
             ],
+            'sales-v2' => [
+                'label' => 'Sales Report V2 (Occupancy)',
+                'component' => 'back-office.sales-report-v2',
+            ],
             'new-guest' => [
                 'label' => 'New Guest Report',
                 'component' => 'back-office.reports.new-guest-report',
