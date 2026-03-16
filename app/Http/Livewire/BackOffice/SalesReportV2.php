@@ -168,7 +168,7 @@ class SalesReportV2 extends Component
             $displayType = $row->transaction_type;
             if ($row->transaction_type_id == 2) { // Deposit
                 $remarks = strtolower($row->remarks ?? '');
-                if (str_contains($remarks, 'room key') || str_contains($remarks, 'tv remote') || str_contains($remarks, 'check in')) {
+                if (str_contains($remarks, 'room key') || str_contains($remarks, 'tv remote')) {
                     $displayType = 'Room Deposit';
                 } else {
                     $displayType = 'Guest Deposit';
