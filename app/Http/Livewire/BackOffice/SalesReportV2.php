@@ -167,6 +167,12 @@ class SalesReportV2 extends Component
                 'tr.created_at as transaction_date',
                 'u.name as processed_by',
                 'sl.shift as shift',
+                // Subquery to get the shift when guest checked in (transaction_type_id = 1)
+                DB::raw('(SELECT sl2.shift FROM transactions t2
+                          LEFT JOIN shift_logs sl2 ON sl2.id = t2.shift_log_id
+                          WHERE t2.checkin_detail_id = tr.checkin_detail_id
+                          AND t2.transaction_type_id = 1
+                          LIMIT 1) as checkin_shift'),
             ])
             ->orderBy('r.number')
             ->orderBy('tr.created_at')
@@ -178,10 +184,20 @@ class SalesReportV2 extends Component
             // Calculate total excluding deposits (type 2) and cashouts (type 5)
             $total = in_array($row->transaction_type_id, [2, 5]) ? 0 : (float) $row->payable_amount;
 
-            // Determine if guest is "Forwarded" (checked in before report date range)
-            $isForwarded = $row->check_in_at
-                ? Carbon::parse($row->check_in_at)->toDateString() < $dateFrom
-                : false;
+            // Determine if guest is "Forwarded"
+            // Shift-based: when shift filter is set, compare check-in shift with current filter
+            // Date-based: when no shift filter, check if check-in date is before report start date
+            $isForwarded = false;
+
+            if ($this->shift) {
+                // Shift filter is active - guest is forwarded if they checked in during a different shift
+                $isForwarded = $row->checkin_shift && $row->checkin_shift !== $this->shift;
+            } else {
+                // No shift filter - use date comparison
+                $isForwarded = $row->check_in_at
+                    ? Carbon::parse($row->check_in_at)->toDateString() < $dateFrom
+                    : false;
+            }
 
             // Determine display label for deposits based on remarks
             $displayType = $row->transaction_type;

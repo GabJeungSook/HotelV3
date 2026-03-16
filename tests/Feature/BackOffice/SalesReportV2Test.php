@@ -368,4 +368,111 @@ class SalesReportV2Test extends TestCase
         $this->assertEquals(now()->toDateString(), $component->get('date_to'));
         $this->assertNull($component->get('frontdesk'));
     }
+
+    /** @test */
+    public function marks_guest_as_forwarded_when_checked_in_during_different_shift()
+    {
+        $this->actingAs($this->user);
+
+        // Create AM shift log
+        $amShiftLog = ShiftLog::create([
+            'frontdesk_id' => $this->user->id,
+            'frontdesk_ids' => json_encode([$this->user->id]),
+            'time_in' => now()->setTime(8, 0),
+            'shift' => 'AM',
+        ]);
+
+        // Create PM shift log
+        $pmShiftLog = ShiftLog::create([
+            'frontdesk_id' => $this->user->id,
+            'frontdesk_ids' => json_encode([$this->user->id]),
+            'time_in' => now()->setTime(20, 0),
+            'shift' => 'PM',
+        ]);
+
+        // Create guest who checked in during AM shift
+        $guest = $this->createGuest(['name' => 'AM Guest Forward']);
+        $checkinDetail = $this->createCheckinDetail($guest, [
+            'check_in_at' => now()->setTime(9, 0),
+            'check_out_at' => now()->addDay(), // Still occupying (future checkout)
+        ]);
+
+        // Check-in transaction processed during AM shift
+        $this->createTransaction($guest, $checkinDetail, [
+            'transaction_type_id' => 1, // Check In
+            'shift_log_id' => $amShiftLog->id,
+            'created_at' => now()->setTime(9, 0),
+        ]);
+
+        // Extension transaction processed during PM shift
+        $this->createTransaction($guest, $checkinDetail, [
+            'transaction_type_id' => 6, // Extension
+            'shift_log_id' => $pmShiftLog->id,
+            'payable_amount' => 200,
+            'paid_amount' => 200,
+            'description' => 'Extension',
+            'created_at' => now()->setTime(21, 0),
+        ]);
+
+        // Filter for PM shift - guest should be marked as FORWARDED
+        $component = Livewire::test(SalesReportV2::class)
+            ->set('date_from', now()->toDateString())
+            ->set('date_to', now()->toDateString())
+            ->set('shift', 'PM')
+            ->call('generateReport');
+
+        $salesRows = $component->get('salesRows');
+
+        // Should have 1 row (extension from PM shift)
+        $this->assertCount(1, $salesRows);
+
+        // Guest should be marked as forwarded (checked in during AM, viewing PM)
+        $this->assertTrue($salesRows[0]['is_forwarded']);
+
+        // Forwarded count should be 1
+        $this->assertEquals(1, $component->get('forwardedCount'));
+    }
+
+    /** @test */
+    public function does_not_mark_guest_as_forwarded_when_checked_in_during_same_shift()
+    {
+        $this->actingAs($this->user);
+
+        // Create PM shift log
+        $pmShiftLog = ShiftLog::create([
+            'frontdesk_id' => $this->user->id,
+            'frontdesk_ids' => json_encode([$this->user->id]),
+            'time_in' => now()->setTime(20, 0),
+            'shift' => 'PM',
+        ]);
+
+        // Create guest who checked in during PM shift
+        $guest = $this->createGuest(['name' => 'PM Guest Same Shift']);
+        $checkinDetail = $this->createCheckinDetail($guest, [
+            'check_in_at' => now()->setTime(20, 30),
+            'check_out_at' => now()->addDay(), // Still occupying (future checkout)
+        ]);
+
+        // Check-in transaction processed during PM shift
+        $this->createTransaction($guest, $checkinDetail, [
+            'transaction_type_id' => 1,
+            'shift_log_id' => $pmShiftLog->id,
+            'created_at' => now()->setTime(20, 30),
+        ]);
+
+        // Filter for PM shift - guest should NOT be forwarded
+        $component = Livewire::test(SalesReportV2::class)
+            ->set('date_from', now()->toDateString())
+            ->set('date_to', now()->toDateString())
+            ->set('shift', 'PM')
+            ->call('generateReport');
+
+        $salesRows = $component->get('salesRows');
+
+        // Guest should NOT be marked as forwarded
+        $this->assertFalse($salesRows[0]['is_forwarded']);
+
+        // Forwarded count should be 0
+        $this->assertEquals(0, $component->get('forwardedCount'));
+    }
 }
