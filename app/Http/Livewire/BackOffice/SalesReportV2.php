@@ -164,12 +164,23 @@ class SalesReportV2 extends Component
                 ? Carbon::parse($row->check_in_at)->toDateString() < $dateFrom
                 : false;
 
+            // Determine display label for deposits based on remarks
+            $displayType = $row->transaction_type;
+            if ($row->transaction_type_id == 2) { // Deposit
+                $remarks = strtolower($row->remarks ?? '');
+                if (str_contains($remarks, 'room key') || str_contains($remarks, 'tv remote') || str_contains($remarks, 'check in')) {
+                    $displayType = 'Room Deposit';
+                } else {
+                    $displayType = 'Guest Deposit';
+                }
+            }
+
             return [
                 'room_number' => $row->room_number ?? '—',
                 'room_id' => $row->room_id,
                 'room_type' => $row->room_type ?? '—',
                 'guest_name' => strtoupper($row->guest_name ?? '—'),
-                'transaction_type' => $row->transaction_type ?? '—',
+                'transaction_type' => $displayType ?? '—',
                 'transaction_type_id' => $row->transaction_type_id,
                 'check_in' => $row->check_in_at
                     ? Carbon::parse($row->check_in_at)->format('m-d-Y h:iA')
