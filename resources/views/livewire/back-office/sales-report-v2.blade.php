@@ -46,8 +46,23 @@
 
     {{-- Filters --}}
     <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 p-4 mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {{-- Filter Mode Toggle --}}
+        <div class="flex gap-6 mb-4 pb-4 border-b border-gray-200">
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" wire:model.live="filterMode" value="date_range"
+                       class="text-indigo-600 focus:ring-indigo-500">
+                <span class="text-sm font-medium text-gray-700">Date Range</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" wire:model.live="filterMode" value="shift"
+                       class="text-indigo-600 focus:ring-indigo-500">
+                <span class="text-sm font-medium text-gray-700">Shift</span>
+            </label>
+        </div>
 
+        {{-- Date Range Mode Filters --}}
+        @if($filterMode === 'date_range')
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             {{-- Frontdesk Filter --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Processed By (Frontdesk)</label>
@@ -86,6 +101,44 @@
                 </button>
             </div>
         </div>
+        @else
+        {{-- Shift Mode Filters --}}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {{-- Shift Date --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                <input type="date" wire:model.live="shiftDate"
+                       class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
+            </div>
+
+            {{-- Shift Log Selection --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Select Shift</label>
+                <select wire:model.defer="selectedShiftLogId"
+                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="">-- Select a completed shift --</option>
+                    @foreach($availableShiftLogs as $log)
+                        <option value="{{ $log['id'] }}">{{ $log['label'] }}</option>
+                    @endforeach
+                </select>
+                @if(empty($availableShiftLogs))
+                    <p class="text-xs text-gray-500 mt-1">No completed shifts found for this date.</p>
+                @endif
+            </div>
+
+            {{-- Buttons --}}
+            <div class="flex items-end gap-2">
+                <button wire:click="generateReport" type="button"
+                        class="flex-1 inline-flex justify-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
+                    Apply
+                </button>
+                <button wire:click="resetFilters" type="button"
+                        class="flex-1 inline-flex justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Reset
+                </button>
+            </div>
+        </div>
+        @endif
     </div>
 
     {{-- Forwarded Count Badge --}}
@@ -103,7 +156,7 @@
     @endif
 
     {{-- Summary Cards --}}
-    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-4">
         <div class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4">
             <div class="text-xs text-gray-500 uppercase tracking-wide">Room Charges</div>
             <div class="text-lg font-semibold text-gray-900 mt-1">P {{ number_format($summaryByType['room_charges'] ?? 0, 2) }}</div>
@@ -136,6 +189,16 @@
             <div class="text-xs text-gray-500 uppercase tracking-wide">Guest Deposit</div>
             <div class="text-lg font-semibold text-gray-900 mt-1">P {{ number_format($summaryByType['guest_deposits'] ?? 0, 2) }}</div>
         </div>
+        {{-- Forwarded Room --}}
+        <div class="bg-amber-50 rounded-lg shadow-sm ring-1 ring-amber-200 p-4">
+            <div class="text-xs text-amber-700 uppercase tracking-wide">Forwarded Room</div>
+            <div class="text-lg font-semibold text-amber-900 mt-1">P {{ number_format($forwardedRoom ?? 0, 2) }}</div>
+        </div>
+        {{-- Forwarded Deposit --}}
+        <div class="bg-amber-50 rounded-lg shadow-sm ring-1 ring-amber-200 p-4">
+            <div class="text-xs text-amber-700 uppercase tracking-wide">Forwarded Deposit</div>
+            <div class="text-lg font-semibold text-amber-900 mt-1">P {{ number_format($forwardedDeposit ?? 0, 2) }}</div>
+        </div>
     </div>
 
     {{-- Grand Total Card --}}
@@ -163,9 +226,16 @@
         <div class="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
             <div class="text-sm font-semibold text-gray-900">SALES REPORT V2 (OCCUPANCY-BASED)</div>
             <div class="text-xs text-gray-500">
-                {{ $date_from }} to {{ $date_to }}
-                @if($frontdesk_name)
-                    | Frontdesk: {{ $frontdesk_name }}
+                @if($filterMode === 'shift' && $selectedShiftLogId)
+                    @php
+                        $selectedShift = collect($availableShiftLogs)->firstWhere('id', $selectedShiftLogId);
+                    @endphp
+                    Shift: {{ $selectedShift['label'] ?? 'N/A' }}
+                @else
+                    {{ $date_from }} to {{ $date_to }}
+                    @if($frontdesk_name)
+                        | Frontdesk: {{ $frontdesk_name }}
+                    @endif
                 @endif
             </div>
         </div>

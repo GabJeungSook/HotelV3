@@ -374,19 +374,21 @@ class SalesReportV2Test extends TestCase
     {
         $this->actingAs($this->user);
 
-        // Create AM shift log
+        // Create AM shift log (completed - has time_out)
         $amShiftLog = ShiftLog::create([
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(8, 0),
+            'time_out' => now()->setTime(16, 0),
             'shift' => 'AM',
         ]);
 
-        // Create PM shift log
+        // Create PM shift log (completed - has time_out)
         $pmShiftLog = ShiftLog::create([
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
-            'time_in' => now()->setTime(20, 0),
+            'time_in' => now()->setTime(16, 0),
+            'time_out' => now()->setTime(23, 59),
             'shift' => 'PM',
         ]);
 
@@ -414,11 +416,11 @@ class SalesReportV2Test extends TestCase
             'created_at' => now()->setTime(21, 0),
         ]);
 
-        // Filter for PM shift - guest should be marked as FORWARDED
+        // Filter for PM shift using shift mode - guest should be marked as FORWARDED
         $component = Livewire::test(SalesReportV2::class)
-            ->set('date_from', now()->toDateString())
-            ->set('date_to', now()->toDateString())
-            ->set('shift', 'PM')
+            ->set('filterMode', 'shift')
+            ->set('shiftDate', now()->toDateString())
+            ->set('selectedShiftLogId', $pmShiftLog->id)
             ->call('generateReport');
 
         $salesRows = $component->get('salesRows');
@@ -431,6 +433,9 @@ class SalesReportV2Test extends TestCase
 
         // Forwarded count should be 1
         $this->assertEquals(1, $component->get('forwardedCount'));
+
+        // Forwarded room should be 0 (extension is not room charge)
+        $this->assertEquals(0, $component->get('forwardedRoom'));
     }
 
     /** @test */
@@ -438,33 +443,34 @@ class SalesReportV2Test extends TestCase
     {
         $this->actingAs($this->user);
 
-        // Create PM shift log
+        // Create PM shift log (completed - has time_out)
         $pmShiftLog = ShiftLog::create([
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
-            'time_in' => now()->setTime(20, 0),
+            'time_in' => now()->setTime(16, 0),
+            'time_out' => now()->setTime(23, 59),
             'shift' => 'PM',
         ]);
 
         // Create guest who checked in during PM shift
         $guest = $this->createGuest(['name' => 'PM Guest Same Shift']);
         $checkinDetail = $this->createCheckinDetail($guest, [
-            'check_in_at' => now()->setTime(20, 30),
+            'check_in_at' => now()->setTime(17, 0),
             'check_out_at' => now()->addDay(), // Still occupying (future checkout)
         ]);
 
-        // Check-in transaction processed during PM shift
+        // Check-in transaction processed during PM shift (within time_in to time_out)
         $this->createTransaction($guest, $checkinDetail, [
             'transaction_type_id' => 1,
             'shift_log_id' => $pmShiftLog->id,
-            'created_at' => now()->setTime(20, 30),
+            'created_at' => now()->setTime(17, 0),
         ]);
 
-        // Filter for PM shift - guest should NOT be forwarded
+        // Filter for PM shift using shift mode - guest should NOT be forwarded
         $component = Livewire::test(SalesReportV2::class)
-            ->set('date_from', now()->toDateString())
-            ->set('date_to', now()->toDateString())
-            ->set('shift', 'PM')
+            ->set('filterMode', 'shift')
+            ->set('shiftDate', now()->toDateString())
+            ->set('selectedShiftLogId', $pmShiftLog->id)
             ->call('generateReport');
 
         $salesRows = $component->get('salesRows');
@@ -474,5 +480,168 @@ class SalesReportV2Test extends TestCase
 
         // Forwarded count should be 0
         $this->assertEquals(0, $component->get('forwardedCount'));
+    }
+
+    /** @test */
+    public function calculates_forwarded_room_and_deposit_totals()
+    {
+        $this->actingAs($this->user);
+
+        // Create AM shift log (completed)
+        $amShiftLog = ShiftLog::create([
+            'frontdesk_id' => $this->user->id,
+            'frontdesk_ids' => json_encode([$this->user->id]),
+            'time_in' => now()->setTime(8, 0),
+            'time_out' => now()->setTime(16, 0),
+            'shift' => 'AM',
+        ]);
+
+        // Create PM shift log (completed)
+        $pmShiftLog = ShiftLog::create([
+            'frontdesk_id' => $this->user->id,
+            'frontdesk_ids' => json_encode([$this->user->id]),
+            'time_in' => now()->setTime(16, 0),
+            'time_out' => now()->setTime(23, 59),
+            'shift' => 'PM',
+        ]);
+
+        // Create guest who checked in during AM shift
+        $guest = $this->createGuest(['name' => 'Forwarded Guest']);
+        $checkinDetail = $this->createCheckinDetail($guest, [
+            'check_in_at' => now()->setTime(9, 0),
+            'check_out_at' => now()->addDay(),
+        ]);
+
+        // Check-in transaction (room charge) during AM shift
+        $this->createTransaction($guest, $checkinDetail, [
+            'transaction_type_id' => 1,
+            'shift_log_id' => $amShiftLog->id,
+            'payable_amount' => 500,
+            'paid_amount' => 500,
+            'created_at' => now()->setTime(9, 0),
+        ]);
+
+        // Deposit during AM shift
+        $this->createTransaction($guest, $checkinDetail, [
+            'transaction_type_id' => 2, // Deposit
+            'shift_log_id' => $amShiftLog->id,
+            'payable_amount' => 300,
+            'paid_amount' => 300,
+            'description' => 'Guest Deposit',
+            'created_at' => now()->setTime(9, 5),
+        ]);
+
+        // Filter for AM shift - both transactions should show with forwarded totals = 0
+        $component = Livewire::test(SalesReportV2::class)
+            ->set('filterMode', 'shift')
+            ->set('shiftDate', now()->toDateString())
+            ->set('selectedShiftLogId', $amShiftLog->id)
+            ->call('generateReport');
+
+        // Guest checked in during AM, viewing AM report - NOT forwarded
+        $this->assertEquals(0, $component->get('forwardedRoom'));
+        $this->assertEquals(0, $component->get('forwardedDeposit'));
+
+        // Now filter for PM shift - guest should be forwarded
+        $component = Livewire::test(SalesReportV2::class)
+            ->set('filterMode', 'shift')
+            ->set('shiftDate', now()->toDateString())
+            ->set('selectedShiftLogId', $pmShiftLog->id)
+            ->call('generateReport');
+
+        // No transactions in PM range (they were all in AM)
+        $this->assertCount(0, $component->get('salesRows'));
+    }
+
+    /** @test */
+    public function shows_forwarded_room_when_check_in_transaction_is_in_viewed_shift_but_guest_checked_in_earlier()
+    {
+        $this->actingAs($this->user);
+
+        // Create AM shift log
+        $amShiftLog = ShiftLog::create([
+            'frontdesk_id' => $this->user->id,
+            'frontdesk_ids' => json_encode([$this->user->id]),
+            'time_in' => now()->setTime(8, 0),
+            'time_out' => now()->setTime(16, 0),
+            'shift' => 'AM',
+        ]);
+
+        // Create PM shift log
+        $pmShiftLog = ShiftLog::create([
+            'frontdesk_id' => $this->user->id,
+            'frontdesk_ids' => json_encode([$this->user->id]),
+            'time_in' => now()->setTime(16, 0),
+            'time_out' => now()->setTime(23, 59),
+            'shift' => 'PM',
+        ]);
+
+        // Guest 1: Checked in during AM, still occupying
+        $guest1 = $this->createGuest(['name' => 'AM Guest']);
+        $checkinDetail1 = $this->createCheckinDetail($guest1, [
+            'check_in_at' => now()->setTime(9, 0),
+            'check_out_at' => now()->addDay(),
+        ]);
+
+        // Check-in transaction during AM
+        $this->createTransaction($guest1, $checkinDetail1, [
+            'transaction_type_id' => 1,
+            'shift_log_id' => $amShiftLog->id,
+            'payable_amount' => 500,
+            'paid_amount' => 500,
+            'created_at' => now()->setTime(9, 0),
+        ]);
+
+        // Extension for AM guest during PM shift
+        $this->createTransaction($guest1, $checkinDetail1, [
+            'transaction_type_id' => 6,
+            'shift_log_id' => $pmShiftLog->id,
+            'payable_amount' => 200,
+            'paid_amount' => 200,
+            'description' => 'Extension',
+            'created_at' => now()->setTime(20, 0),
+        ]);
+
+        // Guest 2: Checked in during PM
+        $guest2 = $this->createGuest(['name' => 'PM Guest']);
+        $checkinDetail2 = $this->createCheckinDetail($guest2, [
+            'check_in_at' => now()->setTime(17, 0),
+            'check_out_at' => now()->addDay(),
+        ]);
+
+        // Check-in transaction during PM
+        $this->createTransaction($guest2, $checkinDetail2, [
+            'transaction_type_id' => 1,
+            'shift_log_id' => $pmShiftLog->id,
+            'payable_amount' => 600,
+            'paid_amount' => 600,
+            'created_at' => now()->setTime(17, 0),
+        ]);
+
+        // Filter for PM shift
+        $component = Livewire::test(SalesReportV2::class)
+            ->set('filterMode', 'shift')
+            ->set('shiftDate', now()->toDateString())
+            ->set('selectedShiftLogId', $pmShiftLog->id)
+            ->call('generateReport');
+
+        $salesRows = $component->get('salesRows');
+
+        // Should have 2 rows: extension for AM guest, check-in for PM guest
+        $this->assertCount(2, $salesRows);
+
+        // AM guest's extension should be marked as forwarded
+        $amGuestRow = collect($salesRows)->firstWhere('guest_name', 'AM GUEST');
+        $this->assertTrue($amGuestRow['is_forwarded']);
+
+        // PM guest should NOT be forwarded
+        $pmGuestRow = collect($salesRows)->firstWhere('guest_name', 'PM GUEST');
+        $this->assertFalse($pmGuestRow['is_forwarded']);
+
+        // Forwarded count = 1 (AM guest)
+        $this->assertEquals(1, $component->get('forwardedCount'));
+
+        // Forwarded room = 0 (AM guest's transaction in PM is extension, not room charge)
+        $this->assertEquals(0, $component->get('forwardedRoom'));
     }
 }

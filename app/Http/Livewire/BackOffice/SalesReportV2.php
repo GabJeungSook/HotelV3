@@ -8,6 +8,7 @@ use App\Models\CheckinDetail;
 use App\Models\Transaction;
 use App\Models\Floor;
 use App\Models\Expense;
+use App\Models\ShiftLog;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -25,11 +26,19 @@ use Carbon\Carbon;
  */
 class SalesReportV2 extends Component
 {
+    // Filter mode: 'date_range' or 'shift'
+    public string $filterMode = 'date_range';
+
+    // Date range mode properties
     public $date_from;
     public $date_to;
     public $frontdesk;
     public $frontdesk_name;
-    public $shift;
+
+    // Shift mode properties
+    public $shiftDate;
+    public $selectedShiftLogId;
+    public array $availableShiftLogs = [];
 
     public array $salesRows = [];
     public float $totalSales = 0;
@@ -41,17 +50,25 @@ class SalesReportV2 extends Component
     public float $netSales = 0;
     public int $forwardedCount = 0;
 
+    // Forwarded totals
+    public float $forwardedRoom = 0;
+    public float $forwardedDeposit = 0;
+
     public function mount()
     {
         $this->date_from = now()->toDateString();
         $this->date_to = now()->toDateString();
+        $this->shiftDate = now()->toDateString();
         $this->salesRows = [];
         $this->totalSales = 0;
         $this->summaryByType = [];
         $this->expensesRows = collect();
         $this->expensesTotal = 0;
         $this->roomSummary = [];
+        $this->forwardedRoom = 0;
+        $this->forwardedDeposit = 0;
 
+        $this->loadAvailableShiftLogs();
         $this->generateReport();
     }
 
@@ -60,6 +77,78 @@ class SalesReportV2 extends Component
         return view('livewire.back-office.sales-report-v2', [
             'frontdesks' => Frontdesk::where('branch_id', auth()->user()->branch_id)->get(),
         ]);
+    }
+
+    /**
+     * Load available shift logs when shift date changes.
+     */
+    public function updatedShiftDate()
+    {
+        $this->loadAvailableShiftLogs();
+        $this->selectedShiftLogId = null;
+    }
+
+    /**
+     * Load completed shift logs for the selected date.
+     */
+    private function loadAvailableShiftLogs(): void
+    {
+        if (!$this->shiftDate) {
+            $this->availableShiftLogs = [];
+            return;
+        }
+
+        $this->availableShiftLogs = ShiftLog::query()
+            ->whereDate('time_in', $this->shiftDate)
+            ->whereNotNull('time_out') // Completed shifts only
+            ->with('frontdesk:id,name')
+            ->orderBy('time_in')
+            ->get()
+            ->map(function ($log) {
+                $frontdeskNames = $this->formatFrontdeskNames($log);
+                return [
+                    'id' => $log->id,
+                    'label' => ($log->shift ?? 'N/A') . ' - ' . $frontdeskNames
+                             . ' (' . $log->time_in->format('g:i A') . ' - ' . $log->time_out->format('g:i A') . ')',
+                    'time_in' => $log->time_in->toDateTimeString(),
+                    'time_out' => $log->time_out->toDateTimeString(),
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Format frontdesk names from shift log.
+     */
+    private function formatFrontdeskNames(ShiftLog $log): string
+    {
+        // Primary frontdesk
+        $name = $log->frontdesk?->name ?? 'Unknown';
+
+        // Check for additional frontdesks in frontdesk_ids
+        if ($log->frontdesk_ids) {
+            $ids = json_decode($log->frontdesk_ids, true) ?? [];
+            $ids = array_filter($ids, fn($id) => $id !== 'N/A' && $id != $log->frontdesk_id);
+
+            if (!empty($ids)) {
+                $additionalNames = \App\Models\User::whereIn('id', $ids)->pluck('name')->toArray();
+                if (!empty($additionalNames)) {
+                    $name .= ', ' . implode(', ', $additionalNames);
+                }
+            }
+        }
+
+        return $name;
+    }
+
+    /**
+     * When filter mode changes, reset related properties.
+     */
+    public function updatedFilterMode()
+    {
+        if ($this->filterMode === 'shift') {
+            $this->loadAvailableShiftLogs();
+        }
     }
 
     public function generateReport()
@@ -72,6 +161,7 @@ class SalesReportV2 extends Component
         $this->summaryByType = $this->buildSummaryByType();
         $this->buildExpensesSummary();
         $this->buildRoomSummary();
+        $this->calculateForwardedTotals();
 
         // Calculate net sales (Gross - Expenses)
         $this->netSales = $this->totalSales - $this->expensesTotal;
@@ -83,32 +173,77 @@ class SalesReportV2 extends Component
             ->count();
     }
 
+    /**
+     * Calculate forwarded room and deposit totals.
+     */
+    private function calculateForwardedTotals(): void
+    {
+        $forwardedRows = collect($this->salesRows)->filter(fn($row) => $row['is_forwarded']);
+
+        // Forwarded Room = Check In transactions (type 1) from forwarded guests
+        $this->forwardedRoom = $forwardedRows
+            ->where('transaction_type_id', 1)
+            ->sum('amount');
+
+        // Forwarded Deposit = Deposit transactions (type 2) from forwarded guests
+        $this->forwardedDeposit = $forwardedRows
+            ->where('transaction_type_id', 2)
+            ->sum('amount');
+    }
+
     public function resetFilters()
     {
-        $this->reset(['frontdesk', 'date_from', 'date_to', 'shift']);
+        $this->reset(['frontdesk', 'date_from', 'date_to', 'selectedShiftLogId']);
+        $this->filterMode = 'date_range';
         $this->date_from = now()->toDateString();
         $this->date_to = now()->toDateString();
+        $this->shiftDate = now()->toDateString();
+        $this->loadAvailableShiftLogs();
         $this->generateReport();
     }
 
     /**
-     * Find check-in details where guest was OCCUPYING room during the date range.
-     *
-     * A guest is considered "occupying" if:
-     * - They checked in ON or BEFORE the end date, AND
-     * - They haven't checked out yet OR checked out ON or AFTER the start date
+     * Get the date/time range based on filter mode.
      */
-    private function getOccupyingCheckinIds(): array
+    private function getFilterRange(): array
     {
+        if ($this->filterMode === 'shift' && $this->selectedShiftLogId) {
+            $shiftLog = ShiftLog::find($this->selectedShiftLogId);
+            if ($shiftLog && $shiftLog->time_in && $shiftLog->time_out) {
+                return [
+                    'start' => $shiftLog->time_in,
+                    'end' => $shiftLog->time_out,
+                ];
+            }
+        }
+
+        // Default: date range mode
         $startDate = $this->date_from ?? now()->toDateString();
         $endDate = $this->date_to ?? now()->toDateString();
 
+        return [
+            'start' => Carbon::parse($startDate)->startOfDay(),
+            'end' => Carbon::parse($endDate)->endOfDay(),
+        ];
+    }
+
+    /**
+     * Find check-in details where guest was OCCUPYING room during the filter period.
+     *
+     * A guest is considered "occupying" if:
+     * - They checked in ON or BEFORE the end time, AND
+     * - They haven't checked out yet OR checked out ON or AFTER the start time
+     */
+    private function getOccupyingCheckinIds(): array
+    {
+        $range = $this->getFilterRange();
+
         return CheckinDetail::query()
             ->whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))
-            ->where('check_in_at', '<=', $endDate . ' 23:59:59')
-            ->where(function ($q) use ($startDate) {
+            ->where('check_in_at', '<=', $range['end'])
+            ->where(function ($q) use ($range) {
                 $q->whereNull('check_out_at')
-                  ->orWhere('check_out_at', '>=', $startDate . ' 00:00:00');
+                  ->orWhere('check_out_at', '>=', $range['start']);
             })
             ->pluck('id')
             ->toArray();
@@ -127,8 +262,7 @@ class SalesReportV2 extends Component
             return [];
         }
 
-        $startDate = $this->date_from ?? now()->toDateString();
-        $endDate = $this->date_to ?? now()->toDateString();
+        $range = $this->getFilterRange();
 
         $query = DB::table('transactions as tr')
             ->leftJoin('shift_logs as sl', 'sl.id', '=', 'tr.shift_log_id')
@@ -139,18 +273,11 @@ class SalesReportV2 extends Component
             ->leftJoin('types as t', 't.id', '=', 'r.type_id')
             ->leftJoin('transaction_types as tt', 'tt.id', '=', 'tr.transaction_type_id')
             ->whereIn('tr.checkin_detail_id', $occupyingIds)
-            // Filter transactions by date range (bug fix)
-            ->whereBetween('tr.created_at', [
-                $startDate . ' 00:00:00',
-                $endDate . ' 23:59:59'
-            ])
-            // Filter by WHO PROCESSED the transaction (via shift_log)
-            ->when($this->frontdesk, function ($q) {
+            // Filter transactions by the selected range
+            ->whereBetween('tr.created_at', [$range['start'], $range['end']])
+            // Filter by WHO PROCESSED the transaction (only in date_range mode)
+            ->when($this->filterMode === 'date_range' && $this->frontdesk, function ($q) {
                 $q->where('sl.frontdesk_id', $this->frontdesk);
-            })
-            // Filter by shift if specified
-            ->when($this->shift, function ($q) {
-                $q->where('sl.shift', $this->shift);
             })
             ->select([
                 'r.number as room_number',
@@ -167,37 +294,29 @@ class SalesReportV2 extends Component
                 'tr.created_at as transaction_date',
                 'u.name as processed_by',
                 'sl.shift as shift',
-                // Subquery to get the shift when guest checked in (transaction_type_id = 1)
-                DB::raw('(SELECT sl2.shift FROM transactions t2
-                          LEFT JOIN shift_logs sl2 ON sl2.id = t2.shift_log_id
+                // Subquery to get the check-in transaction's created_at timestamp
+                DB::raw('(SELECT t2.created_at FROM transactions t2
                           WHERE t2.checkin_detail_id = tr.checkin_detail_id
                           AND t2.transaction_type_id = 1
-                          LIMIT 1) as checkin_shift'),
+                          LIMIT 1) as checkin_transaction_at'),
             ])
             ->orderBy('r.number')
             ->orderBy('tr.created_at')
             ->get();
 
+        $shiftLog = null;
+        if ($this->filterMode === 'shift' && $this->selectedShiftLogId) {
+            $shiftLog = ShiftLog::find($this->selectedShiftLogId);
+        }
+
         $dateFrom = $this->date_from ?? now()->toDateString();
 
-        return $query->map(function ($row) use ($dateFrom) {
+        return $query->map(function ($row) use ($dateFrom, $shiftLog) {
             // Calculate total excluding deposits (type 2) and cashouts (type 5)
             $total = in_array($row->transaction_type_id, [2, 5]) ? 0 : (float) $row->payable_amount;
 
             // Determine if guest is "Forwarded"
-            // Shift-based: when shift filter is set, compare check-in shift with current filter
-            // Date-based: when no shift filter, check if check-in date is before report start date
-            $isForwarded = false;
-
-            if ($this->shift) {
-                // Shift filter is active - guest is forwarded if they checked in during a different shift
-                $isForwarded = $row->checkin_shift && $row->checkin_shift !== $this->shift;
-            } else {
-                // No shift filter - use date comparison
-                $isForwarded = $row->check_in_at
-                    ? Carbon::parse($row->check_in_at)->toDateString() < $dateFrom
-                    : false;
-            }
+            $isForwarded = $this->isGuestForwarded($row, $shiftLog, $dateFrom);
 
             // Determine display label for deposits based on remarks
             $displayType = $row->transaction_type;
@@ -235,6 +354,42 @@ class SalesReportV2 extends Component
                 'is_forwarded' => $isForwarded,
             ];
         })->toArray();
+    }
+
+    /**
+     * Determine if a guest is forwarded based on filter mode.
+     *
+     * Shift mode: Guest is forwarded if their check-in transaction was created
+     * BEFORE the selected shift's time_in.
+     *
+     * Date range mode: Guest is forwarded if their check-in date is before date_from.
+     */
+    private function isGuestForwarded($row, ?ShiftLog $shiftLog, string $dateFrom): bool
+    {
+        if ($this->filterMode === 'shift' && $shiftLog) {
+            // Shift mode: Check if check-in transaction was before this shift started
+            if (!$row->checkin_transaction_at) {
+                return false;
+            }
+
+            $checkInTransactionTime = Carbon::parse($row->checkin_transaction_at);
+
+            // Guest is forwarded if they checked in BEFORE this shift started
+            if ($checkInTransactionTime >= $shiftLog->time_in) {
+                return false; // Checked in during this shift
+            }
+
+            // Guest was still occupying when shift started
+            $checkOutTime = $row->check_out_at ? Carbon::parse($row->check_out_at) : null;
+            return $checkOutTime === null || $checkOutTime >= $shiftLog->time_in;
+        }
+
+        // Date range mode: use date comparison
+        if (!$row->check_in_at) {
+            return false;
+        }
+
+        return Carbon::parse($row->check_in_at)->toDateString() < $dateFrom;
     }
 
     /**
@@ -308,19 +463,16 @@ class SalesReportV2 extends Component
     }
 
     /**
-     * Build expenses summary for the date range.
+     * Build expenses summary for the filter range.
      */
     private function buildExpensesSummary(): void
     {
-        $startDate = $this->date_from ?? now()->toDateString();
-        $endDate = $this->date_to ?? now()->toDateString();
+        $range = $this->getFilterRange();
 
         $rows = Expense::query()
             ->with(['expenseCategory', 'user'])
-            ->whereDate('created_at', '>=', $startDate)
-            ->whereDate('created_at', '<=', $endDate)
-            ->when($this->shift, fn($q) => $q->where('shift', $this->shift))
-            ->when($this->frontdesk, fn($q) => $q->where('user_id', $this->frontdesk))
+            ->whereBetween('created_at', [$range['start'], $range['end']])
+            ->when($this->filterMode === 'date_range' && $this->frontdesk, fn($q) => $q->where('user_id', $this->frontdesk))
             ->orderByDesc('created_at')
             ->get()
             ->map(function ($e) {
@@ -358,23 +510,16 @@ class SalesReportV2 extends Component
             return;
         }
 
-        $startDate = $this->date_from ?? now()->toDateString();
-        $endDate = $this->date_to ?? now()->toDateString();
+        $range = $this->getFilterRange();
 
         $transactions = Transaction::query()
             ->with(['room.floor', 'transaction_type'])
             ->whereIn('checkin_detail_id', $occupyingIds)
             ->whereNotIn('transaction_type_id', [2, 5]) // Exclude deposits and cashouts
-            // Filter transactions by date range
-            ->whereBetween('created_at', [
-                $startDate . ' 00:00:00',
-                $endDate . ' 23:59:59'
-            ])
-            ->when($this->frontdesk, function ($q) {
+            // Filter transactions by range
+            ->whereBetween('created_at', [$range['start'], $range['end']])
+            ->when($this->filterMode === 'date_range' && $this->frontdesk, function ($q) {
                 $q->whereHas('shift_log', fn($q2) => $q2->where('frontdesk_id', $this->frontdesk));
-            })
-            ->when($this->shift, function ($q) {
-                $q->whereHas('shift_log', fn($q2) => $q2->where('shift', $this->shift));
             })
             ->get();
 
