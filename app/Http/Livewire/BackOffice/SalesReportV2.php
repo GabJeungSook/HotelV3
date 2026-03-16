@@ -38,6 +38,8 @@ class SalesReportV2 extends Component
 
     public $expensesRows;
     public float $expensesTotal = 0;
+    public float $netSales = 0;
+    public int $forwardedCount = 0;
 
     public function mount()
     {
@@ -70,6 +72,15 @@ class SalesReportV2 extends Component
         $this->summaryByType = $this->buildSummaryByType();
         $this->buildExpensesSummary();
         $this->buildRoomSummary();
+
+        // Calculate net sales (Gross - Expenses)
+        $this->netSales = $this->totalSales - $this->expensesTotal;
+
+        // Count unique forwarded guests
+        $this->forwardedCount = collect($this->salesRows)
+            ->filter(fn($row) => $row['is_forwarded'])
+            ->unique('guest_name')
+            ->count();
     }
 
     public function resetFilters()
@@ -116,6 +127,9 @@ class SalesReportV2 extends Component
             return [];
         }
 
+        $startDate = $this->date_from ?? now()->toDateString();
+        $endDate = $this->date_to ?? now()->toDateString();
+
         $query = DB::table('transactions as tr')
             ->leftJoin('shift_logs as sl', 'sl.id', '=', 'tr.shift_log_id')
             ->leftJoin('users as u', 'u.id', '=', 'sl.frontdesk_id')
@@ -125,6 +139,11 @@ class SalesReportV2 extends Component
             ->leftJoin('types as t', 't.id', '=', 'r.type_id')
             ->leftJoin('transaction_types as tt', 'tt.id', '=', 'tr.transaction_type_id')
             ->whereIn('tr.checkin_detail_id', $occupyingIds)
+            // Filter transactions by date range (bug fix)
+            ->whereBetween('tr.created_at', [
+                $startDate . ' 00:00:00',
+                $endDate . ' 23:59:59'
+            ])
             // Filter by WHO PROCESSED the transaction (via shift_log)
             ->when($this->frontdesk, function ($q) {
                 $q->where('sl.frontdesk_id', $this->frontdesk);
@@ -217,6 +236,8 @@ class SalesReportV2 extends Component
             'damages' => 0,           // Type 4: Damage Charges
             'transfers' => 0,         // Type 7: Transfer Room
             'deposits' => 0,          // Type 2: Deposit (not counted in total)
+            'room_deposits' => 0,     // Room Key/TV Remote deposits
+            'guest_deposits' => 0,    // Other guest deposits
         ];
 
         foreach ($grouped as $typeId => $transactions) {
@@ -244,6 +265,18 @@ class SalesReportV2 extends Component
                 case 9:
                     $summary['food'] = $sum;
                     break;
+            }
+        }
+
+        // Calculate deposit breakdown (Room Deposit vs Guest Deposit)
+        foreach ($this->salesRows as $row) {
+            if ($row['transaction_type_id'] == 2) {
+                $remarks = strtolower($row['remarks'] ?? '');
+                if (str_contains($remarks, 'room key') || str_contains($remarks, 'tv remote')) {
+                    $summary['room_deposits'] += $row['amount'];
+                } else {
+                    $summary['guest_deposits'] += $row['amount'];
+                }
             }
         }
 
@@ -309,10 +342,18 @@ class SalesReportV2 extends Component
             return;
         }
 
+        $startDate = $this->date_from ?? now()->toDateString();
+        $endDate = $this->date_to ?? now()->toDateString();
+
         $transactions = Transaction::query()
             ->with(['room.floor', 'transaction_type'])
             ->whereIn('checkin_detail_id', $occupyingIds)
             ->whereNotIn('transaction_type_id', [2, 5]) // Exclude deposits and cashouts
+            // Filter transactions by date range
+            ->whereBetween('created_at', [
+                $startDate . ' 00:00:00',
+                $endDate . ' 23:59:59'
+            ])
             ->when($this->frontdesk, function ($q) {
                 $q->whereHas('shift_log', fn($q2) => $q2->where('frontdesk_id', $this->frontdesk));
             })

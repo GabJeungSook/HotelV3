@@ -88,8 +88,22 @@
         </div>
     </div>
 
+    {{-- Forwarded Count Badge --}}
+    @if($forwardedCount > 0)
+    <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+        <div class="flex items-center gap-2">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+                {{ $forwardedCount }} FORWARDED
+            </span>
+            <span class="text-sm text-amber-700">
+                {{ $forwardedCount }} guest(s) carried over from previous day/shift
+            </span>
+        </div>
+    </div>
+    @endif
+
     {{-- Summary Cards --}}
-    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
         <div class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4">
             <div class="text-xs text-gray-500 uppercase tracking-wide">Room Charges</div>
             <div class="text-lg font-semibold text-gray-900 mt-1">P {{ number_format($summaryByType['room_charges'] ?? 0, 2) }}</div>
@@ -114,9 +128,33 @@
             <div class="text-xs text-gray-500 uppercase tracking-wide">Transfers</div>
             <div class="text-lg font-semibold text-gray-900 mt-1">P {{ number_format($summaryByType['transfers'] ?? 0, 2) }}</div>
         </div>
-        <div class="bg-indigo-600 rounded-lg shadow-sm p-4">
-            <div class="text-xs text-indigo-200 uppercase tracking-wide">Grand Total</div>
-            <div class="text-lg font-semibold text-white mt-1">P {{ number_format($summaryByType['grand_total'] ?? 0, 2) }}</div>
+        <div class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4">
+            <div class="text-xs text-gray-500 uppercase tracking-wide">Room Deposit</div>
+            <div class="text-lg font-semibold text-gray-900 mt-1">P {{ number_format($summaryByType['room_deposits'] ?? 0, 2) }}</div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4">
+            <div class="text-xs text-gray-500 uppercase tracking-wide">Guest Deposit</div>
+            <div class="text-lg font-semibold text-gray-900 mt-1">P {{ number_format($summaryByType['guest_deposits'] ?? 0, 2) }}</div>
+        </div>
+    </div>
+
+    {{-- Grand Total Card --}}
+    <div class="bg-indigo-600 rounded-lg shadow-sm p-4 mb-6">
+        <div class="flex justify-between items-center">
+            <div>
+                <div class="text-xs text-indigo-200 uppercase tracking-wide">Gross Sales</div>
+                <div class="text-xl font-semibold text-white">P {{ number_format($summaryByType['grand_total'] ?? 0, 2) }}</div>
+            </div>
+            <div class="text-indigo-200 text-2xl">-</div>
+            <div>
+                <div class="text-xs text-indigo-200 uppercase tracking-wide">Expenses</div>
+                <div class="text-xl font-semibold text-white">P {{ number_format($expensesTotal ?? 0, 2) }}</div>
+            </div>
+            <div class="text-indigo-200 text-2xl">=</div>
+            <div>
+                <div class="text-xs text-indigo-200 uppercase tracking-wide">Net Sales</div>
+                <div class="text-xl font-bold text-white">P {{ number_format($netSales ?? 0, 2) }}</div>
+            </div>
         </div>
     </div>
 

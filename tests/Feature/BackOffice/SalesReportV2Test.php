@@ -201,22 +201,28 @@ class SalesReportV2Test extends TestCase
             'check_out_at' => now()->addHours(4), // Today + 4 hours (still staying)
         ]);
 
-        // Create room charge transaction (created yesterday)
+        // Create extension transaction TODAY for guest who checked in yesterday
+        // This tests that forward guests' transactions appear when created within date range
         $this->createTransaction($guest, $checkinDetail, [
-            'created_at' => now()->subDay()->setTime(22, 0), // Yesterday
+            'transaction_type_id' => 6, // Extension
+            'description' => 'Extension',
+            'created_at' => now()->setTime(8, 0), // Today morning
         ]);
 
         // Test: Filter for TODAY only
-        // The guest checked in yesterday, but is still occupying today
-        // SalesReportV2 should show the transaction
+        // The guest checked in yesterday (forward guest), but has transaction today
+        // SalesReportV2 should show the transaction and mark guest as FORWARDED
         $component = Livewire::test(SalesReportV2::class)
             ->set('date_from', now()->toDateString())
             ->set('date_to', now()->toDateString())
             ->call('generateReport');
 
-        // The guest was occupying the room today (checked in yesterday, checkout is today+4hrs)
-        // So their transaction should appear
+        // The guest should appear with their TODAY transaction
         $component->assertSee('TEST GUEST FORWARD');
+
+        // Guest should be marked as forwarded since check-in was yesterday
+        $salesRows = $component->get('salesRows');
+        $this->assertTrue($salesRows[0]['is_forwarded']);
     }
 
     /** @test */
