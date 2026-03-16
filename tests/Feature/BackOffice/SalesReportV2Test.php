@@ -545,8 +545,25 @@ class SalesReportV2Test extends TestCase
             ->set('selectedShiftLogId', $pmShiftLog->id)
             ->call('generateReport');
 
-        // No transactions in PM range (they were all in AM)
-        $this->assertCount(0, $component->get('salesRows'));
+        // Forwarded guest rows should show (no transactions but still occupying)
+        // 2 rows: FWD ROOM + FWD DEPOSIT
+        $salesRows = $component->get('salesRows');
+        $this->assertCount(2, $salesRows);
+
+        // The forwarded room row
+        $fwdRoomRow = collect($salesRows)->firstWhere('transaction_type', 'FWD ROOM');
+        $this->assertNotNull($fwdRoomRow);
+        $this->assertTrue($fwdRoomRow['is_forwarded_guest_row']);
+        $this->assertEquals('FORWARDED GUEST', $fwdRoomRow['guest_name']);
+        $this->assertEquals(500, $fwdRoomRow['amount']);
+        $this->assertEquals(0, $fwdRoomRow['total']); // No sales credit for this shift
+
+        // The forwarded deposit row
+        $fwdDepositRow = collect($salesRows)->firstWhere('transaction_type', 'FWD DEPOSIT');
+        $this->assertNotNull($fwdDepositRow);
+        $this->assertTrue($fwdDepositRow['is_forwarded_guest_row']);
+        $this->assertEquals(300, $fwdDepositRow['amount']);
+        $this->assertEquals(0, $fwdDepositRow['total']);
 
         // But forwarded totals should show ORIGINAL amounts from AM
         $this->assertEquals(500, $component->get('forwardedRoom'));

@@ -134,19 +134,40 @@
         @endif
     </div>
 
-    {{-- Forwarded Count Badge --}}
-    @if($forwardedCount > 0)
-    <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
-        <div class="flex items-center gap-2">
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
-                {{ $forwardedCount }} FORWARDED
-            </span>
-            <span class="text-sm text-amber-700">
-                {{ $forwardedCount }} guest(s) carried over from previous day/shift
-            </span>
+    {{-- Shift Statistics Badges --}}
+    <div class="flex flex-wrap gap-3 mb-4">
+        {{-- Check-ins --}}
+        <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-2">
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-800">
+                    {{ $shiftCheckins }} CHECK-INS
+                </span>
+            </div>
         </div>
+
+        {{-- Check-outs --}}
+        <div class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
+                    {{ $shiftCheckouts }} CHECK-OUTS
+                </span>
+            </div>
+        </div>
+
+        {{-- Forwarded --}}
+        @if($forwardedCount > 0)
+        <div class="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2">
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+                    {{ $forwardedCount }} FORWARDED
+                </span>
+                <span class="text-xs text-amber-700">
+                    from previous shift
+                </span>
+            </div>
+        </div>
+        @endif
     </div>
-    @endif
 
     {{-- Summary Cards --}}
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-4">
@@ -253,41 +274,62 @@
                 </thead>
                 <tbody>
                     @forelse($salesRows as $row)
-                        <tr class="hover:bg-gray-50">
+                        <tr class="{{ ($row['is_forwarded_guest_row'] ?? false) ? 'bg-amber-50 hover:bg-amber-100' : 'hover:bg-gray-50' }}">
                             <td class="border border-gray-300 px-3 py-2 text-sm font-medium text-gray-900">{{ $row['room_number'] }}</td>
                             <td class="border border-gray-300 px-3 py-2 text-sm text-gray-700">{{ $row['room_type'] }}</td>
                             <td class="border border-gray-300 px-3 py-2 text-sm text-gray-700">{{ $row['guest_name'] }}</td>
                             <td class="border border-gray-300 px-3 py-2 text-sm text-center">
-                                @if($row['is_forwarded'] ?? false)
+                                @if($row['is_forwarded_guest_row'] ?? false)
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-amber-500 text-white">
+                                        FORWARDED
+                                    </span>
+                                @elseif($row['is_forwarded'] ?? false)
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800">
                                         FORWARDED
                                     </span>
                                 @endif
                             </td>
                             <td class="border border-gray-300 px-3 py-2 text-sm text-gray-700">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
-                                    @switch($row['transaction_type_id'])
-                                        @case(1) bg-green-100 text-green-800 @break
-                                        @case(2) bg-yellow-100 text-yellow-800 @break
-                                        @case(4) bg-red-100 text-red-800 @break
-                                        @case(6) bg-blue-100 text-blue-800 @break
-                                        @case(7) bg-purple-100 text-purple-800 @break
-                                        @case(8) bg-pink-100 text-pink-800 @break
-                                        @case(9) bg-orange-100 text-orange-800 @break
-                                        @default bg-gray-100 text-gray-800
-                                    @endswitch
-                                ">
-                                    {{ $row['transaction_type'] }}
-                                </span>
+                                @if($row['is_forwarded_guest_row'] ?? false)
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800">
+                                        {{ $row['transaction_type'] }}
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
+                                        @switch($row['transaction_type_id'])
+                                            @case(1) bg-green-100 text-green-800 @break
+                                            @case(2) bg-yellow-100 text-yellow-800 @break
+                                            @case(4) bg-red-100 text-red-800 @break
+                                            @case(6) bg-blue-100 text-blue-800 @break
+                                            @case(7) bg-purple-100 text-purple-800 @break
+                                            @case(8) bg-pink-100 text-pink-800 @break
+                                            @case(9) bg-orange-100 text-orange-800 @break
+                                            @default bg-gray-100 text-gray-800
+                                        @endswitch
+                                    ">
+                                        {{ $row['transaction_type'] }}
+                                    </span>
+                                @endif
                             </td>
                             <td class="border border-gray-300 px-3 py-2 text-sm text-gray-700">{{ $row['check_in'] }}</td>
                             <td class="border border-gray-300 px-3 py-2 text-sm text-gray-700">{{ $row['check_out'] }}</td>
-                            <td class="border border-gray-300 px-3 py-2 text-sm text-gray-700 text-right">P {{ number_format($row['amount'], 2) }}</td>
+                            <td class="border border-gray-300 px-3 py-2 text-sm text-gray-700 text-right">
+                                @if($row['is_forwarded_guest_row'] ?? false)
+                                    <span class="text-amber-700">P {{ number_format($row['amount'], 2) }}</span>
+                                    <div class="text-xs text-amber-600">(prev shift)</div>
+                                @else
+                                    P {{ number_format($row['amount'], 2) }}
+                                @endif
+                            </td>
                             <td class="border border-gray-300 px-3 py-2 text-sm text-gray-700">{{ $row['processed_by'] }}</td>
                             <td class="border border-gray-300 px-3 py-2 text-sm text-gray-700">{{ $row['shift'] }}</td>
                             <td class="border border-gray-300 px-3 py-2 text-sm text-gray-700">{{ $row['transaction_date'] }}</td>
                             <td class="border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-900 text-right">
-                                P {{ number_format($row['total'], 2) }}
+                                @if($row['is_forwarded_guest_row'] ?? false)
+                                    <span class="text-amber-600">—</span>
+                                @else
+                                    P {{ number_format($row['total'], 2) }}
+                                @endif
                             </td>
                         </tr>
                     @empty

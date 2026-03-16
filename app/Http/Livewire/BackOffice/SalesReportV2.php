@@ -53,6 +53,10 @@ class SalesReportV2 extends Component
     public float $forwardedRoom = 0;
     public float $forwardedDeposit = 0;
 
+    // Shift counts (for shift mode display)
+    public int $shiftCheckins = 0;
+    public int $shiftCheckouts = 0;
+
     public function mount()
     {
         $this->date_from = now()->toDateString();
@@ -78,7 +82,7 @@ class SalesReportV2 extends Component
     }
 
     /**
-     * Load all completed shift sessions (grouped by similar time_in).
+     * Load all completed shift sessions (grouped by shift TYPE + DATE).
      */
     private function loadAvailableShiftSessions(): void
     {
@@ -88,50 +92,78 @@ class SalesReportV2 extends Component
             ->orderByDesc('time_in')
             ->get();
 
-        // Group by session (time_in within 5 minutes = same shift session)
+        // Group by SHIFT TYPE + DATE (not time proximity)
         $sessions = [];
         foreach ($shiftLogs as $log) {
-            $matched = false;
-            foreach ($sessions as &$session) {
-                $sessionTime = Carbon::parse($session['time_in']);
-                if (abs($log->time_in->diffInMinutes($sessionTime)) <= 5) {
-                    $session['logs'][] = $log;
-                    $session['frontdesks'][] = $log->frontdesk?->name ?? 'Unknown';
-                    // Use the latest time_out for the session
-                    if ($log->time_out > $session['time_out']) {
-                        $session['time_out'] = $log->time_out;
-                    }
-                    $matched = true;
-                    break;
-                }
-            }
-            unset($session);
+            $shiftType = $this->getShiftType($log->time_in);
+            $shiftDate = $log->time_in->format('Y-m-d');
+            $key = $shiftType . '_' . $shiftDate;
 
-            if (!$matched) {
-                $sessions[] = [
-                    'id' => $log->id, // Primary log ID for this session
-                    'logs' => [$log],
+            if (!isset($sessions[$key])) {
+                $sessions[$key] = [
+                    'id' => $log->id,
+                    'logs' => [],
+                    'log_ids' => [],
                     'time_in' => $log->time_in,
                     'time_out' => $log->time_out,
-                    'shift_type' => $this->getShiftType($log->time_in),
-                    'frontdesks' => [$log->frontdesk?->name ?? 'Unknown'],
+                    'shift_type' => $shiftType,
+                    'shift_date' => $shiftDate,
+                    'frontdesks' => [],
                 ];
+            }
+
+            $sessions[$key]['logs'][] = $log;
+            $sessions[$key]['log_ids'][] = $log->id;
+            $sessions[$key]['frontdesks'][] = $log->frontdesk?->name ?? 'Unknown';
+
+            // Use earliest time_in and latest time_out
+            if ($log->time_in < $sessions[$key]['time_in']) {
+                $sessions[$key]['time_in'] = $log->time_in;
+            }
+            if ($log->time_out > $sessions[$key]['time_out']) {
+                $sessions[$key]['time_out'] = $log->time_out;
             }
         }
 
-        // Format labels for dropdown
-        $this->availableShiftSessions = collect($sessions)->map(function ($s) {
-            $frontdeskNames = implode(', ', array_unique($s['frontdesks']));
-            return [
-                'id' => $s['id'],
-                'log_ids' => collect($s['logs'])->pluck('id')->toArray(),
-                'label' => $s['shift_type'] . ' ' . $s['time_in']->format('M j')
-                         . ' - ' . $frontdeskNames
-                         . ' (' . $s['time_in']->format('g:i A') . ' - ' . $s['time_out']->format('g:i A') . ')',
-                'time_in' => $s['time_in'],
-                'time_out' => $s['time_out'],
-            ];
-        })->toArray();
+        // Sort by time_in descending and format labels
+        $this->availableShiftSessions = collect($sessions)
+            ->sortByDesc('time_in')
+            ->map(function ($s) {
+                $frontdeskNames = implode(', ', array_unique($s['frontdesks']));
+
+                return [
+                    'id' => $s['log_ids'][0], // Primary ID
+                    'log_ids' => $s['log_ids'],
+                    'label' => $s['shift_type'] . ' ' . $s['time_in']->format('M j')
+                             . ' - ' . $frontdeskNames
+                             . ' (' . $s['time_in']->format('g:i A') . ' - ' . $s['time_out']->format('g:i A') . ')',
+                    'time_in' => $s['time_in'],
+                    'time_out' => $s['time_out'],
+                ];
+            })
+            ->values()
+            ->toArray();
+    }
+
+    /**
+     * Get check-in and check-out counts for a shift period.
+     */
+    private function getShiftCounts(Carbon $timeIn, Carbon $timeOut): array
+    {
+        $branchId = auth()->user()->branch_id;
+
+        // Check-ins: transactions with type 1 created during this shift
+        $checkins = Transaction::where('branch_id', $branchId)
+            ->where('transaction_type_id', 1)
+            ->whereBetween('created_at', [$timeIn, $timeOut])
+            ->count();
+
+        // Check-outs: checkin_details with check_out_at during this shift
+        $checkouts = CheckinDetail::whereHas('room', fn($q) => $q->where('branch_id', $branchId))
+            ->whereBetween('check_out_at', [$timeIn, $timeOut])
+            ->count();
+
+        return ['checkins' => $checkins, 'checkouts' => $checkouts];
     }
 
     /**
@@ -166,6 +198,7 @@ class SalesReportV2 extends Component
         $this->buildExpensesSummary();
         $this->buildRoomSummary();
         $this->calculateForwardedTotals();
+        $this->calculateShiftCounts();
 
         // Calculate net sales (Gross - Expenses)
         $this->netSales = $this->totalSales - $this->expensesTotal;
@@ -175,6 +208,17 @@ class SalesReportV2 extends Component
             ->filter(fn($row) => $row['is_forwarded'])
             ->unique('guest_name')
             ->count();
+    }
+
+    /**
+     * Calculate check-in and check-out counts for the current filter range.
+     */
+    private function calculateShiftCounts(): void
+    {
+        $range = $this->getFilterRange();
+        $counts = $this->getShiftCounts($range['start'], $range['end']);
+        $this->shiftCheckins = $counts['checkins'];
+        $this->shiftCheckouts = $counts['checkouts'];
     }
 
     /**
@@ -290,16 +334,40 @@ class SalesReportV2 extends Component
      * Build sales rows for all transactions of occupying guests.
      * Uses LEFT JOIN on shift_logs to handle transactions with NULL shift_log_id.
      * Filters by transaction processor (shift_log.frontdesk_id), not check-in frontdesk.
+     *
+     * For shift mode: Also includes "forwarded guest" rows - guests who checked in
+     * during a previous shift but are still occupying when this shift started.
      */
     private function buildSalesRows(): array
     {
         $occupyingIds = $this->getOccupyingCheckinIds();
+        $range = $this->getFilterRange();
 
+        // Get transaction rows
+        $transactionRows = $this->getTransactionRows($occupyingIds, $range);
+
+        // For shift mode: Also get forwarded guest rows (occupying but no transactions this shift)
+        $forwardedGuestRows = [];
+        if ($this->filterMode === 'shift' && $this->selectedShiftLogId) {
+            $forwardedGuestRows = $this->getForwardedGuestRows($range);
+        }
+
+        // Merge and sort by room number
+        return collect($transactionRows)
+            ->merge($forwardedGuestRows)
+            ->sortBy('room_number')
+            ->values()
+            ->toArray();
+    }
+
+    /**
+     * Get transaction rows for occupying guests.
+     */
+    private function getTransactionRows(array $occupyingIds, array $range): array
+    {
         if (empty($occupyingIds)) {
             return [];
         }
-
-        $range = $this->getFilterRange();
 
         $query = DB::table('transactions as tr')
             ->leftJoin('shift_logs as sl', 'sl.id', '=', 'tr.shift_log_id')
@@ -391,6 +459,107 @@ class SalesReportV2 extends Component
                 'is_forwarded' => $isForwarded,
             ];
         })->toArray();
+    }
+
+    /**
+     * Get forwarded guest rows for shift mode.
+     * These are guests who checked in BEFORE this shift started but are still occupying,
+     * AND have no transactions in the current shift (otherwise their transactions already show).
+     * Shows them as "FORWARDED" with the original frontdesk who checked them in.
+     */
+    private function getForwardedGuestRows(array $range): array
+    {
+        $shiftLog = ShiftLog::find($this->selectedShiftLogId);
+        if (!$shiftLog) {
+            return [];
+        }
+
+        $branchId = auth()->user()->branch_id;
+
+        // Find guests who:
+        // 1. Checked in BEFORE this shift started
+        // 2. Haven't checked out yet OR checked out AFTER this shift started
+        // 3. Have NO transactions in the current shift (otherwise they already appear)
+        $forwardedGuests = CheckinDetail::query()
+            ->with(['guest', 'room.type', 'room.floor'])
+            ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
+            ->where('check_in_at', '<', $shiftLog->time_in)
+            ->where(function ($q) use ($shiftLog) {
+                $q->whereNull('check_out_at')
+                  ->orWhere('check_out_at', '>=', $shiftLog->time_in);
+            })
+            // Exclude guests who have transactions during this shift (they already show in table)
+            ->whereDoesntHave('transactions', function ($q) use ($range) {
+                $q->whereBetween('created_at', [$range['start'], $range['end']]);
+            })
+            ->get();
+
+        $rows = [];
+        foreach ($forwardedGuests as $cd) {
+            // Get the frontdesk who checked them in (from the check-in transaction)
+            $checkinTransaction = Transaction::where('checkin_detail_id', $cd->id)
+                ->where('transaction_type_id', 1)
+                ->with('shift_log.frontdesk')
+                ->first();
+
+            // Get the deposit transaction
+            $depositTransaction = Transaction::where('checkin_detail_id', $cd->id)
+                ->where('transaction_type_id', 2)
+                ->first();
+
+            $checkinFrontdesk = $checkinTransaction?->shift_log?->frontdesk?->name ?? '—';
+            $roomCharge = (float) ($checkinTransaction?->payable_amount ?? 0);
+            $depositAmount = (float) ($depositTransaction?->payable_amount ?? 0);
+
+            $checkInAt = $cd->check_in_at ? Carbon::parse($cd->check_in_at) : null;
+            $checkOutAt = $cd->check_out_at ? Carbon::parse($cd->check_out_at) : null;
+
+            // Add forwarded room row
+            $rows[] = [
+                'room_number' => $cd->room?->number ?? '—',
+                'room_id' => $cd->room_id,
+                'room_type' => $cd->room?->type?->name ?? '—',
+                'guest_name' => strtoupper($cd->guest?->name ?? '—'),
+                'transaction_type' => 'FWD ROOM',
+                'transaction_type_id' => 0, // Special ID for forwarded display
+                'check_in' => $checkInAt?->format('m-d-Y h:iA') ?? '—',
+                'check_out' => $checkOutAt?->format('m-d-Y h:iA') ?? '—',
+                'hours_stayed' => $cd->hours_stayed ? $cd->hours_stayed . ' hrs' : '—',
+                'amount' => $roomCharge,
+                'remarks' => 'Room charge from previous shift',
+                'processed_by' => strtoupper($checkinFrontdesk),
+                'shift' => '—',
+                'transaction_date' => '—',
+                'total' => 0, // Don't add to totals (already counted in previous shift)
+                'is_forwarded' => true,
+                'is_forwarded_guest_row' => true,
+            ];
+
+            // Add forwarded deposit row if deposit exists
+            if ($depositAmount > 0) {
+                $rows[] = [
+                    'room_number' => $cd->room?->number ?? '—',
+                    'room_id' => $cd->room_id,
+                    'room_type' => $cd->room?->type?->name ?? '—',
+                    'guest_name' => strtoupper($cd->guest?->name ?? '—'),
+                    'transaction_type' => 'FWD DEPOSIT',
+                    'transaction_type_id' => 0,
+                    'check_in' => $checkInAt?->format('m-d-Y h:iA') ?? '—',
+                    'check_out' => $checkOutAt?->format('m-d-Y h:iA') ?? '—',
+                    'hours_stayed' => $cd->hours_stayed ? $cd->hours_stayed . ' hrs' : '—',
+                    'amount' => $depositAmount,
+                    'remarks' => 'Deposit from previous shift',
+                    'processed_by' => strtoupper($checkinFrontdesk),
+                    'shift' => '—',
+                    'transaction_date' => '—',
+                    'total' => 0,
+                    'is_forwarded' => true,
+                    'is_forwarded_guest_row' => true,
+                ];
+            }
+        }
+
+        return $rows;
     }
 
     /**
