@@ -392,7 +392,7 @@ private function buildSalesRows(): array
         AND tr.remarks = "Deposit From Check In (Room Key & TV Remote)"
         AND (
             cg.created_at IS NULL
-            OR DATE(cg.created_at) BETWEEN "' . $this->startDate . '" AND "' . $this->endDate . '"
+            OR DATE(cg.created_at) NOT BETWEEN "' . $this->startDate . '" AND "' . $this->endDate . '"
         )
         THEN tr.payable_amount
         ELSE 0
@@ -406,7 +406,7 @@ private function buildSalesRows(): array
         )
          AND (
             cg.created_at IS NULL
-            OR DATE(cg.created_at) BETWEEN "' . $this->startDate . '" AND "' . $this->endDate . '"
+            OR DATE(cg.created_at) NOT BETWEEN "' . $this->startDate . '" AND "' . $this->endDate . '"
         )
         THEN tr.payable_amount
         ELSE 0
