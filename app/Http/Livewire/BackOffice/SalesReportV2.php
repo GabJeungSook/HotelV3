@@ -89,7 +89,7 @@ class SalesReportV2 extends Component
         $shiftLogs = ShiftLog::query()
             ->whereNotNull('time_out') // Completed shifts only
             ->with('frontdesk:id,name')
-            ->orderByDesc('time_in')
+            ->orderBy('time_in','asc')
             ->get();
 
         // Group by SHIFT TYPE + DATE (not time proximity)
