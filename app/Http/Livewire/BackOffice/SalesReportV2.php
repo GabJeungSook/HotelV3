@@ -36,9 +36,8 @@ class SalesReportV2 extends Component
     public $frontdesk_name;
 
     // Shift mode properties
-    public $shiftDate;
     public $selectedShiftLogId;
-    public array $availableShiftLogs = [];
+    public array $availableShiftSessions = [];
 
     public array $salesRows = [];
     public float $totalSales = 0;
@@ -58,7 +57,6 @@ class SalesReportV2 extends Component
     {
         $this->date_from = now()->toDateString();
         $this->date_to = now()->toDateString();
-        $this->shiftDate = now()->toDateString();
         $this->salesRows = [];
         $this->totalSales = 0;
         $this->summaryByType = [];
@@ -68,7 +66,7 @@ class SalesReportV2 extends Component
         $this->forwardedRoom = 0;
         $this->forwardedDeposit = 0;
 
-        $this->loadAvailableShiftLogs();
+        $this->loadAvailableShiftSessions();
         $this->generateReport();
     }
 
@@ -80,74 +78,80 @@ class SalesReportV2 extends Component
     }
 
     /**
-     * Load available shift logs when shift date changes.
+     * Load all completed shift sessions (grouped by similar time_in).
      */
-    public function updatedShiftDate()
+    private function loadAvailableShiftSessions(): void
     {
-        $this->loadAvailableShiftLogs();
-        $this->selectedShiftLogId = null;
-    }
-
-    /**
-     * Load completed shift logs for the selected date.
-     */
-    private function loadAvailableShiftLogs(): void
-    {
-        if (!$this->shiftDate) {
-            $this->availableShiftLogs = [];
-            return;
-        }
-
-        $this->availableShiftLogs = ShiftLog::query()
-            ->whereDate('time_in', $this->shiftDate)
+        $shiftLogs = ShiftLog::query()
             ->whereNotNull('time_out') // Completed shifts only
             ->with('frontdesk:id,name')
-            ->orderBy('time_in')
-            ->get()
-            ->map(function ($log) {
-                $frontdeskNames = $this->formatFrontdeskNames($log);
-                return [
-                    'id' => $log->id,
-                    'label' => ($log->shift ?? 'N/A') . ' - ' . $frontdeskNames
-                             . ' (' . $log->time_in->format('g:i A') . ' - ' . $log->time_out->format('g:i A') . ')',
-                    'time_in' => $log->time_in->toDateTimeString(),
-                    'time_out' => $log->time_out->toDateTimeString(),
-                ];
-            })
-            ->toArray();
-    }
+            ->orderByDesc('time_in')
+            ->get();
 
-    /**
-     * Format frontdesk names from shift log.
-     */
-    private function formatFrontdeskNames(ShiftLog $log): string
-    {
-        // Primary frontdesk
-        $name = $log->frontdesk?->name ?? 'Unknown';
-
-        // Check for additional frontdesks in frontdesk_ids
-        if ($log->frontdesk_ids) {
-            $ids = json_decode($log->frontdesk_ids, true) ?? [];
-            $ids = array_filter($ids, fn($id) => $id !== 'N/A' && $id != $log->frontdesk_id);
-
-            if (!empty($ids)) {
-                $additionalNames = \App\Models\User::whereIn('id', $ids)->pluck('name')->toArray();
-                if (!empty($additionalNames)) {
-                    $name .= ', ' . implode(', ', $additionalNames);
+        // Group by session (time_in within 5 minutes = same shift session)
+        $sessions = [];
+        foreach ($shiftLogs as $log) {
+            $matched = false;
+            foreach ($sessions as &$session) {
+                $sessionTime = Carbon::parse($session['time_in']);
+                if (abs($log->time_in->diffInMinutes($sessionTime)) <= 5) {
+                    $session['logs'][] = $log;
+                    $session['frontdesks'][] = $log->frontdesk?->name ?? 'Unknown';
+                    // Use the latest time_out for the session
+                    if ($log->time_out > $session['time_out']) {
+                        $session['time_out'] = $log->time_out;
+                    }
+                    $matched = true;
+                    break;
                 }
+            }
+            unset($session);
+
+            if (!$matched) {
+                $sessions[] = [
+                    'id' => $log->id, // Primary log ID for this session
+                    'logs' => [$log],
+                    'time_in' => $log->time_in,
+                    'time_out' => $log->time_out,
+                    'shift_type' => $this->getShiftType($log->time_in),
+                    'frontdesks' => [$log->frontdesk?->name ?? 'Unknown'],
+                ];
             }
         }
 
-        return $name;
+        // Format labels for dropdown
+        $this->availableShiftSessions = collect($sessions)->map(function ($s) {
+            $frontdeskNames = implode(', ', array_unique($s['frontdesks']));
+            return [
+                'id' => $s['id'],
+                'log_ids' => collect($s['logs'])->pluck('id')->toArray(),
+                'label' => $s['shift_type'] . ' ' . $s['time_in']->format('M j')
+                         . ' - ' . $frontdeskNames
+                         . ' (' . $s['time_in']->format('g:i A') . ' - ' . $s['time_out']->format('g:i A') . ')',
+                'time_in' => $s['time_in'],
+                'time_out' => $s['time_out'],
+            ];
+        })->toArray();
     }
 
     /**
-     * When filter mode changes, reset related properties.
+     * Determine shift type from time_in hour.
+     * AM: 6:00 AM - 7:59 PM (hours 6-19)
+     * PM: 8:00 PM - 5:59 AM (hours 20-23, 0-5)
+     */
+    private function getShiftType(Carbon $timeIn): string
+    {
+        $hour = $timeIn->hour;
+        return ($hour >= 6 && $hour < 20) ? 'AM' : 'PM';
+    }
+
+    /**
+     * When filter mode changes, load shift sessions if needed.
      */
     public function updatedFilterMode()
     {
-        if ($this->filterMode === 'shift') {
-            $this->loadAvailableShiftLogs();
+        if ($this->filterMode === 'shift' && empty($this->availableShiftSessions)) {
+            $this->loadAvailableShiftSessions();
         }
     }
 
@@ -175,20 +179,55 @@ class SalesReportV2 extends Component
 
     /**
      * Calculate forwarded room and deposit totals.
+     *
+     * For shift mode: Shows the ORIGINAL room charge + deposit collected by
+     * previous shift for guests who are still occupying (forwarded guests).
      */
     private function calculateForwardedTotals(): void
     {
-        $forwardedRows = collect($this->salesRows)->filter(fn($row) => $row['is_forwarded']);
+        // Only calculate for shift mode
+        if ($this->filterMode !== 'shift' || !$this->selectedShiftLogId) {
+            // For date range mode, use transactions in current range from forwarded guests
+            $forwardedRows = collect($this->salesRows)->filter(fn($row) => $row['is_forwarded']);
+            $this->forwardedRoom = $forwardedRows->where('transaction_type_id', 1)->sum('amount');
+            $this->forwardedDeposit = $forwardedRows->where('transaction_type_id', 2)->sum('amount');
+            return;
+        }
 
-        // Forwarded Room = Check In transactions (type 1) from forwarded guests
-        $this->forwardedRoom = $forwardedRows
+        // Shift mode: Get ORIGINAL room charges and deposits from previous shift
+        $shiftLog = ShiftLog::find($this->selectedShiftLogId);
+        if (!$shiftLog) {
+            $this->forwardedRoom = 0;
+            $this->forwardedDeposit = 0;
+            return;
+        }
+
+        // Find forwarded guests (checked in BEFORE this shift started, still occupying when shift started)
+        $forwardedCheckinIds = CheckinDetail::query()
+            ->whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))
+            ->where('check_in_at', '<', $shiftLog->time_in)
+            ->where(function ($q) use ($shiftLog) {
+                $q->whereNull('check_out_at')
+                  ->orWhere('check_out_at', '>=', $shiftLog->time_in);
+            })
+            ->pluck('id')
+            ->toArray();
+
+        if (empty($forwardedCheckinIds)) {
+            $this->forwardedRoom = 0;
+            $this->forwardedDeposit = 0;
+            return;
+        }
+
+        // Get their ORIGINAL room charges (type 1) - collected by previous shift
+        $this->forwardedRoom = (float) Transaction::whereIn('checkin_detail_id', $forwardedCheckinIds)
             ->where('transaction_type_id', 1)
-            ->sum('amount');
+            ->sum('payable_amount');
 
-        // Forwarded Deposit = Deposit transactions (type 2) from forwarded guests
-        $this->forwardedDeposit = $forwardedRows
+        // Get their ORIGINAL deposits (type 2) - collected by previous shift
+        $this->forwardedDeposit = (float) Transaction::whereIn('checkin_detail_id', $forwardedCheckinIds)
             ->where('transaction_type_id', 2)
-            ->sum('amount');
+            ->sum('payable_amount');
     }
 
     public function resetFilters()
@@ -197,8 +236,6 @@ class SalesReportV2 extends Component
         $this->filterMode = 'date_range';
         $this->date_from = now()->toDateString();
         $this->date_to = now()->toDateString();
-        $this->shiftDate = now()->toDateString();
-        $this->loadAvailableShiftLogs();
         $this->generateReport();
     }
 

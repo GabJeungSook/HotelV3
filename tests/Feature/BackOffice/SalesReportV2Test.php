@@ -419,7 +419,6 @@ class SalesReportV2Test extends TestCase
         // Filter for PM shift using shift mode - guest should be marked as FORWARDED
         $component = Livewire::test(SalesReportV2::class)
             ->set('filterMode', 'shift')
-            ->set('shiftDate', now()->toDateString())
             ->set('selectedShiftLogId', $pmShiftLog->id)
             ->call('generateReport');
 
@@ -434,8 +433,8 @@ class SalesReportV2Test extends TestCase
         // Forwarded count should be 1
         $this->assertEquals(1, $component->get('forwardedCount'));
 
-        // Forwarded room should be 0 (extension is not room charge)
-        $this->assertEquals(0, $component->get('forwardedRoom'));
+        // Forwarded room should show ORIGINAL room charge (500) from previous shift
+        $this->assertEquals(500, $component->get('forwardedRoom'));
     }
 
     /** @test */
@@ -469,7 +468,6 @@ class SalesReportV2Test extends TestCase
         // Filter for PM shift using shift mode - guest should NOT be forwarded
         $component = Livewire::test(SalesReportV2::class)
             ->set('filterMode', 'shift')
-            ->set('shiftDate', now()->toDateString())
             ->set('selectedShiftLogId', $pmShiftLog->id)
             ->call('generateReport');
 
@@ -534,7 +532,6 @@ class SalesReportV2Test extends TestCase
         // Filter for AM shift - both transactions should show with forwarded totals = 0
         $component = Livewire::test(SalesReportV2::class)
             ->set('filterMode', 'shift')
-            ->set('shiftDate', now()->toDateString())
             ->set('selectedShiftLogId', $amShiftLog->id)
             ->call('generateReport');
 
@@ -542,15 +539,18 @@ class SalesReportV2Test extends TestCase
         $this->assertEquals(0, $component->get('forwardedRoom'));
         $this->assertEquals(0, $component->get('forwardedDeposit'));
 
-        // Now filter for PM shift - guest should be forwarded
+        // Now filter for PM shift - guest should be forwarded with ORIGINAL amounts
         $component = Livewire::test(SalesReportV2::class)
             ->set('filterMode', 'shift')
-            ->set('shiftDate', now()->toDateString())
             ->set('selectedShiftLogId', $pmShiftLog->id)
             ->call('generateReport');
 
         // No transactions in PM range (they were all in AM)
         $this->assertCount(0, $component->get('salesRows'));
+
+        // But forwarded totals should show ORIGINAL amounts from AM
+        $this->assertEquals(500, $component->get('forwardedRoom'));
+        $this->assertEquals(300, $component->get('forwardedDeposit'));
     }
 
     /** @test */
@@ -621,7 +621,6 @@ class SalesReportV2Test extends TestCase
         // Filter for PM shift
         $component = Livewire::test(SalesReportV2::class)
             ->set('filterMode', 'shift')
-            ->set('shiftDate', now()->toDateString())
             ->set('selectedShiftLogId', $pmShiftLog->id)
             ->call('generateReport');
 
@@ -641,7 +640,7 @@ class SalesReportV2Test extends TestCase
         // Forwarded count = 1 (AM guest)
         $this->assertEquals(1, $component->get('forwardedCount'));
 
-        // Forwarded room = 0 (AM guest's transaction in PM is extension, not room charge)
-        $this->assertEquals(0, $component->get('forwardedRoom'));
+        // Forwarded room = 500 (AM guest's ORIGINAL room charge from AM shift)
+        $this->assertEquals(500, $component->get('forwardedRoom'));
     }
 }

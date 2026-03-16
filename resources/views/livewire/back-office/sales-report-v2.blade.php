@@ -103,26 +103,19 @@
         </div>
         @else
         {{-- Shift Mode Filters --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {{-- Shift Date --}}
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                <input type="date" wire:model.live="shiftDate"
-                       class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
-            </div>
-
-            {{-- Shift Log Selection --}}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {{-- Shift Session Selection --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Select Shift</label>
                 <select wire:model.defer="selectedShiftLogId"
                         class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                     <option value="">-- Select a completed shift --</option>
-                    @foreach($availableShiftLogs as $log)
-                        <option value="{{ $log['id'] }}">{{ $log['label'] }}</option>
+                    @foreach($availableShiftSessions as $session)
+                        <option value="{{ $session['id'] }}">{{ $session['label'] }}</option>
                     @endforeach
                 </select>
-                @if(empty($availableShiftLogs))
-                    <p class="text-xs text-gray-500 mt-1">No completed shifts found for this date.</p>
+                @if(empty($availableShiftSessions))
+                    <p class="text-xs text-gray-500 mt-1">No completed shifts found.</p>
                 @endif
             </div>
 
@@ -228,9 +221,9 @@
             <div class="text-xs text-gray-500">
                 @if($filterMode === 'shift' && $selectedShiftLogId)
                     @php
-                        $selectedShift = collect($availableShiftLogs)->firstWhere('id', $selectedShiftLogId);
+                        $selectedSession = collect($availableShiftSessions)->firstWhere('id', $selectedShiftLogId);
                     @endphp
-                    Shift: {{ $selectedShift['label'] ?? 'N/A' }}
+                    Shift: {{ $selectedSession['label'] ?? 'N/A' }}
                 @else
                     {{ $date_from }} to {{ $date_to }}
                     @if($frontdesk_name)
