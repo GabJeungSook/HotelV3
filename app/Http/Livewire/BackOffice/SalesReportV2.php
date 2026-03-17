@@ -253,57 +253,13 @@ class SalesReportV2 extends Component
             return;
         }
 
-        // Shift mode: Get ORIGINAL room charges and deposits from previous shift
-        $shiftLog = ShiftLog::find($this->selectedShiftLogId);
-        if (!$shiftLog) {
-            $this->forwardedRoom = 0;
-            $this->forwardedRoomDeposit = 0;
-            $this->forwardedGuestDeposit = 0;
-            return;
-        }
+        // Shift mode: Derive forwarded totals from the FWD rows already in salesRows
+        // This ensures the summary card always matches the FWD rows in the table
+        $fwdRows = collect($this->salesRows)->filter(fn($row) => !empty($row['is_forwarded_guest_row']));
 
-        // Find forwarded guests (checked in BEFORE this shift started, still occupying when shift started)
-        $forwardedCheckinIds = CheckinDetail::query()
-            ->whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))
-            ->where('check_in_at', '<', $shiftLog->time_in)
-            ->where(function ($q) use ($shiftLog) {
-                $q->whereNull('check_out_at')
-                  ->orWhere('check_out_at', '>=', $shiftLog->time_in);
-            })
-            ->pluck('id')
-            ->toArray();
-
-        if (empty($forwardedCheckinIds)) {
-            $this->forwardedRoom = 0;
-            $this->forwardedRoomDeposit = 0;
-            $this->forwardedGuestDeposit = 0;
-            return;
-        }
-
-        // Get their ORIGINAL room charges (type 1) - collected by previous shift
-        $this->forwardedRoom = (float) Transaction::whereIn('checkin_detail_id', $forwardedCheckinIds)
-            ->where('transaction_type_id', 1)
-            ->sum('payable_amount');
-
-        // Get their ORIGINAL room key deposits (type 2, Room Key & TV Remote)
-        $this->forwardedRoomDeposit = (float) Transaction::whereIn('checkin_detail_id', $forwardedCheckinIds)
-            ->where('transaction_type_id', 2)
-            ->where('remarks', 'Deposit From Check In (Room Key & TV Remote)')
-            ->sum('payable_amount');
-
-        // Get their ORIGINAL guest deposits (type 2, NOT Room Key & TV Remote)
-        $originalGuestDeposits = (float) Transaction::whereIn('checkin_detail_id', $forwardedCheckinIds)
-            ->where('transaction_type_id', 2)
-            ->where('remarks', '!=', 'Deposit From Check In (Room Key & TV Remote)')
-            ->sum('payable_amount');
-
-        // Subtract cashouts (type 5) from guest deposits — only those before this shift
-        $totalCashouts = (float) Transaction::whereIn('checkin_detail_id', $forwardedCheckinIds)
-            ->where('transaction_type_id', 5)
-            ->where('created_at', '<', $shiftLog->time_in)
-            ->sum('payable_amount');
-
-        $this->forwardedGuestDeposit = max(0, $originalGuestDeposits - $totalCashouts);
+        $this->forwardedRoom = (float) $fwdRows->where('transaction_type', 'FWD ROOM')->sum('amount');
+        $this->forwardedRoomDeposit = (float) $fwdRows->where('transaction_type', 'FWD ROOM DEPOSIT')->sum('amount');
+        $this->forwardedGuestDeposit = (float) $fwdRows->where('transaction_type', 'FWD GUEST DEPOSIT')->sum('amount');
     }
 
     public function resetFilters()
@@ -536,11 +492,11 @@ class SalesReportV2 extends Component
                 ->where('remarks', 'Deposit From Check In (Room Key & TV Remote)')
                 ->first();
 
-            // Get guest deposit (any deposit that is NOT room key)
-            $guestDeposit = Transaction::where('checkin_detail_id', $cd->id)
+            // Get total guest deposits (any deposit that is NOT room key)
+            $guestDepositTotal = (float) Transaction::where('checkin_detail_id', $cd->id)
                 ->where('transaction_type_id', 2)
                 ->where('remarks', '!=', 'Deposit From Check In (Room Key & TV Remote)')
-                ->first();
+                ->sum('payable_amount');
 
             // Get total cashouts (type 5) for this checkin_detail — only those before this shift
             $totalCashouts = (float) Transaction::where('checkin_detail_id', $cd->id)
@@ -551,7 +507,7 @@ class SalesReportV2 extends Component
             $checkinFrontdesk = $checkinTransaction?->shift_log?->frontdesk?->name ?? '—';
             $roomCharge = (float) ($checkinTransaction?->payable_amount ?? 0);
             $roomKeyDepositAmount = (float) ($roomKeyDeposit?->payable_amount ?? 0);
-            $guestDepositAmount = max(0, (float) ($guestDeposit?->payable_amount ?? 0) - $totalCashouts);
+            $guestDepositAmount = max(0, $guestDepositTotal - $totalCashouts);
 
             $checkInAt = $cd->check_in_at ? Carbon::parse($cd->check_in_at) : null;
             $checkOutAt = $cd->check_out_at ? Carbon::parse($cd->check_out_at) : null;

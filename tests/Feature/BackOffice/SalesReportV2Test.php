@@ -1076,4 +1076,211 @@ class SalesReportV2Test extends TestCase
         $this->assertEquals(200, $component->get('forwardedRoomDeposit'));
         $this->assertEquals(184, $component->get('forwardedGuestDeposit'));
     }
+
+    /** @test */
+    public function forwarded_guest_deposit_sums_all_deposits_not_just_first()
+    {
+        $this->actingAs($this->user);
+
+        $amShiftLog = ShiftLog::create([
+            'frontdesk_id' => $this->user->id,
+            'frontdesk_ids' => json_encode([$this->user->id]),
+            'time_in' => now()->setTime(8, 0),
+            'time_out' => now()->setTime(16, 0),
+            'shift' => 'AM',
+        ]);
+
+        $pmShiftLog = ShiftLog::create([
+            'frontdesk_id' => $this->user->id,
+            'frontdesk_ids' => json_encode([$this->user->id]),
+            'time_in' => now()->setTime(16, 0),
+            'time_out' => now()->setTime(23, 59),
+            'shift' => 'PM',
+        ]);
+
+        $guest = $this->createGuest(['name' => 'Multi Deposit Guest']);
+        $checkinDetail = $this->createCheckinDetail($guest, [
+            'check_in_at' => now()->setTime(9, 0),
+            'check_out_at' => now()->addDay(),
+        ]);
+
+        // Room charge during AM
+        $this->createTransaction($guest, $checkinDetail, [
+            'transaction_type_id' => 1,
+            'shift_log_id' => $amShiftLog->id,
+            'payable_amount' => 500,
+            'paid_amount' => 500,
+            'created_at' => now()->setTime(9, 0),
+        ]);
+
+        // First guest deposit during AM: 200
+        $this->createTransaction($guest, $checkinDetail, [
+            'transaction_type_id' => 2,
+            'shift_log_id' => $amShiftLog->id,
+            'payable_amount' => 200,
+            'paid_amount' => 200,
+            'remarks' => 'Guest Deposit',
+            'description' => 'Deposit',
+            'created_at' => now()->setTime(9, 5),
+        ]);
+
+        // Second guest deposit during AM: 150
+        $this->createTransaction($guest, $checkinDetail, [
+            'transaction_type_id' => 2,
+            'shift_log_id' => $amShiftLog->id,
+            'payable_amount' => 150,
+            'paid_amount' => 150,
+            'remarks' => 'Guest Deposit',
+            'description' => 'Deposit',
+            'created_at' => now()->setTime(10, 0),
+        ]);
+
+        // View PM shift — FWD GUEST DEPOSIT should show 350 (200 + 150), not just 200
+        $component = Livewire::test(SalesReportV2::class)
+            ->set('filterMode', 'shift')
+            ->set('selectedShiftLogId', $pmShiftLog->id)
+            ->call('generateReport');
+
+        $salesRows = $component->get('salesRows');
+
+        // FWD GUEST DEPOSIT row should sum all deposits
+        $fwdGuestDeposit = collect($salesRows)->firstWhere('transaction_type', 'FWD GUEST DEPOSIT');
+        $this->assertNotNull($fwdGuestDeposit);
+        $this->assertEquals(350, $fwdGuestDeposit['amount']);
+
+        // Summary should match
+        $this->assertEquals(350, $component->get('forwardedGuestDeposit'));
+    }
+
+    /** @test */
+    public function forwarded_summary_matches_fwd_row_totals_across_shifts()
+    {
+        $this->actingAs($this->user);
+
+        // Create a second room for guest B
+        $room2 = Room::create([
+            'branch_id' => $this->branch->id,
+            'floor_id' => $this->floor->id,
+            'type_id' => $this->roomType->id,
+            'number' => 102,
+            'status' => 'available',
+        ]);
+
+        // Shift 0 (previous day PM): Guest A checks in
+        $prevPmShiftLog = ShiftLog::create([
+            'frontdesk_id' => $this->user->id,
+            'frontdesk_ids' => json_encode([$this->user->id]),
+            'time_in' => now()->subDay()->setTime(16, 0),
+            'time_out' => now()->subDay()->setTime(23, 59),
+            'shift' => 'PM',
+        ]);
+
+        // Shift 1 (AM): Guest B checks in, Guest B has cashout
+        $amShiftLog = ShiftLog::create([
+            'frontdesk_id' => $this->user->id,
+            'frontdesk_ids' => json_encode([$this->user->id]),
+            'time_in' => now()->setTime(8, 0),
+            'time_out' => now()->setTime(16, 0),
+            'shift' => 'AM',
+        ]);
+
+        // Shift 2 (PM): Both guests forwarded
+        $pmShiftLog = ShiftLog::create([
+            'frontdesk_id' => $this->user->id,
+            'frontdesk_ids' => json_encode([$this->user->id]),
+            'time_in' => now()->setTime(16, 0),
+            'time_out' => now()->setTime(23, 59),
+            'shift' => 'PM',
+        ]);
+
+        // Guest A: checked in during previous day PM with deposit 500
+        $guestA = $this->createGuest(['name' => 'Guest A']);
+        $checkinDetailA = $this->createCheckinDetail($guestA, [
+            'check_in_at' => now()->subDay()->setTime(17, 0),
+            'check_out_at' => now()->addDay(),
+        ]);
+
+        $this->createTransaction($guestA, $checkinDetailA, [
+            'transaction_type_id' => 1,
+            'shift_log_id' => $prevPmShiftLog->id,
+            'payable_amount' => 400,
+            'paid_amount' => 400,
+            'created_at' => now()->subDay()->setTime(17, 0),
+        ]);
+
+        $this->createTransaction($guestA, $checkinDetailA, [
+            'transaction_type_id' => 2,
+            'shift_log_id' => $prevPmShiftLog->id,
+            'payable_amount' => 500,
+            'paid_amount' => 500,
+            'remarks' => 'Guest Deposit',
+            'description' => 'Deposit',
+            'created_at' => now()->subDay()->setTime(17, 5),
+        ]);
+
+        // Guest B: checked in during AM with deposit 300
+        $guestB = $this->createGuest(['name' => 'Guest B', 'room_id' => $room2->id]);
+        $checkinDetailB = $this->createCheckinDetail($guestB, [
+            'room_id' => $room2->id,
+            'check_in_at' => now()->setTime(9, 0),
+            'check_out_at' => now()->addDay(),
+        ]);
+
+        $this->createTransaction($guestB, $checkinDetailB, [
+            'transaction_type_id' => 1,
+            'shift_log_id' => $amShiftLog->id,
+            'payable_amount' => 300,
+            'paid_amount' => 300,
+            'room_id' => $room2->id,
+            'created_at' => now()->setTime(9, 0),
+        ]);
+
+        $this->createTransaction($guestB, $checkinDetailB, [
+            'transaction_type_id' => 2,
+            'shift_log_id' => $amShiftLog->id,
+            'payable_amount' => 300,
+            'paid_amount' => 300,
+            'remarks' => 'Guest Deposit',
+            'description' => 'Deposit',
+            'room_id' => $room2->id,
+            'created_at' => now()->setTime(9, 5),
+        ]);
+
+        // Guest B cashout during AM: 100
+        $this->createTransaction($guestB, $checkinDetailB, [
+            'transaction_type_id' => 5,
+            'shift_log_id' => $amShiftLog->id,
+            'payable_amount' => 100,
+            'paid_amount' => 100,
+            'description' => 'Cashout',
+            'room_id' => $room2->id,
+            'created_at' => now()->setTime(14, 0),
+        ]);
+
+        // View PM shift (shift 2)
+        $component = Livewire::test(SalesReportV2::class)
+            ->set('filterMode', 'shift')
+            ->set('selectedShiftLogId', $pmShiftLog->id)
+            ->call('generateReport');
+
+        $salesRows = $component->get('salesRows');
+        $fwdRows = collect($salesRows)->filter(fn($r) => !empty($r['is_forwarded_guest_row']));
+
+        // Guest A FWD GUEST DEPOSIT = 500 (no cashouts)
+        $guestADeposit = $fwdRows
+            ->where('transaction_type', 'FWD GUEST DEPOSIT')
+            ->firstWhere('guest_name', 'GUEST A');
+        $this->assertNotNull($guestADeposit);
+        $this->assertEquals(500, $guestADeposit['amount']);
+
+        // Guest B FWD GUEST DEPOSIT = 200 (300 - 100 cashout before PM)
+        $guestBDeposit = $fwdRows
+            ->where('transaction_type', 'FWD GUEST DEPOSIT')
+            ->firstWhere('guest_name', 'GUEST B');
+        $this->assertNotNull($guestBDeposit);
+        $this->assertEquals(200, $guestBDeposit['amount']);
+
+        // Summary should equal sum of FWD rows: 500 + 200 = 700
+        $this->assertEquals(700, $component->get('forwardedGuestDeposit'));
+    }
 }
