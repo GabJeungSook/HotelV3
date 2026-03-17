@@ -208,10 +208,19 @@
             <div class="text-xs text-amber-700 uppercase tracking-wide">Forwarded Room</div>
             <div class="text-lg font-semibold text-amber-900 mt-1">P {{ number_format($forwardedRoom ?? 0, 2) }}</div>
         </div>
-        {{-- Forwarded Deposit --}}
+        {{-- Forwarded Deposits --}}
         <div class="bg-amber-50 rounded-lg shadow-sm ring-1 ring-amber-200 p-4">
             <div class="text-xs text-amber-700 uppercase tracking-wide">Forwarded Deposit</div>
-            <div class="text-lg font-semibold text-amber-900 mt-1">P {{ number_format($forwardedDeposit ?? 0, 2) }}</div>
+            <div class="text-sm text-amber-800 mt-1">
+                <div class="flex justify-between">
+                    <span>Room Deposit:</span>
+                    <span class="font-semibold">P {{ number_format($forwardedRoomDeposit ?? 0, 2) }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Guest Deposit:</span>
+                    <span class="font-semibold">P {{ number_format($forwardedGuestDeposit ?? 0, 2) }}</span>
+                </div>
+            </div>
         </div>
     </div>
 

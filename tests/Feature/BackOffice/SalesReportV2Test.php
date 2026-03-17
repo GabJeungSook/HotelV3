@@ -537,7 +537,8 @@ class SalesReportV2Test extends TestCase
 
         // Guest checked in during AM, viewing AM report - NOT forwarded
         $this->assertEquals(0, $component->get('forwardedRoom'));
-        $this->assertEquals(0, $component->get('forwardedDeposit'));
+        $this->assertEquals(0, $component->get('forwardedRoomDeposit'));
+        $this->assertEquals(0, $component->get('forwardedGuestDeposit'));
 
         // Now filter for PM shift - guest should be forwarded with ORIGINAL amounts
         $component = Livewire::test(SalesReportV2::class)
@@ -546,7 +547,7 @@ class SalesReportV2Test extends TestCase
             ->call('generateReport');
 
         // Forwarded guest rows should show (no transactions but still occupying)
-        // 2 rows: FWD ROOM + FWD DEPOSIT
+        // 2 rows: FWD ROOM + FWD GUEST DEPOSIT
         $salesRows = $component->get('salesRows');
         $this->assertCount(2, $salesRows);
 
@@ -558,8 +559,8 @@ class SalesReportV2Test extends TestCase
         $this->assertEquals(500, $fwdRoomRow['amount']);
         $this->assertEquals(0, $fwdRoomRow['total']); // No sales credit for this shift
 
-        // The forwarded deposit row
-        $fwdDepositRow = collect($salesRows)->firstWhere('transaction_type', 'FWD DEPOSIT');
+        // The forwarded guest deposit row
+        $fwdDepositRow = collect($salesRows)->firstWhere('transaction_type', 'FWD GUEST DEPOSIT');
         $this->assertNotNull($fwdDepositRow);
         $this->assertTrue($fwdDepositRow['is_forwarded_guest_row']);
         $this->assertEquals(300, $fwdDepositRow['amount']);
@@ -567,7 +568,8 @@ class SalesReportV2Test extends TestCase
 
         // But forwarded totals should show ORIGINAL amounts from AM
         $this->assertEquals(500, $component->get('forwardedRoom'));
-        $this->assertEquals(300, $component->get('forwardedDeposit'));
+        $this->assertEquals(0, $component->get('forwardedRoomDeposit'));
+        $this->assertEquals(300, $component->get('forwardedGuestDeposit'));
     }
 
     /** @test */
