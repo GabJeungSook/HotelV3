@@ -242,10 +242,14 @@ class SalesReportV2 extends Component
                 $remarks = strtolower($row['remarks'] ?? '');
                 return str_contains($remarks, 'room key') || str_contains($remarks, 'tv remote');
             })->sum('amount');
-            $this->forwardedGuestDeposit = $forwardedDeposits->filter(function ($row) {
+            $originalGuestDeposit = $forwardedDeposits->filter(function ($row) {
                 $remarks = strtolower($row['remarks'] ?? '');
                 return !str_contains($remarks, 'room key') && !str_contains($remarks, 'tv remote');
             })->sum('amount');
+
+            // Subtract cashouts (type 5) from forwarded guest deposits
+            $forwardedCashouts = $forwardedRows->where('transaction_type_id', 5)->sum('amount');
+            $this->forwardedGuestDeposit = max(0, $originalGuestDeposit - $forwardedCashouts);
             return;
         }
 
@@ -288,10 +292,17 @@ class SalesReportV2 extends Component
             ->sum('payable_amount');
 
         // Get their ORIGINAL guest deposits (type 2, NOT Room Key & TV Remote)
-        $this->forwardedGuestDeposit = (float) Transaction::whereIn('checkin_detail_id', $forwardedCheckinIds)
+        $originalGuestDeposits = (float) Transaction::whereIn('checkin_detail_id', $forwardedCheckinIds)
             ->where('transaction_type_id', 2)
             ->where('remarks', '!=', 'Deposit From Check In (Room Key & TV Remote)')
             ->sum('payable_amount');
+
+        // Subtract cashouts (type 5) from guest deposits
+        $totalCashouts = (float) Transaction::whereIn('checkin_detail_id', $forwardedCheckinIds)
+            ->where('transaction_type_id', 5)
+            ->sum('payable_amount');
+
+        $this->forwardedGuestDeposit = max(0, $originalGuestDeposits - $totalCashouts);
     }
 
     public function resetFilters()
@@ -534,10 +545,15 @@ class SalesReportV2 extends Component
                 ->where('remarks', '!=', 'Deposit From Check In (Room Key & TV Remote)')
                 ->first();
 
+            // Get total cashouts (type 5) for this checkin_detail
+            $totalCashouts = (float) Transaction::where('checkin_detail_id', $cd->id)
+                ->where('transaction_type_id', 5)
+                ->sum('payable_amount');
+
             $checkinFrontdesk = $checkinTransaction?->shift_log?->frontdesk?->name ?? '—';
             $roomCharge = (float) ($checkinTransaction?->payable_amount ?? 0);
             $roomKeyDepositAmount = (float) ($roomKeyDeposit?->payable_amount ?? 0);
-            $guestDepositAmount = (float) ($guestDeposit?->payable_amount ?? 0);
+            $guestDepositAmount = max(0, (float) ($guestDeposit?->payable_amount ?? 0) - $totalCashouts);
 
             $checkInAt = $cd->check_in_at ? Carbon::parse($cd->check_in_at) : null;
             $checkOutAt = $cd->check_out_at ? Carbon::parse($cd->check_out_at) : null;
