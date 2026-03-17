@@ -28,7 +28,7 @@
   @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 @if(app()->environment('staging'))
-   <div class="fixed top-0 left-0 w-full bg-yellow-500 text-black text-center py-1 text-sm font-semibold z-50 animate-pulse">
+   <div class="fixed top-0 left-0 w-full bg-red-600 text-white text-center py-1 text-sm font-semibold z-50 animate-pulse">
         STAGING ENVIRONMENT
     </div>
 
