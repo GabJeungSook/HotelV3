@@ -297,9 +297,10 @@ class SalesReportV2 extends Component
             ->where('remarks', '!=', 'Deposit From Check In (Room Key & TV Remote)')
             ->sum('payable_amount');
 
-        // Subtract cashouts (type 5) from guest deposits
+        // Subtract cashouts (type 5) from guest deposits — only those before this shift
         $totalCashouts = (float) Transaction::whereIn('checkin_detail_id', $forwardedCheckinIds)
             ->where('transaction_type_id', 5)
+            ->where('created_at', '<', $shiftLog->time_in)
             ->sum('payable_amount');
 
         $this->forwardedGuestDeposit = max(0, $originalGuestDeposits - $totalCashouts);
@@ -545,9 +546,10 @@ class SalesReportV2 extends Component
                 ->where('remarks', '!=', 'Deposit From Check In (Room Key & TV Remote)')
                 ->first();
 
-            // Get total cashouts (type 5) for this checkin_detail
+            // Get total cashouts (type 5) for this checkin_detail — only those before this shift
             $totalCashouts = (float) Transaction::where('checkin_detail_id', $cd->id)
                 ->where('transaction_type_id', 5)
+                ->where('created_at', '<', $shiftLog->time_in)
                 ->sum('payable_amount');
 
             $checkinFrontdesk = $checkinTransaction?->shift_log?->frontdesk?->name ?? '—';

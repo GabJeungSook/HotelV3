@@ -743,7 +743,18 @@ class SalesReportV2Test extends TestCase
             'created_at' => now()->setTime(20, 0),
         ]);
 
+        // View the PM shift - cashout happens DURING PM (at 20:00),
+        // but PM starts at 16:00, so the cashout is NOT before PM's time_in.
+        // Forwarded guest deposit total should still be 184 (no cashouts before PM start).
+        $pmComponent = Livewire::test(SalesReportV2::class)
+            ->set('filterMode', 'shift')
+            ->set('selectedShiftLogId', $pmShiftLog->id)
+            ->call('generateReport');
+
+        $this->assertEquals(184, $pmComponent->get('forwardedGuestDeposit'));
+
         // View the next day AM shift - guest deposit should be 0 (184 - 184)
+        // because the cashout at 20:00 is before next AM's time_in
         $component = Livewire::test(SalesReportV2::class)
             ->set('filterMode', 'shift')
             ->set('selectedShiftLogId', $nextAmShiftLog->id)
