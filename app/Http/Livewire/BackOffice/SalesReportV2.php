@@ -511,7 +511,7 @@ class SalesReportV2 extends Component
         // Find guests who:
         // 1. Checked in BEFORE this shift started
         // 2. Haven't checked out yet OR checked out AFTER this shift started
-        // 3. Have NO transactions in the current shift (otherwise they already appear)
+        // These guests get FWD rows even if they also have transactions in this shift
         $forwardedGuests = CheckinDetail::query()
             ->with(['guest', 'room.type', 'room.floor'])
             ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
@@ -519,10 +519,6 @@ class SalesReportV2 extends Component
             ->where(function ($q) use ($shiftLog) {
                 $q->whereNull('check_out_at')
                   ->orWhere('check_out_at', '>=', $shiftLog->time_in);
-            })
-            // Exclude guests who have transactions during this shift (they already show in table)
-            ->whereDoesntHave('transactions', function ($q) use ($range) {
-                $q->whereBetween('created_at', [$range['start'], $range['end']]);
             })
             ->get();
 

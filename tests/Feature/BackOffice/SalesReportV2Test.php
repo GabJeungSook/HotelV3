@@ -424,11 +424,17 @@ class SalesReportV2Test extends TestCase
 
         $salesRows = $component->get('salesRows');
 
-        // Should have 1 row (extension from PM shift)
-        $this->assertCount(1, $salesRows);
+        // Should have 2 rows: FWD ROOM + extension transaction
+        $this->assertCount(2, $salesRows);
 
-        // Guest should be marked as forwarded (checked in during AM, viewing PM)
-        $this->assertTrue($salesRows[0]['is_forwarded']);
+        // FWD ROOM row should exist
+        $fwdRoomRow = collect($salesRows)->firstWhere('transaction_type', 'FWD ROOM');
+        $this->assertNotNull($fwdRoomRow);
+        $this->assertTrue($fwdRoomRow['is_forwarded_guest_row']);
+
+        // Extension row should be marked as forwarded
+        $extensionRow = collect($salesRows)->first(fn($r) => $r['transaction_type'] !== 'FWD ROOM');
+        $this->assertTrue($extensionRow['is_forwarded']);
 
         // Forwarded count should be 1
         $this->assertEquals(1, $component->get('forwardedCount'));
@@ -645,8 +651,13 @@ class SalesReportV2Test extends TestCase
 
         $salesRows = $component->get('salesRows');
 
-        // Should have 2 rows: extension for AM guest, check-in for PM guest
-        $this->assertCount(2, $salesRows);
+        // Should have 3 rows: FWD ROOM for AM guest, extension for AM guest, check-in for PM guest
+        $this->assertCount(3, $salesRows);
+
+        // AM guest should have a FWD ROOM row
+        $fwdRoomRow = collect($salesRows)->firstWhere('transaction_type', 'FWD ROOM');
+        $this->assertNotNull($fwdRoomRow);
+        $this->assertTrue($fwdRoomRow['is_forwarded_guest_row']);
 
         // AM guest's extension should be marked as forwarded
         $amGuestRow = collect($salesRows)->firstWhere('guest_name', 'AM GUEST');
@@ -846,5 +857,223 @@ class SalesReportV2Test extends TestCase
         // Forwarded totals
         $this->assertEquals(500, $component->get('forwardedRoom'));
         $this->assertEquals(200, $component->get('forwardedGuestDeposit'));
+    }
+
+    /** @test */
+    public function forwarded_guest_shows_fwd_rows_even_with_transactions_in_current_shift()
+    {
+        $this->actingAs($this->user);
+
+        // Shift 1 (AM): Guest checks in
+        $amShiftLog = ShiftLog::create([
+            'frontdesk_id' => $this->user->id,
+            'frontdesk_ids' => json_encode([$this->user->id]),
+            'time_in' => now()->setTime(8, 0),
+            'time_out' => now()->setTime(16, 0),
+            'shift' => 'AM',
+        ]);
+
+        // Shift 2 (PM): Guest has extension transaction
+        $pmShiftLog = ShiftLog::create([
+            'frontdesk_id' => $this->user->id,
+            'frontdesk_ids' => json_encode([$this->user->id]),
+            'time_in' => now()->setTime(16, 0),
+            'time_out' => now()->setTime(23, 59),
+            'shift' => 'PM',
+        ]);
+
+        $guest = $this->createGuest(['name' => 'FWD With Txn Guest']);
+        $checkinDetail = $this->createCheckinDetail($guest, [
+            'check_in_at' => now()->setTime(9, 0),
+            'check_out_at' => now()->addDay(),
+        ]);
+
+        // Room charge during AM (type 1): 200
+        $this->createTransaction($guest, $checkinDetail, [
+            'transaction_type_id' => 1,
+            'shift_log_id' => $amShiftLog->id,
+            'payable_amount' => 200,
+            'paid_amount' => 200,
+            'created_at' => now()->setTime(9, 0),
+        ]);
+
+        // Room key deposit during AM (type 2): 200
+        $this->createTransaction($guest, $checkinDetail, [
+            'transaction_type_id' => 2,
+            'shift_log_id' => $amShiftLog->id,
+            'payable_amount' => 200,
+            'paid_amount' => 200,
+            'remarks' => 'Deposit From Check In (Room Key & TV Remote)',
+            'description' => 'Deposit',
+            'created_at' => now()->setTime(9, 1),
+        ]);
+
+        // Guest deposit during AM (type 2): 184
+        $this->createTransaction($guest, $checkinDetail, [
+            'transaction_type_id' => 2,
+            'shift_log_id' => $amShiftLog->id,
+            'payable_amount' => 184,
+            'paid_amount' => 184,
+            'remarks' => 'Guest Deposit',
+            'description' => 'Deposit',
+            'created_at' => now()->setTime(9, 2),
+        ]);
+
+        // Extension during PM shift (type 6): 200
+        $this->createTransaction($guest, $checkinDetail, [
+            'transaction_type_id' => 6,
+            'shift_log_id' => $pmShiftLog->id,
+            'payable_amount' => 200,
+            'paid_amount' => 200,
+            'description' => 'Extension',
+            'created_at' => now()->setTime(20, 0),
+        ]);
+
+        // View PM shift — should show FWD rows AND extension transaction
+        $component = Livewire::test(SalesReportV2::class)
+            ->set('filterMode', 'shift')
+            ->set('selectedShiftLogId', $pmShiftLog->id)
+            ->call('generateReport');
+
+        $salesRows = $component->get('salesRows');
+
+        // Should have 4 rows: FWD ROOM + FWD ROOM DEPOSIT + FWD GUEST DEPOSIT + extension
+        $this->assertCount(4, $salesRows);
+
+        // FWD ROOM row
+        $fwdRoom = collect($salesRows)->firstWhere('transaction_type', 'FWD ROOM');
+        $this->assertNotNull($fwdRoom);
+        $this->assertTrue($fwdRoom['is_forwarded_guest_row']);
+        $this->assertEquals(200, $fwdRoom['amount']);
+        $this->assertEquals(0, $fwdRoom['total']);
+
+        // FWD ROOM DEPOSIT row
+        $fwdRoomDeposit = collect($salesRows)->firstWhere('transaction_type', 'FWD ROOM DEPOSIT');
+        $this->assertNotNull($fwdRoomDeposit);
+        $this->assertTrue($fwdRoomDeposit['is_forwarded_guest_row']);
+        $this->assertEquals(200, $fwdRoomDeposit['amount']);
+        $this->assertEquals(0, $fwdRoomDeposit['total']);
+
+        // FWD GUEST DEPOSIT row (full amount, no cashouts before PM)
+        $fwdGuestDeposit = collect($salesRows)->firstWhere('transaction_type', 'FWD GUEST DEPOSIT');
+        $this->assertNotNull($fwdGuestDeposit);
+        $this->assertTrue($fwdGuestDeposit['is_forwarded_guest_row']);
+        $this->assertEquals(184, $fwdGuestDeposit['amount']);
+        $this->assertEquals(0, $fwdGuestDeposit['total']);
+
+        // Extension transaction row
+        $extensionRow = collect($salesRows)->first(fn($r) => !($r['is_forwarded_guest_row'] ?? false));
+        $this->assertNotNull($extensionRow);
+        $this->assertTrue($extensionRow['is_forwarded']);
+        $this->assertEquals(200, $extensionRow['amount']);
+
+        // Forwarded totals
+        $this->assertEquals(200, $component->get('forwardedRoom'));
+        $this->assertEquals(200, $component->get('forwardedRoomDeposit'));
+        $this->assertEquals(184, $component->get('forwardedGuestDeposit'));
+    }
+
+    /** @test */
+    public function forwarded_guest_with_cashout_in_current_shift_shows_full_deposit()
+    {
+        $this->actingAs($this->user);
+
+        // Shift 1 (AM): Guest checks in
+        $amShiftLog = ShiftLog::create([
+            'frontdesk_id' => $this->user->id,
+            'frontdesk_ids' => json_encode([$this->user->id]),
+            'time_in' => now()->setTime(8, 0),
+            'time_out' => now()->setTime(16, 0),
+            'shift' => 'AM',
+        ]);
+
+        // Shift 2 (PM): Cashout happens here
+        $pmShiftLog = ShiftLog::create([
+            'frontdesk_id' => $this->user->id,
+            'frontdesk_ids' => json_encode([$this->user->id]),
+            'time_in' => now()->setTime(16, 0),
+            'time_out' => now()->setTime(23, 59),
+            'shift' => 'PM',
+        ]);
+
+        $guest = $this->createGuest(['name' => 'Cashout In Shift Guest']);
+        $checkinDetail = $this->createCheckinDetail($guest, [
+            'check_in_at' => now()->setTime(9, 0),
+            'check_out_at' => now()->addDay(),
+        ]);
+
+        // Room charge during AM: 200
+        $this->createTransaction($guest, $checkinDetail, [
+            'transaction_type_id' => 1,
+            'shift_log_id' => $amShiftLog->id,
+            'payable_amount' => 200,
+            'paid_amount' => 200,
+            'created_at' => now()->setTime(9, 0),
+        ]);
+
+        // Room key deposit during AM: 200
+        $this->createTransaction($guest, $checkinDetail, [
+            'transaction_type_id' => 2,
+            'shift_log_id' => $amShiftLog->id,
+            'payable_amount' => 200,
+            'paid_amount' => 200,
+            'remarks' => 'Deposit From Check In (Room Key & TV Remote)',
+            'description' => 'Deposit',
+            'created_at' => now()->setTime(9, 1),
+        ]);
+
+        // Guest deposit during AM: 184
+        $this->createTransaction($guest, $checkinDetail, [
+            'transaction_type_id' => 2,
+            'shift_log_id' => $amShiftLog->id,
+            'payable_amount' => 184,
+            'paid_amount' => 184,
+            'remarks' => 'Guest Deposit',
+            'description' => 'Deposit',
+            'created_at' => now()->setTime(9, 2),
+        ]);
+
+        // Cashout during PM shift: 184
+        $this->createTransaction($guest, $checkinDetail, [
+            'transaction_type_id' => 5,
+            'shift_log_id' => $pmShiftLog->id,
+            'payable_amount' => 184,
+            'paid_amount' => 184,
+            'description' => 'Cashout',
+            'created_at' => now()->setTime(20, 0),
+        ]);
+
+        // View PM shift — FWD rows should still show alongside cashout transaction
+        $component = Livewire::test(SalesReportV2::class)
+            ->set('filterMode', 'shift')
+            ->set('selectedShiftLogId', $pmShiftLog->id)
+            ->call('generateReport');
+
+        $salesRows = $component->get('salesRows');
+
+        // FWD ROOM should still appear
+        $fwdRoom = collect($salesRows)->firstWhere('transaction_type', 'FWD ROOM');
+        $this->assertNotNull($fwdRoom, 'FWD ROOM should appear even when guest has transactions in this shift');
+        $this->assertEquals(200, $fwdRoom['amount']);
+
+        // FWD ROOM DEPOSIT should still appear
+        $fwdRoomDeposit = collect($salesRows)->firstWhere('transaction_type', 'FWD ROOM DEPOSIT');
+        $this->assertNotNull($fwdRoomDeposit, 'FWD ROOM DEPOSIT should appear even when guest has transactions in this shift');
+        $this->assertEquals(200, $fwdRoomDeposit['amount']);
+
+        // FWD GUEST DEPOSIT should show FULL amount (cashout is during this shift, not before)
+        $fwdGuestDeposit = collect($salesRows)->firstWhere('transaction_type', 'FWD GUEST DEPOSIT');
+        $this->assertNotNull($fwdGuestDeposit, 'FWD GUEST DEPOSIT should show full amount when cashout is in current shift');
+        $this->assertEquals(184, $fwdGuestDeposit['amount']);
+
+        // Cashout should also appear as a regular transaction row
+        $cashoutRow = collect($salesRows)->first(fn($r) => ($r['transaction_type_id'] ?? 0) == 5);
+        $this->assertNotNull($cashoutRow, 'Cashout transaction should appear as a regular row');
+        $this->assertEquals(184, $cashoutRow['amount']);
+
+        // Forwarded totals: guest deposit = 184 (no cashouts before PM's time_in)
+        $this->assertEquals(200, $component->get('forwardedRoom'));
+        $this->assertEquals(200, $component->get('forwardedRoomDeposit'));
+        $this->assertEquals(184, $component->get('forwardedGuestDeposit'));
     }
 }
