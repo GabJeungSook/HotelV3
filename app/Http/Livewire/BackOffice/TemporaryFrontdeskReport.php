@@ -644,7 +644,7 @@ private function loadShift()
                 'description' => 'Total Check-Out',
                 'sub' => '',
                 'number' => $s->total_check_out_number,
-                'amount' => $this->peso($s->total_check_out_number)
+                'amount' => $this->peso($s->total_check_out_amount)
             ],
 
             [
