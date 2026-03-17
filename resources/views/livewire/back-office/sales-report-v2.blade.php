@@ -208,10 +208,19 @@
             <div class="text-xs text-amber-700 uppercase tracking-wide">Forwarded Room</div>
             <div class="text-lg font-semibold text-amber-900 mt-1">P {{ number_format($forwardedRoom ?? 0, 2) }}</div>
         </div>
-        {{-- Forwarded Deposit --}}
+        {{-- Forwarded Deposits --}}
         <div class="bg-amber-50 rounded-lg shadow-sm ring-1 ring-amber-200 p-4">
             <div class="text-xs text-amber-700 uppercase tracking-wide">Forwarded Deposit</div>
-            <div class="text-lg font-semibold text-amber-900 mt-1">P {{ number_format($forwardedDeposit ?? 0, 2) }}</div>
+            <div class="text-sm text-amber-800 mt-1">
+                <div class="flex justify-between">
+                    <span>Room Deposit:</span>
+                    <span class="font-semibold">P {{ number_format($forwardedRoomDeposit ?? 0, 2) }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Guest Deposit:</span>
+                    <span class="font-semibold">P {{ number_format($forwardedGuestDeposit ?? 0, 2) }}</span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -236,21 +245,36 @@
     </div>
 
     {{-- Sales Table --}}
-    <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 overflow-hidden mb-6">
+    <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 overflow-hidden mb-6" x-data="{
+        search: '',
+        rows: {{ Js::from(collect($salesRows)->map(fn($r) => [
+            's' => strtolower($r['guest_name'] . ' ' . $r['room_number']),
+            't' => $r['total'],
+        ])->values()) }},
+        get filteredTotal() {
+            if (!this.search) return {{ $totalSales }};
+            const s = this.search.toLowerCase();
+            return this.rows.filter(r => r.s.includes(s)).reduce((sum, r) => sum + r.t, 0);
+        }
+    }">
         <div class="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
             <div class="text-sm font-semibold text-gray-900">SALES REPORT V2 (OCCUPANCY-BASED)</div>
-            <div class="text-xs text-gray-500">
-                @if($filterMode === 'shift' && $selectedShiftLogId)
-                    @php
-                        $selectedSession = collect($availableShiftSessions)->firstWhere('id', $selectedShiftLogId);
-                    @endphp
-                    Shift: {{ $selectedSession['label'] ?? 'N/A' }}
-                @else
-                    {{ $date_from }} to {{ $date_to }}
-                    @if($frontdesk_name)
-                        | Frontdesk: {{ $frontdesk_name }}
+            <div class="flex items-center gap-4">
+                <input type="text" x-model="search" placeholder="Search guest or room..."
+                       class="rounded-lg border-gray-300 text-sm px-3 py-1.5 w-56 focus:border-indigo-500 focus:ring-indigo-500 print:hidden" />
+                <div class="text-xs text-gray-500">
+                    @if($filterMode === 'shift' && $selectedShiftLogId)
+                        @php
+                            $selectedSession = collect($availableShiftSessions)->firstWhere('id', $selectedShiftLogId);
+                        @endphp
+                        Shift: {{ $selectedSession['label'] ?? 'N/A' }}
+                    @else
+                        {{ $date_from }} to {{ $date_to }}
+                        @if($frontdesk_name)
+                            | Frontdesk: {{ $frontdesk_name }}
+                        @endif
                     @endif
-                @endif
+                </div>
             </div>
         </div>
 
@@ -274,7 +298,7 @@
                 </thead>
                 <tbody>
                     @forelse($salesRows as $row)
-                        <tr class="{{ ($row['is_forwarded_guest_row'] ?? false) ? 'bg-amber-50 hover:bg-amber-100' : 'hover:bg-gray-50' }}">
+                        <tr x-show="!search || {{ Js::from(strtolower($row['guest_name'] . ' ' . $row['room_number'])) }}.includes(search.toLowerCase())" data-total="{{ $row['total'] }}" class="{{ ($row['is_forwarded_guest_row'] ?? false) ? 'bg-amber-50 hover:bg-amber-100' : 'hover:bg-gray-50' }}">
                             <td class="border border-gray-300 px-3 py-2 text-sm font-medium text-gray-900">{{ $row['room_number'] }}</td>
                             <td class="border border-gray-300 px-3 py-2 text-sm text-gray-700">{{ $row['room_type'] }}</td>
                             <td class="border border-gray-300 px-3 py-2 text-sm text-gray-700">{{ $row['guest_name'] }}</td>
@@ -347,7 +371,7 @@
                                 TOTAL SALES:
                             </td>
                             <td class="border border-gray-300 px-3 py-2 text-sm font-bold text-gray-900 text-right">
-                                P {{ number_format($totalSales, 2) }}
+                                <span x-text="'P ' + filteredTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})"></span>
                             </td>
                         </tr>
                     </tfoot>
