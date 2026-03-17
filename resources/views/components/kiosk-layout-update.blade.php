@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&display=swap"
     rel="stylesheet">
-    
+
   <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
 
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -44,7 +44,13 @@
   <!-- Styles -->
   @livewireStyles
 </head>
+@if(app()->environment('staging'))
+   <div class="fixed top-0 left-0 w-full bg-red-600 text-white text-center py-1 text-sm font-semibold z-50 animate-pulse">
+        STAGING ENVIRONMENT
+    </div>
 
+    <div style="height: 20px;"></div> {{-- spacer to avoid overlap --}}
+@endif
 <body class="font-sans antialiased bg-white" x-data="{ logout: false }">
   <div class="fixed bg-gradient-to-t from-transparent to-gray-600 w-full h-full overflow-hidden">
     {{-- <img src="{{ asset('images/hotel-bg.jpg') }}" class="object-cover opacity-20" alt=""> --}}
@@ -62,7 +68,7 @@
         <header class="flex justify-between items-center py-12 px-20 bg-[#00A0F5] z-10">
             <button onclick="goFullscreen()">
               <h1 class="lg:text-xl font-bold text-white uppercase xs:text-2xs">Welcome to Homi Customer Kiosk</h1>
-            </button>          
+            </button>
             <button x-on:click="logout = true"><img src="{{ asset('images/homiLogo2.png') }}" alt="Homi Logo" class="w-24 h-7"></button>
             {{-- <x-button icon="logout" sm negative  /> --}}
         </header>

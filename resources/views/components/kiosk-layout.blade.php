@@ -43,7 +43,13 @@
   <!-- Styles -->
   @livewireStyles
 </head>
+@if(app()->environment('staging'))
+   <div class="fixed top-0 left-0 w-full bg-red-600 text-white text-center py-1 text-sm font-semibold z-50 animate-pulse">
+        STAGING ENVIRONMENT
+    </div>
 
+    <div style="height: 20px;"></div> {{-- spacer to avoid overlap --}}
+@endif
 <body class="font-sans antialiased bg-gray-400" x-data="{ logout: false }">
   <div class="fixed inset-0 bg-gradient-to-t from-transparent to-gray-600 w-full h-full overflow-hidden">
     <img src="{{ asset('images/hotel-bg.jpg') }}" class="object-cover opacity-20" alt="">

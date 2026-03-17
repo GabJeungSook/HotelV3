@@ -516,7 +516,13 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js "></script>
   <script src="https://fastly.jsdelivr.net/npm/echarts@5.4.1/dist/echarts.min.js"></script>
 </head>
+@if(app()->environment('staging'))
+   <div class="fixed top-0 left-0 w-full bg-red-600 text-white text-center py-1 text-sm font-semibold z-50 animate-pulse">
+        STAGING ENVIRONMENT
+    </div>
 
+    <div style="height: 20px;"></div> {{-- spacer to avoid overlap --}}
+@endif
 <body class="font-sans antialiased " x-data="{ logout: false }">
   <!--
   This example requires updating your template:
