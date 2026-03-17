@@ -28,22 +28,11 @@
   @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 @if(app()->environment('staging'))
-    <div style="
-        width: 100%;
-        background: #f59e0b;
-        color: #000;
-        text-align: center;
-        padding: 8px;
-        font-weight: bold;
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: 9999;
-    ">
+   <div class="fixed top-0 left-0 w-full bg-yellow-500 text-black text-center py-1 text-sm font-semibold z-50 animate-pulse">
         STAGING ENVIRONMENT
     </div>
 
-    <div style="height: 40px;"></div> {{-- spacer to avoid overlap --}}
+    <div style="height: 20px;"></div> {{-- spacer to avoid overlap --}}
 @endif
 
 <body class="font-sans antialiased overflow-hidden">
