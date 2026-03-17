@@ -245,18 +245,7 @@
     </div>
 
     {{-- Sales Table --}}
-    <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 overflow-hidden mb-6" x-data="{
-        search: '',
-        rows: {{ Js::from(collect($salesRows)->map(fn($r) => [
-            's' => strtolower($r['guest_name'] . ' ' . $r['room_number']),
-            't' => $r['total'],
-        ])->values()) }},
-        get filteredTotal() {
-            if (!this.search) return {{ $totalSales }};
-            const s = this.search.toLowerCase();
-            return this.rows.filter(r => r.s.includes(s)).reduce((sum, r) => sum + r.t, 0);
-        }
-    }">
+    <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 overflow-hidden mb-6" x-data="{ search: '' }">
         <div class="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
             <div class="text-sm font-semibold text-gray-900">SALES REPORT V2 (OCCUPANCY-BASED)</div>
             <div class="flex items-center gap-4">
@@ -371,7 +360,7 @@
                                 TOTAL SALES:
                             </td>
                             <td class="border border-gray-300 px-3 py-2 text-sm font-bold text-gray-900 text-right">
-                                <span x-text="'P ' + filteredTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})"></span>
+                                P {{ number_format($totalSales, 2) }}
                             </td>
                         </tr>
                     </tfoot>
