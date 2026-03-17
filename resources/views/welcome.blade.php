@@ -27,6 +27,24 @@
   <!-- Scripts -->
   @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
+@if(app()->environment('staging'))
+    <div style="
+        width: 100%;
+        background: #f59e0b;
+        color: #000;
+        text-align: center;
+        padding: 8px;
+        font-weight: bold;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 9999;
+    ">
+        STAGING ENVIRONMENT
+    </div>
+
+    <div style="height: 40px;"></div> {{-- spacer to avoid overlap --}}
+@endif
 
 <body class="font-sans antialiased overflow-hidden">
 
