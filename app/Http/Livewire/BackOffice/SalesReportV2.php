@@ -129,7 +129,7 @@ class SalesReportV2 extends Component
 
         // Sort by time_in descending and format labels
         $this->availableShiftSessions = collect($sessions)
-            ->sortByDesc('time_in')
+            ->sortBy('time_in')
             ->map(function ($s) {
                 $frontdeskNames = implode(', ', array_unique($s['frontdesks']));
 
