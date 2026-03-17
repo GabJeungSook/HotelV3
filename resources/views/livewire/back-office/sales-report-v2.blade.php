@@ -287,7 +287,7 @@
                 </thead>
                 <tbody>
                     @forelse($salesRows as $row)
-                        <tr x-show="!search || {{ Js::from(strtolower($row['guest_name'] . ' ' . $row['room_number'])) }}.includes(search.toLowerCase())" data-total="{{ $row['total'] }}" class="{{ ($row['is_forwarded_guest_row'] ?? false) ? 'bg-amber-50 hover:bg-amber-100' : 'hover:bg-gray-50' }}">
+                        <tr :class="search && !{{ Js::from(strtolower($row['guest_name'] . ' ' . $row['room_number'])) }}.includes(search.toLowerCase()) ? 'hidden' : ''" data-total="{{ $row['total'] }}" class="{{ ($row['is_forwarded_guest_row'] ?? false) ? 'bg-amber-50 hover:bg-amber-100' : 'hover:bg-gray-50' }}">
                             <td class="border border-gray-300 px-3 py-2 text-sm font-medium text-gray-900">{{ $row['room_number'] }}</td>
                             <td class="border border-gray-300 px-3 py-2 text-sm text-gray-700">{{ $row['room_type'] }}</td>
                             <td class="border border-gray-300 px-3 py-2 text-sm text-gray-700">{{ $row['guest_name'] }}</td>
