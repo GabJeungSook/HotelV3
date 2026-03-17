@@ -247,15 +247,14 @@
     {{-- Sales Table --}}
     <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 overflow-hidden mb-6" x-data="{
         search: '',
+        rows: {{ Js::from(collect($salesRows)->map(fn($r) => [
+            's' => strtolower($r['guest_name'] . ' ' . $r['room_number']),
+            't' => $r['total'],
+        ])->values()) }},
         get filteredTotal() {
             if (!this.search) return {{ $totalSales }};
-            let total = 0;
-            this.$el.querySelectorAll('tbody tr[data-total]').forEach(tr => {
-                if (tr.style.display !== 'none') {
-                    total += parseFloat(tr.dataset.total) || 0;
-                }
-            });
-            return total;
+            const s = this.search.toLowerCase();
+            return this.rows.filter(r => r.s.includes(s)).reduce((sum, r) => sum + r.t, 0);
         }
     }">
         <div class="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
