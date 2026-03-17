@@ -245,7 +245,19 @@
     </div>
 
     {{-- Sales Table --}}
-    <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 overflow-hidden mb-6" x-data="{ search: '' }">
+    <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 overflow-hidden mb-6" x-data="{
+        search: '',
+        get filteredTotal() {
+            if (!this.search) return {{ $totalSales }};
+            let total = 0;
+            this.$el.querySelectorAll('tbody tr[data-total]').forEach(tr => {
+                if (tr.style.display !== 'none') {
+                    total += parseFloat(tr.dataset.total) || 0;
+                }
+            });
+            return total;
+        }
+    }">
         <div class="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
             <div class="text-sm font-semibold text-gray-900">SALES REPORT V2 (OCCUPANCY-BASED)</div>
             <div class="flex items-center gap-4">
@@ -287,7 +299,7 @@
                 </thead>
                 <tbody>
                     @forelse($salesRows as $row)
-                        <tr x-show="!search || $el.textContent.toLowerCase().includes(search.toLowerCase())" class="{{ ($row['is_forwarded_guest_row'] ?? false) ? 'bg-amber-50 hover:bg-amber-100' : 'hover:bg-gray-50' }}">
+                        <tr x-show="!search || '{{ strtolower($row['guest_name'] . ' ' . $row['room_number']) }}'.includes(search.toLowerCase())" data-total="{{ $row['total'] }}" class="{{ ($row['is_forwarded_guest_row'] ?? false) ? 'bg-amber-50 hover:bg-amber-100' : 'hover:bg-gray-50' }}">
                             <td class="border border-gray-300 px-3 py-2 text-sm font-medium text-gray-900">{{ $row['room_number'] }}</td>
                             <td class="border border-gray-300 px-3 py-2 text-sm text-gray-700">{{ $row['room_type'] }}</td>
                             <td class="border border-gray-300 px-3 py-2 text-sm text-gray-700">{{ $row['guest_name'] }}</td>
@@ -360,7 +372,7 @@
                                 TOTAL SALES:
                             </td>
                             <td class="border border-gray-300 px-3 py-2 text-sm font-bold text-gray-900 text-right">
-                                P {{ number_format($totalSales, 2) }}
+                                <span x-text="'P ' + filteredTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})"></span>
                             </td>
                         </tr>
                     </tfoot>
