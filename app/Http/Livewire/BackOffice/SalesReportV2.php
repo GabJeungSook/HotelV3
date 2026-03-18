@@ -670,27 +670,19 @@ class SalesReportV2 extends Component
 
         $branchId = auth()->user()->branch_id;
 
-        // Find previous shift's frontdesk IDs to exclude guests checked out by them
+        // Find previous shift to detect overlap
         $previousShiftLog = ShiftLog::whereHas('frontdesk', fn($q) => $q->where('branch_id', $branchId))
             ->where('time_in', '<', $shiftLog->time_in)
             ->orderBy('time_in', 'desc')
             ->first();
 
-        $prevFrontdeskIds = [];
-        if ($previousShiftLog) {
-            // Get all frontdesk user IDs from the previous shift session
-            $prevUserIds = ShiftLog::whereHas('frontdesk', fn($q) => $q->where('branch_id', $branchId))
-                ->where('time_in', $previousShiftLog->time_in)
-                ->pluck('frontdesk_id')
-                ->toArray();
-            // Convert user IDs to frontdesk station IDs
-            $prevFrontdeskIds = Frontdesk::whereIn('user_id', $prevUserIds)->pluck('id')->toArray();
-        }
+        // Check if there's an overlap (previous shift ends after current shift starts)
+        $hasOverlap = $previousShiftLog && $previousShiftLog->time_out > $shiftLog->time_in;
 
         // Find guests who:
         // 1. Checked in BEFORE this shift started
         // 2. Haven't checked out yet OR checked out AFTER this shift started
-        // 3. Were NOT checked out by the previous shift's frontdesk (overlap case)
+        // 3. Were NOT checked out during the overlap window (previous shift's territory)
         $forwardedGuests = CheckinDetail::query()
             ->with(['guest', 'room.type', 'room.floor'])
             ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
@@ -699,9 +691,12 @@ class SalesReportV2 extends Component
                 $q->whereNull('check_out_at')
                   ->orWhere('check_out_at', '>=', $shiftLog->time_in);
             })
-            ->when(!empty($prevFrontdeskIds), function ($q) use ($prevFrontdeskIds) {
-                $q->whereDoesntHave('checkOutGuestReports', function ($sub) use ($prevFrontdeskIds) {
-                    $sub->whereIn('frontdesk_id', $prevFrontdeskIds);
+            ->when($hasOverlap, function ($q) use ($shiftLog, $previousShiftLog) {
+                // Exclude guests checked out during the overlap window
+                // (between current shift start and previous shift end)
+                $q->whereDoesntHave('checkOutGuestReports', function ($sub) use ($shiftLog, $previousShiftLog) {
+                    $sub->where('created_at', '>=', $shiftLog->time_in)
+                        ->where('created_at', '<=', $previousShiftLog->time_out);
                 });
             })
             ->get();
