@@ -157,6 +157,7 @@ class SalesReportV2 extends Component
                     'label' => $s['shift_type'] . ' ' . $s['time_in']->format('M j')
                              . ' - ' . $frontdeskNames
                              . ' (' . $s['time_in']->format('g:i A') . ' - ' . $s['time_out']->format('g:i A') . ')',
+                    'frontdesks' => $frontdeskNames,
                     'time_in' => $s['time_in'],
                     'time_out' => $s['time_out'],
                 ];
@@ -340,6 +341,7 @@ class SalesReportV2 extends Component
                     'check_out' => $checkOutAt?->format('m-d-Y h:iA') ?? '—',
                     'amount' => $amount,
                     'remarks' => 'Checked out',
+                    'transaction_date' => $checkOutAt?->format('m-d-Y h:iA') ?? '—',
                 ];
             }
         }

@@ -569,6 +569,19 @@
     {{-- Card Detail Modal --}}
     <x-modal wire:model.defer="showCardModal" max-width="5xl">
         <x-card :title="$cardModalTitle">
+            @if($filterMode === 'shift' && $selectedShiftLogId)
+                @php
+                    $modalSession = collect($availableShiftSessions)->firstWhere('id', $selectedShiftLogId);
+                @endphp
+                @if($modalSession)
+                <div class="mb-4 bg-gray-50 rounded-lg p-3 text-sm">
+                    <div class="font-semibold text-gray-900">{{ $modalSession['frontdesks'] ?? '—' }}</div>
+                    <div class="text-gray-600">Opening: {{ \Carbon\Carbon::parse($modalSession['time_in'])->format('m-d-Y h:iA') }}</div>
+                    <div class="text-gray-600">Closing: {{ \Carbon\Carbon::parse($modalSession['time_out'])->format('m-d-Y h:iA') }}</div>
+                </div>
+                @endif
+            @endif
+
             <div class="max-h-[70vh] overflow-y-auto">
                 <table class="w-full border-collapse text-sm">
                     <thead class="sticky top-0 bg-gray-50">
@@ -578,6 +591,7 @@
                             <th class="border border-gray-300 px-3 py-2 text-left font-semibold text-gray-700">Type</th>
                             <th class="border border-gray-300 px-3 py-2 text-left font-semibold text-gray-700">Remarks</th>
                             <th class="border border-gray-300 px-3 py-2 text-right font-semibold text-gray-700">Amount</th>
+                            <th class="border border-gray-300 px-3 py-2 text-left font-semibold text-gray-700">Created At</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -588,10 +602,11 @@
                             <td class="border border-gray-300 px-3 py-2 text-gray-700">{{ $row['transaction_type'] ?? '—' }}</td>
                             <td class="border border-gray-300 px-3 py-2 text-gray-700">{{ $row['remarks'] ?? '—' }}</td>
                             <td class="border border-gray-300 px-3 py-2 text-right text-gray-900">P {{ number_format($row['amount'] ?? 0, 2) }}</td>
+                            <td class="border border-gray-300 px-3 py-2 text-gray-700">{{ $row['transaction_date'] ?? '—' }}</td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="border border-gray-300 px-3 py-4 text-center text-gray-500">No records found</td>
+                            <td colspan="6" class="border border-gray-300 px-3 py-4 text-center text-gray-500">No records found</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -600,6 +615,7 @@
                         <tr>
                             <td colspan="4" class="border border-gray-300 px-3 py-2 text-right font-bold text-gray-900">TOTAL ({{ count($cardModalRows) }} records)</td>
                             <td class="border border-gray-300 px-3 py-2 text-right font-bold text-gray-900">P {{ number_format($cardModalTotal, 2) }}</td>
+                            <td class="border border-gray-300 px-3 py-2"></td>
                         </tr>
                     </tfoot>
                     @endif
