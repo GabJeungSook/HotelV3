@@ -1357,4 +1357,139 @@ class SalesReportV2Test extends TestCase
         // Summary should match
         $this->assertEquals(300, $component->get('forwardedGuestDeposit'));
     }
+
+    /** @test */
+    public function includes_unclaimed_guest_deposit_from_checked_out_guest()
+    {
+        $this->actingAs($this->user);
+
+        // AM shift: guest checks in and checks out, leaving unclaimed deposit
+        $amShiftLog = ShiftLog::create([
+            'frontdesk_id' => $this->user->id,
+            'frontdesk_ids' => json_encode([$this->user->id]),
+            'time_in' => now()->setTime(8, 0),
+            'time_out' => now()->setTime(16, 0),
+            'shift' => 'AM',
+        ]);
+
+        // PM shift: should see unclaimed deposit forwarded
+        $pmShiftLog = ShiftLog::create([
+            'frontdesk_id' => $this->user->id,
+            'frontdesk_ids' => json_encode([$this->user->id]),
+            'time_in' => now()->setTime(16, 0),
+            'time_out' => now()->setTime(23, 59),
+            'shift' => 'PM',
+        ]);
+
+        // Guest checks in during AM and checks out during AM (before PM starts)
+        $guest = $this->createGuest(['name' => 'Checked Out Guest']);
+        $checkinDetail = $this->createCheckinDetail($guest, [
+            'check_in_at' => now()->setTime(9, 0),
+            'check_out_at' => now()->setTime(14, 0), // Checked out during AM
+        ]);
+
+        // Room charge during AM
+        $this->createTransaction($guest, $checkinDetail, [
+            'transaction_type_id' => 1,
+            'shift_log_id' => $amShiftLog->id,
+            'payable_amount' => 500,
+            'paid_amount' => 500,
+            'created_at' => now()->setTime(9, 0),
+        ]);
+
+        // Guest deposit during AM: 300 (unclaimed — no cashout)
+        $this->createTransaction($guest, $checkinDetail, [
+            'transaction_type_id' => 2,
+            'shift_log_id' => $amShiftLog->id,
+            'payable_amount' => 300,
+            'paid_amount' => 300,
+            'remarks' => 'Guest Deposit',
+            'description' => 'Deposit',
+            'created_at' => now()->setTime(9, 5),
+        ]);
+
+        // View PM shift — should see unclaimed FWD GUEST DEPOSIT of 300
+        $component = Livewire::test(SalesReportV2::class)
+            ->set('filterMode', 'shift')
+            ->set('selectedShiftLogId', $pmShiftLog->id)
+            ->call('generateReport');
+
+        $salesRows = $component->get('salesRows');
+
+        $fwdGuestDeposit = collect($salesRows)->firstWhere('transaction_type', 'FWD GUEST DEPOSIT');
+        $this->assertNotNull($fwdGuestDeposit, 'Unclaimed guest deposit should appear as FWD GUEST DEPOSIT');
+        $this->assertEquals(300, $fwdGuestDeposit['amount']);
+        $this->assertStringContainsString('Unclaimed', $fwdGuestDeposit['remarks']);
+
+        // Summary should include it
+        $this->assertEquals(300, $component->get('forwardedGuestDeposit'));
+    }
+
+    /** @test */
+    public function unclaimed_deposit_not_shown_when_fully_cashed_out()
+    {
+        $this->actingAs($this->user);
+
+        $amShiftLog = ShiftLog::create([
+            'frontdesk_id' => $this->user->id,
+            'frontdesk_ids' => json_encode([$this->user->id]),
+            'time_in' => now()->setTime(8, 0),
+            'time_out' => now()->setTime(16, 0),
+            'shift' => 'AM',
+        ]);
+
+        $pmShiftLog = ShiftLog::create([
+            'frontdesk_id' => $this->user->id,
+            'frontdesk_ids' => json_encode([$this->user->id]),
+            'time_in' => now()->setTime(16, 0),
+            'time_out' => now()->setTime(23, 59),
+            'shift' => 'PM',
+        ]);
+
+        $guest = $this->createGuest(['name' => 'Fully Cashed Out Guest']);
+        $checkinDetail = $this->createCheckinDetail($guest, [
+            'check_in_at' => now()->setTime(9, 0),
+            'check_out_at' => now()->setTime(14, 0),
+        ]);
+
+        $this->createTransaction($guest, $checkinDetail, [
+            'transaction_type_id' => 1,
+            'shift_log_id' => $amShiftLog->id,
+            'payable_amount' => 500,
+            'paid_amount' => 500,
+            'created_at' => now()->setTime(9, 0),
+        ]);
+
+        // Guest deposit: 300
+        $this->createTransaction($guest, $checkinDetail, [
+            'transaction_type_id' => 2,
+            'shift_log_id' => $amShiftLog->id,
+            'payable_amount' => 300,
+            'paid_amount' => 300,
+            'remarks' => 'Guest Deposit',
+            'description' => 'Deposit',
+            'created_at' => now()->setTime(9, 5),
+        ]);
+
+        // Full cashout: 300
+        $this->createTransaction($guest, $checkinDetail, [
+            'transaction_type_id' => 5,
+            'shift_log_id' => $amShiftLog->id,
+            'payable_amount' => 300,
+            'paid_amount' => 300,
+            'description' => 'Cashout',
+            'created_at' => now()->setTime(13, 0),
+        ]);
+
+        // View PM shift — no unclaimed deposit (fully cashed out)
+        $component = Livewire::test(SalesReportV2::class)
+            ->set('filterMode', 'shift')
+            ->set('selectedShiftLogId', $pmShiftLog->id)
+            ->call('generateReport');
+
+        $salesRows = $component->get('salesRows');
+        $fwdGuestDeposit = collect($salesRows)->firstWhere('transaction_type', 'FWD GUEST DEPOSIT');
+        $this->assertNull($fwdGuestDeposit, 'No FWD GUEST DEPOSIT when fully cashed out');
+        $this->assertEquals(0, $component->get('forwardedGuestDeposit'));
+    }
 }

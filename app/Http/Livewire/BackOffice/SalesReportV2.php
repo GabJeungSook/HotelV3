@@ -581,6 +581,62 @@ class SalesReportV2 extends Component
             }
         }
 
+        // Find checked-out guests from previous shift with unclaimed guest deposits
+        $previousShiftLog = ShiftLog::whereHas('frontdesk', fn($q) => $q->where('branch_id', $branchId))
+            ->where('time_in', '<', $shiftLog->time_in)
+            ->orderBy('time_in', 'desc')
+            ->first();
+
+        if ($previousShiftLog) {
+            $checkedOutGuests = CheckinDetail::query()
+                ->with(['guest', 'room.type'])
+                ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
+                ->where('check_in_at', '<', $shiftLog->time_in)
+                ->where('check_out_at', '>=', $previousShiftLog->time_in)
+                ->where('check_out_at', '<', $shiftLog->time_in)
+                ->get();
+
+            foreach ($checkedOutGuests as $cd) {
+                $guestDepositTotal = (float) Transaction::where('checkin_detail_id', $cd->id)
+                    ->where('transaction_type_id', 2)
+                    ->where('remarks', '!=', 'Deposit From Check In (Room Key & TV Remote)')
+                    ->where('created_at', '<', $shiftLog->time_in)
+                    ->sum('payable_amount');
+
+                $totalCashouts = (float) Transaction::where('checkin_detail_id', $cd->id)
+                    ->where('transaction_type_id', 5)
+                    ->where('created_at', '<', $shiftLog->time_in)
+                    ->sum('payable_amount');
+
+                $unclaimedAmount = max(0, $guestDepositTotal - $totalCashouts);
+
+                if ($unclaimedAmount > 0) {
+                    $checkInAt = $cd->check_in_at ? Carbon::parse($cd->check_in_at) : null;
+                    $checkOutAt = $cd->check_out_at ? Carbon::parse($cd->check_out_at) : null;
+
+                    $rows[] = [
+                        'room_number' => $cd->room?->number ?? '—',
+                        'room_id' => $cd->room_id,
+                        'room_type' => $cd->room?->type?->name ?? '—',
+                        'guest_name' => strtoupper($cd->guest?->name ?? '—'),
+                        'transaction_type' => 'FWD GUEST DEPOSIT',
+                        'transaction_type_id' => 0,
+                        'check_in' => $checkInAt?->format('m-d-Y h:iA') ?? '—',
+                        'check_out' => $checkOutAt?->format('m-d-Y h:iA') ?? '—',
+                        'hours_stayed' => $cd->hours_stayed ? $cd->hours_stayed . ' hrs' : '—',
+                        'amount' => $unclaimedAmount,
+                        'remarks' => 'Unclaimed guest deposit from checked-out guest',
+                        'processed_by' => '—',
+                        'shift' => '—',
+                        'transaction_date' => '—',
+                        'total' => 0,
+                        'is_forwarded' => true,
+                        'is_forwarded_guest_row' => true,
+                    ];
+                }
+            }
+        }
+
         return $rows;
     }
 
