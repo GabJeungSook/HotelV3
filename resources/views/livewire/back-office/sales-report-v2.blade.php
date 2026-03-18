@@ -162,7 +162,21 @@
                     {{ $forwardedCount }} FORWARDED
                 </span>
                 <span class="text-xs text-amber-700">
-                    from previous shift
+                    check-in from previous shift
+                </span>
+            </div>
+        </div>
+        @endif
+
+        {{-- Unclaimed --}}
+        @if($unclaimedCount > 0)
+        <div class="bg-red-50 border border-red-200 rounded-lg px-4 py-2">
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-800">
+                    {{ $unclaimedCount }} UNCLAIMED
+                </span>
+                <span class="text-xs text-red-700">
+                    guest deposit from checked-out guests
                 </span>
             </div>
         </div>

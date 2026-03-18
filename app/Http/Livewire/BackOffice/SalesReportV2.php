@@ -48,6 +48,7 @@ class SalesReportV2 extends Component
     public float $expensesTotal = 0;
     public float $netSales = 0;
     public int $forwardedCount = 0;
+    public int $unclaimedCount = 0;
 
     // Forwarded totals
     public float $forwardedRoom = 0;
@@ -205,9 +206,15 @@ class SalesReportV2 extends Component
         // Calculate net sales (Gross - Expenses)
         $this->netSales = $this->totalSales - $this->expensesTotal;
 
-        // Count unique forwarded guests
+        // Count unique forwarded guests (still occupying)
         $this->forwardedCount = collect($this->salesRows)
-            ->filter(fn($row) => $row['is_forwarded'])
+            ->filter(fn($row) => $row['is_forwarded'] && !str_contains($row['remarks'] ?? '', 'Unclaimed'))
+            ->unique('guest_name')
+            ->count();
+
+        // Count unique unclaimed deposit guests (checked out)
+        $this->unclaimedCount = collect($this->salesRows)
+            ->filter(fn($row) => ($row['is_forwarded_guest_row'] ?? false) && str_contains($row['remarks'] ?? '', 'Unclaimed'))
             ->unique('guest_name')
             ->count();
     }
