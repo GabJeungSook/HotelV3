@@ -576,8 +576,8 @@
                 @if($modalSession)
                 <div class="mb-4 bg-gray-50 rounded-lg p-3 text-sm">
                     <div class="font-semibold text-gray-900">{{ $modalSession['frontdesks'] ?? '—' }}</div>
-                    <div class="text-gray-600">Opening: {{ \Carbon\Carbon::parse($modalSession['time_in'])->format('F d, Y g:i A') }}</div>
-                    <div class="text-gray-600">Closing: {{ \Carbon\Carbon::parse($modalSession['time_out'])->format('F d, Y g:i A') }}</div>
+                    <div class="text-gray-600">Opening: {{ $modalSession['time_in_formatted'] ?? '—' }}</div>
+                    <div class="text-gray-600">Closing: {{ $modalSession['time_out_formatted'] ?? '—' }}</div>
                 </div>
                 @endif
             @endif

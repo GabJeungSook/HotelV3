@@ -160,6 +160,8 @@ class SalesReportV2 extends Component
                     'frontdesks' => $frontdeskNames,
                     'time_in' => $s['time_in'],
                     'time_out' => $s['time_out'],
+                    'time_in_formatted' => $s['time_in']->format('F d, Y g:i A'),
+                    'time_out_formatted' => $s['time_out']->format('F d, Y g:i A'),
                 ];
             })
             ->values()
