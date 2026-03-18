@@ -55,6 +55,12 @@ class SalesReportV2 extends Component
     public float $forwardedRoomDeposit = 0;
     public float $forwardedGuestDeposit = 0;
 
+    // Checkout and cashout totals
+    public float $totalCashouts = 0;
+    public float $checkoutRoomAmount = 0;
+    public float $checkoutRoomDeposit = 0;
+    public float $remainingRoomDeposit = 0;
+
     // Shift counts (for shift mode display)
     public int $shiftCheckins = 0;
     public int $shiftCheckouts = 0;
@@ -217,6 +223,10 @@ class SalesReportV2 extends Component
             ->filter(fn($row) => ($row['is_forwarded_guest_row'] ?? false) && str_contains($row['remarks'] ?? '', 'Unclaimed'))
             ->unique('guest_name')
             ->count();
+
+        // Calculate cashout and checkout totals
+        $this->totalCashouts = (float) ($this->summaryByType['cashouts'] ?? 0);
+        $this->calculateCheckoutTotals();
     }
 
     /**
@@ -228,6 +238,44 @@ class SalesReportV2 extends Component
         $counts = $this->getShiftCounts($range['start'], $range['end']);
         $this->shiftCheckins = $counts['checkins'];
         $this->shiftCheckouts = $counts['checkouts'];
+    }
+
+    /**
+     * Calculate checkout-specific totals (room charges and room deposits from checkouts in current shift).
+     */
+    private function calculateCheckoutTotals(): void
+    {
+        $range = $this->getFilterRange();
+        $branchId = auth()->user()->branch_id;
+
+        // Find guests who checked out during current shift/range
+        $checkoutIds = CheckinDetail::query()
+            ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
+            ->whereBetween('check_out_at', [$range['start'], $range['end']])
+            ->pluck('id')
+            ->toArray();
+
+        if (empty($checkoutIds)) {
+            $this->checkoutRoomAmount = 0;
+            $this->checkoutRoomDeposit = 0;
+            $this->remainingRoomDeposit = max(0, ($this->summaryByType['room_deposits'] ?? 0) + $this->forwardedRoomDeposit);
+            return;
+        }
+
+        // Sum room charges (type 1) for checked-out guests
+        $this->checkoutRoomAmount = (float) Transaction::whereIn('checkin_detail_id', $checkoutIds)
+            ->where('transaction_type_id', 1)
+            ->sum('payable_amount');
+
+        // Sum room deposits (type 2, Room Key & TV Remote) for checked-out guests
+        $this->checkoutRoomDeposit = (float) Transaction::whereIn('checkin_detail_id', $checkoutIds)
+            ->where('transaction_type_id', 2)
+            ->where('remarks', 'Deposit From Check In (Room Key & TV Remote)')
+            ->sum('payable_amount');
+
+        // Remaining = total room deposits (current shift + forwarded) - checkout room deposits
+        $totalRoomDeposit = ($this->summaryByType['room_deposits'] ?? 0) + $this->forwardedRoomDeposit;
+        $this->remainingRoomDeposit = max(0, $totalRoomDeposit - $this->checkoutRoomDeposit);
     }
 
     /**
@@ -700,6 +748,7 @@ class SalesReportV2 extends Component
             'deposits' => 0,          // Type 2: Deposit (not counted in total)
             'room_deposits' => 0,     // Room Key/TV Remote deposits
             'guest_deposits' => 0,    // Other guest deposits
+            'cashouts' => 0,          // Type 5: Cashout (not counted in total)
         ];
 
         foreach ($grouped as $typeId => $transactions) {
@@ -714,6 +763,9 @@ class SalesReportV2 extends Component
                     break;
                 case 4:
                     $summary['damages'] = $sum;
+                    break;
+                case 5:
+                    $summary['cashouts'] = $sum;
                     break;
                 case 6:
                     $summary['extensions'] = $sum;

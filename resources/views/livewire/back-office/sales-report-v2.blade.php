@@ -209,13 +209,34 @@
             <div class="text-xs text-gray-500 uppercase tracking-wide">Transfers</div>
             <div class="text-lg font-semibold text-gray-900 mt-1">P {{ number_format($summaryByType['transfers'] ?? 0, 2) }}</div>
         </div>
+        {{-- Room Deposit with checkout/remaining breakdown --}}
         <div class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4">
             <div class="text-xs text-gray-500 uppercase tracking-wide">Room Deposit</div>
             <div class="text-lg font-semibold text-gray-900 mt-1">P {{ number_format($summaryByType['room_deposits'] ?? 0, 2) }}</div>
+            <div class="text-xs text-gray-500 mt-1 space-y-0.5">
+                <div class="flex justify-between">
+                    <span>Checkout:</span>
+                    <span class="font-medium">P {{ number_format($checkoutRoomDeposit ?? 0, 2) }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Remaining:</span>
+                    <span class="font-medium">P {{ number_format($remainingRoomDeposit ?? 0, 2) }}</span>
+                </div>
+            </div>
         </div>
         <div class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4">
             <div class="text-xs text-gray-500 uppercase tracking-wide">Guest Deposit</div>
             <div class="text-lg font-semibold text-gray-900 mt-1">P {{ number_format($summaryByType['guest_deposits'] ?? 0, 2) }}</div>
+        </div>
+        {{-- Cashout --}}
+        <div class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4">
+            <div class="text-xs text-gray-500 uppercase tracking-wide">Cashout</div>
+            <div class="text-lg font-semibold text-gray-900 mt-1">P {{ number_format($totalCashouts ?? 0, 2) }}</div>
+        </div>
+        {{-- Checkout Room Amount --}}
+        <div class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4">
+            <div class="text-xs text-gray-500 uppercase tracking-wide">Checkout Room Amount</div>
+            <div class="text-lg font-semibold text-gray-900 mt-1">P {{ number_format($checkoutRoomAmount ?? 0, 2) }}</div>
         </div>
         {{-- Forwarded Room --}}
         <div class="bg-amber-50 rounded-lg shadow-sm ring-1 ring-amber-200 p-4">
