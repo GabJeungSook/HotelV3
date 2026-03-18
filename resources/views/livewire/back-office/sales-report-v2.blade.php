@@ -305,7 +305,7 @@
                             <td class="border border-gray-300 px-3 py-2 text-sm text-gray-700">
                                 @if($row['is_forwarded_guest_row'] ?? false)
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800">
-                                        {{ $row['transaction_type'] }}
+                                        {{ $row['transaction_type'] }}@if(str_contains($row['remarks'] ?? '', 'Unclaimed')) (Unclaimed)@endif
                                     </span>
                                 @else
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
