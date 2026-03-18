@@ -1,24 +1,28 @@
 <div class="max-w-full mx-auto py-8 px-4 sm:px-6 lg:px-8" x-data="{
-    printReport() {
-        const printContent = this.$refs.printContainer.innerHTML;
+    printSection(refName, title) {
+        const el = this.$refs[refName];
+        if (!el) return;
+        const printContent = el.innerHTML;
         const printWindow = window.open('', '_blank');
         const doc = printWindow.document;
         doc.open();
         const html = `<!DOCTYPE html>
             <html>
                 <head>
-                    <title>Sales Report V2</title>
+                    <title>${title}</title>
                     <style>
-                        body { font-family: Arial, sans-serif; font-size: 12px; margin: 20px; }
+                        body { font-family: Arial, sans-serif; font-size: 11px; margin: 20px; }
                         table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-                        th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
+                        th, td { border: 1px solid #ccc; padding: 4px 6px; text-align: left; }
                         th { background: #f5f5f5; font-weight: 600; }
                         .text-right { text-align: right; }
                         .font-semibold { font-weight: 600; }
+                        .font-bold { font-weight: 700; }
                         .text-center { text-align: center; }
-                        .mb-4 { margin-bottom: 16px; }
-                        .mt-6 { margin-top: 24px; }
-                        .border-t { border-top: 1px solid #ccc; padding-top: 16px; }
+                        .header { margin-bottom: 16px; }
+                        .header div { margin-bottom: 2px; }
+                        .section-title { font-size: 14px; font-weight: 700; margin: 16px 0 8px; }
+                        .bg-gray { background: #f9f9f9; }
                     </style>
                 </head>
                 <body>${printContent}</body>
@@ -293,7 +297,14 @@
             <div class="text-sm font-semibold text-gray-900">SALES REPORT V2 (OCCUPANCY-BASED)</div>
             <div class="flex items-center gap-4">
                 <input type="text" x-model="search" placeholder="Search guest or room..."
-                       class="rounded-lg border-gray-300 text-sm px-3 py-1.5 w-56 focus:border-indigo-500 focus:ring-indigo-500 print:hidden" />
+                       class="rounded-lg border-gray-300 text-sm px-3 py-1.5 w-56 focus:border-indigo-500 focus:ring-indigo-500" />
+                <button @click="printSection('salesPrintContent', 'Sales Report V2')" type="button"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    </svg>
+                    Print
+                </button>
                 <div class="text-xs text-gray-500">
                     @if($filterMode === 'shift' && $selectedShiftLogId)
                         @php
@@ -561,9 +572,138 @@
         </div>
     </div>
 
-    {{-- Hidden Print Container for reference --}}
-    <div x-ref="printContainer" class="hidden">
-        <!-- Print content rendered via browser print -->
+    {{-- Hidden Print Container: Sales Report --}}
+    <div x-ref="salesPrintContent" class="hidden">
+        {{-- Header --}}
+        @if($filterMode === 'shift' && $selectedShiftLogId)
+            @php $printSession = collect($availableShiftSessions)->firstWhere('id', $selectedShiftLogId); @endphp
+            @if($printSession)
+            <div class="header">
+                <div style="font-size:14px;font-weight:700;">SALES REPORT V2</div>
+                <div><strong>Frontdesk:</strong> {{ $printSession['frontdesks'] ?? '—' }}</div>
+                <div><strong>Opening:</strong> {{ $printSession['time_in_formatted'] ?? '—' }}</div>
+                <div><strong>Closing:</strong> {{ $printSession['time_out_formatted'] ?? '—' }}</div>
+            </div>
+            @endif
+        @else
+            <div class="header">
+                <div style="font-size:14px;font-weight:700;">SALES REPORT V2</div>
+                <div><strong>Date:</strong> {{ $date_from }} to {{ $date_to }}</div>
+                @if($frontdesk_name)<div><strong>Frontdesk:</strong> {{ $frontdesk_name }}</div>@endif
+            </div>
+        @endif
+
+        {{-- Sales Table --}}
+        <table>
+            <thead>
+                <tr>
+                    <th>Room #</th><th>Room Type</th><th>Guest Name</th><th>Status</th><th>Type</th>
+                    <th>Check-In</th><th>Check-Out</th><th>Hours</th><th class="text-right">Amount</th>
+                    <th>Processed By</th><th>Shift</th><th class="text-right">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($salesRows as $row)
+                <tr>
+                    <td>{{ $row['room_number'] }}</td>
+                    <td>{{ $row['room_type'] }}</td>
+                    <td>{{ $row['guest_name'] }}</td>
+                    <td>@if($row['is_forwarded_guest_row'] ?? false)FORWARDED @elseif($row['is_forwarded'] ?? false)FORWARDED @endif</td>
+                    <td>{{ $row['transaction_type'] }}@if(str_contains($row['remarks'] ?? '', 'Unclaimed')) (Unclaimed)@endif</td>
+                    <td>{{ $row['check_in'] }}</td>
+                    <td>{{ $row['check_out'] }}</td>
+                    <td>{{ $row['hours_stayed'] ?? '—' }}</td>
+                    <td class="text-right">P {{ number_format($row['amount'], 2) }}</td>
+                    <td>{{ $row['processed_by'] }}</td>
+                    <td>{{ $row['shift'] }}</td>
+                    <td class="text-right">@if($row['is_forwarded_guest_row'] ?? false)— @else P {{ number_format($row['total'], 2) }}@endif</td>
+                </tr>
+                @endforeach
+            </tbody>
+            <tfoot>
+                <tr class="bg-gray">
+                    <td colspan="11" class="text-right font-bold">TOTAL SALES:</td>
+                    <td class="text-right font-bold">P {{ number_format($totalSales, 2) }}</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        {{-- Room Summary --}}
+        @if(!empty($roomSummary['rows']))
+        <div class="section-title">ROOM SUMMARY BY FLOOR</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    @foreach(($roomSummary['floors'] ?? []) as $f)
+                        <th class="text-right">{{ $f['number'] }}{{ $f['number'] == 1 ? 'st' : ($f['number'] == 2 ? 'nd' : ($f['number'] == 3 ? 'rd' : 'th')) }} Floor</th>
+                    @endforeach
+                    <th class="text-right">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(($roomSummary['rows'] ?? []) as $r)
+                <tr>
+                    <td>{{ $r['description'] }}</td>
+                    @foreach(($roomSummary['floors'] ?? []) as $f)
+                        <td class="text-right">P {{ number_format($r['floors'][$f['id']] ?? 0, 2) }}</td>
+                    @endforeach
+                    <td class="text-right font-semibold">P {{ number_format(collect($r['floors'] ?? [])->sum(), 2) }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+            <tfoot>
+                <tr class="bg-gray">
+                    <td class="font-bold">TOTAL</td>
+                    @foreach(($roomSummary['floors'] ?? []) as $f)
+                        <td class="text-right font-bold">P {{ number_format($roomSummary['totals'][$f['id']] ?? 0, 2) }}</td>
+                    @endforeach
+                    <td class="text-right font-bold">P {{ number_format(collect($roomSummary['totals'] ?? [])->sum(), 2) }}</td>
+                </tr>
+            </tfoot>
+        </table>
+        @endif
+
+        {{-- Expense Summary --}}
+        @if(count($expensesRows ?? []) > 0)
+        <div class="section-title">EXPENSE SUMMARY</div>
+        <table>
+            <thead>
+                <tr><th>Expense Type</th><th>Description</th><th>Shift</th><th>Frontdesk</th><th class="text-right">Amount</th></tr>
+            </thead>
+            <tbody>
+                @foreach($expensesRows as $e)
+                <tr>
+                    <td>{{ $e['expense_type'] }}</td><td>{{ $e['description'] }}</td><td>{{ $e['shift'] }}</td>
+                    <td>{{ $e['frontdesk'] }}</td><td class="text-right">P {{ number_format($e['amount'], 2) }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+            <tfoot>
+                <tr class="bg-gray"><td colspan="4" class="text-right font-bold">TOTAL EXPENSES:</td><td class="text-right font-bold">P {{ number_format($expensesTotal, 2) }}</td></tr>
+            </tfoot>
+        </table>
+        @endif
+
+        {{-- Remittance Summary --}}
+        @if(count($remittanceRows ?? []) > 0)
+        <div class="section-title">REMITTANCE SUMMARY</div>
+        <table>
+            <thead>
+                <tr><th>Description</th><th>Frontdesk</th><th class="text-right">Amount</th></tr>
+            </thead>
+            <tbody>
+                @foreach($remittanceRows as $r)
+                <tr>
+                    <td>{{ $r['description'] }}</td><td>{{ $r['frontdesk'] }}</td><td class="text-right">P {{ number_format($r['amount'], 2) }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+            <tfoot>
+                <tr class="bg-gray"><td colspan="2" class="text-right font-bold">TOTAL REMITTANCE:</td><td class="text-right font-bold">P {{ number_format($remittanceTotal, 2) }}</td></tr>
+            </tfoot>
+        </table>
+        @endif
     </div>
 
     {{-- Card Detail Modal --}}
@@ -621,8 +761,58 @@
                     @endif
                 </table>
             </div>
+            {{-- Hidden Modal Print Container --}}
+            <div x-ref="modalPrintContent" class="hidden">
+                @if($filterMode === 'shift' && $selectedShiftLogId)
+                    @php $modalPrintSession = collect($availableShiftSessions)->firstWhere('id', $selectedShiftLogId); @endphp
+                    @if($modalPrintSession)
+                    <div class="header">
+                        <div style="font-size:14px;font-weight:700;">{{ $cardModalTitle }}</div>
+                        <div><strong>Frontdesk:</strong> {{ $modalPrintSession['frontdesks'] ?? '—' }}</div>
+                        <div><strong>Opening:</strong> {{ $modalPrintSession['time_in_formatted'] ?? '—' }}</div>
+                        <div><strong>Closing:</strong> {{ $modalPrintSession['time_out_formatted'] ?? '—' }}</div>
+                    </div>
+                    @endif
+                @else
+                    <div class="header">
+                        <div style="font-size:14px;font-weight:700;">{{ $cardModalTitle }}</div>
+                        <div><strong>Date:</strong> {{ $date_from }} to {{ $date_to }}</div>
+                        @if($frontdesk_name)<div><strong>Frontdesk:</strong> {{ $frontdesk_name }}</div>@endif
+                    </div>
+                @endif
+                <table>
+                    <thead>
+                        <tr><th>Room #</th><th>Guest Name</th><th>Type</th><th>Remarks</th><th class="text-right">Amount</th><th>Transaction Date</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach($cardModalRows as $row)
+                        <tr>
+                            <td>{{ $row['room_number'] ?? '—' }}</td>
+                            <td>{{ $row['guest_name'] ?? '—' }}</td>
+                            <td>{{ $row['transaction_type'] ?? '—' }}</td>
+                            <td>{{ $row['remarks'] ?? '—' }}</td>
+                            <td class="text-right">P {{ number_format($row['amount'] ?? 0, 2) }}</td>
+                            <td>{{ $row['transaction_date'] ?? '—' }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                    @if(count($cardModalRows) > 0)
+                    <tfoot>
+                        <tr class="bg-gray"><td colspan="4" class="text-right font-bold">TOTAL ({{ count($cardModalRows) }} records)</td><td class="text-right font-bold">P {{ number_format($cardModalTotal, 2) }}</td><td></td></tr>
+                    </tfoot>
+                    @endif
+                </table>
+            </div>
+
             <x-slot name="footer">
-                <div class="flex justify-end">
+                <div class="flex justify-between">
+                    <button @click="printSection('modalPrintContent', '{{ $cardModalTitle }}')" type="button"
+                            class="inline-flex items-center gap-1.5 rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                        </svg>
+                        Print
+                    </button>
                     <x-button flat label="Close" x-on:click="close" />
                 </div>
             </x-slot>

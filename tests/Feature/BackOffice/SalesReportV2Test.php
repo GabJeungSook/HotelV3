@@ -213,6 +213,7 @@ class SalesReportV2Test extends TestCase
         // The guest checked in yesterday (forward guest), but has transaction today
         // SalesReportV2 should show the transaction and mark guest as FORWARDED
         $component = Livewire::test(SalesReportV2::class)
+            ->set('filterMode', 'date_range')
             ->set('date_from', now()->toDateString())
             ->set('date_to', now()->toDateString())
             ->call('generateReport');
@@ -268,6 +269,7 @@ class SalesReportV2Test extends TestCase
 
         // Filter by second frontdesk - should only see extension
         $component = Livewire::test(SalesReportV2::class)
+            ->set('filterMode', 'date_range')
             ->set('date_from', now()->toDateString())
             ->set('date_to', now()->toDateString())
             ->set('frontdesk', $user2->id)
@@ -309,6 +311,7 @@ class SalesReportV2Test extends TestCase
         ]);
 
         $component = Livewire::test(SalesReportV2::class)
+            ->set('filterMode', 'date_range')
             ->set('date_from', now()->toDateString())
             ->set('date_to', now()->toDateString())
             ->call('generateReport');
@@ -345,6 +348,7 @@ class SalesReportV2Test extends TestCase
         ]);
 
         $component = Livewire::test(SalesReportV2::class)
+            ->set('filterMode', 'date_range')
             ->set('date_from', now()->toDateString())
             ->set('date_to', now()->toDateString())
             ->call('generateReport');
