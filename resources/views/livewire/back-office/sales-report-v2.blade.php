@@ -259,6 +259,12 @@
                 </div>
             </div>
         </div>
+        {{-- Unclaimed Deposits --}}
+        <div wire:click="openCardModal('unclaimed_deposits')" class="bg-red-50 rounded-lg shadow-sm ring-1 ring-red-200 p-4 cursor-pointer hover:ring-2 hover:ring-indigo-300 transition">
+            <div class="text-xs text-red-700 uppercase tracking-wide">Unclaimed Guest Deposit</div>
+            <div class="text-lg font-semibold text-red-900 mt-1">P {{ number_format($unclaimedDepositTotal ?? 0, 2) }}</div>
+            <div class="text-xs text-red-600 mt-0.5">{{ $unclaimedCount }} checked-out guest{{ $unclaimedCount !== 1 ? 's' : '' }}</div>
+        </div>
     </div>
 
     {{-- Grand Total Card --}}

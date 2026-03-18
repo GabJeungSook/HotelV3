@@ -55,6 +55,8 @@ class SalesReportV2 extends Component
     public float $forwardedRoomDeposit = 0;
     public float $forwardedGuestDeposit = 0;
 
+    public float $unclaimedDepositTotal = 0;
+
     // Checkout and cashout totals
     public float $totalCashouts = 0;
     public float $checkoutRoomAmount = 0;
@@ -224,11 +226,11 @@ class SalesReportV2 extends Component
             ->unique('guest_name')
             ->count();
 
-        // Count unique unclaimed deposit guests (checked out)
-        $this->unclaimedCount = collect($this->salesRows)
-            ->filter(fn($row) => ($row['is_forwarded_guest_row'] ?? false) && str_contains($row['remarks'] ?? '', 'Unclaimed'))
-            ->unique('guest_name')
-            ->count();
+        // Count and sum unclaimed deposit guests (checked out)
+        $unclaimedRows = collect($this->salesRows)
+            ->filter(fn($row) => ($row['is_forwarded_guest_row'] ?? false) && str_contains($row['remarks'] ?? '', 'Unclaimed'));
+        $this->unclaimedCount = $unclaimedRows->unique('guest_name')->count();
+        $this->unclaimedDepositTotal = (float) $unclaimedRows->sum('amount');
 
         // Calculate cashout and checkout totals
         $this->totalCashouts = (float) ($this->summaryByType['cashouts'] ?? 0);
@@ -256,6 +258,7 @@ class SalesReportV2 extends Component
             'fwd_room' => 'Forwarded Room',
             'fwd_room_deposit' => 'Forwarded Room Deposit',
             'fwd_guest_deposit' => 'Forwarded Guest Deposit',
+            'unclaimed_deposits' => 'Unclaimed Guest Deposits',
         ];
 
         $this->cardModalTitle = $titles[$type] ?? $type;
@@ -274,6 +277,7 @@ class SalesReportV2 extends Component
             'fwd_room' => fn($r) => ($r['is_forwarded_guest_row'] ?? false) && $r['transaction_type'] === 'FWD ROOM',
             'fwd_room_deposit' => fn($r) => ($r['is_forwarded_guest_row'] ?? false) && $r['transaction_type'] === 'FWD ROOM DEPOSIT',
             'fwd_guest_deposit' => fn($r) => ($r['is_forwarded_guest_row'] ?? false) && $r['transaction_type'] === 'FWD GUEST DEPOSIT',
+            'unclaimed_deposits' => fn($r) => ($r['is_forwarded_guest_row'] ?? false) && str_contains($r['remarks'] ?? '', 'Unclaimed'),
         ];
 
         if (isset($typeFilterMap[$type])) {
