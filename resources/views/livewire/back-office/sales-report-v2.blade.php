@@ -183,63 +183,65 @@
         @endif
     </div>
 
-    {{-- Summary Cards --}}
+    {{-- Summary Cards (clickable) --}}
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-4">
-        <div class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4">
+        <div wire:click="openCardModal('room_charges')" class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4 cursor-pointer hover:ring-2 hover:ring-indigo-300 transition">
             <div class="text-xs text-gray-500 uppercase tracking-wide">Room Charges</div>
             <div class="text-lg font-semibold text-gray-900 mt-1">P {{ number_format($summaryByType['room_charges'] ?? 0, 2) }}</div>
         </div>
-        <div class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4">
+        <div wire:click="openCardModal('extensions')" class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4 cursor-pointer hover:ring-2 hover:ring-indigo-300 transition">
             <div class="text-xs text-gray-500 uppercase tracking-wide">Extensions</div>
             <div class="text-lg font-semibold text-gray-900 mt-1">P {{ number_format($summaryByType['extensions'] ?? 0, 2) }}</div>
         </div>
-        <div class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4">
+        <div wire:click="openCardModal('amenities')" class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4 cursor-pointer hover:ring-2 hover:ring-indigo-300 transition">
             <div class="text-xs text-gray-500 uppercase tracking-wide">Amenities</div>
             <div class="text-lg font-semibold text-gray-900 mt-1">P {{ number_format($summaryByType['amenities'] ?? 0, 2) }}</div>
         </div>
-        <div class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4">
+        <div wire:click="openCardModal('food')" class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4 cursor-pointer hover:ring-2 hover:ring-indigo-300 transition">
             <div class="text-xs text-gray-500 uppercase tracking-wide">Food</div>
             <div class="text-lg font-semibold text-gray-900 mt-1">P {{ number_format($summaryByType['food'] ?? 0, 2) }}</div>
         </div>
-        <div class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4">
+        <div wire:click="openCardModal('damages')" class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4 cursor-pointer hover:ring-2 hover:ring-indigo-300 transition">
             <div class="text-xs text-gray-500 uppercase tracking-wide">Damages</div>
             <div class="text-lg font-semibold text-gray-900 mt-1">P {{ number_format($summaryByType['damages'] ?? 0, 2) }}</div>
         </div>
-        <div class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4">
+        <div wire:click="openCardModal('transfers')" class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4 cursor-pointer hover:ring-2 hover:ring-indigo-300 transition">
             <div class="text-xs text-gray-500 uppercase tracking-wide">Transfers</div>
             <div class="text-lg font-semibold text-gray-900 mt-1">P {{ number_format($summaryByType['transfers'] ?? 0, 2) }}</div>
         </div>
         {{-- Room Deposit with checkout/remaining breakdown --}}
         <div class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4">
-            <div class="text-xs text-gray-500 uppercase tracking-wide">Room Deposit</div>
-            <div class="text-lg font-semibold text-gray-900 mt-1">P {{ number_format($summaryByType['room_deposits'] ?? 0, 2) }}</div>
+            <div wire:click="openCardModal('room_deposits')" class="cursor-pointer hover:text-indigo-600 transition">
+                <div class="text-xs text-gray-500 uppercase tracking-wide">Room Deposit</div>
+                <div class="text-lg font-semibold text-gray-900 mt-1">P {{ number_format($summaryByType['room_deposits'] ?? 0, 2) }}</div>
+            </div>
             <div class="text-xs text-gray-500 mt-1 space-y-0.5">
-                <div class="flex justify-between">
+                <div wire:click="openCardModal('checkout_room_deposit')" class="flex justify-between cursor-pointer hover:text-indigo-600 transition">
                     <span>Checkout:</span>
                     <span class="font-medium">P {{ number_format($checkoutRoomDeposit ?? 0, 2) }}</span>
                 </div>
-                <div class="flex justify-between">
+                <div wire:click="openCardModal('remaining_room_deposit')" class="flex justify-between cursor-pointer hover:text-indigo-600 transition">
                     <span>Remaining:</span>
                     <span class="font-medium">P {{ number_format($remainingRoomDeposit ?? 0, 2) }}</span>
                 </div>
             </div>
         </div>
-        <div class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4">
+        <div wire:click="openCardModal('guest_deposits')" class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4 cursor-pointer hover:ring-2 hover:ring-indigo-300 transition">
             <div class="text-xs text-gray-500 uppercase tracking-wide">Guest Deposit</div>
             <div class="text-lg font-semibold text-gray-900 mt-1">P {{ number_format($summaryByType['guest_deposits'] ?? 0, 2) }}</div>
         </div>
         {{-- Cashout --}}
-        <div class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4">
+        <div wire:click="openCardModal('cashouts')" class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4 cursor-pointer hover:ring-2 hover:ring-indigo-300 transition">
             <div class="text-xs text-gray-500 uppercase tracking-wide">Cashout</div>
             <div class="text-lg font-semibold text-gray-900 mt-1">P {{ number_format($totalCashouts ?? 0, 2) }}</div>
         </div>
         {{-- Checkout Room Amount --}}
-        <div class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4">
+        <div wire:click="openCardModal('checkout_room')" class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4 cursor-pointer hover:ring-2 hover:ring-indigo-300 transition">
             <div class="text-xs text-gray-500 uppercase tracking-wide">Checkout Room Amount</div>
             <div class="text-lg font-semibold text-gray-900 mt-1">P {{ number_format($checkoutRoomAmount ?? 0, 2) }}</div>
         </div>
         {{-- Forwarded Room --}}
-        <div class="bg-amber-50 rounded-lg shadow-sm ring-1 ring-amber-200 p-4">
+        <div wire:click="openCardModal('fwd_room')" class="bg-amber-50 rounded-lg shadow-sm ring-1 ring-amber-200 p-4 cursor-pointer hover:ring-2 hover:ring-indigo-300 transition">
             <div class="text-xs text-amber-700 uppercase tracking-wide">Forwarded Room</div>
             <div class="text-lg font-semibold text-amber-900 mt-1">P {{ number_format($forwardedRoom ?? 0, 2) }}</div>
         </div>
@@ -247,11 +249,11 @@
         <div class="bg-amber-50 rounded-lg shadow-sm ring-1 ring-amber-200 p-4">
             <div class="text-xs text-amber-700 uppercase tracking-wide">Forwarded Deposit</div>
             <div class="text-sm text-amber-800 mt-1">
-                <div class="flex justify-between">
+                <div wire:click="openCardModal('fwd_room_deposit')" class="flex justify-between cursor-pointer hover:text-indigo-600 transition">
                     <span>Room Deposit:</span>
                     <span class="font-semibold">P {{ number_format($forwardedRoomDeposit ?? 0, 2) }}</span>
                 </div>
-                <div class="flex justify-between">
+                <div wire:click="openCardModal('fwd_guest_deposit')" class="flex justify-between cursor-pointer hover:text-indigo-600 transition">
                     <span>Guest Deposit:</span>
                     <span class="font-semibold">P {{ number_format($forwardedGuestDeposit ?? 0, 2) }}</span>
                 </div>
@@ -523,5 +525,52 @@
     <div x-ref="printContainer" class="hidden">
         <!-- Print content rendered via browser print -->
     </div>
+
+    {{-- Card Detail Modal --}}
+    <x-modal wire:model.defer="showCardModal" max-width="5xl">
+        <x-card :title="$cardModalTitle">
+            <div class="max-h-[70vh] overflow-y-auto">
+                <table class="w-full border-collapse text-sm">
+                    <thead class="sticky top-0 bg-gray-50">
+                        <tr>
+                            <th class="border border-gray-300 px-3 py-2 text-left font-semibold text-gray-700">Room #</th>
+                            <th class="border border-gray-300 px-3 py-2 text-left font-semibold text-gray-700">Guest Name</th>
+                            <th class="border border-gray-300 px-3 py-2 text-left font-semibold text-gray-700">Type</th>
+                            <th class="border border-gray-300 px-3 py-2 text-left font-semibold text-gray-700">Remarks</th>
+                            <th class="border border-gray-300 px-3 py-2 text-right font-semibold text-gray-700">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($cardModalRows as $row)
+                        <tr class="hover:bg-gray-50">
+                            <td class="border border-gray-300 px-3 py-2 text-gray-900">{{ $row['room_number'] ?? '—' }}</td>
+                            <td class="border border-gray-300 px-3 py-2 text-gray-700">{{ $row['guest_name'] ?? '—' }}</td>
+                            <td class="border border-gray-300 px-3 py-2 text-gray-700">{{ $row['transaction_type'] ?? '—' }}</td>
+                            <td class="border border-gray-300 px-3 py-2 text-gray-700">{{ $row['remarks'] ?? '—' }}</td>
+                            <td class="border border-gray-300 px-3 py-2 text-right text-gray-900">P {{ number_format($row['amount'] ?? 0, 2) }}</td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="border border-gray-300 px-3 py-4 text-center text-gray-500">No records found</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                    @if(count($cardModalRows) > 0)
+                    <tfoot class="bg-gray-100">
+                        <tr>
+                            <td colspan="4" class="border border-gray-300 px-3 py-2 text-right font-bold text-gray-900">TOTAL ({{ count($cardModalRows) }} records)</td>
+                            <td class="border border-gray-300 px-3 py-2 text-right font-bold text-gray-900">P {{ number_format($cardModalTotal, 2) }}</td>
+                        </tr>
+                    </tfoot>
+                    @endif
+                </table>
+            </div>
+            <x-slot name="footer">
+                <div class="flex justify-end">
+                    <x-button flat label="Close" x-on:click="close" />
+                </div>
+            </x-slot>
+        </x-card>
+    </x-modal>
 
 </div>

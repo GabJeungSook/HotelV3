@@ -61,6 +61,12 @@ class SalesReportV2 extends Component
     public float $checkoutRoomDeposit = 0;
     public float $remainingRoomDeposit = 0;
 
+    // Card modal
+    public bool $showCardModal = false;
+    public string $cardModalTitle = '';
+    public array $cardModalRows = [];
+    public float $cardModalTotal = 0;
+
     // Shift counts (for shift mode display)
     public int $shiftCheckins = 0;
     public int $shiftCheckouts = 0;
@@ -227,6 +233,139 @@ class SalesReportV2 extends Component
         // Calculate cashout and checkout totals
         $this->totalCashouts = (float) ($this->summaryByType['cashouts'] ?? 0);
         $this->calculateCheckoutTotals();
+    }
+
+    /**
+     * Open card detail modal with filtered rows for the clicked card type.
+     */
+    public function openCardModal(string $type): void
+    {
+        $titles = [
+            'room_charges' => 'Room Charges',
+            'extensions' => 'Extensions',
+            'amenities' => 'Amenities',
+            'food' => 'Food and Beverages',
+            'damages' => 'Damage Charges',
+            'transfers' => 'Transfers',
+            'room_deposits' => 'Room Deposits',
+            'guest_deposits' => 'Guest Deposits',
+            'cashouts' => 'Cashouts',
+            'checkout_room' => 'Checkout Room Amount',
+            'checkout_room_deposit' => 'Checkout Room Deposit',
+            'remaining_room_deposit' => 'Remaining Room Deposit',
+            'fwd_room' => 'Forwarded Room',
+            'fwd_room_deposit' => 'Forwarded Room Deposit',
+            'fwd_guest_deposit' => 'Forwarded Guest Deposit',
+        ];
+
+        $this->cardModalTitle = $titles[$type] ?? $type;
+        $rows = collect($this->salesRows);
+
+        $typeFilterMap = [
+            'room_charges' => fn($r) => $r['transaction_type_id'] == 1,
+            'extensions' => fn($r) => $r['transaction_type_id'] == 6,
+            'amenities' => fn($r) => $r['transaction_type_id'] == 8,
+            'food' => fn($r) => $r['transaction_type_id'] == 9,
+            'damages' => fn($r) => $r['transaction_type_id'] == 4,
+            'transfers' => fn($r) => $r['transaction_type_id'] == 7,
+            'cashouts' => fn($r) => $r['transaction_type_id'] == 5,
+            'room_deposits' => fn($r) => $r['transaction_type_id'] == 2 && (str_contains(strtolower($r['remarks'] ?? ''), 'room key') || str_contains(strtolower($r['remarks'] ?? ''), 'tv remote')),
+            'guest_deposits' => fn($r) => $r['transaction_type_id'] == 2 && !str_contains(strtolower($r['remarks'] ?? ''), 'room key') && !str_contains(strtolower($r['remarks'] ?? ''), 'tv remote'),
+            'fwd_room' => fn($r) => ($r['is_forwarded_guest_row'] ?? false) && $r['transaction_type'] === 'FWD ROOM',
+            'fwd_room_deposit' => fn($r) => ($r['is_forwarded_guest_row'] ?? false) && $r['transaction_type'] === 'FWD ROOM DEPOSIT',
+            'fwd_guest_deposit' => fn($r) => ($r['is_forwarded_guest_row'] ?? false) && $r['transaction_type'] === 'FWD GUEST DEPOSIT',
+        ];
+
+        if (isset($typeFilterMap[$type])) {
+            $filtered = $rows->filter($typeFilterMap[$type])->values();
+            $this->cardModalRows = $filtered->toArray();
+            $this->cardModalTotal = (float) $filtered->sum('amount');
+        } elseif (in_array($type, ['checkout_room', 'checkout_room_deposit', 'remaining_room_deposit'])) {
+            $this->buildCheckoutModalRows($type);
+        } else {
+            $this->cardModalRows = [];
+            $this->cardModalTotal = 0;
+        }
+
+        $this->showCardModal = true;
+    }
+
+    /**
+     * Build modal rows for checkout-related cards (requires DB query for checkout checkin IDs).
+     */
+    private function buildCheckoutModalRows(string $type): void
+    {
+        $range = $this->getFilterRange();
+        $branchId = auth()->user()->branch_id;
+
+        $checkoutDetails = CheckinDetail::query()
+            ->with(['guest', 'room.type'])
+            ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
+            ->whereBetween('check_out_at', [$range['start'], $range['end']])
+            ->get();
+
+        $rows = [];
+        foreach ($checkoutDetails as $cd) {
+            if ($type === 'checkout_room') {
+                $amount = (float) Transaction::where('checkin_detail_id', $cd->id)
+                    ->where('transaction_type_id', 1)
+                    ->sum('payable_amount');
+            } elseif ($type === 'checkout_room_deposit') {
+                $amount = (float) Transaction::where('checkin_detail_id', $cd->id)
+                    ->where('transaction_type_id', 2)
+                    ->where('remarks', 'Deposit From Check In (Room Key & TV Remote)')
+                    ->sum('payable_amount');
+            } else {
+                continue;
+            }
+
+            if ($amount > 0) {
+                $checkInAt = $cd->check_in_at ? Carbon::parse($cd->check_in_at) : null;
+                $checkOutAt = $cd->check_out_at ? Carbon::parse($cd->check_out_at) : null;
+
+                $rows[] = [
+                    'room_number' => $cd->room?->number ?? '—',
+                    'room_type' => $cd->room?->type?->name ?? '—',
+                    'guest_name' => strtoupper($cd->guest?->name ?? '—'),
+                    'transaction_type' => $type === 'checkout_room' ? 'Room Charge' : 'Room Deposit',
+                    'check_in' => $checkInAt?->format('m-d-Y h:iA') ?? '—',
+                    'check_out' => $checkOutAt?->format('m-d-Y h:iA') ?? '—',
+                    'amount' => $amount,
+                    'remarks' => 'Checked out',
+                ];
+            }
+        }
+
+        if ($type === 'remaining_room_deposit') {
+            // Remaining = non-checkout guests who still have room deposits
+            $checkoutIds = $checkoutDetails->pluck('id')->toArray();
+            $remainingRows = collect($this->salesRows)
+                ->filter(function ($r) use ($checkoutIds) {
+                    if ($r['transaction_type_id'] == 2 && (str_contains(strtolower($r['remarks'] ?? ''), 'room key') || str_contains(strtolower($r['remarks'] ?? ''), 'tv remote'))) {
+                        return true; // Current shift room deposits not from checkouts
+                    }
+                    if (($r['is_forwarded_guest_row'] ?? false) && $r['transaction_type'] === 'FWD ROOM DEPOSIT') {
+                        return true;
+                    }
+                    return false;
+                })
+                ->values()
+                ->toArray();
+
+            // Filter out checkout guests by matching room_number + guest_name
+            $checkoutKeys = $checkoutDetails->map(fn($cd) => strtoupper($cd->guest?->name ?? '') . '|' . ($cd->room?->number ?? ''))->toArray();
+            $remainingRows = collect($remainingRows)->filter(function ($r) use ($checkoutKeys) {
+                $key = ($r['guest_name'] ?? '') . '|' . ($r['room_number'] ?? '');
+                return !in_array($key, $checkoutKeys);
+            })->values()->toArray();
+
+            $this->cardModalRows = $remainingRows;
+            $this->cardModalTotal = (float) collect($remainingRows)->sum('amount');
+            return;
+        }
+
+        $this->cardModalRows = $rows;
+        $this->cardModalTotal = (float) collect($rows)->sum('amount');
     }
 
     /**
