@@ -576,8 +576,8 @@
                 @if($modalSession)
                 <div class="mb-4 bg-gray-50 rounded-lg p-3 text-sm">
                     <div class="font-semibold text-gray-900">{{ $modalSession['frontdesks'] ?? '—' }}</div>
-                    <div class="text-gray-600">Opening: {{ \Carbon\Carbon::parse($modalSession['time_in'])->format('m-d-Y h:iA') }}</div>
-                    <div class="text-gray-600">Closing: {{ \Carbon\Carbon::parse($modalSession['time_out'])->format('m-d-Y h:iA') }}</div>
+                    <div class="text-gray-600">Opening: {{ \Carbon\Carbon::parse($modalSession['time_in'])->format('F d, Y g:i A') }}</div>
+                    <div class="text-gray-600">Closing: {{ \Carbon\Carbon::parse($modalSession['time_out'])->format('F d, Y g:i A') }}</div>
                 </div>
                 @endif
             @endif
@@ -591,7 +591,7 @@
                             <th class="border border-gray-300 px-3 py-2 text-left font-semibold text-gray-700">Type</th>
                             <th class="border border-gray-300 px-3 py-2 text-left font-semibold text-gray-700">Remarks</th>
                             <th class="border border-gray-300 px-3 py-2 text-right font-semibold text-gray-700">Amount</th>
-                            <th class="border border-gray-300 px-3 py-2 text-left font-semibold text-gray-700">Created At</th>
+                            <th class="border border-gray-300 px-3 py-2 text-left font-semibold text-gray-700">Transaction Date</th>
                         </tr>
                     </thead>
                     <tbody>
