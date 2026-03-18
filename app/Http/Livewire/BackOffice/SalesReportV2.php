@@ -492,10 +492,11 @@ class SalesReportV2 extends Component
                 ->where('remarks', 'Deposit From Check In (Room Key & TV Remote)')
                 ->first();
 
-            // Get total guest deposits (any deposit that is NOT room key)
+            // Get total guest deposits (any deposit that is NOT room key) — only those before this shift
             $guestDepositTotal = (float) Transaction::where('checkin_detail_id', $cd->id)
                 ->where('transaction_type_id', 2)
                 ->where('remarks', '!=', 'Deposit From Check In (Room Key & TV Remote)')
+                ->where('created_at', '<', $shiftLog->time_in)
                 ->sum('payable_amount');
 
             // Get total cashouts (type 5) for this checkin_detail — only those before this shift

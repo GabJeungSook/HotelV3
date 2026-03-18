@@ -1283,4 +1283,78 @@ class SalesReportV2Test extends TestCase
         // Summary should equal sum of FWD rows: 500 + 200 = 700
         $this->assertEquals(700, $component->get('forwardedGuestDeposit'));
     }
+
+    /** @test */
+    public function forwarded_guest_deposit_excludes_deposits_made_during_current_shift()
+    {
+        $this->actingAs($this->user);
+
+        $amShiftLog = ShiftLog::create([
+            'frontdesk_id' => $this->user->id,
+            'frontdesk_ids' => json_encode([$this->user->id]),
+            'time_in' => now()->setTime(8, 0),
+            'time_out' => now()->setTime(16, 0),
+            'shift' => 'AM',
+        ]);
+
+        $pmShiftLog = ShiftLog::create([
+            'frontdesk_id' => $this->user->id,
+            'frontdesk_ids' => json_encode([$this->user->id]),
+            'time_in' => now()->setTime(16, 0),
+            'time_out' => now()->setTime(23, 59),
+            'shift' => 'PM',
+        ]);
+
+        $guest = $this->createGuest(['name' => 'New Deposit Guest']);
+        $checkinDetail = $this->createCheckinDetail($guest, [
+            'check_in_at' => now()->setTime(9, 0),
+            'check_out_at' => now()->addDay(),
+        ]);
+
+        // Room charge during AM
+        $this->createTransaction($guest, $checkinDetail, [
+            'transaction_type_id' => 1,
+            'shift_log_id' => $amShiftLog->id,
+            'payable_amount' => 500,
+            'paid_amount' => 500,
+            'created_at' => now()->setTime(9, 0),
+        ]);
+
+        // Guest deposit during AM: 300
+        $this->createTransaction($guest, $checkinDetail, [
+            'transaction_type_id' => 2,
+            'shift_log_id' => $amShiftLog->id,
+            'payable_amount' => 300,
+            'paid_amount' => 300,
+            'remarks' => 'Guest Deposit',
+            'description' => 'Deposit',
+            'created_at' => now()->setTime(9, 5),
+        ]);
+
+        // Additional guest deposit during PM shift: 200 (should NOT be in FWD)
+        $this->createTransaction($guest, $checkinDetail, [
+            'transaction_type_id' => 2,
+            'shift_log_id' => $pmShiftLog->id,
+            'payable_amount' => 200,
+            'paid_amount' => 200,
+            'remarks' => 'Guest Deposit',
+            'description' => 'Deposit',
+            'created_at' => now()->setTime(18, 0),
+        ]);
+
+        // View PM shift — FWD GUEST DEPOSIT should show 300 (only AM deposit), NOT 500
+        $component = Livewire::test(SalesReportV2::class)
+            ->set('filterMode', 'shift')
+            ->set('selectedShiftLogId', $pmShiftLog->id)
+            ->call('generateReport');
+
+        $salesRows = $component->get('salesRows');
+
+        $fwdGuestDeposit = collect($salesRows)->firstWhere('transaction_type', 'FWD GUEST DEPOSIT');
+        $this->assertNotNull($fwdGuestDeposit);
+        $this->assertEquals(300, $fwdGuestDeposit['amount']);
+
+        // Summary should match
+        $this->assertEquals(300, $component->get('forwardedGuestDeposit'));
+    }
 }
