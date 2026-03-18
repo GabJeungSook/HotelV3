@@ -8,6 +8,7 @@ use App\Models\CheckinDetail;
 use App\Models\Transaction;
 use App\Models\Floor;
 use App\Models\Expense;
+use App\Models\Remittance;
 use App\Models\ShiftLog;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -46,6 +47,8 @@ class SalesReportV2 extends Component
 
     public $expensesRows;
     public float $expensesTotal = 0;
+    public $remittanceRows;
+    public float $remittanceTotal = 0;
     public float $netSales = 0;
     public int $forwardedCount = 0;
     public int $unclaimedCount = 0;
@@ -213,6 +216,7 @@ class SalesReportV2 extends Component
         $this->totalSales = collect($this->salesRows)->sum('total');
         $this->summaryByType = $this->buildSummaryByType();
         $this->buildExpensesSummary();
+        $this->buildRemittanceSummary();
         $this->buildRoomSummary();
         $this->calculateForwardedTotals();
         $this->calculateShiftCounts();
@@ -967,12 +971,37 @@ class SalesReportV2 extends Component
                     'description' => $e->description ?? '—',
                     'shift' => $e->shift ?? '—',
                     'amount' => (float) $e->amount,
-                    'frontdesk' => $e->user?->name ?? '—',
+                    'frontdesk' => strtoupper($e->user?->name ?? '—'),
                 ];
             });
 
         $this->expensesRows = $rows;
         $this->expensesTotal = (float) $rows->sum('amount');
+    }
+
+    /**
+     * Build remittance summary for the filter range.
+     */
+    private function buildRemittanceSummary(): void
+    {
+        $range = $this->getFilterRange();
+
+        $rows = Remittance::query()
+            ->with('user')
+            ->whereBetween('created_at', [$range['start'], $range['end']])
+            ->when($this->filterMode === 'date_range' && $this->frontdesk, fn($q) => $q->where('user_id', $this->frontdesk))
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($r) {
+                return [
+                    'description' => $r->description ?? '—',
+                    'amount' => (float) $r->total_remittance,
+                    'frontdesk' => strtoupper($r->user?->name ?? '—'),
+                ];
+            });
+
+        $this->remittanceRows = $rows;
+        $this->remittanceTotal = (float) $rows->sum('amount');
     }
 
     /**
