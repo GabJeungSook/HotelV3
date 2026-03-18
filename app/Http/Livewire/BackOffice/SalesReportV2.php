@@ -28,7 +28,7 @@ use Carbon\Carbon;
 class SalesReportV2 extends Component
 {
     // Filter mode: 'date_range' or 'shift'
-    public string $filterMode = 'date_range';
+    public string $filterMode = 'shift';
 
     // Date range mode properties
     public $date_from;
