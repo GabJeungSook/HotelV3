@@ -169,8 +169,8 @@ class FrontdeskReportV2 extends Component
         $fwdGuestDeposit = $forwarded['guest_deposit'];
         $totalCashReceived = $openingCash + $fwdRoomDeposit + $fwdGuestDeposit + $forwardingBalance;
 
-        // Cash Reconciliation
-        $expectedCash = $openingCash + $forwardingBalance + $netSales - $totalRemittance;
+        // Cash Reconciliation: Net Sales + Key/Remote Deposit + Guest Deposit + Opening Cash
+        $expectedCash = $netSales + $endShiftRoomDeposit + $currentGuestDeposit + $openingCash;
         $difference = $expectedCash - $actualCash;
 
         // Room Status and Deposit (Operation B)
