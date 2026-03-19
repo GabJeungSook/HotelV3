@@ -1,9 +1,28 @@
-<div class="max-w-5xl mx-auto px-4 py-8 space-y-6 bg-gray-100 min-h-screen text-gray-900">
+<div class="max-w-7xl mx-auto px-4 py-8 space-y-6 bg-gray-100 min-h-screen text-gray-900">
+    <style>
+        @media print {
+            body * {
+                visibility: hidden;
+            }
 
-    {{-- Shift Selector --}}
-    <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 p-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+            #daily-shift-summary-v2,
+            #daily-shift-summary-v2 * {
+                visibility: visible;
+            }
+
+            #daily-shift-summary-v2 {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+        }
+    </style>
+
+    {{-- Filters --}}
+    <div class="no-print bg-white rounded-xl shadow-sm ring-1 ring-gray-200 p-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="md:col-span-2">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Select Shift</label>
                 <select wire:model="selectedShiftLogId"
                         class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
@@ -13,228 +32,263 @@
                     @endforeach
                 </select>
             </div>
-            <div class="flex items-end">
+            <div class="flex items-end gap-2">
                 <button wire:click="generateReport" type="button"
                         class="inline-flex justify-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
                     Refresh
+                </button>
+                <button type="button" onclick="window.print()"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    </svg>
+                    Print
                 </button>
             </div>
         </div>
     </div>
 
     @if(!empty($reportData))
-    {{-- Debug Data Output --}}
-    <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 p-6 space-y-6">
+    {{-- Report --}}
+    <div class="bg-white shadow-sm ring-1 ring-gray-300 p-8">
+        <div id="daily-shift-summary-v2" class="mx-auto max-w-full text-[16px] leading-tight text-black space-y-8">
+            <h1 class="text-center font-bold uppercase">DAILY SHIFT SUMMARY REPORT</h1>
 
-        <h2 class="text-lg font-bold text-gray-900">DAILY SHIFT SUMMARY REPORT (V2 - Data Verification)</h2>
+            <div class="space-y-1 text-[15px]">
+                <p>Frontdesk (Outgoing): {{ $reportData['frontdesk_outgoing'] }}</p>
+                <p>Frontdesk (Incoming): {{ $reportData['frontdesk_incoming'] }}</p>
+                <p>Shift Opened: {{ $reportData['shift_opened'] }}</p>
+                <p>Shift Closed: {{ $reportData['shift_closed'] }}</p>
+            </div>
 
-        {{-- Header --}}
-        <div class="bg-gray-50 rounded-lg p-4 space-y-1 text-sm">
-            <p><strong>Frontdesk (Outgoing):</strong> {{ $reportData['frontdesk_outgoing'] }}</p>
-            <p><strong>Frontdesk (Incoming):</strong> {{ $reportData['frontdesk_incoming'] }}</p>
-            <p><strong>Shift Opened:</strong> {{ $reportData['shift_opened'] }}</p>
-            <p><strong>Shift Closed:</strong> {{ $reportData['shift_closed'] }}</p>
-        </div>
+            {{-- 1. Cash Drawer --}}
+            <div>
+                <div class="mb-2 text-[15px]">1.&nbsp;&nbsp;&nbsp;&nbsp;Cash Drawer</div>
+                <table class="w-full border-collapse table-fixed border border-black text-[15px]">
+                    <thead>
+                        <tr>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[39%]">Description</th>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[27%]">Amount</th>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[34%]">Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border border-black px-2 py-1 align-top">
+                                <div class="font-bold">Opening Cash</div>
+                                <div>(Net Sales Receive from previous Shift)</div>
+                            </td>
+                            <td class="border border-black px-2 py-1 align-top">{{ $reportData['cash_drawer']['opening_cash'] > 0 ? '₱ ' . number_format($reportData['cash_drawer']['opening_cash'], 2) : '-' }}</td>
+                            <td class="border border-black px-2 py-1 align-top">-</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1 align-top">
+                                <div class="font-bold">Key Deposit</div>
+                                <div>(Room occupied receive)</div>
+                            </td>
+                            <td class="border border-black px-2 py-1 align-top">{{ $reportData['cash_drawer']['key_deposit'] > 0 ? '₱ ' . number_format($reportData['cash_drawer']['key_deposit'], 2) : '-' }}</td>
+                            <td class="border border-black px-2 py-1 align-top">-</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1 align-top">
+                                <div class="font-bold">Guest Deposit</div>
+                                <div>(Total client other deposit received)</div>
+                            </td>
+                            <td class="border border-black px-2 py-1 align-top">{{ $reportData['cash_drawer']['guest_deposit'] > 0 ? '₱ ' . number_format($reportData['cash_drawer']['guest_deposit'], 2) : '-' }}</td>
+                            <td class="border border-black px-2 py-1 align-top">-</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1 align-top">
+                                <div class="font-bold">Forwarding Balance</div>
+                                <div>(From previous Shift)</div>
+                            </td>
+                            <td class="border border-black px-2 py-1 align-top">{{ $reportData['cash_drawer']['forwarding_balance'] > 0 ? '₱ ' . number_format($reportData['cash_drawer']['forwarding_balance'], 2) : '-' }}</td>
+                            <td class="border border-black px-2 py-1 align-top">-</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Total Cash Received</td>
+                            <td class="border border-black px-2 py-1 font-bold">{{ $reportData['cash_drawer']['total'] > 0 ? '₱ ' . number_format($reportData['cash_drawer']['total'], 2) : '-' }}</td>
+                            <td class="border border-black px-2 py-1"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
-        {{-- 1. Cash Drawer --}}
-        <div>
-            <h3 class="text-sm font-bold text-gray-700 mb-2">1. Cash Drawer</h3>
-            <table class="w-full border-collapse text-sm">
-                <thead>
-                    <tr class="bg-gray-50">
-                        <th class="border border-gray-300 px-3 py-2 text-left">Description</th>
-                        <th class="border border-gray-300 px-3 py-2 text-right">Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="border border-gray-300 px-3 py-2 font-medium">Opening Cash <span class="text-gray-500 text-xs">(Net Sales from previous shift)</span></td>
-                        <td class="border border-gray-300 px-3 py-2 text-right">P {{ number_format($reportData['cash_drawer']['opening_cash'], 2) }}</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-gray-300 px-3 py-2 font-medium">Key/Remote Deposit <span class="text-gray-500 text-xs">(Room occupied receive)</span></td>
-                        <td class="border border-gray-300 px-3 py-2 text-right">P {{ number_format($reportData['cash_drawer']['key_deposit'], 2) }}</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-gray-300 px-3 py-2 font-medium">Guest Deposit <span class="text-gray-500 text-xs">(Total guest other deposit received)</span></td>
-                        <td class="border border-gray-300 px-3 py-2 text-right">P {{ number_format($reportData['cash_drawer']['guest_deposit'], 2) }}</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-gray-300 px-3 py-2 font-medium">Forwarding Balance <span class="text-gray-500 text-xs">(From previous shift)</span></td>
-                        <td class="border border-gray-300 px-3 py-2 text-right">P {{ number_format($reportData['cash_drawer']['forwarding_balance'], 2) }}</td>
-                    </tr>
-                    <tr class="bg-gray-100 font-bold">
-                        <td class="border border-gray-300 px-3 py-2">Total Cash Received</td>
-                        <td class="border border-gray-300 px-3 py-2 text-right">P {{ number_format($reportData['cash_drawer']['total'], 2) }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+            {{-- 2. Frontdesk Operation --}}
+            <div>
+                <div class="mb-2 text-[15px]">2.&nbsp;&nbsp;&nbsp;&nbsp;Frontdesk Operation</div>
 
-        {{-- 2a. Sales Summary --}}
-        <div>
-            <h3 class="text-sm font-bold text-gray-700 mb-2">2a. Frontdesk Operation — Sales Summary</h3>
-            <table class="w-full border-collapse text-sm">
-                <thead>
-                    <tr class="bg-gray-50">
-                        <th class="border border-gray-300 px-3 py-2 text-left">Description</th>
-                        <th class="border border-gray-300 px-3 py-2 text-right">Number</th>
-                        <th class="border border-gray-300 px-3 py-2 text-right">Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach([
-                        'new_checkin' => 'New Check-in',
-                        'extension' => 'Extension',
-                        'transfer' => 'Transfer',
-                        'miscellaneous' => 'Miscellaneous',
-                        'food' => 'Food',
-                        'drink' => 'Drink',
-                        'others' => 'Others',
-                    ] as $key => $label)
-                    <tr>
-                        <td class="border border-gray-300 px-3 py-2 font-medium">
-                            {{ $label }}
-                            @if($key === 'new_checkin')
-                                <span class="text-gray-500 text-xs">(Total New Check-in)</span>
-                            @elseif($key === 'others')
-                                <span class="text-gray-500 text-xs">(Foods and Drinks from POS)</span>
-                            @endif
-                        </td>
-                        <td class="border border-gray-300 px-3 py-2 text-right">{{ $reportData['sales_summary'][$key]['count'] }}</td>
-                        <td class="border border-gray-300 px-3 py-2 text-right">P {{ number_format($reportData['sales_summary'][$key]['amount'], 2) }}</td>
-                    </tr>
-                    @endforeach
-                    <tr class="bg-gray-100 font-bold">
-                        <td class="border border-gray-300 px-3 py-2">TOTAL</td>
-                        <td class="border border-gray-300 px-3 py-2 text-right">{{ $reportData['sales_summary']['total']['count'] }}</td>
-                        <td class="border border-gray-300 px-3 py-2 text-right">P {{ number_format($reportData['sales_summary']['total']['amount'], 2) }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+                {{-- 2a. Sales Summary --}}
+                <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a.&nbsp;&nbsp;&nbsp;&nbsp;Sales Summary</span>
+                <table class="w-full border-collapse table-fixed border border-black text-[15px] mt-3 mb-5">
+                    <thead>
+                        <tr>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[50%]">Description</th>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[16%]">Number</th>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[34%]">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach([
+                            'new_checkin' => ['label' => 'New Check-in', 'sub' => 'Total New Check-in'],
+                            'extension' => ['label' => 'Extension', 'sub' => null],
+                            'transfer' => ['label' => 'Transfer', 'sub' => null],
+                            'miscellaneous' => ['label' => 'Miscellaneous charges', 'sub' => null],
+                            'food' => ['label' => 'Food', 'sub' => null],
+                            'drink' => ['label' => 'Drink', 'sub' => null],
+                            'others' => ['label' => 'Others', 'sub' => 'Foods and Drinks from POS'],
+                        ] as $key => $info)
+                        <tr>
+                            <td class="border border-black px-2 py-1">
+                                <div class="font-bold">{{ $info['label'] }}</div>
+                                @if($info['sub'])
+                                <div class="font-normal">({{ $info['sub'] }})</div>
+                                @endif
+                            </td>
+                            <td class="border border-black px-2 py-1">{{ $reportData['sales_summary'][$key]['count'] ?: '-' }}</td>
+                            <td class="border border-black px-2 py-1 font-bold">{{ $reportData['sales_summary'][$key]['amount'] > 0 ? '₱ ' . number_format($reportData['sales_summary'][$key]['amount'], 2) : '-' }}</td>
+                        </tr>
+                        @endforeach
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Total</td>
+                            <td class="border border-black px-2 py-1 font-bold">{{ $reportData['sales_summary']['total']['count'] ?: '-' }}</td>
+                            <td class="border border-black px-2 py-1 font-bold">{{ $reportData['sales_summary']['total']['amount'] > 0 ? '₱ ' . number_format($reportData['sales_summary']['total']['amount'], 2) : '-' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
 
-        {{-- 2b. Room Status and Deposit --}}
-        <div>
-            <h3 class="text-sm font-bold text-gray-700 mb-2">2b. Room Status and Deposit</h3>
-            <table class="w-full border-collapse text-sm">
-                <thead>
-                    <tr class="bg-gray-50">
-                        <th class="border border-gray-300 px-3 py-2 text-left">Description</th>
-                        <th class="border border-gray-300 px-3 py-2 text-right">Number</th>
-                        <th class="border border-gray-300 px-3 py-2 text-right">Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach([
-                        'forwarded_room' => 'Forwarded Room Check-In (Previous Shift)',
-                        'key_remote_deposit' => 'Key/Remote Deposit (End of shift occupied)',
-                        'forwarded_guest_deposit' => 'Forwarded Room Guest Deposit',
-                        'guest_deposit' => 'Guest Deposit (Current shift)',
-                        'total_checkout' => 'Total Check-Out',
-                        'expenses' => 'Expenses',
-                    ] as $key => $label)
-                    <tr>
-                        <td class="border border-gray-300 px-3 py-2 font-medium">{{ $label }}</td>
-                        <td class="border border-gray-300 px-3 py-2 text-right">{{ $reportData['room_status'][$key]['count'] }}</td>
-                        <td class="border border-gray-300 px-3 py-2 text-right">P {{ number_format($reportData['room_status'][$key]['amount'], 2) }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+                {{-- 2b. Room Status and Deposit --}}
+                <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b.&nbsp;&nbsp;&nbsp;&nbsp;Room Status and Deposit</span>
+                <table class="w-full border-collapse table-fixed border border-black text-[15px] mt-3 mb-8">
+                    <thead>
+                        <tr>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[50%]">Description</th>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[16%]">Number</th>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[34%]">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach([
+                            'forwarded_room' => ['label' => 'Forwarded Room Check-In', 'sub' => 'Previous Shift'],
+                            'key_remote_deposit' => ['label' => 'Key/Remote Deposit', 'sub' => 'Current room occupied at the end shift'],
+                            'forwarded_guest_deposit' => ['label' => 'Forwarded Room Guest Deposit', 'sub' => 'Previous Shift'],
+                            'guest_deposit' => ['label' => 'Guest Deposit', 'sub' => null],
+                            'total_checkout' => ['label' => 'Total Check-Out', 'sub' => null],
+                            'expenses' => ['label' => 'Expenses', 'sub' => null],
+                        ] as $key => $info)
+                        <tr>
+                            <td class="border border-black px-2 py-1">
+                                <div class="font-bold">{{ $info['label'] }}</div>
+                                @if($info['sub'])
+                                <div class="font-normal">({{ $info['sub'] }})</div>
+                                @endif
+                            </td>
+                            <td class="border border-black px-2 py-1">{{ $reportData['room_status'][$key]['count'] ?: '-' }}</td>
+                            <td class="border border-black px-2 py-1 font-bold">{{ $reportData['room_status'][$key]['amount'] > 0 ? '₱ ' . number_format($reportData['room_status'][$key]['amount'], 2) : '-' }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
 
-        {{-- 3. Final Sales --}}
-        <div>
-            <h3 class="text-sm font-bold text-gray-700 mb-2">3. Final Sales</h3>
-            <table class="w-full border-collapse text-sm">
-                <thead>
-                    <tr class="bg-gray-50">
-                        <th class="border border-gray-300 px-3 py-2 text-left">Description</th>
-                        <th class="border border-gray-300 px-3 py-2 text-right">Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="border border-gray-300 px-3 py-2 font-medium">Gross Sales</td>
-                        <td class="border border-gray-300 px-3 py-2 text-right">P {{ number_format($reportData['final_sales']['gross_sales'], 2) }}</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-gray-300 px-3 py-2 font-medium">Refund</td>
-                        <td class="border border-gray-300 px-3 py-2 text-right">P {{ number_format($reportData['final_sales']['refund'], 2) }}</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-gray-300 px-3 py-2 font-medium">Expenses</td>
-                        <td class="border border-gray-300 px-3 py-2 text-right">P {{ number_format($reportData['final_sales']['expenses'], 2) }}</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-gray-300 px-3 py-2 font-medium">Discounts</td>
-                        <td class="border border-gray-300 px-3 py-2 text-right">P {{ number_format($reportData['final_sales']['discounts'], 2) }}</td>
-                    </tr>
-                    <tr class="bg-gray-100 font-bold">
-                        <td class="border border-gray-300 px-3 py-2">Net Sales</td>
-                        <td class="border border-gray-300 px-3 py-2 text-right">P {{ number_format($reportData['final_sales']['net_sales'], 2) }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+            {{-- 3. Final Sales --}}
+            <div>
+                <div class="mb-2 text-[15px]">3.&nbsp;&nbsp;&nbsp;&nbsp;Final Sales</div>
+                <table class="w-full border-collapse table-fixed border border-black text-[15px]">
+                    <thead>
+                        <tr>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[55%]">Description</th>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[45%]" colspan="2">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Gross Sales</td>
+                            <td class="border border-black px-2 py-1" colspan="2">{{ $reportData['final_sales']['gross_sales'] > 0 ? '₱ ' . number_format($reportData['final_sales']['gross_sales'], 2) : '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Refund</td>
+                            <td class="border border-black px-2 py-1" colspan="2">{{ $reportData['final_sales']['refund'] > 0 ? '₱ ' . number_format($reportData['final_sales']['refund'], 2) : '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Expenses</td>
+                            <td class="border border-black px-2 py-1" colspan="2">{{ $reportData['final_sales']['expenses'] > 0 ? '₱ ' . number_format($reportData['final_sales']['expenses'], 2) : '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Discounts</td>
+                            <td class="border border-black px-2 py-1" colspan="2">{{ $reportData['final_sales']['discounts'] > 0 ? '₱ ' . number_format($reportData['final_sales']['discounts'], 2) : '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Net Sales</td>
+                            <td class="border border-black px-2 py-1 font-bold" colspan="2">{{ $reportData['final_sales']['net_sales'] != 0 ? '₱ ' . number_format($reportData['final_sales']['net_sales'], 2) : '-' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
-        {{-- 4. Cash Position Summary --}}
-        <div>
-            <h3 class="text-sm font-bold text-gray-700 mb-2">4. Cash Position Summary</h3>
-            <table class="w-full border-collapse text-sm">
-                <thead>
-                    <tr class="bg-gray-50">
-                        <th class="border border-gray-300 px-3 py-2 text-left">Description</th>
-                        <th class="border border-gray-300 px-3 py-2 text-right">Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="border border-gray-300 px-3 py-2 font-medium">Opening Cash</td>
-                        <td class="border border-gray-300 px-3 py-2 text-right">P {{ number_format($reportData['cash_position']['opening_cash'], 2) }}</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-gray-300 px-3 py-2 font-medium">Forwarded Balance</td>
-                        <td class="border border-gray-300 px-3 py-2 text-right">P {{ number_format($reportData['cash_position']['forwarded_balance'], 2) }}</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-gray-300 px-3 py-2 font-medium">Net Sales</td>
-                        <td class="border border-gray-300 px-3 py-2 text-right">P {{ number_format($reportData['cash_position']['net_sales'], 2) }}</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-gray-300 px-3 py-2 font-medium">Remittance</td>
-                        <td class="border border-gray-300 px-3 py-2 text-right">P {{ number_format($reportData['cash_position']['remittance'], 2) }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+            {{-- 4. Cash Position Summary --}}
+            <div>
+                <div class="mb-2 text-[15px]">4.&nbsp;&nbsp;&nbsp;&nbsp;Cash Position Summary</div>
+                <table class="w-full border-collapse table-fixed border border-black text-[15px]">
+                    <thead>
+                        <tr>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[55%]">Description</th>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[45%]" colspan="2">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Opening Cash</td>
+                            <td class="border border-black px-2 py-1" colspan="2">{{ $reportData['cash_position']['opening_cash'] > 0 ? '₱ ' . number_format($reportData['cash_position']['opening_cash'], 2) : '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Forwarded Balance</td>
+                            <td class="border border-black px-2 py-1" colspan="2">{{ $reportData['cash_position']['forwarded_balance'] > 0 ? '₱ ' . number_format($reportData['cash_position']['forwarded_balance'], 2) : '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Net Sales</td>
+                            <td class="border border-black px-2 py-1" colspan="2">{{ $reportData['cash_position']['net_sales'] != 0 ? '₱ ' . number_format($reportData['cash_position']['net_sales'], 2) : '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Remittance</td>
+                            <td class="border border-black px-2 py-1" colspan="2">{{ $reportData['cash_position']['remittance'] > 0 ? '₱ ' . number_format($reportData['cash_position']['remittance'], 2) : '-' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
-        {{-- 5. Cash Reconciliation --}}
-        <div>
-            <h3 class="text-sm font-bold text-gray-700 mb-2">5. Cash Reconciliation</h3>
-            <table class="w-full border-collapse text-sm">
-                <thead>
-                    <tr class="bg-gray-50">
-                        <th class="border border-gray-300 px-3 py-2 text-left">Description</th>
-                        <th class="border border-gray-300 px-3 py-2 text-right">Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="border border-gray-300 px-3 py-2 font-medium">Expected Cash</td>
-                        <td class="border border-gray-300 px-3 py-2 text-right">P {{ number_format($reportData['cash_reconciliation']['expected_cash'], 2) }}</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-gray-300 px-3 py-2 font-medium">Actual Cash</td>
-                        <td class="border border-gray-300 px-3 py-2 text-right">P {{ number_format($reportData['cash_reconciliation']['actual_cash'], 2) }}</td>
-                    </tr>
-                    <tr class="text-red-600 font-bold">
-                        <td class="border border-gray-300 px-3 py-2">Difference</td>
-                        <td class="border border-gray-300 px-3 py-2 text-right">P {{ number_format($reportData['cash_reconciliation']['difference'], 2) }}</td>
-                    </tr>
-                </tbody>
-            </table>
+            {{-- 5. Cash Reconciliation --}}
+            <div>
+                <div class="mb-2 text-[15px]">5.&nbsp;&nbsp;&nbsp;&nbsp;Cash Reconciliation</div>
+                <table class="w-full border-collapse table-fixed border border-black text-[15px]">
+                    <thead>
+                        <tr>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[55%]">Description</th>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[45%]" colspan="2">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Expected Cash</td>
+                            <td class="border border-black px-2 py-1" colspan="2">{{ $reportData['cash_reconciliation']['expected_cash'] != 0 ? '₱ ' . number_format($reportData['cash_reconciliation']['expected_cash'], 2) : '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">Actual Cash</td>
+                            <td class="border border-black px-2 py-1" colspan="2">{{ $reportData['cash_reconciliation']['actual_cash'] > 0 ? '₱ ' . number_format($reportData['cash_reconciliation']['actual_cash'], 2) : '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold text-red-600">Difference</td>
+                            <td class="border border-black px-2 py-1 text-red-600" colspan="2">{{ $reportData['cash_reconciliation']['difference'] != 0 ? '₱ ' . number_format($reportData['cash_reconciliation']['difference'], 2) : '-' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- Signature --}}
+            <div class="pt-16 pl-2">
+                <div class="text-[15px] mb-16">Certified and Correct:</div>
+                <div class="w-64 border-b mt-10 border-black"></div>
+            </div>
         </div>
     </div>
     @else
