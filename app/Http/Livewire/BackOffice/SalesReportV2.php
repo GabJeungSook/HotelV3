@@ -91,6 +91,9 @@ class SalesReportV2 extends Component
         $this->forwardedGuestDeposit = 0;
 
         $this->loadAvailableShiftSessions();
+        if (!empty($this->availableShiftSessions)) {
+            $this->selectedShiftLogId = end($this->availableShiftSessions)['id'];
+        }
         $this->generateReport();
     }
 
@@ -227,16 +230,17 @@ class SalesReportV2 extends Component
         // Calculate net sales (Gross - Expenses)
         $this->netSales = $this->totalSales - $this->expensesTotal;
 
-        // Count unique forwarded guests (still occupying)
+        // Count forwarded stays (each stay has exactly one FWD ROOM row)
         $this->forwardedCount = collect($this->salesRows)
-            ->filter(fn($row) => $row['is_forwarded'] && !str_contains($row['remarks'] ?? '', 'Unclaimed'))
-            ->unique('guest_name')
+            ->filter(fn($row) => ($row['is_forwarded_guest_row'] ?? false)
+                && $row['transaction_type'] === 'FWD ROOM'
+                && !str_contains($row['remarks'] ?? '', 'Unclaimed'))
             ->count();
 
         // Count and sum unclaimed deposit guests (checked out)
         $unclaimedRows = collect($this->salesRows)
             ->filter(fn($row) => ($row['is_forwarded_guest_row'] ?? false) && str_contains($row['remarks'] ?? '', 'Unclaimed'));
-        $this->unclaimedCount = $unclaimedRows->unique('guest_name')->count();
+        $this->unclaimedCount = $unclaimedRows->count();
         $this->unclaimedDepositTotal = (float) $unclaimedRows->sum('amount');
 
         // Calculate cashout and checkout totals
@@ -700,14 +704,6 @@ class SalesReportV2 extends Component
                 });
             })
             ->get();
-
-        // Deduplicate: keep only the latest check-in per guest + room
-        // (handles guests with multiple checkin_details for the same room)
-        $forwardedGuests = $forwardedGuests
-            ->sortByDesc('check_in_at')
-            ->unique(function ($cd) {
-                return $cd->guest_id . '-' . $cd->room_id;
-            });
 
         // Batch-load all transactions for forwarded guests in 1 query (fixes N+1)
         $forwardedIds = $forwardedGuests->pluck('id')->toArray();
