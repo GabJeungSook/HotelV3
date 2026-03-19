@@ -46,8 +46,11 @@ class FrontdeskReportV2 extends Component
 
         $logIds = $session['log_ids'];
         $shiftLogs = ShiftLog::whereIn('id', $logIds)->with('frontdesk:id,name')->get();
-        $timeIn = Carbon::parse($session['time_in']);
-        $timeOut = Carbon::parse($session['time_out']);
+
+        // Use the same time range as SalesReportV2: load primary ShiftLog from DB
+        $primaryShiftLog = ShiftLog::find($this->selectedShiftLogId);
+        $timeIn = $primaryShiftLog->time_in;
+        $timeOut = $primaryShiftLog->time_out;
         $branchId = auth()->user()->branch_id;
 
         // Opening Cash
@@ -71,9 +74,8 @@ class FrontdeskReportV2 extends Component
             ->pluck('id')
             ->toArray();
 
-        // All transactions for occupying guests within this shift's time range
-        $transactions = Transaction::where('branch_id', $branchId)
-            ->whereIn('checkin_detail_id', $occupyingIds)
+        // All transactions for occupying guests within this shift's time range (same as SalesReportV2)
+        $transactions = Transaction::whereIn('checkin_detail_id', $occupyingIds)
             ->whereBetween('created_at', [$timeIn, $timeOut])
             ->get();
 
@@ -184,8 +186,8 @@ class FrontdeskReportV2 extends Component
         $this->reportData = [
             'frontdesk_outgoing' => $outgoingNames ?: '—',
             'frontdesk_incoming' => $incomingNames ?: '—',
-            'shift_opened' => $timeIn->format('F d, Y g:i A'),
-            'shift_closed' => $timeOut->format('F d, Y g:i A'),
+            'shift_opened' => $shiftLogs->min('time_in')->format('F d, Y g:i A'),
+            'shift_closed' => $shiftLogs->max('time_out')->format('F d, Y g:i A'),
 
             'cash_drawer' => [
                 'opening_cash' => $openingCash,
