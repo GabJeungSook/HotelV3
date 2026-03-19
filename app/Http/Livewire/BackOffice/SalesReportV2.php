@@ -413,7 +413,7 @@ class SalesReportV2 extends Component
         if (empty($checkoutIds)) {
             $this->checkoutRoomAmount = 0;
             $this->checkoutRoomDeposit = 0;
-            $this->remainingRoomDeposit = max(0, ($this->summaryByType['room_deposits'] ?? 0) + $this->forwardedRoomDeposit);
+            $this->remainingRoomDeposit = max(0, ($this->summaryByType['room_deposits'] ?? 0));
             return;
         }
 
@@ -428,9 +428,8 @@ class SalesReportV2 extends Component
             ->where('remarks', 'Deposit From Check In (Room Key & TV Remote)')
             ->sum('payable_amount');
 
-        // Remaining = total room deposits (current shift + forwarded) - checkout room deposits
-        $totalRoomDeposit = ($this->summaryByType['room_deposits'] ?? 0) + $this->forwardedRoomDeposit;
-        $this->remainingRoomDeposit = max(0, $totalRoomDeposit - $this->checkoutRoomDeposit);
+        // Remaining = current shift room deposits - checkout room deposits
+        $this->remainingRoomDeposit = max(0, ($this->summaryByType['room_deposits'] ?? 0) - $this->checkoutRoomDeposit);
     }
 
     /**
@@ -463,13 +462,99 @@ class SalesReportV2 extends Component
             return;
         }
 
-        // Shift mode: Derive forwarded totals from the FWD rows already in salesRows
-        // This ensures the summary card always matches the FWD rows in the table
+        // Shift mode: FWD Room from FWD rows, but FWD deposits from previous shift's remaining balance
         $fwdRows = collect($this->salesRows)->filter(fn($row) => !empty($row['is_forwarded_guest_row']));
-
         $this->forwardedRoom = (float) $fwdRows->where('transaction_type', 'FWD ROOM')->sum('amount');
-        $this->forwardedRoomDeposit = (float) $fwdRows->where('transaction_type', 'FWD ROOM DEPOSIT')->sum('amount');
-        $this->forwardedGuestDeposit = (float) $fwdRows->where('transaction_type', 'FWD GUEST DEPOSIT')->sum('amount');
+
+        // Calculate forwarded deposits from previous shift's remaining balance
+        $this->calculateForwardedDepositsFromPreviousShift();
+    }
+
+    /**
+     * Calculate forwarded room deposit and guest deposit from the previous shift's remaining balance.
+     * FWD Room Deposit = previous shift's room deposits - previous shift's checkout room deposits
+     * FWD Guest Deposit = previous shift's guest deposits - previous shift's cashouts
+     */
+    private function calculateForwardedDepositsFromPreviousShift(): void
+    {
+        $currentShiftLog = ShiftLog::find($this->selectedShiftLogId);
+        if (!$currentShiftLog) {
+            $this->forwardedRoomDeposit = 0;
+            $this->forwardedGuestDeposit = 0;
+            return;
+        }
+
+        $branchId = auth()->user()->branch_id;
+
+        // Find the previous shift
+        $prevShiftLog = ShiftLog::query()
+            ->whereHas('frontdesk', fn($q) => $q->where('branch_id', $branchId))
+            ->where('time_out', '<=', $currentShiftLog->time_in)
+            ->whereNotNull('time_out')
+            ->orderBy('time_out', 'desc')
+            ->first();
+
+        if (!$prevShiftLog) {
+            $this->forwardedRoomDeposit = 0;
+            $this->forwardedGuestDeposit = 0;
+            return;
+        }
+
+        $prevTimeIn = $prevShiftLog->time_in;
+        $prevTimeOut = $prevShiftLog->time_out;
+
+        // Previous shift's occupying guests
+        $prevOccupyingIds = CheckinDetail::query()
+            ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
+            ->where('check_in_at', '<=', $prevTimeOut)
+            ->where(function ($q) use ($prevTimeIn) {
+                $q->whereNull('check_out_at')
+                  ->orWhere('check_out_at', '>=', $prevTimeIn);
+            })
+            ->pluck('id')
+            ->toArray();
+
+        if (empty($prevOccupyingIds)) {
+            $this->forwardedRoomDeposit = 0;
+            $this->forwardedGuestDeposit = 0;
+            return;
+        }
+
+        // Previous shift's transactions for occupying guests
+        $prevTransactions = Transaction::whereIn('checkin_detail_id', $prevOccupyingIds)
+            ->whereBetween('created_at', [$prevTimeIn, $prevTimeOut])
+            ->get();
+
+        // Previous shift's room deposits (type 2, room key/tv remote)
+        $prevRoomDeposits = (float) $prevTransactions->where('transaction_type_id', 2)
+            ->filter(fn($t) => str_contains(strtolower($t->remarks ?? ''), 'room key') || str_contains(strtolower($t->remarks ?? ''), 'tv remote'))
+            ->sum('payable_amount');
+
+        // Previous shift's checkout room deposits
+        $prevCheckoutIds = CheckinDetail::query()
+            ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
+            ->whereBetween('check_out_at', [$prevTimeIn, $prevTimeOut])
+            ->pluck('id')
+            ->toArray();
+
+        $prevCheckoutRoomDeposit = empty($prevCheckoutIds) ? 0 : (float) Transaction::whereIn('checkin_detail_id', $prevCheckoutIds)
+            ->where('transaction_type_id', 2)
+            ->where('remarks', 'Deposit From Check In (Room Key & TV Remote)')
+            ->sum('payable_amount');
+
+        // FWD Room Deposit = previous shift room deposits - previous shift checkout deposits
+        $this->forwardedRoomDeposit = max(0, $prevRoomDeposits - $prevCheckoutRoomDeposit);
+
+        // Previous shift's guest deposits (type 2, non-room-key)
+        $prevGuestDeposits = (float) $prevTransactions->where('transaction_type_id', 2)
+            ->filter(fn($t) => !str_contains(strtolower($t->remarks ?? ''), 'room key') && !str_contains(strtolower($t->remarks ?? ''), 'tv remote'))
+            ->sum('payable_amount');
+
+        // Previous shift's cashouts (type 5)
+        $prevCashouts = (float) $prevTransactions->where('transaction_type_id', 5)->sum('payable_amount');
+
+        // FWD Guest Deposit = previous shift guest deposits - previous shift cashouts
+        $this->forwardedGuestDeposit = max(0, $prevGuestDeposits - $prevCashouts);
     }
 
     public function resetFilters()
