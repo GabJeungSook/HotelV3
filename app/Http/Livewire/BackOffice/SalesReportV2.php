@@ -701,6 +701,14 @@ class SalesReportV2 extends Component
             })
             ->get();
 
+        // Deduplicate: keep only the latest check-in per guest + room
+        // (handles guests with multiple checkin_details for the same room)
+        $forwardedGuests = $forwardedGuests
+            ->sortByDesc('check_in_at')
+            ->unique(function ($cd) {
+                return $cd->guest_id . '-' . $cd->room_id;
+            });
+
         $rows = [];
         foreach ($forwardedGuests as $cd) {
             // Get the frontdesk who checked them in (from the check-in transaction)
