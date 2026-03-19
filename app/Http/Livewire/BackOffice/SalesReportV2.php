@@ -709,31 +709,37 @@ class SalesReportV2 extends Component
                 return $cd->guest_id . '-' . $cd->room_id;
             });
 
+        // Batch-load all transactions for forwarded guests in 1 query (fixes N+1)
+        $forwardedIds = $forwardedGuests->pluck('id')->toArray();
+        $allFwdTransactions = Transaction::whereIn('checkin_detail_id', $forwardedIds)
+            ->with('shift_log.frontdesk')
+            ->get()
+            ->groupBy('checkin_detail_id');
+
         $rows = [];
         foreach ($forwardedGuests as $cd) {
+            $cdTransactions = $allFwdTransactions->get($cd->id, collect());
+
             // Get the frontdesk who checked them in (from the check-in transaction)
-            $checkinTransaction = Transaction::where('checkin_detail_id', $cd->id)
-                ->where('transaction_type_id', 1)
-                ->with('shift_log.frontdesk')
-                ->first();
+            $checkinTransaction = $cdTransactions->where('transaction_type_id', 1)->first();
 
             // Get room key deposit (Room Key & TV Remote)
-            $roomKeyDeposit = Transaction::where('checkin_detail_id', $cd->id)
+            $roomKeyDeposit = $cdTransactions
                 ->where('transaction_type_id', 2)
                 ->where('remarks', 'Deposit From Check In (Room Key & TV Remote)')
                 ->first();
 
             // Get total guest deposits (any deposit that is NOT room key) — only those before this shift
-            $guestDepositTotal = (float) Transaction::where('checkin_detail_id', $cd->id)
+            $guestDepositTotal = (float) $cdTransactions
                 ->where('transaction_type_id', 2)
                 ->where('remarks', '!=', 'Deposit From Check In (Room Key & TV Remote)')
-                ->where('created_at', '<', $shiftLog->time_in)
+                ->filter(fn($t) => $t->created_at < $shiftLog->time_in)
                 ->sum('payable_amount');
 
             // Get total cashouts (type 5) for this checkin_detail — only those before this shift
-            $totalCashouts = (float) Transaction::where('checkin_detail_id', $cd->id)
+            $totalCashouts = (float) $cdTransactions
                 ->where('transaction_type_id', 5)
-                ->where('created_at', '<', $shiftLog->time_in)
+                ->filter(fn($t) => $t->created_at < $shiftLog->time_in)
                 ->sum('payable_amount');
 
             $checkinFrontdesk = $checkinTransaction?->shift_log?->frontdesk?->name ?? '—';
@@ -827,16 +833,25 @@ class SalesReportV2 extends Component
                 ->where('check_out_at', '<', $shiftLog->time_in)
                 ->get();
 
+            // Batch-load transactions for checked-out guests (fixes N+1)
+            $checkedOutIds = $checkedOutGuests->pluck('id')->toArray();
+            $allCheckedOutTransactions = Transaction::whereIn('checkin_detail_id', $checkedOutIds)
+                ->whereIn('transaction_type_id', [2, 5])
+                ->get()
+                ->groupBy('checkin_detail_id');
+
             foreach ($checkedOutGuests as $cd) {
-                $guestDepositTotal = (float) Transaction::where('checkin_detail_id', $cd->id)
+                $cdTransactions = $allCheckedOutTransactions->get($cd->id, collect());
+
+                $guestDepositTotal = (float) $cdTransactions
                     ->where('transaction_type_id', 2)
                     ->where('remarks', '!=', 'Deposit From Check In (Room Key & TV Remote)')
-                    ->where('created_at', '<', $shiftLog->time_in)
+                    ->filter(fn($t) => $t->created_at < $shiftLog->time_in)
                     ->sum('payable_amount');
 
-                $totalCashouts = (float) Transaction::where('checkin_detail_id', $cd->id)
+                $totalCashouts = (float) $cdTransactions
                     ->where('transaction_type_id', 5)
-                    ->where('created_at', '<', $shiftLog->time_in)
+                    ->filter(fn($t) => $t->created_at < $shiftLog->time_in)
                     ->sum('payable_amount');
 
                 $unclaimedAmount = max(0, $guestDepositTotal - $totalCashouts);
