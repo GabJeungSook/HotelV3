@@ -60,8 +60,20 @@ class FrontdeskReportV2 extends Component
         $outgoingNames = $shiftLogs->map(fn($l) => $l->frontdesk?->name)->filter()->unique()->implode(', ');
         $incomingNames = $this->getIncomingFrontdesks($timeOut, $branchId);
 
-        // All transactions in this shift
+        // Use occupying-guest approach (same as SalesReportV2) for accurate counts
+        $occupyingIds = CheckinDetail::query()
+            ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
+            ->where('check_in_at', '<=', $timeOut)
+            ->where(function ($q) use ($timeIn) {
+                $q->whereNull('check_out_at')
+                  ->orWhere('check_out_at', '>=', $timeIn);
+            })
+            ->pluck('id')
+            ->toArray();
+
+        // All transactions for occupying guests within this shift's time range
         $transactions = Transaction::where('branch_id', $branchId)
+            ->whereIn('checkin_detail_id', $occupyingIds)
             ->whereBetween('created_at', [$timeIn, $timeOut])
             ->get();
 
@@ -78,14 +90,18 @@ class FrontdeskReportV2 extends Component
         $roomDeposits = $deposits->filter(fn($t) => str_contains(strtolower($t->remarks ?? ''), 'room key') || str_contains(strtolower($t->remarks ?? ''), 'tv remote'));
         $guestDeposits = $deposits->filter(fn($t) => !str_contains(strtolower($t->remarks ?? ''), 'room key') && !str_contains(strtolower($t->remarks ?? ''), 'tv remote'));
 
+        // Miscellaneous = amenities (type 8) + damages (type 4)
+        $miscCount = $amenities->count() + $damages->count();
+        $miscAmount = (float) $amenities->sum('payable_amount') + (float) $damages->sum('payable_amount');
+
         $salesSummary = [
             'new_checkin' => ['count' => $checkins->count(), 'amount' => (float) $checkins->sum('payable_amount')],
             'extension' => ['count' => $extensions->count(), 'amount' => (float) $extensions->sum('payable_amount')],
             'transfer' => ['count' => $transfers->count(), 'amount' => (float) $transfers->sum('payable_amount')],
-            'miscellaneous' => ['count' => $amenities->count(), 'amount' => (float) $amenities->sum('payable_amount')],
+            'miscellaneous' => ['count' => $miscCount, 'amount' => $miscAmount],
             'food' => ['count' => $food->count(), 'amount' => (float) $food->sum('payable_amount')],
             'drink' => ['count' => 0, 'amount' => 0],
-            'others' => ['count' => $damages->count(), 'amount' => (float) $damages->sum('payable_amount')],
+            'others' => ['count' => 0, 'amount' => 0],
         ];
         $salesSummary['total'] = [
             'count' => collect($salesSummary)->sum('count'),
@@ -129,8 +145,8 @@ class FrontdeskReportV2 extends Component
             ->where('remarks', 'Deposit From Check In (Room Key & TV Remote)')
             ->sum('payable_amount');
 
-        // Current shift guest deposits
-        $currentGuestDeposit = (float) $guestDeposits->sum('payable_amount');
+        // Current shift guest deposits minus cashouts
+        $currentGuestDeposit = max(0, (float) $guestDeposits->sum('payable_amount') - (float) $cashouts->sum('payable_amount'));
 
         // Expenses
         $expenses = Expense::whereBetween('created_at', [$timeIn, $timeOut])->get();

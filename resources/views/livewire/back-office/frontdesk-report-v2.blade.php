@@ -90,10 +90,17 @@
                         'miscellaneous' => 'Miscellaneous',
                         'food' => 'Food',
                         'drink' => 'Drink',
-                        'others' => 'Others (Damages)',
+                        'others' => 'Others',
                     ] as $key => $label)
                     <tr>
-                        <td class="border border-gray-300 px-3 py-2 font-medium">{{ $label }}</td>
+                        <td class="border border-gray-300 px-3 py-2 font-medium">
+                            {{ $label }}
+                            @if($key === 'new_checkin')
+                                <span class="text-gray-500 text-xs">(Total New Check-in)</span>
+                            @elseif($key === 'others')
+                                <span class="text-gray-500 text-xs">(Foods and Drinks from POS)</span>
+                            @endif
+                        </td>
                         <td class="border border-gray-300 px-3 py-2 text-right">{{ $reportData['sales_summary'][$key]['count'] }}</td>
                         <td class="border border-gray-300 px-3 py-2 text-right">P {{ number_format($reportData['sales_summary'][$key]['amount'], 2) }}</td>
                     </tr>
