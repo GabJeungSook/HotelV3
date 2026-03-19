@@ -391,8 +391,8 @@ class SalesReportV2Test extends TestCase
         $pmShiftLog = ShiftLog::create([
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
-            'time_in' => now()->setTime(16, 0),
-            'time_out' => now()->setTime(23, 59),
+            'time_in' => now()->setTime(20, 0),
+            'time_out' => now()->addDay()->setTime(7, 59),
             'shift' => 'PM',
         ]);
 
@@ -456,15 +456,15 @@ class SalesReportV2Test extends TestCase
         $pmShiftLog = ShiftLog::create([
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
-            'time_in' => now()->setTime(16, 0),
-            'time_out' => now()->setTime(23, 59),
+            'time_in' => now()->setTime(20, 0),
+            'time_out' => now()->addDay()->setTime(7, 59),
             'shift' => 'PM',
         ]);
 
         // Create guest who checked in during PM shift
         $guest = $this->createGuest(['name' => 'PM Guest Same Shift']);
         $checkinDetail = $this->createCheckinDetail($guest, [
-            'check_in_at' => now()->setTime(17, 0),
+            'check_in_at' => now()->setTime(21, 0),
             'check_out_at' => now()->addDay(), // Still occupying (future checkout)
         ]);
 
@@ -472,7 +472,7 @@ class SalesReportV2Test extends TestCase
         $this->createTransaction($guest, $checkinDetail, [
             'transaction_type_id' => 1,
             'shift_log_id' => $pmShiftLog->id,
-            'created_at' => now()->setTime(17, 0),
+            'created_at' => now()->setTime(21, 0),
         ]);
 
         // Filter for PM shift using shift mode - guest should NOT be forwarded
@@ -508,8 +508,8 @@ class SalesReportV2Test extends TestCase
         $pmShiftLog = ShiftLog::create([
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
-            'time_in' => now()->setTime(16, 0),
-            'time_out' => now()->setTime(23, 59),
+            'time_in' => now()->setTime(20, 0),
+            'time_out' => now()->addDay()->setTime(7, 59),
             'shift' => 'PM',
         ]);
 
@@ -600,8 +600,8 @@ class SalesReportV2Test extends TestCase
         $pmShiftLog = ShiftLog::create([
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
-            'time_in' => now()->setTime(16, 0),
-            'time_out' => now()->setTime(23, 59),
+            'time_in' => now()->setTime(20, 0),
+            'time_out' => now()->addDay()->setTime(7, 59),
             'shift' => 'PM',
         ]);
 
@@ -634,7 +634,7 @@ class SalesReportV2Test extends TestCase
         // Guest 2: Checked in during PM
         $guest2 = $this->createGuest(['name' => 'PM Guest']);
         $checkinDetail2 = $this->createCheckinDetail($guest2, [
-            'check_in_at' => now()->setTime(17, 0),
+            'check_in_at' => now()->setTime(21, 0),
             'check_out_at' => now()->addDay(),
         ]);
 
@@ -644,7 +644,7 @@ class SalesReportV2Test extends TestCase
             'shift_log_id' => $pmShiftLog->id,
             'payable_amount' => 600,
             'paid_amount' => 600,
-            'created_at' => now()->setTime(17, 0),
+            'created_at' => now()->setTime(21, 0),
         ]);
 
         // Filter for PM shift
@@ -696,8 +696,8 @@ class SalesReportV2Test extends TestCase
         $pmShiftLog = ShiftLog::create([
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
-            'time_in' => now()->setTime(16, 0),
-            'time_out' => now()->setTime(23, 59),
+            'time_in' => now()->setTime(20, 0),
+            'time_out' => now()->addDay()->setTime(7, 59),
             'shift' => 'PM',
         ]);
 
@@ -804,8 +804,8 @@ class SalesReportV2Test extends TestCase
         $pmShiftLog = ShiftLog::create([
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
-            'time_in' => now()->setTime(16, 0),
-            'time_out' => now()->setTime(23, 59),
+            'time_in' => now()->setTime(20, 0),
+            'time_out' => now()->addDay()->setTime(7, 59),
             'shift' => 'PM',
         ]);
 
@@ -881,8 +881,8 @@ class SalesReportV2Test extends TestCase
         $pmShiftLog = ShiftLog::create([
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
-            'time_in' => now()->setTime(16, 0),
-            'time_out' => now()->setTime(23, 59),
+            'time_in' => now()->setTime(20, 0),
+            'time_out' => now()->addDay()->setTime(7, 59),
             'shift' => 'PM',
         ]);
 
@@ -995,8 +995,8 @@ class SalesReportV2Test extends TestCase
         $pmShiftLog = ShiftLog::create([
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
-            'time_in' => now()->setTime(16, 0),
-            'time_out' => now()->setTime(23, 59),
+            'time_in' => now()->setTime(20, 0),
+            'time_out' => now()->addDay()->setTime(7, 59),
             'shift' => 'PM',
         ]);
 
@@ -1097,8 +1097,8 @@ class SalesReportV2Test extends TestCase
         $pmShiftLog = ShiftLog::create([
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
-            'time_in' => now()->setTime(16, 0),
-            'time_out' => now()->setTime(23, 59),
+            'time_in' => now()->setTime(20, 0),
+            'time_out' => now()->addDay()->setTime(7, 59),
             'shift' => 'PM',
         ]);
 
@@ -1192,8 +1192,8 @@ class SalesReportV2Test extends TestCase
         $pmShiftLog = ShiftLog::create([
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
-            'time_in' => now()->setTime(16, 0),
-            'time_out' => now()->setTime(23, 59),
+            'time_in' => now()->setTime(20, 0),
+            'time_out' => now()->addDay()->setTime(7, 59),
             'shift' => 'PM',
         ]);
 
@@ -1304,8 +1304,8 @@ class SalesReportV2Test extends TestCase
         $pmShiftLog = ShiftLog::create([
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
-            'time_in' => now()->setTime(16, 0),
-            'time_out' => now()->setTime(23, 59),
+            'time_in' => now()->setTime(20, 0),
+            'time_out' => now()->addDay()->setTime(7, 59),
             'shift' => 'PM',
         ]);
 
@@ -1335,7 +1335,7 @@ class SalesReportV2Test extends TestCase
             'created_at' => now()->setTime(9, 5),
         ]);
 
-        // Additional guest deposit during PM shift: 200 (should NOT be in FWD)
+        // Additional guest deposit during PM shift: 200 (created at 21:00, during PM)
         $this->createTransaction($guest, $checkinDetail, [
             'transaction_type_id' => 2,
             'shift_log_id' => $pmShiftLog->id,
@@ -1343,10 +1343,11 @@ class SalesReportV2Test extends TestCase
             'paid_amount' => 200,
             'remarks' => 'Guest Deposit',
             'description' => 'Deposit',
-            'created_at' => now()->setTime(18, 0),
+            'created_at' => now()->setTime(21, 0),
         ]);
 
-        // View PM shift — FWD GUEST DEPOSIT should show 300 (only AM deposit), NOT 500
+        // View PM shift — FWD GUEST DEPOSIT should show 300 (only AM deposit),
+        // because the 200 deposit at 21:00 is during PM shift (after time_in 20:00)
         $component = Livewire::test(SalesReportV2::class)
             ->set('filterMode', 'shift')
             ->set('selectedShiftLogId', $pmShiftLog->id)
@@ -1358,7 +1359,7 @@ class SalesReportV2Test extends TestCase
         $this->assertNotNull($fwdGuestDeposit);
         $this->assertEquals(300, $fwdGuestDeposit['amount']);
 
-        // Summary should match
+        // Summary should match — cumulative chain: AM has 300 guest dep, 0 cashouts = remaining 300
         $this->assertEquals(300, $component->get('forwardedGuestDeposit'));
     }
 
@@ -1380,8 +1381,8 @@ class SalesReportV2Test extends TestCase
         $pmShiftLog = ShiftLog::create([
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
-            'time_in' => now()->setTime(16, 0),
-            'time_out' => now()->setTime(23, 59),
+            'time_in' => now()->setTime(20, 0),
+            'time_out' => now()->addDay()->setTime(7, 59),
             'shift' => 'PM',
         ]);
 
@@ -1445,8 +1446,8 @@ class SalesReportV2Test extends TestCase
         $pmShiftLog = ShiftLog::create([
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
-            'time_in' => now()->setTime(16, 0),
-            'time_out' => now()->setTime(23, 59),
+            'time_in' => now()->setTime(20, 0),
+            'time_out' => now()->addDay()->setTime(7, 59),
             'shift' => 'PM',
         ]);
 
