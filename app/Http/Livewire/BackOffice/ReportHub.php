@@ -57,6 +57,10 @@ class ReportHub extends Component
                 'label' => 'Frontdesk Report',
                 'component' => 'back-office.temporary-frontdesk-report',
             ],
+            'frontdesk-v2' => [
+                'label' => 'Frontdesk Report V2',
+                'component' => 'back-office.frontdesk-report-v2',
+            ],
         ];
     }
 
