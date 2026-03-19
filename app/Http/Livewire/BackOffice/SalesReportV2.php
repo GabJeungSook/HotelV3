@@ -413,7 +413,7 @@ class SalesReportV2 extends Component
         if (empty($checkoutIds)) {
             $this->checkoutRoomAmount = 0;
             $this->checkoutRoomDeposit = 0;
-            $this->remainingRoomDeposit = max(0, ($this->summaryByType['room_deposits'] ?? 0));
+            $this->remainingRoomDeposit = max(0, ($this->summaryByType['room_deposits'] ?? 0) + $this->forwardedRoomDeposit);
             return;
         }
 
@@ -428,8 +428,9 @@ class SalesReportV2 extends Component
             ->where('remarks', 'Deposit From Check In (Room Key & TV Remote)')
             ->sum('payable_amount');
 
-        // Remaining = current shift room deposits - checkout room deposits
-        $this->remainingRoomDeposit = max(0, ($this->summaryByType['room_deposits'] ?? 0) - $this->checkoutRoomDeposit);
+        // Remaining = (current shift room deposits + forwarded room deposits) - checkout room deposits
+        $totalRoomDeposit = ($this->summaryByType['room_deposits'] ?? 0) + $this->forwardedRoomDeposit;
+        $this->remainingRoomDeposit = max(0, $totalRoomDeposit - $this->checkoutRoomDeposit);
     }
 
     /**
