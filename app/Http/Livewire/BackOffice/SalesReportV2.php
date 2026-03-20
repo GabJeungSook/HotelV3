@@ -161,8 +161,8 @@ class SalesReportV2 extends Component
                              . ' - ' . $frontdeskNames
                              . ' (' . $s['time_in']->format('g:i A') . ' - ' . $s['time_out']->format('g:i A') . ')',
                     'frontdesks' => $frontdeskNames,
-                    'time_in' => $s['time_in'],
-                    'time_out' => $s['time_out'],
+                    'time_in' => $s['time_in']->toIso8601String(),
+                    'time_out' => $s['time_out']->toIso8601String(),
                     'time_in_formatted' => $s['time_in']->format('F d, Y g:i A'),
                     'time_out_formatted' => $s['time_out']->format('F d, Y g:i A'),
                 ];
@@ -411,13 +411,16 @@ class SalesReportV2 extends Component
         // Find the next session's time_in to expand checkout range (captures gap checkouts)
         $nextSessionTimeIn = null;
         if ($this->filterMode === 'shift' && $this->selectedShiftLogId) {
-            $currentIdx = collect($this->availableShiftSessions)
-                ->search(fn($s) => $s['id'] == $this->selectedShiftLogId);
-            if ($currentIdx !== false) {
-                $nextSession = $this->availableShiftSessions[$currentIdx + 1] ?? null;
-                if ($nextSession) {
-                    $nextSessionTimeIn = Carbon::parse($nextSession['time_in']);
+            $sessions = $this->availableShiftSessions;
+            $currentIdx = null;
+            foreach ($sessions as $idx => $s) {
+                if ((int) $s['id'] === (int) $this->selectedShiftLogId) {
+                    $currentIdx = $idx;
+                    break;
                 }
+            }
+            if ($currentIdx !== null && isset($sessions[$currentIdx + 1])) {
+                $nextSessionTimeIn = Carbon::parse($sessions[$currentIdx + 1]['time_in']);
             }
         }
 
