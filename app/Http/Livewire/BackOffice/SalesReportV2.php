@@ -174,7 +174,7 @@ class SalesReportV2 extends Component
     /**
      * Get check-in and check-out counts for a shift period.
      */
-    private function getShiftCounts(Carbon $timeIn, Carbon $timeOut, ?Carbon $nextSessionTimeIn = null): array
+    private function getShiftCounts(Carbon $timeIn, Carbon $timeOut): array
     {
         $branchId = auth()->user()->branch_id;
 
@@ -183,13 +183,9 @@ class SalesReportV2 extends Component
             ->whereBetween('check_in_at', [$timeIn, $timeOut])
             ->count();
 
-        // Check-outs: expand range to next session's time_in to capture gap checkouts
-        // so that: check-ins + forwarded - checkouts = next shift's forwarded
-        $checkoutEnd = $nextSessionTimeIn ?? $timeOut;
-
+        // Check-outs: checkin_details with check_out_at during this shift
         $checkouts = CheckinDetail::whereHas('room', fn($q) => $q->where('branch_id', $branchId))
-            ->where('check_out_at', '>=', $timeIn)
-            ->where('check_out_at', '<', $checkoutEnd)
+            ->whereBetween('check_out_at', [$timeIn, $timeOut])
             ->count();
 
         return ['checkins' => $checkins, 'checkouts' => $checkouts];
@@ -407,24 +403,7 @@ class SalesReportV2 extends Component
     private function calculateShiftCounts(): void
     {
         $range = $this->getFilterRange();
-
-        // Find the next session's time_in to expand checkout range (captures gap checkouts)
-        $nextSessionTimeIn = null;
-        if ($this->filterMode === 'shift' && $this->selectedShiftLogId) {
-            $sessions = $this->availableShiftSessions;
-            $currentIdx = null;
-            foreach ($sessions as $idx => $s) {
-                if ((int) $s['id'] === (int) $this->selectedShiftLogId) {
-                    $currentIdx = $idx;
-                    break;
-                }
-            }
-            if ($currentIdx !== null && isset($sessions[$currentIdx + 1])) {
-                $nextSessionTimeIn = Carbon::parse($sessions[$currentIdx + 1]['time_in']);
-            }
-        }
-
-        $counts = $this->getShiftCounts($range['start'], $range['end'], $nextSessionTimeIn);
+        $counts = $this->getShiftCounts($range['start'], $range['end']);
         $this->shiftCheckins = $counts['checkins'];
         $this->shiftCheckouts = $counts['checkouts'];
     }
