@@ -174,19 +174,22 @@ class SalesReportV2 extends Component
     /**
      * Get check-in and check-out counts for a shift period.
      */
-    private function getShiftCounts(Carbon $timeIn, Carbon $timeOut): array
+    private function getShiftCounts(Carbon $timeIn, Carbon $timeOut, ?Carbon $nextSessionTimeIn = null): array
     {
         $branchId = auth()->user()->branch_id;
 
-        // Check-ins: transactions with type 1 created during this shift
-        $checkins = Transaction::where('branch_id', $branchId)
-            ->where('transaction_type_id', 1)
-            ->whereBetween('created_at', [$timeIn, $timeOut])
+        // Check-ins: checkin_details with check_in_at during this shift
+        $checkins = CheckinDetail::whereHas('room', fn($q) => $q->where('branch_id', $branchId))
+            ->whereBetween('check_in_at', [$timeIn, $timeOut])
             ->count();
 
-        // Check-outs: checkin_details with check_out_at during this shift
+        // Check-outs: expand range to next session's time_in to capture gap checkouts
+        // so that: check-ins + forwarded - checkouts = next shift's forwarded
+        $checkoutEnd = $nextSessionTimeIn ?? $timeOut;
+
         $checkouts = CheckinDetail::whereHas('room', fn($q) => $q->where('branch_id', $branchId))
-            ->whereBetween('check_out_at', [$timeIn, $timeOut])
+            ->where('check_out_at', '>=', $timeIn)
+            ->where('check_out_at', '<', $checkoutEnd)
             ->count();
 
         return ['checkins' => $checkins, 'checkouts' => $checkouts];
@@ -404,7 +407,21 @@ class SalesReportV2 extends Component
     private function calculateShiftCounts(): void
     {
         $range = $this->getFilterRange();
-        $counts = $this->getShiftCounts($range['start'], $range['end']);
+
+        // Find the next session's time_in to expand checkout range (captures gap checkouts)
+        $nextSessionTimeIn = null;
+        if ($this->filterMode === 'shift' && $this->selectedShiftLogId) {
+            $currentIdx = collect($this->availableShiftSessions)
+                ->search(fn($s) => $s['id'] == $this->selectedShiftLogId);
+            if ($currentIdx !== false) {
+                $nextSession = $this->availableShiftSessions[$currentIdx + 1] ?? null;
+                if ($nextSession) {
+                    $nextSessionTimeIn = Carbon::parse($nextSession['time_in']);
+                }
+            }
+        }
+
+        $counts = $this->getShiftCounts($range['start'], $range['end'], $nextSessionTimeIn);
         $this->shiftCheckins = $counts['checkins'];
         $this->shiftCheckouts = $counts['checkouts'];
     }
@@ -706,8 +723,16 @@ class SalesReportV2 extends Component
             ->leftJoin('types as t', 't.id', '=', 'r.type_id')
             ->leftJoin('transaction_types as tt', 'tt.id', '=', 'tr.transaction_type_id')
             ->whereIn('tr.checkin_detail_id', $occupyingIds)
-            // Filter transactions by the selected range
-            ->whereBetween('tr.created_at', [$range['start'], $range['end']])
+            // Filter transactions by the selected range,
+            // OR include check-in transactions (type 1) for guests whose check_in_at is in range
+            // (ensures room charges match the check-in badge count)
+            ->where(function ($q) use ($range) {
+                $q->whereBetween('tr.created_at', [$range['start'], $range['end']])
+                  ->orWhere(function ($q2) use ($range) {
+                      $q2->where('tr.transaction_type_id', 1)
+                         ->whereBetween('cd.check_in_at', [$range['start'], $range['end']]);
+                  });
+            })
             // Filter by WHO PROCESSED the transaction (only in date_range mode)
             ->when($this->filterMode === 'date_range' && $this->frontdesk, function ($q) {
                 $q->where('sl.frontdesk_id', $this->frontdesk);
@@ -804,19 +829,9 @@ class SalesReportV2 extends Component
 
         $branchId = auth()->user()->branch_id;
 
-        // Find previous shift to detect overlap
-        $previousShiftLog = ShiftLog::whereHas('frontdesk', fn($q) => $q->where('branch_id', $branchId))
-            ->where('time_in', '<', $shiftLog->time_in)
-            ->orderBy('time_in', 'desc')
-            ->first();
-
-        // Check if there's an overlap (previous shift ends after current shift starts)
-        $hasOverlap = $previousShiftLog && $previousShiftLog->time_out > $shiftLog->time_in;
-
         // Find guests who:
         // 1. Checked in BEFORE this shift started
         // 2. Haven't checked out yet OR checked out AFTER this shift started
-        // 3. Were NOT checked out during the overlap window (previous shift's territory)
         $forwardedGuests = CheckinDetail::query()
             ->with(['guest', 'room.type', 'room.floor'])
             ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
@@ -824,14 +839,6 @@ class SalesReportV2 extends Component
             ->where(function ($q) use ($shiftLog) {
                 $q->whereNull('check_out_at')
                   ->orWhere('check_out_at', '>=', $shiftLog->time_in);
-            })
-            ->when($hasOverlap, function ($q) use ($shiftLog, $previousShiftLog) {
-                // Exclude guests checked out during the overlap window
-                // (between current shift start and previous shift end)
-                $q->whereDoesntHave('checkOutGuestReports', function ($sub) use ($shiftLog, $previousShiftLog) {
-                    $sub->where('created_at', '>=', $shiftLog->time_in)
-                        ->where('created_at', '<=', $previousShiftLog->time_out);
-                });
             })
             ->get();
 
