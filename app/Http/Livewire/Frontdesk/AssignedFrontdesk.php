@@ -73,6 +73,27 @@ class AssignedFrontdesk extends Component
         if($this->drawer)
         {
          DB::beginTransaction();
+
+            // Auto-close any stale shifts open longer than 14 hours (forgotten clock-outs)
+            ShiftLog::whereNull('time_out')
+                ->where('time_in', '<', now()->subHours(14))
+                ->update([
+                    'time_out' => DB::raw('DATE_ADD(time_in, INTERVAL 14 HOUR)'),
+                    'end_cash' => DB::raw('COALESCE(NULLIF(end_cash, 0), 1.00)'),
+                ]);
+
+            // Auto-close any existing open shift for this user
+            $openShift = ShiftLog::where('frontdesk_id', auth()->user()->id)
+                ->whereNull('time_out')
+                ->first();
+
+            if ($openShift) {
+                $openShift->update([
+                    'time_out' => now(),
+                    'end_cash' => $openShift->end_cash ?: 1.00,
+                ]);
+            }
+
              array_push($this->get_frontdesk, 'N/A');
             $frontdesk_ids = json_encode($this->get_frontdesk);
             ShiftLog::create([
@@ -116,6 +137,19 @@ class AssignedFrontdesk extends Component
         $this->validate([
             'name' => 'required',
         ]);
+
+        // Auto-close any existing open shift for this user
+        $openShift = ShiftLog::where('frontdesk_id', auth()->user()->id)
+            ->whereNull('time_out')
+            ->first();
+
+        if ($openShift) {
+            $openShift->update([
+                'time_out' => now(),
+                'end_cash' => $openShift->end_cash ?: 1.00,
+            ]);
+        }
+
         array_push($this->get_frontdesk, $this->name);
         $haha = json_encode($this->get_frontdesk);
         DB::beginTransaction();

@@ -42,6 +42,7 @@ class ClearCashDrawerOnLogout
             ->first();
         if ($shift_log) {
             $shift_log->time_out = now();
+            $shift_log->end_cash = $shift_log->end_cash ?: 1.00;
             $shift_log->save();
         }
     }
