@@ -383,18 +383,11 @@ class SalesReportV2 extends Component
                 ->values()
                 ->toArray();
 
-            // Filter out checkout guests by matching room_number + guest_name
-            $checkoutKeys = $checkoutDetails->map(fn($cd) => strtoupper($cd->guest?->name ?? '—') . '|' . ($cd->room?->number ?? '—'))->toArray();
-            $remainingRows = collect($remainingRows)->filter(function ($r) use ($checkoutKeys) {
-                $key = ($r['guest_name'] ?? '') . '|' . ($r['room_number'] ?? '');
-                return !in_array($key, $checkoutKeys);
-            })->values();
-
-            // Deduplicate by guest_name|room_number — a forwarded guest who also has a
-            // deposit transaction in the current shift would otherwise appear twice
-            $remainingRows = $remainingRows->unique(fn($r) => ($r['guest_name'] ?? '') . '|' . ($r['room_number'] ?? ''))
-                ->values()
-                ->toArray();
+            // Filter out checkout guests by checkin_detail_id and deduplicate
+            $checkoutCheckinDetailIds = $checkoutDetails->pluck('id')->toArray();
+            $remainingRows = collect($remainingRows)->filter(function ($r) use ($checkoutCheckinDetailIds) {
+                return !in_array($r['checkin_detail_id'] ?? null, $checkoutCheckinDetailIds);
+            })->unique('checkin_detail_id')->values()->toArray();
 
             $this->cardModalRows = $remainingRows;
             $this->cardModalTotal = count($remainingRows) * 200;
@@ -704,6 +697,7 @@ class SalesReportV2 extends Component
                 $q->where('sl.frontdesk_id', $this->frontdesk);
             })
             ->select([
+                'tr.checkin_detail_id',
                 'r.number as room_number',
                 'r.id as room_id',
                 't.name as room_type',
@@ -754,6 +748,7 @@ class SalesReportV2 extends Component
             }
 
             return [
+                'checkin_detail_id' => $row->checkin_detail_id,
                 'room_number' => $row->room_number ?? '—',
                 'room_id' => $row->room_id,
                 'room_type' => $row->room_type ?? '—',
@@ -851,6 +846,7 @@ class SalesReportV2 extends Component
 
             // Add forwarded room row
             $rows[] = [
+                'checkin_detail_id' => $cd->id,
                 'room_number' => $cd->room?->number ?? '—',
                 'room_id' => $cd->room_id,
                 'room_type' => $cd->room?->type?->name ?? '—',
@@ -873,6 +869,7 @@ class SalesReportV2 extends Component
             // Add forwarded room key deposit row if exists
             if ($roomKeyDepositAmount > 0) {
                 $rows[] = [
+                    'checkin_detail_id' => $cd->id,
                     'room_number' => $cd->room?->number ?? '—',
                     'room_id' => $cd->room_id,
                     'room_type' => $cd->room?->type?->name ?? '—',
@@ -896,6 +893,7 @@ class SalesReportV2 extends Component
             // Add forwarded guest deposit row if exists
             if ($guestDepositAmount > 0) {
                 $rows[] = [
+                    'checkin_detail_id' => $cd->id,
                     'room_number' => $cd->room?->number ?? '—',
                     'room_id' => $cd->room_id,
                     'room_type' => $cd->room?->type?->name ?? '—',
@@ -960,6 +958,7 @@ class SalesReportV2 extends Component
                     $checkOutAt = $cd->check_out_at ? Carbon::parse($cd->check_out_at) : null;
 
                     $rows[] = [
+                        'checkin_detail_id' => $cd->id,
                         'room_number' => $cd->room?->number ?? '—',
                         'room_id' => $cd->room_id,
                         'room_type' => $cd->room?->type?->name ?? '—',
