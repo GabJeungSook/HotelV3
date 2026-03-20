@@ -576,9 +576,9 @@ class SalesReportV2Test extends TestCase
         $this->assertEquals(300, $fwdDepositRow['amount']);
         $this->assertEquals(0, $fwdDepositRow['total']);
 
-        // But forwarded totals should show ORIGINAL amounts from AM
+        // Forwarded totals: room from FWD rows, room deposit = forwardedCount × 200
         $this->assertEquals(500, $component->get('forwardedRoom'));
-        $this->assertEquals(0, $component->get('forwardedRoomDeposit'));
+        $this->assertEquals(200, $component->get('forwardedRoomDeposit')); // 1 forwarded guest × 200
         $this->assertEquals(300, $component->get('forwardedGuestDeposit'));
     }
 

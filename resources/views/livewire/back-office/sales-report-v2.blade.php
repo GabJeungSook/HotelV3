@@ -217,7 +217,7 @@
         <div class="bg-white rounded-lg shadow-sm ring-1 ring-gray-200 p-4">
             <div wire:click="openCardModal('room_deposits')" class="cursor-pointer hover:text-indigo-600 transition">
                 <div class="text-xs text-gray-500 uppercase tracking-wide">Room Deposit</div>
-                <div class="text-lg font-semibold text-gray-900 mt-1">P {{ number_format(($summaryByType['room_deposits'] ?? 0) + ($forwardedRoomDeposit ?? 0), 2) }}</div>
+                <div class="text-lg font-semibold text-gray-900 mt-1">P {{ number_format(($shiftCheckins + $forwardedCount) * 200, 2) }}</div>
             </div>
             <div class="text-xs text-gray-500 mt-1 space-y-0.5">
                 <div wire:click="openCardModal('checkout_room_deposit')" class="flex justify-between cursor-pointer hover:text-indigo-600 transition">

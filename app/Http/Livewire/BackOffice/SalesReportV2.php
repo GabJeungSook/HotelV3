@@ -223,18 +223,18 @@ class SalesReportV2 extends Component
         $this->buildExpensesSummary();
         $this->buildRemittanceSummary();
         $this->buildRoomSummary();
-        $this->calculateForwardedTotals();
-        $this->calculateShiftCounts();
-
-        // Calculate net sales (Gross - Expenses)
-        $this->netSales = $this->totalSales - $this->expensesTotal;
-
-        // Count forwarded stays (each stay has exactly one FWD ROOM row)
+        // Count forwarded stays FIRST (needed by calculateForwardedTotals for count × 200)
         $this->forwardedCount = collect($this->salesRows)
             ->filter(fn($row) => ($row['is_forwarded_guest_row'] ?? false)
                 && $row['transaction_type'] === 'FWD ROOM'
                 && !str_contains($row['remarks'] ?? '', 'Unclaimed'))
             ->count();
+
+        $this->calculateShiftCounts();
+        $this->calculateForwardedTotals();
+
+        // Calculate net sales (Gross - Expenses)
+        $this->netSales = $this->totalSales - $this->expensesTotal;
 
         // Count and sum unclaimed deposit guests (checked out)
         $unclaimedRows = collect($this->salesRows)
@@ -295,13 +295,15 @@ class SalesReportV2 extends Component
             $this->cardModalRows = $filtered->toArray();
             $this->cardModalTotal = (float) $filtered->sum('amount');
 
-            // Override totals for cumulative cards to match card values
+            // Override totals to match card values (count × 200 for room deposits)
             if ($type === 'fwd_room_deposit') {
                 $this->cardModalTotal = $this->forwardedRoomDeposit;
             } elseif ($type === 'fwd_guest_deposit') {
                 $this->cardModalTotal = $this->forwardedGuestDeposit;
             } elseif ($type === 'room_deposits') {
-                $this->cardModalTotal = ($this->summaryByType['room_deposits'] ?? 0) + $this->forwardedRoomDeposit;
+                $this->cardModalTotal = ($this->shiftCheckins + $this->forwardedCount) * 200;
+            } elseif ($type === 'checkout_room_deposit') {
+                // Handled by buildCheckoutModalRows but won't reach here
             }
         } elseif (in_array($type, ['checkout_room', 'checkout_room_deposit', 'remaining_room_deposit'])) {
             $this->buildCheckoutModalRows($type);
@@ -382,14 +384,14 @@ class SalesReportV2 extends Component
                 ->toArray();
 
             // Filter out checkout guests by matching room_number + guest_name
-            $checkoutKeys = $checkoutDetails->map(fn($cd) => strtoupper($cd->guest?->name ?? '') . '|' . ($cd->room?->number ?? ''))->toArray();
+            $checkoutKeys = $checkoutDetails->map(fn($cd) => strtoupper($cd->guest?->name ?? '—') . '|' . ($cd->room?->number ?? '—'))->toArray();
             $remainingRows = collect($remainingRows)->filter(function ($r) use ($checkoutKeys) {
                 $key = ($r['guest_name'] ?? '') . '|' . ($r['room_number'] ?? '');
                 return !in_array($key, $checkoutKeys);
             })->values()->toArray();
 
             $this->cardModalRows = $remainingRows;
-            $this->cardModalTotal = $this->remainingRoomDeposit;
+            $this->cardModalTotal = count($remainingRows) * 200;
             return;
         }
 
@@ -426,7 +428,7 @@ class SalesReportV2 extends Component
         if (empty($checkoutIds)) {
             $this->checkoutRoomAmount = 0;
             $this->checkoutRoomDeposit = 0;
-            $this->remainingRoomDeposit = max(0, ($this->summaryByType['room_deposits'] ?? 0) + $this->forwardedRoomDeposit);
+            $this->remainingRoomDeposit = ($this->shiftCheckins + $this->forwardedCount) * 200;
             return;
         }
 
@@ -435,15 +437,13 @@ class SalesReportV2 extends Component
             ->where('transaction_type_id', 1)
             ->sum('payable_amount');
 
-        // Sum room deposits (type 2, Room Key & TV Remote) for checked-out guests
-        $this->checkoutRoomDeposit = (float) Transaction::whereIn('checkin_detail_id', $checkoutIds)
-            ->where('transaction_type_id', 2)
-            ->where('remarks', 'Deposit From Check In (Room Key & TV Remote)')
-            ->sum('payable_amount');
+        // Checkout room deposit = checkout count × 200 (each guest returns their 200 deposit)
+        $this->checkoutRoomDeposit = $this->shiftCheckouts * 200;
 
-        // Remaining = (current shift room deposits + forwarded room deposits) - checkout room deposits
-        $totalRoomDeposit = ($this->summaryByType['room_deposits'] ?? 0) + $this->forwardedRoomDeposit;
-        $this->remainingRoomDeposit = max(0, $totalRoomDeposit - $this->checkoutRoomDeposit);
+        // Remaining = guests still occupying at shift end × 200
+        // Still occupying = check-ins + forwarded - checkouts
+        $remainingGuests = max(0, $this->shiftCheckins + $this->forwardedCount - $this->shiftCheckouts);
+        $this->remainingRoomDeposit = $remainingGuests * 200;
     }
 
     /**
@@ -476,25 +476,28 @@ class SalesReportV2 extends Component
             return;
         }
 
-        // Shift mode: FWD Room from FWD rows, but FWD deposits from previous shift's remaining balance
+        // Shift mode: FWD Room from FWD rows
         $fwdRows = collect($this->salesRows)->filter(fn($row) => !empty($row['is_forwarded_guest_row']));
         $this->forwardedRoom = (float) $fwdRows->where('transaction_type', 'FWD ROOM')->sum('amount');
 
-        // Calculate forwarded deposits from previous shift's remaining balance
+        // FWD Room Deposit = forwarded guest count × 200 (each guest has exactly one 200 deposit)
+        $this->forwardedRoomDeposit = $this->forwardedCount * 200;
+
+        // FWD Guest Deposit from cumulative chain (guest deposits vary per guest)
         $this->calculateForwardedDepositsFromPreviousShift();
     }
 
     /**
-     * Calculate forwarded deposits by walking the cumulative chain across all previous shifts.
+     * Calculate forwarded guest deposit by walking the cumulative chain across all previous shifts.
+     * Guest deposits vary per guest, so we need the chain: running + own deposits - cashouts.
      *
-     * Deposits compound: Shift N's forwarded = Shift N-1's (forwarded + own deposits - checkouts).
-     * We iterate from the first shift forward to build the running balance.
+     * Note: forwardedRoomDeposit is computed separately as forwardedCount × 200
+     * (since room key deposit is always 200 per guest).
      */
     private function calculateForwardedDepositsFromPreviousShift(): void
     {
         $currentShiftLog = ShiftLog::find($this->selectedShiftLogId);
         if (!$currentShiftLog) {
-            $this->forwardedRoomDeposit = 0;
             $this->forwardedGuestDeposit = 0;
             return;
         }
@@ -507,7 +510,7 @@ class SalesReportV2 extends Component
             ->orderBy('time_in', 'asc')
             ->get();
 
-        // Group into sessions by shift type + date (same as loadAvailableShiftSessions)
+        // Group into sessions by shift type + date
         $sessions = [];
         foreach ($allLogs as $log) {
             $shiftType = $this->getShiftType($log->time_in);
@@ -518,7 +521,6 @@ class SalesReportV2 extends Component
                 $sessions[$key] = [
                     'time_in' => $log->time_in,
                     'time_out' => $log->time_out,
-                    'primary_id' => $log->id,
                 ];
             }
             if ($log->time_in < $sessions[$key]['time_in']) {
@@ -529,27 +531,23 @@ class SalesReportV2 extends Component
             }
         }
 
-        // Sort sessions by time_in and filter to only those before current shift
         $orderedSessions = collect($sessions)
             ->sortBy('time_in')
             ->filter(fn($s) => $s['time_in'] < $currentShiftLog->time_in)
             ->values();
 
         if ($orderedSessions->isEmpty()) {
-            $this->forwardedRoomDeposit = 0;
             $this->forwardedGuestDeposit = 0;
             return;
         }
 
-        // Walk forward through all previous shifts to build cumulative remaining
-        $runningRoomDeposit = 0;
+        // Walk forward through all previous shifts to build cumulative guest deposit balance
         $runningGuestDeposit = 0;
 
         foreach ($orderedSessions as $session) {
             $ti = $session['time_in'];
             $to = $session['time_out'];
 
-            // This shift's own room deposits (type 2, room key, created during shift)
             $occupyingIds = CheckinDetail::query()
                 ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
                 ->where('check_in_at', '<=', $to)
@@ -568,36 +566,16 @@ class SalesReportV2 extends Component
                 ->whereBetween('created_at', [$ti, $to])
                 ->get();
 
-            // Own room deposits this shift
-            $ownRoomDep = (float) $transactions->where('transaction_type_id', 2)
-                ->filter(fn($t) => str_contains(strtolower($t->remarks ?? ''), 'room key') || str_contains(strtolower($t->remarks ?? ''), 'tv remote'))
-                ->sum('payable_amount');
-
-            // Checkout room deposits this shift
-            $checkoutIds = CheckinDetail::query()
-                ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
-                ->whereBetween('check_out_at', [$ti, $to])
-                ->pluck('id')
-                ->toArray();
-
-            $checkoutRoomDep = empty($checkoutIds) ? 0 : (float) Transaction::whereIn('checkin_detail_id', $checkoutIds)
-                ->where('transaction_type_id', 2)
-                ->where('remarks', 'Deposit From Check In (Room Key & TV Remote)')
-                ->sum('payable_amount');
-
-            // Own guest deposits and cashouts this shift
+            // Own guest deposits (non-room-key) and cashouts this shift
             $ownGuestDep = (float) $transactions->where('transaction_type_id', 2)
                 ->filter(fn($t) => !str_contains(strtolower($t->remarks ?? ''), 'room key') && !str_contains(strtolower($t->remarks ?? ''), 'tv remote'))
                 ->sum('payable_amount');
 
             $ownCashouts = (float) $transactions->where('transaction_type_id', 5)->sum('payable_amount');
 
-            // Accumulate: card total = running + own, then remaining = card - checkouts
-            $runningRoomDeposit = max(0, $runningRoomDeposit + $ownRoomDep - $checkoutRoomDep);
             $runningGuestDeposit = max(0, $runningGuestDeposit + $ownGuestDep - $ownCashouts);
         }
 
-        $this->forwardedRoomDeposit = $runningRoomDeposit;
         $this->forwardedGuestDeposit = $runningGuestDeposit;
     }
 
@@ -820,7 +798,7 @@ class SalesReportV2 extends Component
             ->where('check_in_at', '<', $shiftLog->time_in)
             ->where(function ($q) use ($shiftLog) {
                 $q->whereNull('check_out_at')
-                  ->orWhere('check_out_at', '>=', $shiftLog->time_in);
+                  ->orWhere('check_out_at', '>', $shiftLog->time_in);
             })
             ->get();
 
