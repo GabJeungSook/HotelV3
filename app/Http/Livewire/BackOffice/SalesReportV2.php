@@ -388,7 +388,13 @@ class SalesReportV2 extends Component
             $remainingRows = collect($remainingRows)->filter(function ($r) use ($checkoutKeys) {
                 $key = ($r['guest_name'] ?? '') . '|' . ($r['room_number'] ?? '');
                 return !in_array($key, $checkoutKeys);
-            })->values()->toArray();
+            })->values();
+
+            // Deduplicate by guest_name|room_number — a forwarded guest who also has a
+            // deposit transaction in the current shift would otherwise appear twice
+            $remainingRows = $remainingRows->unique(fn($r) => ($r['guest_name'] ?? '') . '|' . ($r['room_number'] ?? ''))
+                ->values()
+                ->toArray();
 
             $this->cardModalRows = $remainingRows;
             $this->cardModalTotal = count($remainingRows) * 200;
