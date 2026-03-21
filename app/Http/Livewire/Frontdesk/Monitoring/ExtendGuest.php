@@ -71,6 +71,7 @@ class ExtendGuest extends Component
         $this->current_time_alloted = $this->guest->checkInDetail()->first()->number_of_hours;
 
         $stayingHourIds = Rate::where('branch_id', auth()->user()->branch_id)
+            ->where('type_id', $this->rate->type_id)
             ->distinct()
             ->pluck('staying_hour_id');
 
@@ -107,7 +108,7 @@ class ExtendGuest extends Component
                 ->where('id', $this->extension_rate_id)
                 ->first();
             $current = $this->current_time_alloted + $this->extended_rate->hour;
-            if(($current > $this->extension_time_reset) && $this->current_time_alloted != $this->extension_time_reset)
+            if(($current >= $this->extension_time_reset) && $this->current_time_alloted != $this->extension_time_reset)
             {
                 $total_current_hours = $this->current_time_alloted + $this->extended_rate->hour;
                 if($total_current_hours >= $this->extension_time_reset)
@@ -115,8 +116,7 @@ class ExtendGuest extends Component
                    
                     $total_current_hours = $total_current_hours - $this->extension_time_reset;
                     if($total_current_hours > $this->extension_time_reset)
-                    {   
-                        dd($total_current_hours, $this->extension_time_reset);
+                    {
                         $total_current_hours = $this->extension_time_reset;
                     }
                     $rate = Rate::where('branch_id', auth()->user()->branch_id)->where('type_id', operator: $this->rate->type_id)->whereHas('stayingHour', function($query) use ($total_current_hours){
@@ -132,8 +132,8 @@ class ExtendGuest extends Component
 
                     $extend = ExtensionRate::where('branch_id', auth()->user()->branch_id)->where('hour', $extend_hour)->first();
 
-                    $this->initial_amount = $rate->amount;
-                    $this->extended_amount = $extend->amount;
+                    $this->initial_amount = $rate?->amount ?? 0;
+                    $this->extended_amount = $extend?->amount ?? 0;
                     $this->total_amount = $this->initial_amount + $this->extended_amount;
                 }else{
 
@@ -155,7 +155,7 @@ class ExtendGuest extends Component
                    $rate = Rate::where('branch_id', auth()->user()->branch_id)->where('type_id', operator: $this->rate->type_id)->whereHas('stayingHour', function($query){
                         $query->where('number', $this->extended_rate->hour);
                         })->first();
-                    $this->initial_amount = $rate->amount;
+                    $this->initial_amount = $rate?->amount ?? 0;
                     $this->extended_amount = 0;
                     $this->total_amount = $this->initial_amount + $this->extended_amount;
                 }else{
