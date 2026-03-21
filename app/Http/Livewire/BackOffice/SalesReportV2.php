@@ -595,8 +595,15 @@ class SalesReportV2 extends Component
         if ($this->filterMode === 'shift' && $this->selectedShiftLogId) {
             $shiftLog = ShiftLog::find($this->selectedShiftLogId);
             if ($shiftLog && $shiftLog->time_in && $shiftLog->time_out) {
+                // Use previous shift's time_out as start to capture gap events
+                // (guests who checked in/out between the previous shift ending and this shift starting)
+                $previousShift = ShiftLog::whereHas('frontdesk', fn($q) => $q->where('branch_id', auth()->user()->branch_id))
+                    ->where('time_out', '<=', $shiftLog->time_in)
+                    ->orderBy('time_out', 'desc')
+                    ->first();
+
                 return [
-                    'start' => $shiftLog->time_in,
+                    'start' => $previousShift ? $previousShift->time_out : $shiftLog->time_in,
                     'end' => $shiftLog->time_out,
                 ];
             }
@@ -790,16 +797,24 @@ class SalesReportV2 extends Component
 
         $branchId = auth()->user()->branch_id;
 
+        // Find previous shift to use its time_out as boundary
+        // This ensures forwarded count = previous shift's remaining count
+        $previousShift = ShiftLog::whereHas('frontdesk', fn($q) => $q->where('branch_id', $branchId))
+            ->where('time_out', '<=', $shiftLog->time_in)
+            ->orderBy('time_out', 'desc')
+            ->first();
+        $effectiveStart = $previousShift ? $previousShift->time_out : $shiftLog->time_in;
+
         // Find guests who:
-        // 1. Checked in BEFORE this shift started
-        // 2. Haven't checked out yet OR checked out AFTER this shift started
+        // 1. Checked in BEFORE the previous shift ended (not just before this shift started)
+        // 2. Haven't checked out yet OR checked out AFTER the previous shift ended
         $forwardedGuests = CheckinDetail::query()
             ->with(['guest', 'room.type', 'room.floor'])
             ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
-            ->where('check_in_at', '<', $shiftLog->time_in)
-            ->where(function ($q) use ($shiftLog) {
+            ->where('check_in_at', '<', $effectiveStart)
+            ->where(function ($q) use ($effectiveStart) {
                 $q->whereNull('check_out_at')
-                  ->orWhere('check_out_at', '>', $shiftLog->time_in);
+                  ->orWhere('check_out_at', '>', $effectiveStart);
             })
             ->get();
 
@@ -823,17 +838,17 @@ class SalesReportV2 extends Component
                 ->where('remarks', 'Deposit From Check In (Room Key & TV Remote)')
                 ->first();
 
-            // Get total guest deposits (any deposit that is NOT room key) — only those before this shift
+            // Get total guest deposits (any deposit that is NOT room key) — only those before the effective start
             $guestDepositTotal = (float) $cdTransactions
                 ->where('transaction_type_id', 2)
                 ->where('remarks', '!=', 'Deposit From Check In (Room Key & TV Remote)')
-                ->filter(fn($t) => $t->created_at < $shiftLog->time_in)
+                ->filter(fn($t) => $t->created_at < $effectiveStart)
                 ->sum('payable_amount');
 
-            // Get total cashouts (type 5) for this checkin_detail — only those before this shift
+            // Get total cashouts (type 5) for this checkin_detail — only those before the effective start
             $totalCashouts = (float) $cdTransactions
                 ->where('transaction_type_id', 5)
-                ->filter(fn($t) => $t->created_at < $shiftLog->time_in)
+                ->filter(fn($t) => $t->created_at < $effectiveStart)
                 ->sum('payable_amount');
 
             $checkinFrontdesk = $checkinTransaction?->shift_log?->frontdesk?->name ?? '—';
@@ -916,18 +931,14 @@ class SalesReportV2 extends Component
         }
 
         // Find checked-out guests from previous shift with unclaimed guest deposits
-        $previousShiftLog = ShiftLog::whereHas('frontdesk', fn($q) => $q->where('branch_id', $branchId))
-            ->where('time_in', '<', $shiftLog->time_in)
-            ->orderBy('time_in', 'desc')
-            ->first();
-
-        if ($previousShiftLog) {
+        // Reuse $previousShift found earlier
+        if ($previousShift) {
             $checkedOutGuests = CheckinDetail::query()
                 ->with(['guest', 'room.type'])
                 ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
-                ->where('check_in_at', '<', $shiftLog->time_in)
-                ->where('check_out_at', '>=', $previousShiftLog->time_in)
-                ->where('check_out_at', '<', $shiftLog->time_in)
+                ->where('check_in_at', '<', $effectiveStart)
+                ->where('check_out_at', '>=', $previousShift->time_in)
+                ->where('check_out_at', '<', $effectiveStart)
                 ->get();
 
             // Batch-load transactions for checked-out guests (fixes N+1)
@@ -943,12 +954,12 @@ class SalesReportV2 extends Component
                 $guestDepositTotal = (float) $cdTransactions
                     ->where('transaction_type_id', 2)
                     ->where('remarks', '!=', 'Deposit From Check In (Room Key & TV Remote)')
-                    ->filter(fn($t) => $t->created_at < $shiftLog->time_in)
+                    ->filter(fn($t) => $t->created_at < $effectiveStart)
                     ->sum('payable_amount');
 
                 $totalCashouts = (float) $cdTransactions
                     ->where('transaction_type_id', 5)
-                    ->filter(fn($t) => $t->created_at < $shiftLog->time_in)
+                    ->filter(fn($t) => $t->created_at < $effectiveStart)
                     ->sum('payable_amount');
 
                 $unclaimedAmount = max(0, $guestDepositTotal - $totalCashouts);
@@ -995,21 +1006,23 @@ class SalesReportV2 extends Component
     private function isGuestForwarded($row, ?ShiftLog $shiftLog, string $dateFrom): bool
     {
         if ($this->filterMode === 'shift' && $shiftLog) {
-            // Shift mode: Check if check-in transaction was before this shift started
+            // Shift mode: Check if check-in transaction was before the effective start
+            // (previous shift's time_out, to properly classify gap guests as check-ins)
             if (!$row->checkin_transaction_at) {
                 return false;
             }
 
+            $effectiveStart = $this->getFilterRange()['start'];
             $checkInTransactionTime = Carbon::parse($row->checkin_transaction_at);
 
-            // Guest is forwarded if they checked in BEFORE this shift started
-            if ($checkInTransactionTime >= $shiftLog->time_in) {
-                return false; // Checked in during this shift
+            // Guest is forwarded if they checked in BEFORE the effective start
+            if ($checkInTransactionTime >= $effectiveStart) {
+                return false; // Checked in during this shift (or gap)
             }
 
-            // Guest was still occupying when shift started
+            // Guest was still occupying when the effective start began
             $checkOutTime = $row->check_out_at ? Carbon::parse($row->check_out_at) : null;
-            return $checkOutTime === null || $checkOutTime >= $shiftLog->time_in;
+            return $checkOutTime === null || $checkOutTime >= $effectiveStart;
         }
 
         // Date range mode: use date comparison
