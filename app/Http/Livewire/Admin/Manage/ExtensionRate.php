@@ -161,7 +161,7 @@ class ExtensionRate extends Component implements Tables\Contracts\HasTable
 
     public function editExtension($extension_id)
     {
-        $extension = extensionRateModel::where('id', $extension_id)->first();
+        $extension = extensionRateModel::where('id', $extension_id)->where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)->first();
         $this->extension_id = $extension->id;
         $this->hour = $extension->hour;
         $this->amount = $extension->amount;

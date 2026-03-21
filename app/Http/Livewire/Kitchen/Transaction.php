@@ -31,7 +31,7 @@ class Transaction extends Component
 
     public function addTransaction($id)
     {
-        $this->guest = Guest::find($id);
+        $this->guest = Guest::where('branch_id', auth()->user()->branch_id)->find($id);
         $this->food_beverages_modal = true;
     }
 
@@ -145,9 +145,10 @@ class Transaction extends Component
     public function render()
     {
         return view('livewire.kitchen.transaction', [
-            'guests' => Guest::whereHas('checkInDetail', function ($query) {
-                $query->where('is_check_out', false);
-            })->get(),
+            'guests' => Guest::where('branch_id', auth()->user()->branch_id)
+                ->whereHas('checkInDetail', function ($query) {
+                    $query->where('is_check_out', false);
+                })->get(),
             'foods' => Menu::where('branch_id', auth()->user()->branch_id)->get(),
         ]);
     }

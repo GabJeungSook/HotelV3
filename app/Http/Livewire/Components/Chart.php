@@ -24,11 +24,11 @@ class Chart extends Component
 
     public function mount()
     {
-        $this->check_in_today = CheckinDetail::whereDate('check_in_at', Carbon::today())->count();
-        $this->check_out_today = CheckinDetail::where('is_check_out', 1)->whereDate('check_out_at', Carbon::today())->count();
-        $this->expected_check_out = CheckinDetail::where('is_check_out', 0)->whereDate('check_out_at', Carbon::today())->count();
-        $this->total_check_in = CheckinDetail::where('is_check_out', 0)->count();
-        $this->total_check_out = CheckinDetail::where('is_check_out', 1)->count();
+        $this->check_in_today = CheckinDetail::whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))->whereDate('check_in_at', Carbon::today())->count();
+        $this->check_out_today = CheckinDetail::whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))->where('is_check_out', 1)->whereDate('check_out_at', Carbon::today())->count();
+        $this->expected_check_out = CheckinDetail::whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))->where('is_check_out', 0)->whereDate('check_out_at', Carbon::today())->count();
+        $this->total_check_in = CheckinDetail::whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))->where('is_check_out', 0)->count();
+        $this->total_check_out = CheckinDetail::whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))->where('is_check_out', 1)->count();
 
         $this->generateGuestDataYear();
     }
@@ -59,7 +59,9 @@ class Chart extends Component
     {
 
         $now = Carbon::now();
-        $guests = Guest::whereHas('checkInDetail')
+        $guests = Guest::whereHas('checkInDetail', function ($query) {
+                $query->whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id));
+            })
             ->selectRaw('MONTH(created_at) as month, COUNT(*) as total')
             ->whereYear('created_at', $now->year)
             ->groupBy('month')
@@ -77,7 +79,9 @@ class Chart extends Component
     public function generateGuestDataMonth()
     {
         $now = Carbon::now();
-        $guests = Guest::whereHas('checkInDetail')
+        $guests = Guest::whereHas('checkInDetail', function ($query) {
+                $query->whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id));
+            })
             ->selectRaw('DAY(created_at) as day, COUNT(*) as total')
             ->whereYear('created_at', $now->year)
             ->whereMonth('created_at', $now->month)
@@ -99,7 +103,9 @@ class Chart extends Component
         $startOfWeek = $now->copy()->startOfWeek();
         $endOfWeek = $now->copy()->endOfWeek();
 
-        $guests = Guest::whereHas('checkInDetail')
+        $guests = Guest::whereHas('checkInDetail', function ($query) {
+                $query->whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id));
+            })
             ->selectRaw('DAYNAME(created_at) as day, COUNT(*) as total')
             ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
             ->groupBy('day')
@@ -119,23 +125,28 @@ class Chart extends Component
 
     public function generateChartData()
     {
-      $this->check_in_today = CheckinDetail::where('is_check_out', 0)
+      $this->check_in_today = CheckinDetail::whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))
+        ->where('is_check_out', 0)
         ->whereBetween('check_in_at', [$this->date_from, $this->date_to])
         ->count();
 
-      $this->check_out_today = CheckinDetail::where('is_check_out', 1)
+      $this->check_out_today = CheckinDetail::whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))
+        ->where('is_check_out', 1)
         ->whereBetween('check_out_at', [$this->date_from, $this->date_to])
         ->count();
 
-      $this->expected_check_out = CheckinDetail::where('is_check_out', 0)
+      $this->expected_check_out = CheckinDetail::whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))
+        ->where('is_check_out', 0)
         ->whereBetween('check_out_at', [$this->date_from, $this->date_to])
         ->count();
 
-      $this->total_check_in = CheckinDetail::where('is_check_out', 0)
+      $this->total_check_in = CheckinDetail::whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))
+        ->where('is_check_out', 0)
         ->whereBetween('check_in_at', [$this->date_from, $this->date_to])
         ->count();
 
-      $this->total_check_out = CheckinDetail::where('is_check_out', 1)
+      $this->total_check_out = CheckinDetail::whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))
+        ->where('is_check_out', 1)
         ->whereBetween('check_out_at', [$this->date_from, $this->date_to])
         ->count();
     }

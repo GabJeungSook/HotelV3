@@ -53,7 +53,7 @@ class Discount extends Component
 
     public function editDiscount($discount_id)
     {
-        $discount = discountModel::where('id', $discount_id)->first();
+        $discount = discountModel::where('id', $discount_id)->where('branch_id', auth()->user()->branch_id)->first();
         $this->discount_id = $discount->id;
         $this->name = $discount->name;
         $this->description = $discount->description;

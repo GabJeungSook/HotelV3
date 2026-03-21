@@ -32,6 +32,7 @@ class FrontdeskReport extends Component
     public function getShiftSummaryProperty()
     {
         $logs = ShiftLog::query()
+            ->where('branch_id', auth()->user()->branch_id)
             ->with('frontdesk')
             ->where('shift', $this->shift)
             ->whereDate('time_out', $this->date)
@@ -213,6 +214,7 @@ class FrontdeskReport extends Component
     public function getFrontdeskOperationRowsProperty()
 {
     $shiftLogs = ShiftLog::query()
+        ->where('branch_id', auth()->user()->branch_id)
         ->where('shift', $this->shift)
         ->whereDate('time_out', $this->date)
         ->get();
@@ -276,6 +278,7 @@ class FrontdeskReport extends Component
 public function getRoomActivityRowsProperty()
 {
     $shiftLogs = ShiftLog::query()
+        ->where('branch_id', auth()->user()->branch_id)
         ->where('shift', $this->shift)
         ->whereDate('time_out', $this->date)
         ->get();
@@ -343,6 +346,7 @@ public function getRoomActivityRowsProperty()
 public function getCashReconciliationProperty()
 {
     $shiftLogs = ShiftLog::query()
+        ->where('branch_id', auth()->user()->branch_id)
         ->where('shift', $this->shift)
         ->whereDate('time_out', $this->date)
         ->get();
@@ -376,6 +380,7 @@ public function getCashReconciliationProperty()
 public function getFinalSalesProperty()
 {
     $shiftLogs = ShiftLog::query()
+        ->where('branch_id', auth()->user()->branch_id)
         ->where('shift', $this->shift)
         ->whereDate('time_out', $this->date)
         ->get();

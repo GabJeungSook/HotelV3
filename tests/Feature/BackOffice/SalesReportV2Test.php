@@ -95,6 +95,7 @@ class SalesReportV2Test extends TestCase
 
         // Create shift log
         $this->shiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(8, 0),
@@ -243,6 +244,7 @@ class SalesReportV2Test extends TestCase
             'number' => 2,
         ]);
         $shiftLog2 = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $user2->id,
             'frontdesk_ids' => json_encode([$user2->id]),
             'time_in' => now()->setTime(20, 0),
@@ -380,6 +382,7 @@ class SalesReportV2Test extends TestCase
 
         // Create AM shift log (completed - has time_out)
         $amShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(8, 0),
@@ -389,6 +392,7 @@ class SalesReportV2Test extends TestCase
 
         // Create PM shift log (completed - has time_out)
         $pmShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(20, 0),
@@ -454,6 +458,7 @@ class SalesReportV2Test extends TestCase
 
         // Create PM shift log (completed - has time_out)
         $pmShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(20, 0),
@@ -497,6 +502,7 @@ class SalesReportV2Test extends TestCase
 
         // Create AM shift log (completed)
         $amShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(8, 0),
@@ -506,6 +512,7 @@ class SalesReportV2Test extends TestCase
 
         // Create PM shift log (completed)
         $pmShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(20, 0),
@@ -589,6 +596,7 @@ class SalesReportV2Test extends TestCase
 
         // Create AM shift log
         $amShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(8, 0),
@@ -598,6 +606,7 @@ class SalesReportV2Test extends TestCase
 
         // Create PM shift log
         $pmShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(20, 0),
@@ -685,6 +694,7 @@ class SalesReportV2Test extends TestCase
 
         // Shift 1 (AM)
         $amShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(8, 0),
@@ -694,6 +704,7 @@ class SalesReportV2Test extends TestCase
 
         // Shift 2 (PM) - cashout happens here
         $pmShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(20, 0),
@@ -703,6 +714,7 @@ class SalesReportV2Test extends TestCase
 
         // Shift 3 (next day AM) - should see reduced forwarded guest deposit
         $nextAmShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->addDay()->setTime(8, 0),
@@ -794,6 +806,7 @@ class SalesReportV2Test extends TestCase
         $this->actingAs($this->user);
 
         $amShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(8, 0),
@@ -802,6 +815,7 @@ class SalesReportV2Test extends TestCase
         ]);
 
         $pmShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(20, 0),
@@ -870,6 +884,7 @@ class SalesReportV2Test extends TestCase
 
         // Shift 1 (AM): Guest checks in
         $amShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(8, 0),
@@ -879,6 +894,7 @@ class SalesReportV2Test extends TestCase
 
         // Shift 2 (PM): Guest has extension transaction
         $pmShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(20, 0),
@@ -984,6 +1000,7 @@ class SalesReportV2Test extends TestCase
 
         // Shift 1 (AM): Guest checks in
         $amShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(8, 0),
@@ -993,6 +1010,7 @@ class SalesReportV2Test extends TestCase
 
         // Shift 2 (PM): Cashout happens here
         $pmShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(20, 0),
@@ -1087,6 +1105,7 @@ class SalesReportV2Test extends TestCase
         $this->actingAs($this->user);
 
         $amShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(8, 0),
@@ -1095,6 +1114,7 @@ class SalesReportV2Test extends TestCase
         ]);
 
         $pmShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(20, 0),
@@ -1172,6 +1192,7 @@ class SalesReportV2Test extends TestCase
 
         // Shift 0 (previous day PM): Guest A checks in
         $prevPmShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->subDay()->setTime(16, 0),
@@ -1181,6 +1202,7 @@ class SalesReportV2Test extends TestCase
 
         // Shift 1 (AM): Guest B checks in, Guest B has cashout
         $amShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(8, 0),
@@ -1190,6 +1212,7 @@ class SalesReportV2Test extends TestCase
 
         // Shift 2 (PM): Both guests forwarded
         $pmShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(20, 0),
@@ -1294,6 +1317,7 @@ class SalesReportV2Test extends TestCase
         $this->actingAs($this->user);
 
         $amShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(8, 0),
@@ -1302,6 +1326,7 @@ class SalesReportV2Test extends TestCase
         ]);
 
         $pmShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(20, 0),
@@ -1370,6 +1395,7 @@ class SalesReportV2Test extends TestCase
 
         // AM shift: guest checks in and checks out, leaving unclaimed deposit
         $amShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(8, 0),
@@ -1379,6 +1405,7 @@ class SalesReportV2Test extends TestCase
 
         // PM shift: should see unclaimed deposit forwarded
         $pmShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(20, 0),
@@ -1436,6 +1463,7 @@ class SalesReportV2Test extends TestCase
         $this->actingAs($this->user);
 
         $amShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(8, 0),
@@ -1444,6 +1472,7 @@ class SalesReportV2Test extends TestCase
         ]);
 
         $pmShiftLog = ShiftLog::create([
+            'branch_id' => $this->user->branch_id,
             'frontdesk_id' => $this->user->id,
             'frontdesk_ids' => json_encode([$this->user->id]),
             'time_in' => now()->setTime(20, 0),

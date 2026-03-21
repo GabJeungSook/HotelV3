@@ -55,7 +55,8 @@ class CheckIn extends Component
             ->pluck('room_id')
             ->toArray();
         return view('livewire.kiosk.check-in', [
-            'rooms' => Room::whereTypeId($this->type_id)
+            'rooms' => Room::where('branch_id', auth()->user()->branch_id)
+                ->whereTypeId($this->type_id)
                 ->whereIn('status', ['Available', 'Cleaned'])
                 ->whereNotIn('id', $temporaryCheckInKiosk)
                 ->whereNotIn('id', $temporaryReserved)
@@ -79,7 +80,7 @@ class CheckIn extends Component
     public function mount()
     {
         $this->getTypes();
-        $this->floors = Floor::get();
+        $this->floors = Floor::where('branch_id', auth()->user()->branch_id)->get();
         $this->discountEnabled = false;
         $this->discount_amount = 0;
 
@@ -95,7 +96,8 @@ class CheckIn extends Component
             ->pluck('room_id')
             ->toArray();
         if (
-            Room::where('type_id', $type_id)
+            Room::where('branch_id', auth()->user()->branch_id)
+                ->where('type_id', $type_id)
                 ->whereIn('status', ['Available', 'Cleaned'])
                 ->whereNotIn('id', $temporaryCheckInKiosk)
                 ->where('is_priority', true)

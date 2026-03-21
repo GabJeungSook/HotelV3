@@ -178,7 +178,7 @@ class Floor extends Component implements Tables\Contracts\HasTable
 
     public function editFloor($floor_id)
     {
-        $floor = floorModel::where('id', $floor_id)->first();
+        $floor = floorModel::where('id', $floor_id)->where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)->first();
         $this->floor_id = $floor_id;
         $this->number = $floor->number;
         $this->edit_modal = true;

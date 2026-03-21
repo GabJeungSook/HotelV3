@@ -23,12 +23,12 @@ class Dashboard extends Component
 
     public function mount()
     {
-        $this->check_in_today = CheckinDetail::whereDate('check_in_at', Carbon::today())->count();
-        $this->check_out_today = CheckinDetail::where('is_check_out', 1)->whereDate('check_out_at', Carbon::today())->count();
-        $this->expected_check_out = CheckinDetail::where('is_check_out', 0)->whereDate('check_out_at', Carbon::today())->count();
+        $this->check_in_today = CheckinDetail::whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))->whereDate('check_in_at', Carbon::today())->count();
+        $this->check_out_today = CheckinDetail::whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))->where('is_check_out', 1)->whereDate('check_out_at', Carbon::today())->count();
+        $this->expected_check_out = CheckinDetail::whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))->where('is_check_out', 0)->whereDate('check_out_at', Carbon::today())->count();
         $date = Carbon::today();
-        $queryCheckin = CheckinDetail::query();
-        $queryCheckout = CheckinDetail::query();
+        $queryCheckin = CheckinDetail::whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id));
+        $queryCheckout = CheckinDetail::whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id));
 
         switch ($this->cardFilter) {
             case 'week':

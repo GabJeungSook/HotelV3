@@ -169,7 +169,7 @@ class Amenities extends Component implements Tables\Contracts\HasTable
 
     public function editItem($item_id)
     {
-        $item = RequestableItem::where('id', $item_id)->first();
+        $item = RequestableItem::where('id', $item_id)->where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)->first();
         $this->item_id = $item->id;
         $this->name = $item->name;
         $this->amount = $item->price;

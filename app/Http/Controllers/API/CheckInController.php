@@ -15,7 +15,14 @@ class CheckInController extends Controller
 public function store(Request $request)
 {
 
-        // $user = Auth::user();
+        $user = Auth::user();
+
+        if (!$user->hasRole('superadmin') && $request->branch_id != $user->branch_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized: branch_id mismatch.',
+            ], 403);
+        }
 
         //  $room = Room::where('branch_id', $request->branch_id)
         //             ->where('id', $request->room_id)

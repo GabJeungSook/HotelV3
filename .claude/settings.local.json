@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(php artisan:*)",
-      "Bash(1:*)"
+      "Bash(1:*)",
+      "Bash(ls -la /c/Users/Owner/Documents/GitHub/HotelV2/app/Models/*.php)"
     ]
   }
 }

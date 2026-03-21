@@ -12,7 +12,7 @@ class ConfirmCheckOut extends Controller
     public function kioskCheckOut($guestId)
 {
     try {
-        $guest = Guest::findOrFail($guestId);
+        $guest = Guest::where('branch_id', auth()->user()->branch_id)->findOrFail($guestId);
         $guest->has_kiosk_check_out = 1;
         $guest->save();
 

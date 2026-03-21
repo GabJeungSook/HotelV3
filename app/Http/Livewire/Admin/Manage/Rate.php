@@ -192,7 +192,7 @@ class Rate extends Component implements Tables\Contracts\HasTable
 
     public function editRate($rate_id)
     {
-        $rate = rateModel::where('id', $rate_id)->first();
+        $rate = rateModel::where('id', $rate_id)->where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)->first();
         $this->amount = $rate->amount;
         $this->hours_id = $rate->staying_hour_id;
         $this->type_id = $rate->type_id;
@@ -225,7 +225,7 @@ class Rate extends Component implements Tables\Contracts\HasTable
         $rate_exists = rateModel::where('staying_hour_id', $this->hours_id)
             ->where('type_id', $this->type_id)
             ->where('amount', $this->amount)
-            ->where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_idbranch_id)
+            ->where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)
             ->where('id', '!=', $this->rate_id)
             ->exists();
 

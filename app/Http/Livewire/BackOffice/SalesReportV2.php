@@ -110,6 +110,7 @@ class SalesReportV2 extends Component
     private function loadAvailableShiftSessions(): void
     {
         $shiftLogs = ShiftLog::query()
+            ->where('branch_id', auth()->user()->branch_id)
             ->whereNotNull('time_out') // Completed shifts only
             ->with('frontdesk:id,name')
             ->orderBy('time_in','asc')
@@ -527,6 +528,7 @@ class SalesReportV2 extends Component
 
         // Get all completed shift sessions before the current one, ordered chronologically
         $allLogs = ShiftLog::query()
+            ->where('branch_id', $branchId)
             ->whereNotNull('time_out')
             ->orderBy('time_in', 'asc')
             ->get();

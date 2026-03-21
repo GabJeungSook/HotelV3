@@ -24,7 +24,7 @@ class CheckOut extends Component
 
     public function mount()
     {
-        $this->floors = Floor::get();
+        $this->floors = Floor::where('branch_id', auth()->user()->branch_id)->get();
         $this->steps = 1;
     }
     public function render()
@@ -41,7 +41,8 @@ class CheckOut extends Component
 
 
         return view('livewire.kiosk.check-out', [
-            'rooms' => Room::where('status', 'Occupied')
+            'rooms' => Room::where('branch_id', auth()->user()->branch_id)
+                ->where('status', 'Occupied')
                 ->when($this->floor_id, function ($query) {
                     return $query->where('floor_id', $this->floor_id);
                 })

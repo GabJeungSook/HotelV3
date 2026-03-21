@@ -172,7 +172,7 @@ class ManageFrondesk extends Component implements Tables\Contracts\HasTable
 
     public function editFrontdesk($id)
     {
-        $frontdesk = Frontdesk::where('id', $id)->first();
+        $frontdesk = Frontdesk::where('id', $id)->where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)->first();
         $this->frontdesk_id = $frontdesk->id;
         $this->name = $frontdesk->name;
         $this->number = $frontdesk->number;

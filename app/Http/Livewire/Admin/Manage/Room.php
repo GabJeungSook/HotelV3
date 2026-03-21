@@ -414,7 +414,7 @@ class Room extends Component implements Tables\Contracts\HasTable
 
     public function editRoom($room_id)
     {
-        $room = roomModel::where('id', $room_id)->first();
+        $room = roomModel::where('id', $room_id)->where('branch_id', $this->branch_id)->first();
         $this->room_id = $room->id;
         $this->number = $room->number;
         $this->type = $room->type_id;
@@ -436,7 +436,7 @@ class Room extends Component implements Tables\Contracts\HasTable
                 auth()->user()->branch_id,
         ]);
 
-        $room = roomModel::where('id', $this->room_id)->first();
+        $room = roomModel::where('id', $this->room_id)->where('branch_id', $this->branch_id)->first();
         $room->update([
             'number' => $this->number,
             'type_id' => $this->type,

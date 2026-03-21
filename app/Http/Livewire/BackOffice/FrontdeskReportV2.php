@@ -403,6 +403,7 @@ class FrontdeskReportV2 extends Component
     private function loadAvailableShiftSessions(): void
     {
         $shiftLogs = ShiftLog::query()
+            ->where('branch_id', auth()->user()->branch_id)
             ->whereNotNull('time_out')
             ->with('frontdesk:id,name')
             ->orderBy('time_in', 'asc')
