@@ -112,6 +112,7 @@ class ManageCashDrawers extends Component implements Tables\Contracts\HasTable
         CashDrawer::create([
             'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
             'name' => $this->name,
+            'is_active' => false
         ]);
 
         ActivityLog::create([
