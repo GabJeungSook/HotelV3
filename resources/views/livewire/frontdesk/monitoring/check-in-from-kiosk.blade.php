@@ -28,7 +28,8 @@
             @else
             <div>
                 <label class="block font-medium mb-1">Staying Hours</label>
-                <div class="p-2 bg-gray-100 rounded-md">{{ $stayingHour->number }}</div>
+                @dump($stayingHour)
+                <div class="p-2 bg-gray-100 rounded-md">{{ $stayingHour?->number }}</div>
             </div>
             @endif
         </div>
