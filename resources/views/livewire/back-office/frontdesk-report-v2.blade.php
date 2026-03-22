@@ -67,9 +67,8 @@
                 <table class="w-full border-collapse table-fixed border border-black text-[15px]">
                     <thead>
                         <tr>
-                            <th class="border border-black px-2 py-1 text-left font-bold w-[39%]">Description</th>
-                            <th class="border border-black px-2 py-1 text-left font-bold w-[27%]">Amount</th>
-                            <th class="border border-black px-2 py-1 text-left font-bold w-[34%]">Remarks</th>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[50%]">Description</th>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[50%]">Amount</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -79,7 +78,6 @@
                                 <div>(From Previous Shift)</div>
                             </td>
                             <td class="border border-black px-2 py-1 align-top">{{ $reportData['cash_drawer']['net_sales_prev'] > 0 ? '₱ ' . number_format($reportData['cash_drawer']['net_sales_prev'], 2) : '-' }}</td>
-                            <td class="border border-black px-2 py-1 align-top">-</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 align-top">
@@ -87,7 +85,6 @@
                                 <div>(From Previous Shift)</div>
                             </td>
                             <td class="border border-black px-2 py-1 align-top">{{ $reportData['cash_drawer']['key_deposit_prev'] > 0 ? '₱ ' . number_format($reportData['cash_drawer']['key_deposit_prev'], 2) : '-' }}</td>
-                            <td class="border border-black px-2 py-1 align-top">-</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 align-top">
@@ -95,25 +92,15 @@
                                 <div>(From Previous Shift)</div>
                             </td>
                             <td class="border border-black px-2 py-1 align-top">{{ $reportData['cash_drawer']['guest_deposit_prev'] > 0 ? '₱ ' . number_format($reportData['cash_drawer']['guest_deposit_prev'], 2) : '-' }}</td>
-                            <td class="border border-black px-2 py-1 align-top">-</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 align-top font-bold">Cash Received</td>
                             <td class="border border-black px-2 py-1 align-top">
                                 ₱ {{ number_format($reportData['cash_drawer']['cash_received'], 2) }}
-                                @if($reportData['cash_drawer']['cash_difference'] > 0)
-                                    <span class="text-red-600 font-bold">(₱{{ number_format($reportData['cash_drawer']['cash_difference'], 2) }})</span>
-                                @elseif($reportData['cash_drawer']['cash_difference'] < 0)
-                                    <span class="text-green-600 font-bold">(₱{{ number_format(abs($reportData['cash_drawer']['cash_difference']), 2) }})</span>
-                                @endif
-                            </td>
-                            <td class="border border-black px-2 py-1 align-top">
-                                @if($reportData['cash_drawer']['cash_difference'] > 0)
-                                    <span class="text-red-600">Short</span>
-                                @elseif($reportData['cash_drawer']['cash_difference'] < 0)
-                                    <span class="text-green-600">Over</span>
-                                @else
-                                    -
+                                @if($reportData['cash_drawer']['has_previous'] && $reportData['cash_drawer']['cash_difference'] > 0)
+                                    <span class="text-red-600 font-bold">(₱{{ number_format($reportData['cash_drawer']['cash_difference'], 2) }}) Short</span>
+                                @elseif($reportData['cash_drawer']['has_previous'] && $reportData['cash_drawer']['cash_difference'] < 0)
+                                    <span class="text-green-600 font-bold">(₱{{ number_format(abs($reportData['cash_drawer']['cash_difference']), 2) }}) Over</span>
                                 @endif
                             </td>
                         </tr>

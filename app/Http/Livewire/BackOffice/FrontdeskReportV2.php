@@ -197,6 +197,7 @@ class FrontdeskReportV2 extends Component
                 'cash_received' => $openingCash,
                 'expected_received' => $expectedReceived,
                 'cash_difference' => $cashDifference,
+                'has_previous' => $prevShiftData['has_previous'],
             ],
 
             'sales_summary' => $salesSummary,
@@ -365,13 +366,21 @@ class FrontdeskReportV2 extends Component
 
     private function getPreviousShiftData(Carbon $currentTimeIn, int $branchId): array
     {
-        $default = ['net_sales' => 0, 'key_deposit' => 0, 'guest_deposit' => 0];
+        $default = ['net_sales' => 0, 'key_deposit' => 0, 'guest_deposit' => 0, 'has_previous' => false];
 
-        // Find the previous shift session
+        // Determine current shift session to exclude it
+        $currentShiftType = $this->getShiftType($currentTimeIn);
+        $currentShiftDate = $currentTimeIn->format('Y-m-d');
+
+        // Find the previous shift session by time_in (not time_out) to handle overlaps
         $prevLog = ShiftLog::query()
             ->whereHas('frontdesk', fn($q) => $q->where('branch_id', $branchId))
-            ->where('time_out', '<=', $currentTimeIn)
-            ->orderBy('time_out', 'desc')
+            ->whereNotNull('time_out')
+            ->where('time_in', '<', $currentTimeIn)
+            ->orderBy('time_in', 'desc')
+            ->get()
+            ->reject(fn($l) => $this->getShiftType($l->time_in) === $currentShiftType
+                             && $l->time_in->format('Y-m-d') === $currentShiftDate)
             ->first();
 
         if (!$prevLog) {
@@ -437,6 +446,7 @@ class FrontdeskReportV2 extends Component
             'net_sales' => $netSales,
             'key_deposit' => $keyDeposit,
             'guest_deposit' => $guestDeposit,
+            'has_previous' => true,
         ];
     }
 
