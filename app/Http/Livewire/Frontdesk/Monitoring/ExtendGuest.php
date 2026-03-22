@@ -108,62 +108,46 @@ class ExtendGuest extends Component
                 ->where('id', $this->extension_rate_id)
                 ->first();
             $current = $this->current_time_alloted + $this->extended_rate->hour;
-            if(($current >= $this->extension_time_reset) && $this->current_time_alloted != $this->extension_time_reset)
-            {
-                $total_current_hours = $this->current_time_alloted + $this->extended_rate->hour;
-                if($total_current_hours >= $this->extension_time_reset)
-                {
-                   
-                    $total_current_hours = $total_current_hours - $this->extension_time_reset;
-                    if($total_current_hours > $this->extension_time_reset)
-                    {
-                        $total_current_hours = $this->extension_time_reset;
-                    }
-                    $rate = Rate::where('branch_id', auth()->user()->branch_id)->where('type_id', operator: $this->rate->type_id)->whereHas('stayingHour', function($query) use ($total_current_hours){
-                        $query->where('number', $total_current_hours);
-                        })->first();
-                    $extend_hour = 0;
-                    if($this->current_time_alloted >= $this->extension_time_reset)
-                    {
-                         $extend_hour = $this->current_time_alloted - $this->extension_time_reset;
-                    }else{
-                        $extend_hour = $this->extension_time_reset - $this->current_time_alloted;
-                    }
 
-                    $extend = ExtensionRate::where('branch_id', auth()->user()->branch_id)->where('hour', $extend_hour)->first();
-
-                    $this->initial_amount = $rate?->amount ?? 0;
-                    $this->extended_amount = $extend?->amount ?? 0;
-                    $this->total_amount = $this->initial_amount + $this->extended_amount;
-                }else{
-
-                    $this->initial_amount = 0;
-                    $this->extended_amount = $this->extended_rate->amount;
-                    $this->total_amount = $this->initial_amount + $this->extended_amount;
-                }
-            }else{
-
-
-
-                // $this->initial_amount = 0;
-                // $this->extended_amount = $this->extended_rate->amount;
-                // $this->total_amount = $this->initial_amount + $this->extended_amount;
-
-                if(($this->current_time_alloted == 0) && $this->guest->checkInDetail()->first()->next_extension_is_original == true)
-                {
-
-                   $rate = Rate::where('branch_id', auth()->user()->branch_id)->where('type_id', operator: $this->rate->type_id)->whereHas('stayingHour', function($query){
+            // Priority 1: Post-reset → charge original rate
+            if (($this->current_time_alloted == 0)
+                && $this->guest->checkInDetail()->first()->next_extension_is_original == true) {
+                $rate = Rate::where('branch_id', auth()->user()->branch_id)
+                    ->where('type_id', $this->rate->type_id)
+                    ->whereHas('stayingHour', function ($query) {
                         $query->where('number', $this->extended_rate->hour);
-                        })->first();
-                    $this->initial_amount = $rate?->amount ?? 0;
-                    $this->extended_amount = 0;
-                    $this->total_amount = $this->initial_amount + $this->extended_amount;
-                }else{
+                    })->first();
+                $this->initial_amount = $rate?->amount ?? 0;
+                $this->extended_amount = 0;
+                $this->total_amount = $this->initial_amount + $this->extended_amount;
+            }
+            // Priority 2: Extension crosses cycle boundary
+            elseif ($current >= $this->extension_time_reset) {
+                $total_current_hours = $this->current_time_alloted + $this->extended_rate->hour;
+                $total_current_hours = $total_current_hours - $this->extension_time_reset;
+                if ($total_current_hours > $this->extension_time_reset) {
+                    $total_current_hours = $this->extension_time_reset;
+                }
+
+                $rate = Rate::where('branch_id', auth()->user()->branch_id)
+                    ->where('type_id', $this->rate->type_id)
+                    ->whereHas('stayingHour', function ($query) use ($total_current_hours) {
+                        $query->where('number', $total_current_hours);
+                    })->first();
+
+                $extend_hour = $this->extension_time_reset - $this->current_time_alloted;
+                $extend = ExtensionRate::where('branch_id', auth()->user()->branch_id)
+                    ->where('hour', $extend_hour)->first();
+
+                $this->initial_amount = $rate?->amount ?? 0;
+                $this->extended_amount = $extend?->amount ?? 0;
+                $this->total_amount = $this->initial_amount + $this->extended_amount;
+            }
+            // Priority 3: Normal extension (no cycle crossing)
+            else {
                 $this->initial_amount = 0;
                 $this->extended_amount = $this->extended_rate->amount;
                 $this->total_amount = $this->initial_amount + $this->extended_amount;
-                }
-
             }
         }
 
@@ -236,12 +220,10 @@ class ExtendGuest extends Component
                  $extension_hours = $rate->hour;
                  $total_hours = $cycle_hours + $extension_hours;
 
-                 if($total_hours >= $this->extension_time_reset)
-                 {
+                 $next_extension_is_original = false;
+                 while ($total_hours >= $this->extension_time_reset) {
                     $total_hours = $total_hours - $this->extension_time_reset;
                     $next_extension_is_original = true;
-                 }else{
-                    $next_extension_is_original = false;
                  }
 
                  $check_in_detail->update([
