@@ -3,7 +3,8 @@
     "allow": [
       "Bash(php artisan:*)",
       "Bash(1:*)",
-      "Bash(ls -la /c/Users/Owner/Documents/GitHub/HotelV2/app/Models/*.php)"
+      "Bash(ls -la /c/Users/Owner/Documents/GitHub/HotelV2/app/Models/*.php)",
+      "Bash(xargs grep:*)"
     ]
   }
 }

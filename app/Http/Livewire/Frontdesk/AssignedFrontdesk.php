@@ -97,6 +97,7 @@ class AssignedFrontdesk extends Component
              array_push($this->get_frontdesk, 'N/A');
             $frontdesk_ids = json_encode($this->get_frontdesk);
             ShiftLog::create([
+                'branch_id' => auth()->user()->branch_id,
                 'frontdesk_id' => auth()->user()->id,
                 'time_in' => \Carbon\Carbon::now(),
                 'frontdesk_ids' => $frontdesk_ids,
@@ -154,8 +155,12 @@ class AssignedFrontdesk extends Component
         $haha = json_encode($this->get_frontdesk);
         DB::beginTransaction();
         ShiftLog::create([
+            'branch_id' => auth()->user()->branch_id,
+            'frontdesk_id' => auth()->user()->id,
             'time_in' => \Carbon\Carbon::now(),
             'frontdesk_ids' => json_encode($this->get_frontdesk),
+            'cash_drawer_id' => auth()->user()->cash_drawer_id,
+            'shift' => $this->shift,
         ]);
 
         auth()
