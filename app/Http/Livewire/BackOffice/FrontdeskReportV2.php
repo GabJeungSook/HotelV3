@@ -403,7 +403,7 @@ class FrontdeskReportV2 extends Component
         $prevTimeIn = $prevLogs->min('time_in');
         $prevTimeOut = $prevLogs->max('time_out');
 
-        // --- Net Sales (match SalesReportV2 totalSales) ---
+        // --- Net Sales (gross sales - expenses from previous shift) ---
         $prevOccupyingIds = CheckinDetail::query()
             ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
             ->where('check_in_at', '<=', $prevTimeOut)
@@ -411,7 +411,7 @@ class FrontdeskReportV2 extends Component
             ->pluck('id')
             ->toArray();
 
-        $netSales = empty($prevOccupyingIds) ? 0 : (float) DB::table('transactions as tr')
+        $grossSales = empty($prevOccupyingIds) ? 0 : (float) DB::table('transactions as tr')
             ->leftJoin('checkin_details as cd', 'cd.id', '=', 'tr.checkin_detail_id')
             ->whereIn('tr.checkin_detail_id', $prevOccupyingIds)
             ->whereNotIn('tr.transaction_type_id', [2, 5])
@@ -419,6 +419,9 @@ class FrontdeskReportV2 extends Component
                 ->orWhere(fn($q2) => $q2->where('tr.transaction_type_id', 1)
                     ->whereBetween('cd.check_in_at', [$prevTimeIn, $prevTimeOut])))
             ->sum('tr.payable_amount');
+
+        $prevExpenses = (float) Expense::whereBetween('created_at', [$prevTimeIn, $prevTimeOut])->sum('amount');
+        $netSales = $grossSales - $prevExpenses;
 
         // --- Key Deposit (remaining room deposit = guests still occupying at prev shift end × 200) ---
         $remainingAtPrevEnd = CheckinDetail::query()

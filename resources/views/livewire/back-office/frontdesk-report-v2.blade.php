@@ -98,9 +98,9 @@
                             <td class="border border-black px-2 py-1 align-top">
                                 ₱ {{ number_format($reportData['cash_drawer']['cash_received'], 2) }}
                                 @if($reportData['cash_drawer']['has_previous'] && $reportData['cash_drawer']['cash_difference'] > 0)
-                                    <span class="text-red-600 font-bold">(₱{{ number_format($reportData['cash_drawer']['cash_difference'], 2) }}) Short</span>
+                                    <span class="text-red-600 font-bold">(₱{{ number_format($reportData['cash_drawer']['cash_difference'], 2) }})</span>
                                 @elseif($reportData['cash_drawer']['has_previous'] && $reportData['cash_drawer']['cash_difference'] < 0)
-                                    <span class="text-green-600 font-bold">(₱{{ number_format(abs($reportData['cash_drawer']['cash_difference']), 2) }}) Over</span>
+                                    <span class="text-green-600 font-bold">(₱{{ number_format(abs($reportData['cash_drawer']['cash_difference']), 2) }})</span>
                                 @endif
                             </td>
                         </tr>
