@@ -197,8 +197,8 @@
                     </tbody>
                 </table>
 
-                {{-- 2b. Room Status and Deposit --}}
-                <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b.&nbsp;&nbsp;&nbsp;&nbsp;Room Status and Deposit</span>
+                {{-- 2b. Room Summary --}}
+                <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b.&nbsp;&nbsp;&nbsp;&nbsp;Room Summary</span>
                 <table class="w-full border-collapse table-fixed border border-black text-[15px] mt-3 mb-8">
                     <thead>
                         <tr>
@@ -208,25 +208,22 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach([
-                            'forwarded_room' => ['label' => 'Forwarded Room Check-In', 'sub' => 'Previous Shift'],
-                            'key_remote_deposit' => ['label' => 'Key/Remote Deposit', 'sub' => 'Current room occupied at the end shift'],
-                            'forwarded_guest_deposit' => ['label' => 'Forwarded Room Guest Deposit', 'sub' => 'Previous Shift'],
-                            'guest_deposit' => ['label' => 'Guest Deposit', 'sub' => null],
-                            'total_checkout' => ['label' => 'Total Check-Out', 'sub' => null],
-                            'expenses' => ['label' => 'Expenses', 'sub' => null],
-                        ] as $key => $info)
                         <tr>
                             <td class="border border-black px-2 py-1">
-                                <div class="font-bold">{{ $info['label'] }}</div>
-                                @if($info['sub'])
-                                <div class="font-normal">({{ $info['sub'] }})</div>
-                                @endif
+                                <div class="font-bold">Rooms Forwarded</div>
+                                <div>(From Previous Shift)</div>
                             </td>
-                            <td class="border border-black px-2 py-1">{{ $reportData['room_status'][$key]['count'] ?: '-' }}</td>
-                            <td class="border border-black px-2 py-1 font-bold">{{ $reportData['room_status'][$key]['amount'] > 0 ? '₱ ' . number_format($reportData['room_status'][$key]['amount'], 2) : '-' }}</td>
+                            <td class="border border-black px-2 py-1">{{ $reportData['room_summary']['forwarded_prev']['count'] ?: '-' }}</td>
+                            <td class="border border-black px-2 py-1 font-bold">{{ $reportData['room_summary']['forwarded_prev']['amount'] > 0 ? '₱ ' . number_format($reportData['room_summary']['forwarded_prev']['amount'], 2) : '-' }}</td>
                         </tr>
-                        @endforeach
+                        <tr>
+                            <td class="border border-black px-2 py-1">
+                                <div class="font-bold">Room Total</div>
+                                <div>(Current Shift)</div>
+                            </td>
+                            <td class="border border-black px-2 py-1">{{ $reportData['room_summary']['current_shift']['count'] ?: '-' }}</td>
+                            <td class="border border-black px-2 py-1 font-bold">{{ $reportData['room_summary']['current_shift']['amount'] > 0 ? '₱ ' . number_format($reportData['room_summary']['current_shift']['amount'], 2) : '-' }}</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>

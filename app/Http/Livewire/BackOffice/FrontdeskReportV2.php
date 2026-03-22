@@ -227,14 +227,11 @@ class FrontdeskReportV2 extends Component
         $expectedCash = $netSales + $endShiftRoomDeposit + $currentGuestDeposit + $openingCash;
         $difference = $expectedCash - $actualCash;
 
-        // Room Status and Deposit (Operation B)
-        $roomStatus = [
-            'forwarded_room' => ['count' => $forwarded['room_count'], 'amount' => $forwarded['room_amount']],
-            'key_remote_deposit' => ['count' => $endShiftRoomDepositCount, 'amount' => $endShiftRoomDeposit],
-            'forwarded_guest_deposit' => ['count' => $forwarded['guest_deposit_count'], 'amount' => $fwdGuestDeposit],
-            'guest_deposit' => ['count' => $guestDeposits->count(), 'amount' => $currentGuestDeposit],
-            'total_checkout' => ['count' => $checkoutCount, 'amount' => $checkoutRoomDeposit],
-            'expenses' => ['count' => $expenses->count(), 'amount' => $totalExpenses],
+        // Room Summary (Operation B)
+        $currentCheckinCount = $checkins->count();
+        $roomSummary = [
+            'forwarded_prev' => ['count' => $forwarded['room_count'], 'amount' => $prevShiftData['key_deposit']],
+            'current_shift' => ['count' => $currentCheckinCount, 'amount' => $currentCheckinCount * 200],
         ];
 
         $this->reportData = [
@@ -254,7 +251,7 @@ class FrontdeskReportV2 extends Component
             ],
 
             'sales_summary' => $salesSummary,
-            'room_status' => $roomStatus,
+            'room_summary' => $roomSummary,
 
             'final_sales' => [
                 'gross_sales' => $grossSales,
