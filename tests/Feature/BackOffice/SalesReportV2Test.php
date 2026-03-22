@@ -1526,4 +1526,93 @@ class SalesReportV2Test extends TestCase
         $this->assertNull($fwdGuestDeposit, 'No FWD GUEST DEPOSIT when fully cashed out');
         $this->assertEquals(0, $component->get('forwardedGuestDeposit'));
     }
+
+    /** @test */
+    public function overlap_guests_room_charges_appear_in_sales_rows()
+    {
+        $this->actingAs($this->user);
+
+        // Delete the default shift log from setUp to avoid interfering with overlap detection
+        $this->shiftLog->delete();
+
+        // Shift 1 (AM): 8:00 AM - 4:30 PM (ends AFTER shift 2 starts = overlap)
+        $amShiftLog = ShiftLog::create([
+            'frontdesk_id' => $this->user->id,
+            'frontdesk_ids' => json_encode([$this->user->id]),
+            'time_in' => now()->setTime(8, 0),
+            'time_out' => now()->setTime(16, 30), // Ends 30 min after shift 2 starts
+            'shift' => 'AM',
+        ]);
+
+        // Shift 2 (PM): 4:00 PM - 11:59 PM (starts at 4 PM, overlaps with AM until 4:30 PM)
+        $pmShiftLog = ShiftLog::create([
+            'frontdesk_id' => $this->user->id,
+            'frontdesk_ids' => json_encode([$this->user->id]),
+            'time_in' => now()->setTime(16, 0),
+            'time_out' => now()->setTime(23, 59),
+            'shift' => 'PM',
+        ]);
+
+        // --- Guest 1: Normal check-in during PM shift (not overlap) ---
+        $guest1 = $this->createGuest(['name' => 'Normal PM Guest']);
+        $checkin1 = $this->createCheckinDetail($guest1, [
+            'check_in_at' => now()->setTime(17, 0),
+            'check_out_at' => now()->addDay(),
+        ]);
+        $this->createTransaction($guest1, $checkin1, [
+            'transaction_type_id' => 1,
+            'shift_log_id' => $pmShiftLog->id,
+            'payable_amount' => 500,
+            'paid_amount' => 500,
+            'created_at' => now()->setTime(17, 0),
+        ]);
+
+        // --- Guest 2: Overlap guest — checked in during AM, checked out during overlap ---
+        $guest2 = $this->createGuest(['name' => 'Overlap Guest']);
+        $room2 = Room::create([
+            'branch_id' => $this->branch->id,
+            'floor_id' => $this->floor->id,
+            'type_id' => $this->roomType->id,
+            'number' => 102,
+            'status' => 'available',
+        ]);
+        $checkin2 = $this->createCheckinDetail($guest2, [
+            'room_id' => $room2->id,
+            'check_in_at' => now()->setTime(10, 0),  // AM shift
+            'check_out_at' => now()->setTime(16, 15), // During overlap (between 16:00 and 16:30)
+        ]);
+        $this->createTransaction($guest2, $checkin2, [
+            'room_id' => $room2->id,
+            'transaction_type_id' => 1,
+            'shift_log_id' => $amShiftLog->id,
+            'payable_amount' => 400,
+            'paid_amount' => 400,
+            'created_at' => now()->setTime(10, 0), // Created during AM shift
+        ]);
+
+        // View PM shift
+        $component = Livewire::test(SalesReportV2::class)
+            ->set('filterMode', 'shift')
+            ->set('selectedShiftLogId', $pmShiftLog->id)
+            ->call('generateReport');
+
+        // Check-in count should include the overlap guest
+        $shiftCheckins = $component->get('shiftCheckins');
+        $this->assertEquals(2, $shiftCheckins, 'Check-in count should include overlap guest');
+
+        // Room charges should also include the overlap guest's type 1 transaction
+        $salesRows = $component->get('salesRows');
+        $roomChargeRows = collect($salesRows)->where('transaction_type_id', 1);
+
+        $this->assertCount(2, $roomChargeRows, 'Room charges should include overlap guest');
+
+        // Verify both guests are present
+        $guestNames = $roomChargeRows->pluck('guest_name')->toArray();
+        $this->assertContains('NORMAL PM GUEST', $guestNames);
+        $this->assertContains('OVERLAP GUEST', $guestNames);
+
+        // Verify the overlap guest's room charge amount
+        $overlapRow = $roomChargeRows->firstWhere('guest_name', 'OVERLAP GUEST');
+        $this->assertEquals(400, $overlapRow['amount']);
+    }
 }

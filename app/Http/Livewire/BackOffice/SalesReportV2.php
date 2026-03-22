@@ -671,8 +671,29 @@ class SalesReportV2 extends Component
         $occupyingIds = $this->getOccupyingCheckinIds();
         $range = $this->getFilterRange();
 
+        // For shift mode: find overlap guests (checked in before this shift,
+        // checked out during the overlap period with previous shift)
+        $overlapCheckinIds = [];
+        if ($this->filterMode === 'shift' && $this->selectedShiftLogId) {
+            $shiftLog = ShiftLog::find($this->selectedShiftLogId);
+            if ($shiftLog) {
+                $branchId = auth()->user()->branch_id;
+                $prevShift = ShiftLog::whereHas('frontdesk', fn($q) => $q->where('branch_id', $branchId))
+                    ->where('time_in', '<', $shiftLog->time_in)
+                    ->orderBy('time_in', 'desc')
+                    ->first();
+                if ($prevShift && $prevShift->time_out > $shiftLog->time_in) {
+                    $overlapCheckinIds = CheckinDetail::whereHas('room', fn($q) => $q->where('branch_id', $branchId))
+                        ->where('check_in_at', '<', $shiftLog->time_in)
+                        ->whereBetween('check_out_at', [$shiftLog->time_in, $prevShift->time_out])
+                        ->pluck('id')
+                        ->toArray();
+                }
+            }
+        }
+
         // Get transaction rows
-        $transactionRows = $this->getTransactionRows($occupyingIds, $range);
+        $transactionRows = $this->getTransactionRows($occupyingIds, $range, $overlapCheckinIds);
 
         // For shift mode: Also get forwarded guest rows (occupying but no transactions this shift)
         $forwardedGuestRows = [];
@@ -691,7 +712,7 @@ class SalesReportV2 extends Component
     /**
      * Get transaction rows for occupying guests.
      */
-    private function getTransactionRows(array $occupyingIds, array $range): array
+    private function getTransactionRows(array $occupyingIds, array $range, array $overlapCheckinIds = []): array
     {
         if (empty($occupyingIds)) {
             return [];
@@ -709,12 +730,20 @@ class SalesReportV2 extends Component
             // Filter transactions by the selected range,
             // OR include check-in transactions (type 1) for guests whose check_in_at is in range
             // (ensures room charges match the check-in badge count)
-            ->where(function ($q) use ($range) {
+            ->where(function ($q) use ($range, $overlapCheckinIds) {
                 $q->whereBetween('tr.created_at', [$range['start'], $range['end']])
                   ->orWhere(function ($q2) use ($range) {
                       $q2->where('tr.transaction_type_id', 1)
                          ->whereBetween('cd.check_in_at', [$range['start'], $range['end']]);
                   });
+                // Include check-in transactions for overlap guests
+                // (checked in before this shift, checked out during overlap with previous shift)
+                if (!empty($overlapCheckinIds)) {
+                    $q->orWhere(function ($q3) use ($overlapCheckinIds) {
+                        $q3->where('tr.transaction_type_id', 1)
+                           ->whereIn('tr.checkin_detail_id', $overlapCheckinIds);
+                    });
+                }
             })
             // Filter by WHO PROCESSED the transaction (only in date_range mode)
             ->when($this->filterMode === 'date_range' && $this->frontdesk, function ($q) {
