@@ -228,7 +228,19 @@ class FrontdeskReportV2 extends Component
         $difference = $expectedCash - $actualCash;
 
         // Room Summary (Operation B)
+        // Check-in count including overlap guests (same as SalesReportV2 getShiftCounts)
         $currentCheckinCount = $checkins->count();
+        $prevShiftForOverlap = ShiftLog::whereHas('frontdesk', fn($q) => $q->where('branch_id', $branchId))
+            ->where('time_in', '<', $timeIn)
+            ->orderBy('time_in', 'desc')
+            ->first();
+        if ($prevShiftForOverlap && $prevShiftForOverlap->time_out > $timeIn) {
+            $overlapCheckins = CheckinDetail::whereHas('room', fn($q) => $q->where('branch_id', $branchId))
+                ->where('check_in_at', '<', $timeIn)
+                ->whereBetween('check_out_at', [$timeIn, $prevShiftForOverlap->time_out])
+                ->count();
+            $currentCheckinCount += $overlapCheckins;
+        }
         $roomSummary = [
             'forwarded_prev' => ['count' => $forwarded['room_count'], 'amount' => $prevShiftData['key_deposit']],
             'current_shift' => ['count' => $currentCheckinCount, 'amount' => $currentCheckinCount * 200],
