@@ -276,7 +276,7 @@ class FrontdeskReportV2 extends Component
                 ],
                 'guest_deposit' => [
                     'count' => max(0, $currentCheckinCount + $forwardedCount - $checkoutCount),
-                    'amount' => max(0, (float) $guestDeposits->sum('payable_amount') + $fwdGuestDeposit - (float) $cashouts->sum('payable_amount')),
+                    'amount' => max(0, (float) $guestDeposits->sum('payable_amount') + $this->calculateForwardedGuestDeposit($timeIn, $branchId) - (float) $cashouts->sum('payable_amount')),
                 ],
             ],
 
@@ -552,6 +552,77 @@ class FrontdeskReportV2 extends Component
             'guest_deposit' => $guestDeposit,
             'has_previous' => true,
         ];
+    }
+
+    /**
+     * Calculate forwarded guest deposit using cumulative chain walk (same as SalesReportV2).
+     */
+    private function calculateForwardedGuestDeposit(Carbon $currentTimeIn, int $branchId): float
+    {
+        $allLogs = ShiftLog::query()
+            ->where('branch_id', $branchId)
+            ->whereNotNull('time_out')
+            ->orderBy('time_in', 'asc')
+            ->get();
+
+        // Group into sessions by shift type + date
+        $sessions = [];
+        foreach ($allLogs as $log) {
+            $shiftType = $this->getShiftType($log->time_in);
+            $shiftDate = $log->time_in->format('Y-m-d');
+            $key = $shiftType . '_' . $shiftDate;
+
+            if (!isset($sessions[$key])) {
+                $sessions[$key] = ['time_in' => $log->time_in, 'time_out' => $log->time_out];
+            }
+            if ($log->time_in < $sessions[$key]['time_in']) {
+                $sessions[$key]['time_in'] = $log->time_in;
+            }
+            if ($log->time_out > $sessions[$key]['time_out']) {
+                $sessions[$key]['time_out'] = $log->time_out;
+            }
+        }
+
+        $orderedSessions = collect($sessions)
+            ->sortBy('time_in')
+            ->filter(fn($s) => $s['time_in'] < $currentTimeIn)
+            ->values();
+
+        if ($orderedSessions->isEmpty()) {
+            return 0;
+        }
+
+        $runningGuestDeposit = 0;
+
+        foreach ($orderedSessions as $session) {
+            $ti = $session['time_in'];
+            $to = $session['time_out'];
+
+            $occupyingIds = CheckinDetail::query()
+                ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
+                ->where('check_in_at', '<=', $to)
+                ->where(fn($q) => $q->whereNull('check_out_at')->orWhere('check_out_at', '>=', $ti))
+                ->pluck('id')
+                ->toArray();
+
+            if (empty($occupyingIds)) {
+                continue;
+            }
+
+            $transactions = Transaction::whereIn('checkin_detail_id', $occupyingIds)
+                ->whereBetween('created_at', [$ti, $to])
+                ->get();
+
+            $ownGuestDep = (float) $transactions->where('transaction_type_id', 2)
+                ->filter(fn($t) => !str_contains(strtolower($t->remarks ?? ''), 'room key') && !str_contains(strtolower($t->remarks ?? ''), 'tv remote'))
+                ->sum('payable_amount');
+
+            $ownCashouts = (float) $transactions->where('transaction_type_id', 5)->sum('payable_amount');
+
+            $runningGuestDeposit = max(0, $runningGuestDeposit + $ownGuestDep - $ownCashouts);
+        }
+
+        return $runningGuestDeposit;
     }
 
     private function getShiftType(Carbon $timeIn): string
