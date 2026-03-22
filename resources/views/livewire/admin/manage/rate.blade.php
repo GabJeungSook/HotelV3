@@ -175,7 +175,7 @@
         <x-native-select label="Select Number of Hours" wire:model="hours_id">
           <option selected hidden>Select Number of Hours</option>
           @foreach ($stayingHours as $hour)
-            <option value="{{ $hour->id }}">{{ $hour->number }} hours</option>
+            <option value="{{ $hour->id }}">{{ $hour->number }} hours ({{$hour->branch->name}})</option>
           @endforeach
         </x-native-select>
         <x-input wire:model.defer="amount" label="Amount" placeholder="" />
@@ -213,7 +213,7 @@
         <x-native-select label="Select Number of Hours" wire:model="hours_id">
           <option selected hidden>Select Number of Hours</option>
           @foreach ($stayingHours as $hour)
-            <option value="{{ $hour->id }}">{{ $hour->number }} hours</option>
+            <option value="{{ $hour->id }}">{{ $hour->number  }} hours ({{$hour->branch->name}})</option>
           @endforeach
         </x-native-select>
         <x-input wire:model.defer="amount" label="Amount" placeholder="" />
