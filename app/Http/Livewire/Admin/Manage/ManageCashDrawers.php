@@ -136,6 +136,8 @@ class ManageCashDrawers extends Component implements Tables\Contracts\HasTable
 
     public function render()
     {
-        return view('livewire.admin.manage.manage-cash-drawers');
+        return view('livewire.admin.manage.manage-cash-drawers', [
+             'branches' => \App\Models\Branch::all(),
+        ]);
     }
 }
