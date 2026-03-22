@@ -125,49 +125,7 @@ class Rate extends Component implements Tables\Contracts\HasTable
             'type_id' => 'required',
         ]);
 
-        $rate_exists = rateModel::where('staying_hour_id', $this->hours_id)
-            ->where('type_id', $this->type_id)
-            ->where('amount', $this->amount)
-            ->where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)
-            ->exists();
-
-        if ($rate_exists) {
-            $this->dialog()->error(
-                $title = 'Rate Exists',
-                $description = 'The rate you are trying to add already exists.'
-            );
-        } elseif (
-            rateModel::where('staying_hour_id', $this->hours_id)
-                ->where('amount', $this->amount)
-                ->where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)
-                ->exists()
-        ) {
-            $this->dialog()->error(
-                $title = 'Rate Exists',
-                $description = 'The rate you are trying to add already exists.'
-            );
-        } elseif (
-            rateModel::where('type_id', $this->type_id)
-                ->where('amount', $this->amount)
-                ->where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)
-                ->exists()
-        ) {
-            $this->dialog()->error(
-                $title = 'Rate Exists',
-                $description = 'The rate you are trying to add already exists.'
-            );
-        } elseif (
-            rateModel::where('staying_hour_id', $this->hours_id)
-                ->where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)
-                ->where('type_id', $this->type_id)
-                ->exists()
-        ) {
-            $this->dialog()->error(
-                $title = 'Rate Exists',
-                $description = 'The rate you are trying to add already exists.'
-            );
-        } else {
-            rateModel::create([
+         rateModel::create([
                 'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
                 'amount' => $this->amount,
                 'staying_hour_id' => $this->hours_id,
@@ -187,7 +145,70 @@ class Rate extends Component implements Tables\Contracts\HasTable
                 $description = 'Rate was successfully saved'
             );
             $this->add_modal = false;
-        }
+
+        // $rate_exists = rateModel::where('staying_hour_id', $this->hours_id)
+        //     ->where('type_id', $this->type_id)
+        //     ->where('amount', $this->amount)
+        //     ->where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)
+        //     ->exists();
+
+        // if ($rate_exists) {
+        //     $this->dialog()->error(
+        //         $title = 'Rate Exists',
+        //         $description = 'The rate you are trying to add already exists.'
+        //     );
+        // } elseif (
+        //     rateModel::where('staying_hour_id', $this->hours_id)
+        //         ->where('amount', $this->amount)
+        //         ->where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)
+        //         ->exists()
+        // ) {
+        //     $this->dialog()->error(
+        //         $title = 'Rate Exists',
+        //         $description = 'The rate you are trying to add already exists.'
+        //     );
+        // } elseif (
+        //     rateModel::where('type_id', $this->type_id)
+        //         ->where('amount', $this->amount)
+        //         ->where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)
+        //         ->exists()
+        // ) {
+        //     $this->dialog()->error(
+        //         $title = 'Rate Exists',
+        //         $description = 'The rate you are trying to add already exists.'
+        //     );
+        // } elseif (
+        //     rateModel::where('staying_hour_id', $this->hours_id)
+        //         ->where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)
+        //         ->where('type_id', $this->type_id)
+        //         ->exists()
+        // ) {
+        //     $this->dialog()->error(
+        //         $title = 'Rate Exists',
+        //         $description = 'The rate you are trying to add already exists.'
+        //     );
+        // } else {
+        //     rateModel::create([
+        //         'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
+        //         'amount' => $this->amount,
+        //         'staying_hour_id' => $this->hours_id,
+        //         'type_id' => $this->type_id,
+        //     ]);
+
+        //     ActivityLog::create([
+        //         'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
+        //         'user_id' => auth()->user()->id,
+        //         'activity' => 'Create Rate',
+        //         'description' => 'Created rate ' . $this->amount . ' for type ID ' . $this->type_id,
+        //     ]);
+
+        //     $this->reset(['amount', 'hours_id', 'type_id']);
+        //     $this->dialog()->success(
+        //         $title = 'Rate Saved',
+        //         $description = 'Rate was successfully saved'
+        //     );
+        //     $this->add_modal = false;
+        // }
     }
 
     public function editRate($rate_id)
