@@ -167,6 +167,13 @@ class CheckInFromKiosk extends Component
             auth()->user()->branch_id
         )->first()->extension_time_reset;
 
+         $number_of_hours = $rate;
+         $next_extension_is_original = false;
+         while ($number_of_hours >= $extension_time_reset) {
+             $number_of_hours -= $extension_time_reset;
+             $next_extension_is_original = true;
+         }
+
          //save check-in details
          $checkin = CheckinDetail::create([
             'guest_id' => $this->guest->id,
@@ -187,8 +194,8 @@ class CheckInFromKiosk extends Component
                 ? now()->addDays($this->guest->number_of_days)
                 : now()->addHours($this->stayingHour->number),
             'is_long_stay' => $this->is_longStay != null ? true : false,
-            'number_of_hours' => $rate == $extension_time_reset ? 0 : $rate,
-            'next_extension_is_original' => $rate == $extension_time_reset ? 1 : 0,
+            'number_of_hours' => $number_of_hours,
+            'next_extension_is_original' => $next_extension_is_original ? 1 : 0,
         ]);
 
         $users = User::role('frontdesk')->get();

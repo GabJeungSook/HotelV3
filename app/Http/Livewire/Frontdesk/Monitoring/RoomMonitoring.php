@@ -868,6 +868,13 @@ class RoomMonitoring extends Component
             auth()->user()->assigned_frontdesks,
             true
         );
+        $number_of_hours = $this->stayingHour->number;
+        $next_extension_is_original = false;
+        while ($number_of_hours >= auth()->user()->branch->extension_time_reset) {
+            $number_of_hours -= auth()->user()->branch->extension_time_reset;
+            $next_extension_is_original = true;
+        }
+
         $checkin = CheckinDetail::create([
             'guest_id' => $this->guest->id,
             'frontdesk_id' => $decode_frontdesk[0],
@@ -887,12 +894,8 @@ class RoomMonitoring extends Component
                 ? now()->addDays($this->guest->number_of_days)
                 : now()->addHours($this->stayingHour->number),
             'is_long_stay' => $this->temporary_checkIn->guest->is_long_stay,
-            'number_of_hours' =>
-                auth()->user()->branch->extension_time_reset -
-                ($this->temporary_checkIn->guest->is_long_stay
-                    ? $this->stayingHour->number *
-                        $this->temporary_checkIn->guest->number_of_days
-                    : $this->stayingHour->number),
+            'number_of_hours' => $number_of_hours,
+            'next_extension_is_original' => $next_extension_is_original ? 1 : 0,
         ]);
         $room_number = Room::where('id', $this->guest->room_id)->first()
             ->number;
@@ -1074,6 +1077,13 @@ class RoomMonitoring extends Component
             true
         );
 
+        $number_of_hours_reserve = $this->stayingHour_reserve->number;
+        $next_extension_is_original_reserve = false;
+        while ($number_of_hours_reserve >= auth()->user()->branch->extension_time_reset) {
+            $number_of_hours_reserve -= auth()->user()->branch->extension_time_reset;
+            $next_extension_is_original_reserve = true;
+        }
+
         $checkin = CheckinDetail::create([
             'guest_id' => $this->guest_reserve->id,
             'frontdesk_id' => $decode_frontdesk[0],
@@ -1094,12 +1104,8 @@ class RoomMonitoring extends Component
                 ? now()->addDays($this->guest_reserve->number_of_days)
                 : now()->addHours($this->stayingHour_reserve->number),
             'is_long_stay' => $this->temporary_reserve->guest->is_long_stay,
-            'number_of_hours' =>
-                auth()->user()->branch->extension_time_reset -
-                ($this->temporary_reserve->guest->is_long_stay
-                    ? $this->stayingHour_reserve->number *
-                        $this->temporary_reserve->guest->number_of_days
-                    : $this->stayingHour_reserve->number),
+            'number_of_hours' => $number_of_hours_reserve,
+            'next_extension_is_original' => $next_extension_is_original_reserve ? 1 : 0,
         ]);
         $room_number = Room::where('id', $this->guest_reserve->room_id)->first()
 

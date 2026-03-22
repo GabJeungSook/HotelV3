@@ -110,6 +110,13 @@ class CheckInCo extends Component
 
         $staying_hours = StayingHour::where('id', $rate->staying_hour_id)->first()->number;
 
+        $number_of_hours = $staying_hours;
+        $next_extension_is_original = false;
+        while ($number_of_hours >= auth()->user()->branch->extension_time_reset) {
+            $number_of_hours -= auth()->user()->branch->extension_time_reset;
+            $next_extension_is_original = true;
+        }
+
         $checkin = CheckinDetail::create([
             'guest_id' => $guest->id,
             'frontdesk_id' => auth()->user()->hasRole('frontdesk') ? $decode_frontdesk[0] : 1,
@@ -126,11 +133,8 @@ class CheckInCo extends Component
                 ? now()->addDays($guest->number_of_days)
                 : now()->addHours($staying_hours),
             'is_long_stay' => $guest->is_long_stay,
-            'number_of_hours' =>
-                auth()->user()->branch->extension_time_reset -
-                ($guest->is_long_stay
-                    ? $staying_hours * $guest->number_of_days
-                    : $staying_hours),
+            'number_of_hours' => $number_of_hours,
+            'next_extension_is_original' => $next_extension_is_original ? 1 : 0,
         ]);
          $room_number = Room::where('id', $guest->room_id)->first()->number;
           if(auth()->user()->hasRole('frontdesk'))
