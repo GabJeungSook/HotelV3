@@ -411,13 +411,37 @@ class FrontdeskReportV2 extends Component
             ->pluck('id')
             ->toArray();
 
+        // Find overlap guests for the previous shift (same logic as SalesReportV2)
+        $overlapCheckinIds = [];
+        $shiftBeforePrev = ShiftLog::whereHas('frontdesk', fn($q) => $q->where('branch_id', $branchId))
+            ->whereNotNull('time_out')
+            ->where('time_in', '<', $prevTimeIn)
+            ->orderBy('time_in', 'desc')
+            ->get()
+            ->reject(fn($l) => $this->getShiftType($l->time_in) === $shiftType
+                             && $l->time_in->format('Y-m-d') === $shiftDate)
+            ->first();
+        if ($shiftBeforePrev && $shiftBeforePrev->time_out > $prevTimeIn) {
+            $overlapCheckinIds = CheckinDetail::whereHas('room', fn($q) => $q->where('branch_id', $branchId))
+                ->where('check_in_at', '<', $prevTimeIn)
+                ->whereBetween('check_out_at', [$prevTimeIn, $shiftBeforePrev->time_out])
+                ->pluck('id')
+                ->toArray();
+        }
+
         $grossSales = empty($prevOccupyingIds) ? 0 : (float) DB::table('transactions as tr')
             ->leftJoin('checkin_details as cd', 'cd.id', '=', 'tr.checkin_detail_id')
             ->whereIn('tr.checkin_detail_id', $prevOccupyingIds)
             ->whereNotIn('tr.transaction_type_id', [2, 5])
-            ->where(fn($q) => $q->whereBetween('tr.created_at', [$prevTimeIn, $prevTimeOut])
-                ->orWhere(fn($q2) => $q2->where('tr.transaction_type_id', 1)
-                    ->whereBetween('cd.check_in_at', [$prevTimeIn, $prevTimeOut])))
+            ->where(function ($q) use ($prevTimeIn, $prevTimeOut, $overlapCheckinIds) {
+                $q->whereBetween('tr.created_at', [$prevTimeIn, $prevTimeOut])
+                  ->orWhere(fn($q2) => $q2->where('tr.transaction_type_id', 1)
+                      ->whereBetween('cd.check_in_at', [$prevTimeIn, $prevTimeOut]));
+                if (!empty($overlapCheckinIds)) {
+                    $q->orWhere(fn($q3) => $q3->where('tr.transaction_type_id', 1)
+                        ->whereIn('tr.checkin_detail_id', $overlapCheckinIds));
+                }
+            })
             ->sum('tr.payable_amount');
 
         $prevExpenses = (float) Expense::whereBetween('created_at', [$prevTimeIn, $prevTimeOut])->sum('amount');
