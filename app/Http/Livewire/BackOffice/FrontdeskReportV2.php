@@ -161,13 +161,14 @@ class FrontdeskReportV2 extends Component
         // Net Sales
         $netSales = $grossSales - $totalExpenses;
 
-        // Forwarding Balance (previous shift net sales)
-        $forwardingBalance = $this->getPreviousShiftNetSales($timeIn, $branchId);
+        // Previous shift data for Cash Drawer
+        $prevShiftData = $this->getPreviousShiftData($timeIn, $branchId);
+        $expectedReceived = $prevShiftData['net_sales'] + $prevShiftData['key_deposit'] + $prevShiftData['guest_deposit'];
+        $cashDifference = $expectedReceived - $openingCash;
 
-        // Cash Drawer
+        // Legacy forwarded values still used in Room Status section
         $fwdRoomDeposit = $forwarded['room_deposit'];
         $fwdGuestDeposit = $forwarded['guest_deposit'];
-        $totalCashReceived = $openingCash + $fwdRoomDeposit + $fwdGuestDeposit + $forwardingBalance;
 
         // Cash Reconciliation: Net Sales + Key/Remote Deposit + Guest Deposit + Opening Cash
         $expectedCash = $netSales + $endShiftRoomDeposit + $currentGuestDeposit + $openingCash;
@@ -190,11 +191,12 @@ class FrontdeskReportV2 extends Component
             'shift_closed' => $shiftLogs->max('time_out')->format('F d, Y g:i A'),
 
             'cash_drawer' => [
-                'opening_cash' => $openingCash,
-                'key_deposit' => $fwdRoomDeposit,
-                'guest_deposit' => $fwdGuestDeposit,
-                'forwarding_balance' => $forwardingBalance,
-                'total' => $totalCashReceived,
+                'net_sales_prev' => $prevShiftData['net_sales'],
+                'key_deposit_prev' => $prevShiftData['key_deposit'],
+                'guest_deposit_prev' => $prevShiftData['guest_deposit'],
+                'cash_received' => $openingCash,
+                'expected_received' => $expectedReceived,
+                'cash_difference' => $cashDifference,
             ],
 
             'sales_summary' => $salesSummary,
@@ -210,7 +212,7 @@ class FrontdeskReportV2 extends Component
 
             'cash_position' => [
                 'opening_cash' => $openingCash,
-                'forwarded_balance' => $forwardingBalance,
+                'forwarded_balance' => $prevShiftData['net_sales'],
                 'net_sales' => $netSales,
                 'remittance' => $totalRemittance,
             ],
@@ -361,8 +363,10 @@ class FrontdeskReportV2 extends Component
         ];
     }
 
-    private function getPreviousShiftNetSales(Carbon $currentTimeIn, int $branchId): float
+    private function getPreviousShiftData(Carbon $currentTimeIn, int $branchId): array
     {
+        $default = ['net_sales' => 0, 'key_deposit' => 0, 'guest_deposit' => 0];
+
         // Find the previous shift session
         $prevLog = ShiftLog::query()
             ->whereHas('frontdesk', fn($q) => $q->where('branch_id', $branchId))
@@ -371,7 +375,7 @@ class FrontdeskReportV2 extends Component
             ->first();
 
         if (!$prevLog) {
-            return 0;
+            return $default;
         }
 
         // Get all logs in same session (same shift type + date)
@@ -390,16 +394,50 @@ class FrontdeskReportV2 extends Component
         $prevTimeIn = $prevLogs->min('time_in');
         $prevTimeOut = $prevLogs->max('time_out');
 
-        // Gross sales in previous shift
-        $prevGross = (float) Transaction::where('branch_id', $branchId)
+        // --- Net Sales (match SalesReportV2 totalSales) ---
+        $prevOccupyingIds = CheckinDetail::query()
+            ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
+            ->where('check_in_at', '<=', $prevTimeOut)
+            ->where(fn($q) => $q->whereNull('check_out_at')->orWhere('check_out_at', '>=', $prevTimeIn))
+            ->pluck('id')
+            ->toArray();
+
+        $netSales = empty($prevOccupyingIds) ? 0 : (float) DB::table('transactions as tr')
+            ->leftJoin('checkin_details as cd', 'cd.id', '=', 'tr.checkin_detail_id')
+            ->whereIn('tr.checkin_detail_id', $prevOccupyingIds)
+            ->whereNotIn('tr.transaction_type_id', [2, 5])
+            ->where(fn($q) => $q->whereBetween('tr.created_at', [$prevTimeIn, $prevTimeOut])
+                ->orWhere(fn($q2) => $q2->where('tr.transaction_type_id', 1)
+                    ->whereBetween('cd.check_in_at', [$prevTimeIn, $prevTimeOut])))
+            ->sum('tr.payable_amount');
+
+        // --- Key Deposit (remaining room deposit = guests still occupying at prev shift end × 200) ---
+        $remainingAtPrevEnd = CheckinDetail::query()
+            ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
+            ->where('check_in_at', '<=', $prevTimeOut)
+            ->where(fn($q) => $q->whereNull('check_out_at')->orWhere('check_out_at', '>', $prevTimeOut))
+            ->count();
+        $keyDeposit = $remainingAtPrevEnd * 200;
+
+        // --- Guest Deposit minus Cashouts (during previous shift) ---
+        $prevGuestDeposits = empty($prevOccupyingIds) ? 0 : (float) Transaction::whereIn('checkin_detail_id', $prevOccupyingIds)
             ->whereBetween('created_at', [$prevTimeIn, $prevTimeOut])
-            ->whereNotIn('transaction_type_id', [2, 5])
+            ->where('transaction_type_id', 2)
+            ->where('remarks', '!=', 'Deposit From Check In (Room Key & TV Remote)')
             ->sum('payable_amount');
 
-        // Expenses in previous shift
-        $prevExpenses = (float) Expense::whereBetween('created_at', [$prevTimeIn, $prevTimeOut])->sum('amount');
+        $prevCashouts = empty($prevOccupyingIds) ? 0 : (float) Transaction::whereIn('checkin_detail_id', $prevOccupyingIds)
+            ->whereBetween('created_at', [$prevTimeIn, $prevTimeOut])
+            ->where('transaction_type_id', 5)
+            ->sum('payable_amount');
 
-        return $prevGross - $prevExpenses;
+        $guestDeposit = max(0, $prevGuestDeposits - $prevCashouts);
+
+        return [
+            'net_sales' => $netSales,
+            'key_deposit' => $keyDeposit,
+            'guest_deposit' => $guestDeposit,
+        ];
     }
 
     private function getShiftType(Carbon $timeIn): string

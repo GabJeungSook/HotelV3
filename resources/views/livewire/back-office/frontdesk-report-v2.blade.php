@@ -75,40 +75,47 @@
                     <tbody>
                         <tr>
                             <td class="border border-black px-2 py-1 align-top">
-                                <div class="font-bold">Opening Cash</div>
-                                <div>(Net Sales Receive from previous Shift)</div>
+                                <div class="font-bold">Net Sales Received</div>
+                                <div>(From Previous Shift)</div>
                             </td>
-                            <td class="border border-black px-2 py-1 align-top">{{ $reportData['cash_drawer']['opening_cash'] > 0 ? '₱ ' . number_format($reportData['cash_drawer']['opening_cash'], 2) : '-' }}</td>
+                            <td class="border border-black px-2 py-1 align-top">{{ $reportData['cash_drawer']['net_sales_prev'] > 0 ? '₱ ' . number_format($reportData['cash_drawer']['net_sales_prev'], 2) : '-' }}</td>
                             <td class="border border-black px-2 py-1 align-top">-</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 align-top">
                                 <div class="font-bold">Key Deposit</div>
-                                <div>(Room occupied receive)</div>
+                                <div>(From Previous Shift)</div>
                             </td>
-                            <td class="border border-black px-2 py-1 align-top">{{ $reportData['cash_drawer']['key_deposit'] > 0 ? '₱ ' . number_format($reportData['cash_drawer']['key_deposit'], 2) : '-' }}</td>
+                            <td class="border border-black px-2 py-1 align-top">{{ $reportData['cash_drawer']['key_deposit_prev'] > 0 ? '₱ ' . number_format($reportData['cash_drawer']['key_deposit_prev'], 2) : '-' }}</td>
                             <td class="border border-black px-2 py-1 align-top">-</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1 align-top">
                                 <div class="font-bold">Guest Deposit</div>
-                                <div>(Total client other deposit received)</div>
+                                <div>(From Previous Shift)</div>
                             </td>
-                            <td class="border border-black px-2 py-1 align-top">{{ $reportData['cash_drawer']['guest_deposit'] > 0 ? '₱ ' . number_format($reportData['cash_drawer']['guest_deposit'], 2) : '-' }}</td>
+                            <td class="border border-black px-2 py-1 align-top">{{ $reportData['cash_drawer']['guest_deposit_prev'] > 0 ? '₱ ' . number_format($reportData['cash_drawer']['guest_deposit_prev'], 2) : '-' }}</td>
                             <td class="border border-black px-2 py-1 align-top">-</td>
                         </tr>
                         <tr>
+                            <td class="border border-black px-2 py-1 align-top font-bold">Cash Received</td>
                             <td class="border border-black px-2 py-1 align-top">
-                                <div class="font-bold">Forwarding Balance</div>
-                                <div>(From previous Shift)</div>
+                                ₱ {{ number_format($reportData['cash_drawer']['cash_received'], 2) }}
+                                @if($reportData['cash_drawer']['cash_difference'] > 0)
+                                    <span class="text-red-600 font-bold">(₱{{ number_format($reportData['cash_drawer']['cash_difference'], 2) }})</span>
+                                @elseif($reportData['cash_drawer']['cash_difference'] < 0)
+                                    <span class="text-green-600 font-bold">(₱{{ number_format(abs($reportData['cash_drawer']['cash_difference']), 2) }})</span>
+                                @endif
                             </td>
-                            <td class="border border-black px-2 py-1 align-top">{{ $reportData['cash_drawer']['forwarding_balance'] > 0 ? '₱ ' . number_format($reportData['cash_drawer']['forwarding_balance'], 2) : '-' }}</td>
-                            <td class="border border-black px-2 py-1 align-top">-</td>
-                        </tr>
-                        <tr>
-                            <td class="border border-black px-2 py-1 font-bold">Total Cash Received</td>
-                            <td class="border border-black px-2 py-1 font-bold">{{ $reportData['cash_drawer']['total'] > 0 ? '₱ ' . number_format($reportData['cash_drawer']['total'], 2) : '-' }}</td>
-                            <td class="border border-black px-2 py-1"></td>
+                            <td class="border border-black px-2 py-1 align-top">
+                                @if($reportData['cash_drawer']['cash_difference'] > 0)
+                                    <span class="text-red-600">Short</span>
+                                @elseif($reportData['cash_drawer']['cash_difference'] < 0)
+                                    <span class="text-green-600">Over</span>
+                                @else
+                                    -
+                                @endif
+                            </td>
                         </tr>
                     </tbody>
                 </table>
