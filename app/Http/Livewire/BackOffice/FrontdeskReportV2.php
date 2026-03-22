@@ -265,6 +265,20 @@ class FrontdeskReportV2 extends Component
 
             'sales_summary' => $salesSummary,
             'room_summary' => $roomSummary,
+            'checkout_summary' => [
+                'count' => $checkoutCount,
+                'amount' => $checkoutRoomDeposit,
+            ],
+            'deposit_summary' => [
+                'room_deposit' => [
+                    'count' => max(0, $currentCheckinCount + $forwardedCount - $checkoutCount),
+                    'amount' => max(0, $currentCheckinCount + $forwardedCount - $checkoutCount) * 200,
+                ],
+                'guest_deposit' => [
+                    'count' => max(0, $currentCheckinCount + $forwardedCount - $checkoutCount),
+                    'amount' => max(0, $currentCheckinCount + $forwardedCount - $checkoutCount) * 200,
+                ],
+            ],
 
             'final_sales' => [
                 'gross_sales' => $grossSales,

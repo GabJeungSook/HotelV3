@@ -226,6 +226,58 @@
                         </tr>
                     </tbody>
                 </table>
+
+                {{-- 2c. Check-out Summary --}}
+                <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c.&nbsp;&nbsp;&nbsp;&nbsp;Check-out Summary</span>
+                <table class="w-full border-collapse table-fixed border border-black text-[15px] mt-3 mb-5">
+                    <thead>
+                        <tr>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[50%]">Description</th>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[16%]">Number</th>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[34%]">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border border-black px-2 py-1">
+                                <div class="font-bold">Total Check-out</div>
+                                <div>(Current Shift)</div>
+                            </td>
+                            <td class="border border-black px-2 py-1">{{ $reportData['checkout_summary']['count'] ?: '-' }}</td>
+                            <td class="border border-black px-2 py-1 font-bold">{{ $reportData['checkout_summary']['amount'] > 0 ? '₱ ' . number_format($reportData['checkout_summary']['amount'], 2) : '-' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                {{-- 2d. Deposit Summary --}}
+                <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;d.&nbsp;&nbsp;&nbsp;&nbsp;Deposit Summary</span>
+                <table class="w-full border-collapse table-fixed border border-black text-[15px] mt-3 mb-8">
+                    <thead>
+                        <tr>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[50%]">Description</th>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[16%]">Number</th>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[34%]">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border border-black px-2 py-1">
+                                <div class="font-bold">Total Room Deposit</div>
+                                <div>(At End of Shift)</div>
+                            </td>
+                            <td class="border border-black px-2 py-1">{{ $reportData['deposit_summary']['room_deposit']['count'] ?: '-' }}</td>
+                            <td class="border border-black px-2 py-1 font-bold">{{ $reportData['deposit_summary']['room_deposit']['amount'] > 0 ? '₱ ' . number_format($reportData['deposit_summary']['room_deposit']['amount'], 2) : '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1">
+                                <div class="font-bold">Total Guest Deposit</div>
+                                <div>(At End of Shift)</div>
+                            </td>
+                            <td class="border border-black px-2 py-1">{{ $reportData['deposit_summary']['guest_deposit']['count'] ?: '-' }}</td>
+                            <td class="border border-black px-2 py-1 font-bold">{{ $reportData['deposit_summary']['guest_deposit']['amount'] > 0 ? '₱ ' . number_format($reportData['deposit_summary']['guest_deposit']['amount'], 2) : '-' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
             {{-- 3. Final Sales --}}
