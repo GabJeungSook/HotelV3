@@ -265,9 +265,9 @@ class FrontdeskReportV2 extends Component
 
             'sales_summary' => $salesSummary,
             'room_summary' => $roomSummary,
-            'checkout_summary' => [
-                'count' => $checkoutCount,
-                'amount' => $checkoutRoomDeposit,
+            'room_summary_subtotal' => [
+                'count' => $roomSummary['forwarded_prev']['count'] + $roomSummary['current_shift']['count'],
+                'amount' => $roomSummary['forwarded_prev']['amount'] + $roomSummary['current_shift']['amount'],
             ],
             'guest_deposit_summary' => [
                 'forwarded_prev' => [
@@ -278,6 +278,14 @@ class FrontdeskReportV2 extends Component
                     'count' => $guestDeposits->count(),
                     'amount' => (float) $guestDeposits->sum('payable_amount'),
                 ],
+            ],
+            'guest_deposit_subtotal' => [
+                'count' => $forwarded['guest_deposit_count'] + $guestDeposits->count(),
+                'amount' => $prevShiftData['guest_deposit'] + (float) $guestDeposits->sum('payable_amount'),
+            ],
+            'checkout_summary' => [
+                'count' => $checkoutCount,
+                'amount' => $checkoutRoomDeposit,
             ],
             'forwarded_deposit_summary' => [
                 'room_deposit' => [
