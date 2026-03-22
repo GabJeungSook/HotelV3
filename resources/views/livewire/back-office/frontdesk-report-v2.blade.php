@@ -227,8 +227,38 @@
                     </tbody>
                 </table>
 
-                {{-- 2c. Check-out Summary --}}
-                <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c.&nbsp;&nbsp;&nbsp;&nbsp;Check-out Summary</span>
+                {{-- 2c. Guest Deposit Summary --}}
+                <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c.&nbsp;&nbsp;&nbsp;&nbsp;Guest Deposit Summary</span>
+                <table class="w-full border-collapse table-fixed border border-black text-[15px] mt-3 mb-5">
+                    <thead>
+                        <tr>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[50%]">Description</th>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[16%]">Number</th>
+                            <th class="border border-black px-2 py-1 text-left font-bold w-[34%]">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border border-black px-2 py-1">
+                                <div class="font-bold">Guest Forwarded Deposit</div>
+                                <div>(From Previous Shift)</div>
+                            </td>
+                            <td class="border border-black px-2 py-1">{{ $reportData['guest_deposit_summary']['forwarded_prev']['count'] ?: '-' }}</td>
+                            <td class="border border-black px-2 py-1 font-bold">{{ $reportData['guest_deposit_summary']['forwarded_prev']['amount'] > 0 ? '₱ ' . number_format($reportData['guest_deposit_summary']['forwarded_prev']['amount'], 2) : '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1">
+                                <div class="font-bold">Guest Total Deposit</div>
+                                <div>(Current Shift)</div>
+                            </td>
+                            <td class="border border-black px-2 py-1">{{ $reportData['guest_deposit_summary']['current_shift']['count'] ?: '-' }}</td>
+                            <td class="border border-black px-2 py-1 font-bold">{{ $reportData['guest_deposit_summary']['current_shift']['amount'] > 0 ? '₱ ' . number_format($reportData['guest_deposit_summary']['current_shift']['amount'], 2) : '-' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                {{-- 2d. Check-out Summary --}}
+                <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;d.&nbsp;&nbsp;&nbsp;&nbsp;Check-out Summary</span>
                 <table class="w-full border-collapse table-fixed border border-black text-[15px] mt-3 mb-5">
                     <thead>
                         <tr>
@@ -249,8 +279,8 @@
                     </tbody>
                 </table>
 
-                {{-- 2d. Deposit Summary --}}
-                <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;d.&nbsp;&nbsp;&nbsp;&nbsp;Deposit Summary</span>
+                {{-- 2e. Forwarded Deposit Summary --}}
+                <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;e.&nbsp;&nbsp;&nbsp;&nbsp;Forwarded Deposit Summary</span>
                 <table class="w-full border-collapse table-fixed border border-black text-[15px] mt-3 mb-8">
                     <thead>
                         <tr>
@@ -265,16 +295,16 @@
                                 <div class="font-bold">Total Room Deposit</div>
                                 <div>(At End of Shift)</div>
                             </td>
-                            <td class="border border-black px-2 py-1">{{ $reportData['deposit_summary']['room_deposit']['count'] ?: '-' }}</td>
-                            <td class="border border-black px-2 py-1 font-bold">{{ $reportData['deposit_summary']['room_deposit']['amount'] > 0 ? '₱ ' . number_format($reportData['deposit_summary']['room_deposit']['amount'], 2) : '-' }}</td>
+                            <td class="border border-black px-2 py-1">{{ $reportData['forwarded_deposit_summary']['room_deposit']['count'] ?: '-' }}</td>
+                            <td class="border border-black px-2 py-1 font-bold">{{ $reportData['forwarded_deposit_summary']['room_deposit']['amount'] > 0 ? '₱ ' . number_format($reportData['forwarded_deposit_summary']['room_deposit']['amount'], 2) : '-' }}</td>
                         </tr>
                         <tr>
                             <td class="border border-black px-2 py-1">
                                 <div class="font-bold">Total Guest Deposit</div>
                                 <div>(At End of Shift)</div>
                             </td>
-                            <td class="border border-black px-2 py-1">{{ $reportData['deposit_summary']['guest_deposit']['count'] ?: '-' }}</td>
-                            <td class="border border-black px-2 py-1 font-bold">{{ $reportData['deposit_summary']['guest_deposit']['amount'] > 0 ? '₱ ' . number_format($reportData['deposit_summary']['guest_deposit']['amount'], 2) : '-' }}</td>
+                            <td class="border border-black px-2 py-1">{{ $reportData['forwarded_deposit_summary']['guest_deposit']['count'] ?: '-' }}</td>
+                            <td class="border border-black px-2 py-1 font-bold">{{ $reportData['forwarded_deposit_summary']['guest_deposit']['amount'] > 0 ? '₱ ' . number_format($reportData['forwarded_deposit_summary']['guest_deposit']['amount'], 2) : '-' }}</td>
                         </tr>
                     </tbody>
                 </table>

@@ -269,7 +269,17 @@ class FrontdeskReportV2 extends Component
                 'count' => $checkoutCount,
                 'amount' => $checkoutRoomDeposit,
             ],
-            'deposit_summary' => [
+            'guest_deposit_summary' => [
+                'forwarded_prev' => [
+                    'count' => $forwarded['guest_deposit_count'],
+                    'amount' => $fwdGuestDeposit,
+                ],
+                'current_shift' => [
+                    'count' => $guestDeposits->count(),
+                    'amount' => (float) $guestDeposits->sum('payable_amount'),
+                ],
+            ],
+            'forwarded_deposit_summary' => [
                 'room_deposit' => [
                     'count' => max(0, $currentCheckinCount + $forwardedCount - $checkoutCount),
                     'amount' => max(0, $currentCheckinCount + $forwardedCount - $checkoutCount) * 200,
