@@ -241,8 +241,9 @@ class FrontdeskReportV2 extends Component
                 ->count();
             $currentCheckinCount += $overlapCheckins;
         }
+        $forwardedCount = $forwarded['room_count'] - ($overlapCheckins ?? 0);
         $roomSummary = [
-            'forwarded_prev' => ['count' => $forwarded['room_count'], 'amount' => $prevShiftData['key_deposit']],
+            'forwarded_prev' => ['count' => $forwardedCount, 'amount' => $prevShiftData['key_deposit']],
             'current_shift' => ['count' => $currentCheckinCount, 'amount' => $currentCheckinCount * 200],
         ];
 
