@@ -61,7 +61,7 @@ class FrontdeskReportV2 extends Component
 
         // Frontdesk names
         $outgoingNames = $shiftLogs->map(fn($l) => $l->frontdesk?->name)->filter()->unique()->implode(', ');
-        $incomingNames = $this->getIncomingFrontdesks($timeOut, $branchId);
+        $incomingNames = $this->getIncomingFrontdesks($timeIn, $timeOut, $branchId);
 
         // Use occupying-guest approach (same as SalesReportV2) for accurate counts
         $occupyingIds = CheckinDetail::query()
@@ -256,15 +256,23 @@ class FrontdeskReportV2 extends Component
         return (float) $main + (float) $sub;
     }
 
-    private function getIncomingFrontdesks(Carbon $currentTimeOut, int $branchId): string
+    private function getIncomingFrontdesks(Carbon $currentTimeIn, Carbon $currentTimeOut, int $branchId): string
     {
+        // Determine current shift session (type + date) to exclude it
+        $currentShiftType = $this->getShiftType($currentTimeIn);
+        $currentShiftDate = $currentTimeIn->format('Y-m-d');
+
+        // Search from current shift's start time (not end time) to catch overlapping shifts,
+        // then exclude logs from the same session
         $nextLogs = ShiftLog::query()
             ->whereHas('frontdesk', fn($q) => $q->where('branch_id', $branchId))
-            ->where('time_in', '>=', $currentTimeOut)
+            ->where('time_in', '>=', $currentTimeIn)
             ->orderBy('time_in', 'asc')
             ->with('frontdesk:id,name')
-            ->limit(5)
-            ->get();
+            ->limit(10)
+            ->get()
+            ->reject(fn($l) => $this->getShiftType($l->time_in) === $currentShiftType
+                             && $l->time_in->format('Y-m-d') === $currentShiftDate);
 
         if ($nextLogs->isEmpty()) {
             return '—';
