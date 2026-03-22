@@ -14,4 +14,9 @@ class StayingHour extends Model
     {
         return $this->hasMany(Rate::class);
     }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
+    }
 }
