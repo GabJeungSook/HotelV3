@@ -127,7 +127,53 @@
                             'new_checkin' => ['label' => 'New Check-in', 'sub' => 'Total New Check-in'],
                             'extension' => ['label' => 'Extension', 'sub' => null],
                             'transfer' => ['label' => 'Transfer', 'sub' => null],
-                            'miscellaneous' => ['label' => 'Miscellaneous charges', 'sub' => null],
+                        ] as $key => $info)
+                        <tr>
+                            <td class="border border-black px-2 py-1">
+                                <div class="font-bold">{{ $info['label'] }}</div>
+                                @if($info['sub'])
+                                <div class="font-normal">({{ $info['sub'] }})</div>
+                                @endif
+                            </td>
+                            <td class="border border-black px-2 py-1">{{ $reportData['sales_summary'][$key]['count'] ?: '-' }}</td>
+                            <td class="border border-black px-2 py-1 font-bold">{{ $reportData['sales_summary'][$key]['amount'] > 0 ? '₱ ' . number_format($reportData['sales_summary'][$key]['amount'], 2) : '-' }}</td>
+                        </tr>
+                        @endforeach
+                        {{-- Miscellaneous breakdown --}}
+                        @php $misc = $reportData['sales_summary']['miscellaneous']; @endphp
+                        <tr>
+                            <td class="border border-black px-2 py-1 align-top font-bold" rowspan="4">Miscellaneous Charges</td>
+                            <td class="border border-black px-2 py-1">{{ $misc['breakdown']['amenities']['count'] ?: '-' }}</td>
+                            <td class="border border-black px-2 py-1">
+                                <div class="flex justify-between">
+                                    <span>Amenities</span>
+                                    <span class="font-bold">{{ $misc['breakdown']['amenities']['amount'] > 0 ? '₱ ' . number_format($misc['breakdown']['amenities']['amount'], 2) : '-' }}</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1">{{ $misc['breakdown']['damages']['count'] ?: '-' }}</td>
+                            <td class="border border-black px-2 py-1">
+                                <div class="flex justify-between">
+                                    <span>Damages</span>
+                                    <span class="font-bold">{{ $misc['breakdown']['damages']['amount'] > 0 ? '₱ ' . number_format($misc['breakdown']['damages']['amount'], 2) : '-' }}</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1">{{ $misc['breakdown']['unclaimed']['count'] ?: '-' }}</td>
+                            <td class="border border-black px-2 py-1">
+                                <div class="flex justify-between">
+                                    <span>Unclaimed Deposit</span>
+                                    <span class="font-bold">{{ $misc['breakdown']['unclaimed']['amount'] > 0 ? '₱ ' . number_format($misc['breakdown']['unclaimed']['amount'], 2) : '-' }}</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1 font-bold">{{ $misc['count'] ?: '-' }}</td>
+                            <td class="border border-black px-2 py-1 font-bold">{{ $misc['amount'] > 0 ? '₱ ' . number_format($misc['amount'], 2) : '-' }}</td>
+                        </tr>
+                        @foreach([
                             'food' => ['label' => 'Food', 'sub' => null],
                             'drink' => ['label' => 'Drink', 'sub' => null],
                             'others' => ['label' => 'Others', 'sub' => 'Foods and Drinks from POS'],

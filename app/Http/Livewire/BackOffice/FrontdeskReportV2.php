@@ -92,15 +92,68 @@ class FrontdeskReportV2 extends Component
         $roomDeposits = $deposits->filter(fn($t) => str_contains(strtolower($t->remarks ?? ''), 'room key') || str_contains(strtolower($t->remarks ?? ''), 'tv remote'));
         $guestDeposits = $deposits->filter(fn($t) => !str_contains(strtolower($t->remarks ?? ''), 'room key') && !str_contains(strtolower($t->remarks ?? ''), 'tv remote'));
 
-        // Miscellaneous = amenities (type 8) + damages (type 4)
-        $miscCount = $amenities->count() + $damages->count();
-        $miscAmount = (float) $amenities->sum('payable_amount') + (float) $damages->sum('payable_amount');
+        // Miscellaneous breakdown: amenities (type 8) + damages (type 4) + unclaimed deposits
+        $amenitiesCount = $amenities->count();
+        $amenitiesAmount = (float) $amenities->sum('payable_amount');
+        $damagesCount = $damages->count();
+        $damagesAmount = (float) $damages->sum('payable_amount');
+
+        // Unclaimed guest deposits from previous shift (same logic as SalesReportV2)
+        $unclaimedCount = 0;
+        $unclaimedAmount = 0;
+        $prevShiftLog = ShiftLog::whereHas('frontdesk', fn($q) => $q->where('branch_id', $branchId))
+            ->where('time_in', '<', $timeIn)
+            ->orderBy('time_in', 'desc')
+            ->first();
+        if ($prevShiftLog) {
+            $checkedOutGuests = CheckinDetail::query()
+                ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
+                ->where('check_in_at', '<', $timeIn)
+                ->where('check_out_at', '>=', $prevShiftLog->time_in)
+                ->where('check_out_at', '<', $timeIn)
+                ->pluck('id')
+                ->toArray();
+
+            if (!empty($checkedOutGuests)) {
+                $checkedOutTransactions = Transaction::whereIn('checkin_detail_id', $checkedOutGuests)
+                    ->whereIn('transaction_type_id', [2, 5])
+                    ->get()
+                    ->groupBy('checkin_detail_id');
+
+                foreach ($checkedOutGuests as $cdId) {
+                    $cdTxns = $checkedOutTransactions->get($cdId, collect());
+                    $depTotal = (float) $cdTxns->where('transaction_type_id', 2)
+                        ->where('remarks', '!=', 'Deposit From Check In (Room Key & TV Remote)')
+                        ->filter(fn($t) => $t->created_at < $timeIn)
+                        ->sum('payable_amount');
+                    $cashoutTotal = (float) $cdTxns->where('transaction_type_id', 5)
+                        ->filter(fn($t) => $t->created_at < $timeIn)
+                        ->sum('payable_amount');
+                    $unclaimed = max(0, $depTotal - $cashoutTotal);
+                    if ($unclaimed > 0) {
+                        $unclaimedCount++;
+                        $unclaimedAmount += $unclaimed;
+                    }
+                }
+            }
+        }
+
+        $miscCount = $amenitiesCount + $damagesCount + $unclaimedCount;
+        $miscAmount = $amenitiesAmount + $damagesAmount + $unclaimedAmount;
 
         $salesSummary = [
             'new_checkin' => ['count' => $checkins->count(), 'amount' => (float) $checkins->sum('payable_amount')],
             'extension' => ['count' => $extensions->count(), 'amount' => (float) $extensions->sum('payable_amount')],
             'transfer' => ['count' => $transfers->count(), 'amount' => (float) $transfers->sum('payable_amount')],
-            'miscellaneous' => ['count' => $miscCount, 'amount' => $miscAmount],
+            'miscellaneous' => [
+                'count' => $miscCount,
+                'amount' => $miscAmount,
+                'breakdown' => [
+                    'amenities' => ['count' => $amenitiesCount, 'amount' => $amenitiesAmount],
+                    'damages' => ['count' => $damagesCount, 'amount' => $damagesAmount],
+                    'unclaimed' => ['count' => $unclaimedCount, 'amount' => $unclaimedAmount],
+                ],
+            ],
             'food' => ['count' => $food->count(), 'amount' => (float) $food->sum('payable_amount')],
             'drink' => ['count' => 0, 'amount' => 0],
             'others' => ['count' => 0, 'amount' => 0],
