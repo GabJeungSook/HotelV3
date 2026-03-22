@@ -15,4 +15,9 @@ class CashDrawer extends Model
     {
         return $this->hasOne(Frontdesk::class);
     }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
+    }
 }
