@@ -223,9 +223,20 @@ class FrontdeskReportV2 extends Component
             ->sum('payable_amount');
 
         // Count unique guests still occupying at end of shift with guest deposits
-        $endShiftGuestDepositCount = empty($occupiedAtEnd) ? 0 : (int) Transaction::whereIn('checkin_detail_id', $occupiedAtEnd)
+        // Uses same boundary logic as getForwardedData() so counts match across shifts
+        $occupiedAtEndForDeposits = CheckinDetail::query()
+            ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
+            ->where('check_in_at', '<', $timeOut)
+            ->where(function ($q) use ($timeOut) {
+                $q->whereNull('check_out_at')
+                  ->orWhere('check_out_at', '>=', $timeOut);
+            })
+            ->pluck('id')
+            ->toArray();
+        $endShiftGuestDepositCount = empty($occupiedAtEndForDeposits) ? 0 : (int) Transaction::whereIn('checkin_detail_id', $occupiedAtEndForDeposits)
             ->where('transaction_type_id', 2)
             ->where('remarks', '!=', 'Deposit From Check In (Room Key & TV Remote)')
+            ->where('created_at', '<', $timeOut)
             ->distinct('checkin_detail_id')
             ->count('checkin_detail_id');
 
