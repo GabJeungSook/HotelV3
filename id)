@@ -1,0 +1,87 @@
+
+Deprecated: Filament\Notifications\Testing\assertNotified(): Implicitly marking parameter $notification as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\filament\notifications\src\Testing\Autoload.php on line 10
+
+Deprecated: Termwind\style(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\nunomaduro\termwind\src\Functions.php on line 29
+
+Deprecated: Termwind\ask(): Implicitly marking parameter $autocomplete as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\nunomaduro\termwind\src\Functions.php on line 61
+
+Deprecated: money(): Implicitly marking parameter $currency as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\akaunting\laravel-money\src\helpers.php on line 7
+
+Deprecated: optional(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\laravel\framework\src\Illuminate\Support\helpers.php on line 189
+
+Deprecated: with(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\laravel\framework\src\Illuminate\Support\helpers.php on line 421
+
+Deprecated: Illuminate\Container\Container::beforeResolving(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\laravel\framework\src\Illuminate\Container\Container.php on line 1128
+
+Deprecated: Illuminate\Container\Container::resolving(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\laravel\framework\src\Illuminate\Container\Container.php on line 1148
+
+Deprecated: Illuminate\Container\Container::afterResolving(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\laravel\framework\src\Illuminate\Container\Container.php on line 1168
+
+Deprecated: Illuminate\Container\Container::setInstance(): Implicitly marking parameter $container as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\laravel\framework\src\Illuminate\Container\Container.php on line 1407
+
+Deprecated: Illuminate\Contracts\Container\Container::beforeResolving(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\laravel\framework\src\Illuminate\Contracts\Container\Container.php on line 191
+
+Deprecated: Illuminate\Contracts\Container\Container::resolving(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\laravel\framework\src\Illuminate\Contracts\Container\Container.php on line 200
+
+Deprecated: Illuminate\Contracts\Container\Container::afterResolving(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\laravel\framework\src\Illuminate\Contracts\Container\Container.php on line 209
+
+Deprecated: Illuminate\Support\Arr::first(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\laravel\framework\src\Illuminate\Collections\Arr.php on line 188
+
+Deprecated: Illuminate\Support\Arr::last(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\laravel\framework\src\Illuminate\Collections\Arr.php on line 217
+
+Deprecated: Illuminate\Events\Dispatcher::__construct(): Implicitly marking parameter $container as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\laravel\framework\src\Illuminate\Events\Dispatcher.php on line 65
+
+Deprecated: Carbon\Traits\Date::getDaysFromStartOfWeek(): Implicitly marking parameter $weekStartsAt as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\nesbot\carbon\src\Carbon\Traits\Date.php on line 1394
+
+Deprecated: Carbon\Traits\Date::setDaysFromStartOfWeek(): Implicitly marking parameter $weekStartsAt as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\nesbot\carbon\src\Carbon\Traits\Date.php on line 1412
+
+Deprecated: Carbon\Traits\Date::utcOffset(): Implicitly marking parameter $minuteOffset as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\nesbot\carbon\src\Carbon\Traits\Date.php on line 1481
+
+Deprecated: Carbon\Traits\Localization::locale(): Implicitly marking parameter $locale as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\nesbot\carbon\src\Carbon\Traits\Localization.php on line 447
+
+Deprecated: Carbon\Traits\Test::setDefaultTimezone(): Implicitly marking parameter $date as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\nesbot\carbon\src\Carbon\Traits\Test.php on line 203
+
+Deprecated: Return type of Carbon\Traits\Date::createFromTimestamp($timestamp, $tz = null) should either be compatible with DateTime::createFromTimestamp(int|float $timestamp): static, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\nesbot\carbon\src\Carbon\Traits\Timestamp.php on line 29
+
+Deprecated: Illuminate\Support\Traits\Conditionable::when(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\laravel\framework\src\Illuminate\Conditionable\Traits\Conditionable.php on line 21
+
+Deprecated: Illuminate\Support\Traits\Conditionable::when(): Implicitly marking parameter $default as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\laravel\framework\src\Illuminate\Conditionable\Traits\Conditionable.php on line 21
+
+Deprecated: Illuminate\Support\Traits\Conditionable::unless(): Implicitly marking parameter $callback as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\laravel\framework\src\Illuminate\Conditionable\Traits\Conditionable.php on line 53
+
+Deprecated: Illuminate\Support\Traits\Conditionable::unless(): Implicitly marking parameter $default as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\laravel\framework\src\Illuminate\Conditionable\Traits\Conditionable.php on line 53
+
+Deprecated: Carbon\CarbonTimeZone::toOffsetName(): Implicitly marking parameter $date as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\nesbot\carbon\src\Carbon\CarbonTimeZone.php on line 158
+
+Deprecated: Carbon\CarbonTimeZone::toOffsetTimeZone(): Implicitly marking parameter $date as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\nesbot\carbon\src\Carbon\CarbonTimeZone.php on line 172
+
+Deprecated: Carbon\CarbonTimeZone::toRegionName(): Implicitly marking parameter $date as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\nesbot\carbon\src\Carbon\CarbonTimeZone.php on line 188
+
+Deprecated: Carbon\CarbonTimeZone::toRegionTimeZone(): Implicitly marking parameter $date as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\nesbot\carbon\src\Carbon\CarbonTimeZone.php on line 230
+
+Deprecated: Dotenv\Repository\RepositoryBuilder::__construct(): Implicitly marking parameter $allowList as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\vlucas\phpdotenv\src\Repository\RepositoryBuilder.php on line 68
+
+Deprecated: Dotenv\Repository\RepositoryBuilder::allowList(): Implicitly marking parameter $allowList as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\vlucas\phpdotenv\src\Repository\RepositoryBuilder.php on line 247
+
+Deprecated: Illuminate\Log\Logger::__construct(): Implicitly marking parameter $dispatcher as nullable is deprecated, the explicit nullable type must be used instead in C:\Users\Owner\Documents\GitHub\HotelV2\vendor\laravel\framework\src\Illuminate\Log\Logger.php on line 43
+
+  [41;1m Psy\Exception\ParseErrorException [49;22m
+
+[39;1m  PHP Parse error: Syntax error, unexpected ';' on line 1[39;22m
+
+  at [32mC:\Users\Owner\Documents\GitHub\HotelV2\vendor\psy\psysh\src\Exception\ParseErrorException.php[39m:[32m44[39m
+     40▕      * @param \PhpParser\Error $e
+     41▕      */
+     42▕     public static function fromParseError(\PhpParser\Error $e): self
+     43▕     {
+  ➜  44▕         return new self($e->getRawMessage(), $e->getAttributes());
+     45▕     }
+     46▕ }
+     47▕
+
+  [33m1   [39m[39;1mC:\Users\Owner\Documents\GitHub\HotelV2\vendor\psy\psysh\src\CodeCleaner.php[39;22m:[39;1m311[39;22m
+  [90m    Psy\Exception\ParseErrorException::fromParseError(Object(PhpParser\Error))[39m
+
+  [33m2   [39m[39;1mC:\Users\Owner\Documents\GitHub\HotelV2\vendor\psy\psysh\src\CodeCleaner.php[39;22m:[39;1m240[39;22m
+  [90m    Psy\CodeCleaner::parse("<?php var_dump(App\Models\Room::where('status','Occupied')-;
+")[39m
