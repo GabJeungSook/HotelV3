@@ -183,9 +183,10 @@ class FrontdeskReportV2 extends Component
             'amount' => collect($salesSummary)->sum('amount'),
         ];
 
-        // Gross Sales (excludes deposits type 2 and cashouts type 5) + overlap room charges
+        // Gross Sales (excludes deposits type 2 and cashouts type 5) + overlap room charges + unclaimed deposits
         $grossSales = (float) $transactions->whereNotIn('transaction_type_id', [2, 5])->sum('payable_amount')
-                    + (float) $overlapRoomCharges->sum('payable_amount');
+                    + (float) $overlapRoomCharges->sum('payable_amount')
+                    + $unclaimedAmount;
 
         // Forwarded guests
         $forwarded = $this->getForwardedData($timeIn, $branchId);
@@ -296,12 +297,12 @@ class FrontdeskReportV2 extends Component
                     'amount' => $prevShiftData['guest_deposit'],
                 ],
                 'current_shift' => [
-                    'count' => $guestDeposits->count(),
+                    'count' => $guestDeposits->unique('checkin_detail_id')->count(),
                     'amount' => (float) $guestDeposits->sum('payable_amount'),
                 ],
             ],
             'guest_deposit_subtotal' => [
-                'count' => $forwarded['guest_deposit_count'] + $guestDeposits->count(),
+                'count' => $forwarded['guest_deposit_count'] + $guestDeposits->unique('checkin_detail_id')->count(),
                 'amount' => $prevShiftData['guest_deposit'] + (float) $guestDeposits->sum('payable_amount'),
             ],
             'checkout_summary' => [
@@ -314,7 +315,7 @@ class FrontdeskReportV2 extends Component
                     'amount' => max(0, $currentCheckinCount + $forwardedCount - $checkoutCount) * 200,
                 ],
                 'guest_deposit' => [
-                    'count' => $guestDeposits->count(),
+                    'count' => $guestDeposits->unique('checkin_detail_id')->count(),
                     'amount' => max(0, (float) $guestDeposits->sum('payable_amount') + $this->calculateForwardedGuestDeposit($timeIn, $branchId) - (float) $cashouts->sum('payable_amount')),
                 ],
             ],
