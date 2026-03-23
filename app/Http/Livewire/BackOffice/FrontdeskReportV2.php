@@ -559,7 +559,9 @@ class FrontdeskReportV2 extends Component
             ->count();
         $keyDeposit = $remainingAtPrevEnd * 200;
 
-        // --- Guest Deposit minus Cashouts (during previous shift) ---
+        // --- Guest Deposit: forwarded into prev shift + prev shift own deposits - prev shift cashouts ---
+        $fwdGuestDepAtPrevStart = $this->calculateForwardedGuestDeposit($prevTimeIn, $branchId);
+
         $prevGuestDeposits = empty($prevOccupyingIds) ? 0 : (float) Transaction::whereIn('checkin_detail_id', $prevOccupyingIds)
             ->whereBetween('created_at', [$prevTimeIn, $prevTimeOut])
             ->where('transaction_type_id', 2)
@@ -571,7 +573,7 @@ class FrontdeskReportV2 extends Component
             ->where('transaction_type_id', 5)
             ->sum('payable_amount');
 
-        $guestDeposit = max(0, $prevGuestDeposits - $prevCashouts);
+        $guestDeposit = max(0, $fwdGuestDepAtPrevStart + $prevGuestDeposits - $prevCashouts);
 
         return [
             'net_sales' => $netSales,
