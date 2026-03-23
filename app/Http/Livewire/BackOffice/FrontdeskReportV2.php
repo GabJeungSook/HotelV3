@@ -708,25 +708,32 @@ class FrontdeskReportV2 extends Component
             return (float) ($currentLogs->first()?->beginning_cash ?? 0);
         }
 
-        // Walk through sessions computing forwarded_balance and net_sales for each
+        // Walk through sessions computing forwarded_balance for each
+        // fb(0) = beginning_cash
+        // fb(N) = nsp(N-1) + fb(N-1), where nsp(N) = own_net_sales of session N-1
         $forwardedBalance = 0;
-        $prevNetSales = 0; // net sales of the session before the current one in the walk
+        $lastNsp = 0;       // nsp of the last session processed (net_sales_prev = own_ns of session before it)
+        $prevOwnNs = 0;     // own net sales of the previous session (becomes nsp for the next)
 
         foreach ($orderedSessions as $index => $session) {
             $ti = $session['time_in'];
             $to = $session['time_out'];
 
+            // nsp for this session = own net sales of the session before it
+            $nsp = ($index === 0) ? 0 : $prevOwnNs;
+
             if ($index === 0) {
                 // First session: forwarded_balance = beginning_cash
                 $sessionLogs = ShiftLog::whereIn('id', $session['log_ids'])->get();
-                $beginningCash = $this->calculateOpeningCash($sessionLogs);
-                $forwardedBalance = $beginningCash;
+                $forwardedBalance = $this->calculateOpeningCash($sessionLogs);
             } else {
-                // Subsequent sessions: forwarded_balance = prev.net_sales_prev + prev.forwarded_balance
-                $forwardedBalance = $prevNetSales + $forwardedBalance;
+                // fb(N) = nsp(N-1) + fb(N-1)
+                $forwardedBalance = $lastNsp + $forwardedBalance;
             }
 
-            // Compute this session's net sales (for use as next session's net_sales_prev)
+            $lastNsp = $nsp;
+
+            // Compute this session's own net sales
             $occupyingIds = CheckinDetail::query()
                 ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
                 ->where('check_in_at', '<=', $to)
@@ -745,14 +752,14 @@ class FrontdeskReportV2 extends Component
                     ->sum('tr.payable_amount');
 
                 $expenses = (float) Expense::whereBetween('created_at', [$ti, $to])->sum('amount');
-                $prevNetSales = $grossSales - $expenses;
+                $prevOwnNs = $grossSales - $expenses;
             } else {
-                $prevNetSales = 0;
+                $prevOwnNs = 0;
             }
         }
 
-        // For the current shift: forwarded_balance = last session's net_sales_prev + last session's forwarded_balance
-        return $prevNetSales + $forwardedBalance;
+        // Current shift's fb = last session's nsp + last session's fb
+        return $lastNsp + $forwardedBalance;
     }
 
     private function getShiftType(Carbon $timeIn): string
