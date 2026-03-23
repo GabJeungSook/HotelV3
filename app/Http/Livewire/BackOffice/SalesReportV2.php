@@ -505,8 +505,8 @@ class SalesReportV2 extends Component
         // FWD Room Deposit = forwarded guest count × 200 (each guest has exactly one 200 deposit)
         $this->forwardedRoomDeposit = $this->forwardedCount * 200;
 
-        // FWD Guest Deposit from FWD rows (ensures card total matches modal rows)
-        $this->forwardedGuestDeposit = (float) $fwdRows->where('transaction_type', 'FWD GUEST DEPOSIT')->sum('amount');
+        // FWD Guest Deposit from cumulative chain (running balance across all previous shifts)
+        $this->calculateForwardedDepositsFromPreviousShift();
     }
 
     /**
@@ -596,10 +596,10 @@ class SalesReportV2 extends Component
 
             $ownCashouts = (float) $transactions->where('transaction_type_id', 5)->sum('payable_amount');
 
-            $runningGuestDeposit = max(0, $runningGuestDeposit + $ownGuestDep - $ownCashouts);
+            $runningGuestDeposit = $runningGuestDeposit + $ownGuestDep - $ownCashouts;
         }
 
-        $this->forwardedGuestDeposit = $runningGuestDeposit;
+        $this->forwardedGuestDeposit = max(0, $runningGuestDeposit);
     }
 
     public function resetFilters()
