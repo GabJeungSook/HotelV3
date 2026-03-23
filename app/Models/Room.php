@@ -58,7 +58,6 @@ class Room extends Model
     public function latestCheckInDetail()
     {
         return $this->hasOne(CheckinDetail::class)
-            ->where('is_check_out', false)
             ->latestOfMany();
     }
 
