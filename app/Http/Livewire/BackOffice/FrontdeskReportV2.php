@@ -79,6 +79,26 @@ class FrontdeskReportV2 extends Component
             ->whereBetween('created_at', [$timeIn, $timeOut])
             ->get();
 
+        // Detect overlapping shifts and include overlap guests' room charges
+        $overlapCheckinIds = [];
+        $overlapRoomCharges = collect();
+        $prevShiftForOverlapEarly = ShiftLog::whereHas('frontdesk', fn($q) => $q->where('branch_id', $branchId))
+            ->where('time_in', '<', $timeIn)
+            ->orderBy('time_in', 'desc')
+            ->first();
+        if ($prevShiftForOverlapEarly && $prevShiftForOverlapEarly->time_out > $timeIn) {
+            $overlapCheckinIds = CheckinDetail::whereHas('room', fn($q) => $q->where('branch_id', $branchId))
+                ->where('check_in_at', '<', $timeIn)
+                ->whereBetween('check_out_at', [$timeIn, $prevShiftForOverlapEarly->time_out])
+                ->pluck('id')
+                ->toArray();
+            if (!empty($overlapCheckinIds)) {
+                $overlapRoomCharges = Transaction::whereIn('checkin_detail_id', $overlapCheckinIds)
+                    ->where('transaction_type_id', 1)
+                    ->get();
+            }
+        }
+
         // Sales Summary (Operation A)
         $checkins = $transactions->where('transaction_type_id', 1);
         $extensions = $transactions->where('transaction_type_id', 6);
@@ -142,7 +162,7 @@ class FrontdeskReportV2 extends Component
         $miscAmount = $amenitiesAmount + $damagesAmount + $unclaimedAmount;
 
         $salesSummary = [
-            'new_checkin' => ['count' => $checkins->count(), 'amount' => (float) $checkins->sum('payable_amount')],
+            'new_checkin' => ['count' => $checkins->count() + count($overlapCheckinIds), 'amount' => (float) $checkins->sum('payable_amount') + (float) $overlapRoomCharges->sum('payable_amount')],
             'extension' => ['count' => $extensions->count(), 'amount' => (float) $extensions->sum('payable_amount')],
             'transfer' => ['count' => $transfers->count(), 'amount' => (float) $transfers->sum('payable_amount')],
             'miscellaneous' => [
@@ -163,8 +183,9 @@ class FrontdeskReportV2 extends Component
             'amount' => collect($salesSummary)->sum('amount'),
         ];
 
-        // Gross Sales (excludes deposits type 2 and cashouts type 5)
-        $grossSales = (float) $transactions->whereNotIn('transaction_type_id', [2, 5])->sum('payable_amount');
+        // Gross Sales (excludes deposits type 2 and cashouts type 5) + overlap room charges
+        $grossSales = (float) $transactions->whereNotIn('transaction_type_id', [2, 5])->sum('payable_amount')
+                    + (float) $overlapRoomCharges->sum('payable_amount');
 
         // Forwarded guests
         $forwarded = $this->getForwardedData($timeIn, $branchId);
@@ -230,20 +251,9 @@ class FrontdeskReportV2 extends Component
         $fwdDepGuestAmount = max(0, (float) $guestDeposits->sum('payable_amount') + $this->calculateForwardedGuestDeposit($timeIn, $branchId) - (float) $cashouts->sum('payable_amount'));
 
         // Room Summary (Operation B)
-        // Check-in count including overlap guests (same as SalesReportV2 getShiftCounts)
-        $currentCheckinCount = $checkins->count();
-        $prevShiftForOverlap = ShiftLog::whereHas('frontdesk', fn($q) => $q->where('branch_id', $branchId))
-            ->where('time_in', '<', $timeIn)
-            ->orderBy('time_in', 'desc')
-            ->first();
-        if ($prevShiftForOverlap && $prevShiftForOverlap->time_out > $timeIn) {
-            $overlapCheckins = CheckinDetail::whereHas('room', fn($q) => $q->where('branch_id', $branchId))
-                ->where('check_in_at', '<', $timeIn)
-                ->whereBetween('check_out_at', [$timeIn, $prevShiftForOverlap->time_out])
-                ->count();
-            $currentCheckinCount += $overlapCheckins;
-        }
-        $forwardedCount = $forwarded['room_count'] - ($overlapCheckins ?? 0);
+        // Check-in count including overlap guests (reuse already-computed overlap data)
+        $currentCheckinCount = $checkins->count() + count($overlapCheckinIds);
+        $forwardedCount = $forwarded['room_count'] - count($overlapCheckinIds);
         $roomSummary = [
             'forwarded_prev' => ['count' => $forwardedCount, 'amount' => $prevShiftData['key_deposit']],
             'current_shift' => ['count' => $currentCheckinCount, 'amount' => $currentCheckinCount * 200],
