@@ -238,7 +238,7 @@ class FrontdeskReportV2 extends Component
         // Previous shift data for Cash Drawer
         $prevShiftData = $this->getPreviousShiftData($timeIn, $branchId);
         $forwardedBalance = $this->calculateForwardedBalance($timeIn, $branchId);
-        $expectedReceived = $prevShiftData['net_sales'] + $prevShiftData['key_deposit'] + $prevShiftData['guest_deposit'];
+        $expectedReceived = $prevShiftData['net_sales'] + $prevShiftData['key_deposit'] + $prevShiftData['guest_deposit'] + $forwardedBalance;
         $cashDifference = $expectedReceived - $openingCash;
 
         // Legacy forwarded values still used in Room Status section
