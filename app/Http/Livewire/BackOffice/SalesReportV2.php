@@ -981,14 +981,14 @@ class SalesReportV2 extends Component
         }
 
         // Find ALL checked-out guests before this shift with unclaimed guest deposits
-        // (not just previous shift — unclaimed deposits carry forward across all shifts)
+        // Uses checkoutBoundary to also capture overlap guests (checked out between shift.time_in and prevShift.time_out)
         {
             $checkedOutGuests = CheckinDetail::query()
                 ->with(['guest', 'room.type'])
                 ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
                 ->where('check_in_at', '<', $shiftLog->time_in)
                 ->whereNotNull('check_out_at')
-                ->where('check_out_at', '<', $shiftLog->time_in)
+                ->where('check_out_at', '<=', $checkoutBoundary)
                 ->get();
 
             // Batch-load transactions for checked-out guests (fixes N+1)
