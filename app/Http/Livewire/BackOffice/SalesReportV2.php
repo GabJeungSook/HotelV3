@@ -505,8 +505,8 @@ class SalesReportV2 extends Component
         // FWD Room Deposit = forwarded guest count × 200 (each guest has exactly one 200 deposit)
         $this->forwardedRoomDeposit = $this->forwardedCount * 200;
 
-        // FWD Guest Deposit from cumulative chain (guest deposits vary per guest)
-        $this->calculateForwardedDepositsFromPreviousShift();
+        // FWD Guest Deposit from FWD rows (ensures card total matches modal rows)
+        $this->forwardedGuestDeposit = (float) $fwdRows->where('transaction_type', 'FWD GUEST DEPOSIT')->sum('amount');
     }
 
     /**
