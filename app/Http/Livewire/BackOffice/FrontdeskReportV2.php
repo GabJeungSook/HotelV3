@@ -253,8 +253,8 @@ class FrontdeskReportV2 extends Component
         $fwdDepRoomAmount = max(0, $currentCheckinCount + $forwardedCount - $checkoutCount) * 200;
         $fwdDepSubtotal = $fwdDepRoomAmount + $fwdDepGuestAmount;
 
-        // Cash Reconciliation: net sales prev + net sales current + forwarded deposit subtotal
-        $expectedCash = $prevShiftData['net_sales'] + $netSales + $fwdDepSubtotal;
+        // Cash Reconciliation: net sales prev + net sales current + forwarded deposit subtotal + forwarded balance
+        $expectedCash = $prevShiftData['net_sales'] + $netSales + $fwdDepSubtotal + $forwardedBalance;
         $difference = $expectedCash - $actualCash;
 
         $this->reportData = [
