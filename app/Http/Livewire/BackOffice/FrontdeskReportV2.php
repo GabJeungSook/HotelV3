@@ -222,6 +222,13 @@ class FrontdeskReportV2 extends Component
             ->where('remarks', 'Deposit From Check In (Room Key & TV Remote)')
             ->sum('payable_amount');
 
+        // Count unique guests still occupying at end of shift with guest deposits
+        $endShiftGuestDepositCount = empty($occupiedAtEnd) ? 0 : (int) Transaction::whereIn('checkin_detail_id', $occupiedAtEnd)
+            ->where('transaction_type_id', 2)
+            ->where('remarks', '!=', 'Deposit From Check In (Room Key & TV Remote)')
+            ->distinct('checkin_detail_id')
+            ->count('checkin_detail_id');
+
         // Current shift guest deposits minus cashouts
         $currentGuestDeposit = max(0, (float) $guestDeposits->sum('payable_amount') - (float) $cashouts->sum('payable_amount'));
 
@@ -315,7 +322,7 @@ class FrontdeskReportV2 extends Component
                     'amount' => max(0, $currentCheckinCount + $forwardedCount - $checkoutCount) * 200,
                 ],
                 'guest_deposit' => [
-                    'count' => $guestDeposits->unique('checkin_detail_id')->count(),
+                    'count' => $endShiftGuestDepositCount,
                     'amount' => max(0, (float) $guestDeposits->sum('payable_amount') + $this->calculateForwardedGuestDeposit($timeIn, $branchId) - (float) $cashouts->sum('payable_amount')),
                 ],
             ],
