@@ -223,9 +223,10 @@ class FrontdeskReportV2 extends Component
         $fwdRoomDeposit = $forwarded['room_deposit'];
         $fwdGuestDeposit = $forwarded['guest_deposit'];
 
-        // Cash Reconciliation: Net Sales + Key/Remote Deposit + Guest Deposit + Opening Cash
-        $expectedCash = $netSales + $endShiftRoomDeposit + $currentGuestDeposit + $openingCash;
-        $difference = $expectedCash - $actualCash;
+        // Forwarded deposit summary values (computed early for cash reconciliation)
+        $fwdDepRoomCount = max(0, $checkins->count() + $forwarded['room_count'] - $checkoutCount);
+        // overlap will adjust these later, but we need base values now
+        $fwdDepGuestAmount = max(0, (float) $guestDeposits->sum('payable_amount') + $this->calculateForwardedGuestDeposit($timeIn, $branchId) - (float) $cashouts->sum('payable_amount'));
 
         // Room Summary (Operation B)
         // Check-in count including overlap guests (same as SalesReportV2 getShiftCounts)
@@ -246,6 +247,14 @@ class FrontdeskReportV2 extends Component
             'forwarded_prev' => ['count' => $forwardedCount, 'amount' => $prevShiftData['key_deposit']],
             'current_shift' => ['count' => $currentCheckinCount, 'amount' => $currentCheckinCount * 200],
         ];
+
+        // Forwarded deposit summary (with overlap-adjusted counts)
+        $fwdDepRoomAmount = max(0, $currentCheckinCount + $forwardedCount - $checkoutCount) * 200;
+        $fwdDepSubtotal = $fwdDepRoomAmount + $fwdDepGuestAmount;
+
+        // Cash Reconciliation: net sales prev + net sales current + forwarded deposit subtotal
+        $expectedCash = $prevShiftData['net_sales'] + $netSales + $fwdDepSubtotal;
+        $difference = $expectedCash - $actualCash;
 
         $this->reportData = [
             'frontdesk_outgoing' => $outgoingNames ?: '—',
