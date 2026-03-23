@@ -980,18 +980,14 @@ class SalesReportV2 extends Component
             }
         }
 
-        // Find checked-out guests from previous shift with unclaimed guest deposits
-        $previousShiftLog = ShiftLog::whereHas('frontdesk', fn($q) => $q->where('branch_id', $branchId))
-            ->where('time_in', '<', $shiftLog->time_in)
-            ->orderBy('time_in', 'desc')
-            ->first();
-
-        if ($previousShiftLog) {
+        // Find ALL checked-out guests before this shift with unclaimed guest deposits
+        // (not just previous shift — unclaimed deposits carry forward across all shifts)
+        {
             $checkedOutGuests = CheckinDetail::query()
                 ->with(['guest', 'room.type'])
                 ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
                 ->where('check_in_at', '<', $shiftLog->time_in)
-                ->where('check_out_at', '>=', $previousShiftLog->time_in)
+                ->whereNotNull('check_out_at')
                 ->where('check_out_at', '<', $shiftLog->time_in)
                 ->get();
 
