@@ -216,6 +216,7 @@ class FrontdeskReportV2 extends Component
 
         // Previous shift data for Cash Drawer
         $prevShiftData = $this->getPreviousShiftData($timeIn, $branchId);
+        $forwardedBalance = $this->calculateForwardedBalance($timeIn, $branchId);
         $expectedReceived = $prevShiftData['net_sales'] + $prevShiftData['key_deposit'] + $prevShiftData['guest_deposit'];
         $cashDifference = $expectedReceived - $openingCash;
 
@@ -266,6 +267,7 @@ class FrontdeskReportV2 extends Component
                 'net_sales_prev' => $prevShiftData['net_sales'],
                 'key_deposit_prev' => $prevShiftData['key_deposit'],
                 'guest_deposit_prev' => $prevShiftData['guest_deposit'],
+                'forwarded_balance' => $forwardedBalance,
                 'cash_received' => $openingCash,
                 'expected_received' => $expectedReceived,
                 'cash_difference' => $cashDifference,
@@ -652,6 +654,105 @@ class FrontdeskReportV2 extends Component
         }
 
         return $runningGuestDeposit;
+    }
+
+    /**
+     * Calculate forwarded balance using cumulative chain.
+     * Shift 1: forwarded_balance = beginning_cash
+     * Shift N: forwarded_balance = prev_shift.net_sales_prev + prev_shift.forwarded_balance
+     */
+    private function calculateForwardedBalance(Carbon $currentTimeIn, int $branchId): float
+    {
+        $allLogs = ShiftLog::query()
+            ->where('branch_id', $branchId)
+            ->whereNotNull('time_out')
+            ->orderBy('time_in', 'asc')
+            ->get();
+
+        // Group into sessions by shift type + date
+        $sessions = [];
+        foreach ($allLogs as $log) {
+            $shiftType = $this->getShiftType($log->time_in);
+            $shiftDate = $log->time_in->format('Y-m-d');
+            $key = $shiftType . '_' . $shiftDate;
+
+            if (!isset($sessions[$key])) {
+                $sessions[$key] = [
+                    'time_in' => $log->time_in,
+                    'time_out' => $log->time_out,
+                    'log_ids' => [],
+                ];
+            }
+            $sessions[$key]['log_ids'][] = $log->id;
+            if ($log->time_in < $sessions[$key]['time_in']) {
+                $sessions[$key]['time_in'] = $log->time_in;
+            }
+            if ($log->time_out > $sessions[$key]['time_out']) {
+                $sessions[$key]['time_out'] = $log->time_out;
+            }
+        }
+
+        $orderedSessions = collect($sessions)
+            ->sortBy('time_in')
+            ->filter(fn($s) => $s['time_in'] < $currentTimeIn)
+            ->values();
+
+        if ($orderedSessions->isEmpty()) {
+            // First shift: forwarded balance = beginning_cash
+            $currentLogs = ShiftLog::where('branch_id', $branchId)
+                ->whereNotNull('time_out')
+                ->where('time_in', '>=', $currentTimeIn)
+                ->orderBy('time_in', 'asc')
+                ->limit(5)
+                ->get();
+            return (float) ($currentLogs->first()?->beginning_cash ?? 0);
+        }
+
+        // Walk through sessions computing forwarded_balance and net_sales for each
+        $forwardedBalance = 0;
+        $prevNetSales = 0; // net sales of the session before the current one in the walk
+
+        foreach ($orderedSessions as $index => $session) {
+            $ti = $session['time_in'];
+            $to = $session['time_out'];
+
+            if ($index === 0) {
+                // First session: forwarded_balance = beginning_cash
+                $sessionLogs = ShiftLog::whereIn('id', $session['log_ids'])->get();
+                $beginningCash = $this->calculateOpeningCash($sessionLogs);
+                $forwardedBalance = $beginningCash;
+            } else {
+                // Subsequent sessions: forwarded_balance = prev.net_sales_prev + prev.forwarded_balance
+                $forwardedBalance = $prevNetSales + $forwardedBalance;
+            }
+
+            // Compute this session's net sales (for use as next session's net_sales_prev)
+            $occupyingIds = CheckinDetail::query()
+                ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
+                ->where('check_in_at', '<=', $to)
+                ->where(fn($q) => $q->whereNull('check_out_at')->orWhere('check_out_at', '>=', $ti))
+                ->pluck('id')
+                ->toArray();
+
+            if (!empty($occupyingIds)) {
+                $grossSales = (float) DB::table('transactions as tr')
+                    ->leftJoin('checkin_details as cd', 'cd.id', '=', 'tr.checkin_detail_id')
+                    ->whereIn('tr.checkin_detail_id', $occupyingIds)
+                    ->whereNotIn('tr.transaction_type_id', [2, 5])
+                    ->where(fn($q) => $q->whereBetween('tr.created_at', [$ti, $to])
+                        ->orWhere(fn($q2) => $q2->where('tr.transaction_type_id', 1)
+                            ->whereBetween('cd.check_in_at', [$ti, $to])))
+                    ->sum('tr.payable_amount');
+
+                $expenses = (float) Expense::whereBetween('created_at', [$ti, $to])->sum('amount');
+                $prevNetSales = $grossSales - $expenses;
+            } else {
+                $prevNetSales = 0;
+            }
+        }
+
+        // For the current shift: forwarded_balance = last session's net_sales_prev + last session's forwarded_balance
+        return $prevNetSales + $forwardedBalance;
     }
 
     private function getShiftType(Carbon $timeIn): string

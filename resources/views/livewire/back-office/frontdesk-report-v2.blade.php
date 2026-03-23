@@ -94,6 +94,13 @@
                             <td class="border border-black px-2 py-1 align-top text-right">{{ $reportData['cash_drawer']['guest_deposit_prev'] > 0 ? '₱ ' . number_format($reportData['cash_drawer']['guest_deposit_prev'], 2) : '-' }}</td>
                         </tr>
                         <tr>
+                            <td class="border border-black px-2 py-1 align-top">
+                                <div class="font-bold">Forwarded Balance</div>
+                                <div>(From Previous Shift)</div>
+                            </td>
+                            <td class="border border-black px-2 py-1 align-top text-right">{{ $reportData['cash_drawer']['forwarded_balance'] > 0 ? '₱ ' . number_format($reportData['cash_drawer']['forwarded_balance'], 2) : '-' }}</td>
+                        </tr>
+                        <tr>
                             <td class="border border-black px-2 py-1 align-top font-bold">Cash Received</td>
                             <td class="border border-black px-2 py-1 align-top text-right">
                                 ₱ {{ number_format($reportData['cash_drawer']['cash_received'], 2) }}
