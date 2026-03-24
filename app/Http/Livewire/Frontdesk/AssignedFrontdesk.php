@@ -115,7 +115,7 @@ class AssignedFrontdesk extends Component
                 ]);
 
                 CashDrawer::where('id', $this->drawer)->update([
-                    'is_active' => true,
+                    'is_active' => false,
                 ]);
 
          DB::commit();
