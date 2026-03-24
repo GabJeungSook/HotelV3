@@ -294,11 +294,11 @@
     {{-- Sales Table --}}
     <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 overflow-hidden mb-6" x-data="{ search: '' }">
         <div class="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-            <div class="text-sm font-semibold text-gray-900">SALES REPORT V2 (OCCUPANCY-BASED)</div>
+            <div class="text-sm font-semibold text-gray-900">SALES REPORT (OCCUPANCY-BASED)</div>
             <div class="flex items-center gap-4">
                 <input type="text" x-model="search" placeholder="Search guest or room..."
                        class="rounded-lg border-gray-300 text-sm px-3 py-1.5 w-56 focus:border-indigo-500 focus:ring-indigo-500" />
-                <button @click="printSection('salesPrintContent', 'Sales Report V2')" type="button"
+                <button @click="printSection('salesPrintContent', 'Sales Report')" type="button"
                         class="inline-flex items-center gap-1.5 rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
@@ -579,7 +579,7 @@
             @php $printSession = collect($availableShiftSessions)->firstWhere('id', $selectedShiftLogId); @endphp
             @if($printSession)
             <div class="header">
-                <div style="font-size:14px;font-weight:700;">SALES REPORT V2</div>
+                <div style="font-size:14px;font-weight:700;">SALES REPORT</div>
                 <div><strong>Frontdesk:</strong> {{ $printSession['frontdesks'] ?? '—' }}</div>
                 <div><strong>Opening:</strong> {{ $printSession['time_in_formatted'] ?? '—' }}</div>
                 <div><strong>Closing:</strong> {{ $printSession['time_out_formatted'] ?? '—' }}</div>
@@ -587,7 +587,7 @@
             @endif
         @else
             <div class="header">
-                <div style="font-size:14px;font-weight:700;">SALES REPORT V2</div>
+                <div style="font-size:14px;font-weight:700;">SALES REPORT</div>
                 <div><strong>Date:</strong> {{ $date_from }} to {{ $date_to }}</div>
                 @if($frontdesk_name)<div><strong>Frontdesk:</strong> {{ $frontdesk_name }}</div>@endif
             </div>

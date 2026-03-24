@@ -399,6 +399,13 @@
                             </td>
                             <td class="border border-black px-2 py-1 text-right" colspan="2">{{ $reportData['cash_drawer']['forwarded_balance'] > 0 ? '₱ ' . number_format($reportData['cash_drawer']['forwarded_balance'], 2) : '-' }}</td>
                         </tr>
+                        <tr>
+                            <td class="border border-black px-2 py-1">
+                                <div class="font-bold">Remittances</div>
+                                <div>(From Current Shift)</div>
+                            </td>
+                            <td class="border border-black px-2 py-1 text-right" colspan="2">{{ $reportData['cash_position']['remittance'] > 0 ? '(' . '₱ ' . number_format($reportData['cash_position']['remittance'], 2) . ')' : '-' }}</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
