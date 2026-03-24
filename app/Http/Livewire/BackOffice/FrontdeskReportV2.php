@@ -579,6 +579,39 @@ class FrontdeskReportV2 extends Component
             })
             ->sum('tr.payable_amount');
 
+        // Unclaimed deposits from guests who checked out before prev shift but after the shift before it
+        $prevUnclaimedAmount = 0;
+        if ($shiftBeforePrev) {
+            $prevCheckedOutGuests = CheckinDetail::query()
+                ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
+                ->where('check_in_at', '<', $prevTimeIn)
+                ->where('check_out_at', '>=', $shiftBeforePrev->time_in)
+                ->where('check_out_at', '<', $prevTimeIn)
+                ->pluck('id')
+                ->toArray();
+
+            if (!empty($prevCheckedOutGuests)) {
+                $prevCheckedOutTxns = Transaction::whereIn('checkin_detail_id', $prevCheckedOutGuests)
+                    ->whereIn('transaction_type_id', [2, 5])
+                    ->get()
+                    ->groupBy('checkin_detail_id');
+
+                foreach ($prevCheckedOutGuests as $cdId) {
+                    $cdTxns = $prevCheckedOutTxns->get($cdId, collect());
+                    $depTotal = (float) $cdTxns->where('transaction_type_id', 2)
+                        ->where('remarks', '!=', 'Deposit From Check In (Room Key & TV Remote)')
+                        ->filter(fn($t) => $t->created_at < $prevTimeIn)
+                        ->sum('payable_amount');
+                    $cashoutTotal = (float) $cdTxns->where('transaction_type_id', 5)
+                        ->filter(fn($t) => $t->created_at < $prevTimeIn)
+                        ->sum('payable_amount');
+                    $unclaimed = max(0, $depTotal - $cashoutTotal);
+                    $prevUnclaimedAmount += $unclaimed;
+                }
+            }
+        }
+        $grossSales += $prevUnclaimedAmount;
+
         $prevExpenses = (float) Expense::whereBetween('created_at', [$prevTimeIn, $prevTimeOut])->sum('amount');
         $netSales = $grossSales - $prevExpenses;
 
