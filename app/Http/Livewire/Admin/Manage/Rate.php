@@ -56,11 +56,23 @@ class Rate extends Component implements Tables\Contracts\HasTable
         {
             return Type::query()
             ->where('branch_id', $this->branch_id)
-            ->with(['rates.stayingHour', 'rates.type']);
+            ->with([
+                'rates' => function ($query) {
+                    $query->where('branch_id', $this->branch_id);
+                },
+                'rates.stayingHour',
+                'rates.type'
+            ]);
         }else{
             return Type::query()
-            ->where('branch_id', auth()->user()->branch_id)
-            ->with(['rates.stayingHour', 'rates.type']);
+            ->where('branch_id', $this->branch_id)
+            ->with([
+                'rates' => function ($query) {
+                    $query->where('branch_id', $this->branch_id);
+                },
+                'rates.stayingHour',
+                'rates.type'
+            ]);
         }
     }
 
