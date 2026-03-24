@@ -7,23 +7,23 @@ use Livewire\Component;
 class ReportHub extends Component
 {
      // optional: keep selection in URL for refresh/share
-    public string $report = 'sales';
+    public string $report = 'sales-v2';
 
     protected $queryString = [
-        'report' => ['except' => 'sales'],
+        'report' => ['except' => 'sales-v2'],
     ];
 
     public function getReportsProperty(): array
     {
         // Key => config used by UI + dynamic component
         return [
-            'sales' => [
-                'label' => 'Sales Report',
-                'component' => 'back-office.sales-report',
-            ],
             'sales-v2' => [
-                'label' => 'Sales Report V2 (Occupancy)',
+                'label' => 'Sales Report',
                 'component' => 'back-office.sales-report-v2',
+            ],
+            'frontdesk-v2' => [
+                'label' => 'Frontdesk Report',
+                'component' => 'back-office.frontdesk-report-v2',
             ],
             'new-guest' => [
                 'label' => 'New Guest Report',
@@ -41,10 +41,6 @@ class ReportHub extends Component
                 'label' => 'Room Boy Report',
                 'component' => 'back-office.reports.room-boy-report',
             ],
-            // 'unoccupied' => [
-            //     'label' => 'Unoccupied Room Report',
-            //     'component' => 'back-office.reports.unoccupied-room-report',
-            // ],
             'extended' => [
                 'label' => 'Extended Guest Report',
                 'component' => 'back-office.reports.extended-guest-report',
@@ -52,14 +48,6 @@ class ReportHub extends Component
             'inventory' => [
                 'label' => 'Inventory Report',
                 'component' => 'back-office.inventory-report',
-            ],
-            'frontdesk' => [
-                'label' => 'Frontdesk Report',
-                'component' => 'back-office.temporary-frontdesk-report',
-            ],
-            'frontdesk-v2' => [
-                'label' => 'Frontdesk Report V2',
-                'component' => 'back-office.frontdesk-report-v2',
             ],
         ];
     }
