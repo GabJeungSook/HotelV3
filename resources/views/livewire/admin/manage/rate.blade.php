@@ -137,11 +137,15 @@
   <div class="bg-white p-4 rounded-xl">
     <div class="flex justify-between mb-5">
       @if(auth()->user()->hasRole('superadmin') && $branch_id != null)
-      <x-button wire:click="openAddHour" icon="plus" blue label="Add New Staying Hour" />
-      <x-button wire:click="openAdd" icon="plus" blue label="Add New Rate" />
+        <div class="flex space-x-4">
+            <x-button wire:click="openAddHour" icon="plus" blue label="Add New Staying Hour" />
+            <x-button wire:click="openAdd" icon="plus" blue label="Add New Rate" />
+        </div>
       @elseif(auth()->user()->hasRole('admin'))
-      <x-button wire:click="openAddHour" icon="plus" blue label="Add New Staying Hour" />
-      <x-button wire:click="openAdd" icon="plus" blue label="Add New Rate" />
+       <div class="flex space-x-4"></div>
+            <x-button wire:click="openAddHour" icon="plus" blue label="Add New Staying Hour" />
+            <x-button wire:click="openAdd" icon="plus" blue label="Add New Rate" />
+        </div>
       @else
       <div></div>
       @endif
