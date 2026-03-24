@@ -23,12 +23,14 @@ class Rate extends Component implements Tables\Contracts\HasTable
     use Tables\Concerns\InteractsWithTable;
     use Actions;
     public $add_modal = false;
+    public $add_staying_hour_modal = false;
     public $edit_modal = false;
     public $amount, $hours_id, $type_id, $rate_id;
     public $search;
     public $has_discount = false;
     public $branch_id;
     public $branch_name;
+    public $number;
 
     public function render()
     {
@@ -211,6 +213,32 @@ class Rate extends Component implements Tables\Contracts\HasTable
         // }
     }
 
+    public function saveStayingHour()
+    {
+        $this->validate([
+            'number' => 'required|integer',
+        ]);
+
+        StayingHour::create([
+            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
+            'number' => $this->number
+        ]);
+
+         ActivityLog::create([
+                'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
+                'user_id' => auth()->user()->id,
+                'activity' => 'Create Staying Hour',
+                'description' => 'Created staying hour ' . $this->number . ' hours.',
+            ]);
+
+            $this->reset(['number']);
+            $this->dialog()->success(
+                $title = 'Staying Hour Saved',
+                $description = 'Staying Hour was successfully saved'
+            );
+            $this->add_staying_hour_modal = false;
+    }
+
     public function editRate($rate_id)
     {
         $rate = rateModel::where('id', $rate_id)->where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)->first();
@@ -232,6 +260,20 @@ class Rate extends Component implements Tables\Contracts\HasTable
             );
         }else{
             $this->add_modal = true;
+        }
+    }
+
+    public function openAddHour()
+    {
+        $branch = Branch::find($this->branch_id);
+        if($branch->types->isEmpty())
+        {
+            $this->dialog()->error(
+                $title = 'No Types Found',
+                $description = 'Please add a room type first before proceeding to add a new staying hour.'
+            );
+        }else{
+            $this->add_staying_hour_modal = true;
         }
     }
 
