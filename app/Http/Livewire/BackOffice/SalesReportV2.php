@@ -617,11 +617,15 @@ class SalesReportV2 extends Component
     private function getFilterRange(): array
     {
         if ($this->filterMode === 'shift' && $this->selectedShiftLogId) {
-            $shiftLog = ShiftLog::find($this->selectedShiftLogId);
-            if ($shiftLog && $shiftLog->time_in && $shiftLog->time_out) {
+            // Use the session's grouped time range (min time_in / max time_out across all logs)
+            // instead of a single shift log's times, to handle sessions with multiple logs
+            $session = collect($this->availableShiftSessions)
+                ->firstWhere('id', $this->selectedShiftLogId);
+
+            if ($session) {
                 return [
-                    'start' => $shiftLog->time_in,
-                    'end' => $shiftLog->time_out,
+                    'start' => Carbon::parse($session['time_in']),
+                    'end' => Carbon::parse($session['time_out']),
                 ];
             }
         }
