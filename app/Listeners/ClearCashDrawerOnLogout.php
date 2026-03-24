@@ -31,6 +31,11 @@ class ClearCashDrawerOnLogout
             return;
         }
 
+        if ($event->user->cash_drawer_id) {
+            \App\Models\CashDrawer::where('id', $event->user->cash_drawer_id)
+                ->update(['is_active' => false]);
+        }
+
         $event->user->forceFill([
             'cash_drawer_id' => null,
         ])->save();
