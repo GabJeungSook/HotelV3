@@ -803,15 +803,65 @@ class FrontdeskReportV2 extends Component
                 ->pluck('id')
                 ->toArray();
 
+            // Detect overlap with previous session
+            $overlapIds = [];
+            $prevSession = ($index > 0) ? $orderedSessions[$index - 1] : null;
+            if ($prevSession && $prevSession['time_out'] > $ti) {
+                $overlapIds = CheckinDetail::whereHas('room', fn($q) => $q->where('branch_id', $branchId))
+                    ->where('check_in_at', '<', $ti)
+                    ->whereBetween('check_out_at', [$ti, $prevSession['time_out']])
+                    ->pluck('id')
+                    ->toArray();
+            }
+
             if (!empty($occupyingIds)) {
                 $grossSales = (float) DB::table('transactions as tr')
                     ->leftJoin('checkin_details as cd', 'cd.id', '=', 'tr.checkin_detail_id')
                     ->whereIn('tr.checkin_detail_id', $occupyingIds)
                     ->whereNotIn('tr.transaction_type_id', [2, 5])
-                    ->where(fn($q) => $q->whereBetween('tr.created_at', [$ti, $to])
-                        ->orWhere(fn($q2) => $q2->where('tr.transaction_type_id', 1)
-                            ->whereBetween('cd.check_in_at', [$ti, $to])))
+                    ->where(function ($q) use ($ti, $to, $overlapIds) {
+                        $q->whereBetween('tr.created_at', [$ti, $to])
+                          ->orWhere(fn($q2) => $q2->where('tr.transaction_type_id', 1)
+                              ->whereBetween('cd.check_in_at', [$ti, $to]));
+                        if (!empty($overlapIds)) {
+                            $q->orWhere(fn($q3) => $q3->where('tr.transaction_type_id', 1)
+                                ->whereIn('tr.checkin_detail_id', $overlapIds));
+                        }
+                    })
                     ->sum('tr.payable_amount');
+
+                // Unclaimed guest deposits from inter-session checkouts
+                $unclaimedAmount = 0;
+                if ($prevSession) {
+                    $interSessionCheckouts = CheckinDetail::query()
+                        ->whereHas('room', fn($q) => $q->where('branch_id', $branchId))
+                        ->where('check_in_at', '<', $ti)
+                        ->where('check_out_at', '>=', $prevSession['time_in'])
+                        ->where('check_out_at', '<', $ti)
+                        ->pluck('id')
+                        ->toArray();
+
+                    if (!empty($interSessionCheckouts)) {
+                        $interTxns = Transaction::whereIn('checkin_detail_id', $interSessionCheckouts)
+                            ->whereIn('transaction_type_id', [2, 5])
+                            ->get()
+                            ->groupBy('checkin_detail_id');
+
+                        foreach ($interSessionCheckouts as $cdId) {
+                            $cdTxns = $interTxns->get($cdId, collect());
+                            $depTotal = (float) $cdTxns->where('transaction_type_id', 2)
+                                ->where('remarks', '!=', 'Deposit From Check In (Room Key & TV Remote)')
+                                ->filter(fn($t) => $t->created_at < $ti)
+                                ->sum('payable_amount');
+                            $cashoutTotal = (float) $cdTxns->where('transaction_type_id', 5)
+                                ->filter(fn($t) => $t->created_at < $ti)
+                                ->sum('payable_amount');
+                            $unclaimed = max(0, $depTotal - $cashoutTotal);
+                            $unclaimedAmount += $unclaimed;
+                        }
+                    }
+                }
+                $grossSales += $unclaimedAmount;
 
                 $expenses = (float) Expense::whereBetween('created_at', [$ti, $to])->sum('amount');
                 $prevOwnNs = $grossSales - $expenses;
