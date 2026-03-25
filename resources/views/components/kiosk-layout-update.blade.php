@@ -39,6 +39,7 @@
     }
   </style>
   @wireUiScripts
+  @filamentStyles
   <!-- Scripts -->
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   <!-- Styles -->
@@ -70,7 +71,7 @@
               <h1 class="lg:text-xl font-bold text-white uppercase xs:text-2xs">Welcome to Homi Customer Kiosk</h1>
             </button>
             <button x-on:click="logout = true"><img src="{{ asset('images/homiLogo2.png') }}" alt="Homi Logo" class="w-24 h-7"></button>
-            {{-- <x-button icon="logout" sm negative  /> --}}
+            {{-- <x-button icon="arrow-right-start-on-rectangle" sm negative  /> --}}
         </header>
         <div class="absolute rounded-lg bg-white p-4 overflow-y-auto -mt-4 left-16 right-16 shadow-lg z-20 top-28 min-h-screen ">
             {{ $slot }}
@@ -116,11 +117,11 @@ aria-modal="true">
       <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse  sm:px-6">
         <form method="POST" action="{{ route('logout') }}" class="flex space-x-2">
           @csrf
-          <x-button @click="logout=false" label="Cancel" sm icon="x" />
+          <x-button @click="logout=false" label="Cancel" sm icon="x-mark" />
           <x-button href="{{ route('logout') }}"
             onclick="event.preventDefault();
           this.closest('form').submit();" label="Logout"
-            icon="logout" sm negative />
+            icon="arrow-right-start-on-rectangle" sm negative />
         </form>
 
       </div>
@@ -129,7 +130,8 @@ aria-modal="true">
 </div>
 </div>
   <x-dialog z-index="z-50" blur="md" align="center" />
-  @livewireScripts
+  @livewireScriptConfig
+  @filamentScripts
 </body>
 <script>
 

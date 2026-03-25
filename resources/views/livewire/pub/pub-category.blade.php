@@ -12,7 +12,7 @@
         {{ $this->table }}
       </div>
     </div>
-    <x-modal wire:model.defer="add_modal" max-width="lg">
+    <x-modal wire:model="add_modal" max-width="lg">
       <x-card title="Add New Category">
         <div>
           <x-input label="Name" wire:model="name" />
@@ -26,7 +26,7 @@
       </x-card>
     </x-modal>
 
-    <x-modal wire:model.defer="edit_modal" max-width="lg">
+    <x-modal wire:model="edit_modal" max-width="lg">
       <x-card title="Update Category">
         <div>
           <x-input label="Name" wire:model="name" />
@@ -35,7 +35,7 @@
           <div class="flex justify-end gap-x-4">
             <x-button flat label="Cancel" x-on:click="close" />
             <x-button positive label="Update" wire:click="updateCategory" spinner="updateCategory"
-              right-icon="arrow-narrow-right" />
+              right-icon="arrow-small-right" />
           </div>
         </x-slot>
       </x-card>

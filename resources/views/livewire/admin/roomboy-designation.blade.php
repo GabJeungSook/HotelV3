@@ -60,7 +60,7 @@
                             <div class="flex justify-end">
                               <x-button label="MANAGE DESIGNATION" wire:click="manageDesignation({{ $roomboy->id }})"
                                 spinner="manageDesignation({{ $roomboy->id }})" sm dark
-                                right-icon="arrow-narrow-right" />
+                                right-icon="arrow-small-right" />
                             </div>
                           </td>
                         </tr>
@@ -76,7 +76,7 @@
 
       </div>
     </div>
-    <x-modal wire:model.defer="assign_modal" align="center" max-width="lg">
+    <x-modal wire:model="assign_modal" align="center" max-width="lg">
       <x-card title="Manage Designation">
         <div>
           <x-native-select label="Floor" wire:model="floor">

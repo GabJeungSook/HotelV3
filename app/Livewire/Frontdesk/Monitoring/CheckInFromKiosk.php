@@ -1,0 +1,419 @@
+<?php
+
+namespace App\Livewire\Frontdesk\Monitoring;
+
+use App\Models\ActivityLog;
+use App\Models\Branch;
+use App\Models\User;
+use App\Models\CashOnDrawer;
+use App\Models\CheckinDetail;
+use App\Models\Guest;
+use App\Models\NewGuestReport;
+use App\Models\Rate;
+use App\Models\Room;
+use App\Models\StayingHour;
+use App\Models\TemporaryCheckInKiosk;
+use App\Models\Transaction;
+use Carbon\Carbon;
+use DB;
+use Livewire\Component;
+use WireUi\Traits\WireUiActions;
+
+class CheckInFromKiosk extends Component
+{
+    use WireUiActions;
+    public $record;
+    public $temporary_checkIn;
+    public $additional_charges = 0;
+    public $room;
+    public $rate;
+    public $stayingHour;
+    public $guest;
+    public $has_discount;
+    public $discount_amount;
+
+    public $is_longStay = false;
+    public $total = 0;
+
+    public $save_excess = false;
+
+    public $amountPaid;
+    public $excess = false;
+    public $excess_amount = 0;
+    public $room_static_amount = 0;
+
+    //modals
+    public $change_modal = false;
+    public function mount($record)
+    {;
+        $this->additional_charges = auth()->user()->branch->initial_deposit;
+        //  $this->record = TemporaryCheckInKiosk::where(
+        //         'branch_id',
+        //         auth()->user()->branch_id
+        //     )->where('id', $record)->first();
+         $this->temporary_checkIn = TemporaryCheckInKiosk::where(
+                'branch_id',
+                auth()->user()->branch_id
+            )
+                ->where('id', $record)
+                ->first();
+        $this->guest = Guest::where('branch_id', auth()->user()->branch_id)
+                ->where('id', $this->temporary_checkIn->guest_id)
+                ->first();
+        $this->room_static_amount = $this->guest->static_amount;
+        $this->room = Room::where('branch_id', auth()->user()->branch_id)
+                ->where('id', $this->temporary_checkIn->room_id)
+                ->first();
+        $this->rate = Rate::where('branch_id', auth()->user()->branch_id)
+                ->where('id', $this->guest->rate_id)
+                ->first();
+        $this->stayingHour = StayingHour::where(
+                'branch_id',
+                auth()->user()->branch_id
+            )
+                ->where('id', $this->rate->staying_hour_id)
+                ->first();
+            $this->has_discount = $this->guest->has_discount;
+            $this->discount_amount = auth()->user()->branch->discount_amount;
+
+            if ($this->has_discount) {
+                $this->total = ($this->guest->static_amount + $this->additional_charges) - $this->discount_amount;
+            } else {
+                $this->total = $this->guest->static_amount + $this->additional_charges;
+            }
+    }
+
+    public function cancelCheckIn()
+    {
+        $this->temporary_checkIn->update([
+            'is_opened' => false,
+        ]);
+        return redirect()->route('frontdesk.room-monitoring');
+    }
+
+    public function updatedHasDiscount()
+    {
+        //compute total amount
+         if ($this->has_discount) {
+                $this->total = ($this->guest->static_amount + $this->additional_charges) - $this->discount_amount;
+            } else {
+                $this->total = $this->guest->static_amount + $this->additional_charges;
+        }
+        //check if amount paid is greater than total
+        if ($this->amountPaid > $this->total) {
+            $this->excess = true;
+            $this->excess_amount = $this->amountPaid - $this->total;
+        } else {
+            $this->excess = false;
+            $this->excess_amount = 0;
+        }
+    }
+
+    public function proceedCheckIn()
+    {
+        $this->validate([
+            'amountPaid' => 'required|numeric',
+        ],
+        [
+            'amountPaid.required' => 'Amount Paid is required',
+            'amountPaid.numeric' => 'Amount Paid must be a number',
+        ]);
+
+
+        //check if amount paid is greater than total
+        if ($this->amountPaid > $this->total) {
+            $this->excess_amount = $this->amountPaid - $this->total;
+            $this->change_modal = true;
+        }else{
+            if($this->amountPaid < $this->total)
+            {
+                 $this->dialog()->error(
+                    $title = 'Oops !!!',
+                    $description = 'Amount paid is less than the total payable amount.'
+                );
+            }else{
+                $this->dialog()->confirm([
+                'title'       => 'Save Transaction?',
+                'description' => 'The guest payment is the exact amount. Do you want to proceed with the check-in?',
+                'acceptLabel' => 'Yes, proceed',
+                'method'      => 'saveCheckIn',
+                'params'      => 'Saved',
+                ]);
+            }
+
+        }
+    }
+
+    public function saveCheckIn()
+    {
+        DB::beginTransaction();
+
+        $rate = Rate::where('id', $this->guest->rate_id)->first()->stayingHour->number;
+        $room_number = Room::where('id', $this->guest->room_id)->first()->number;
+        $assigned_frontdesk = auth()->user()->assigned_frontdesks;
+         //update guest
+         $this->guest->static_amount = $this->total;
+         $this->guest->has_discount = $this->has_discount;
+         $this->guest->discount_amount = $this->discount_amount;
+         $this->guest->save();
+
+         $decode_frontdesk = json_decode(
+            $assigned_frontdesk,
+            true
+        );
+
+        $extension_time_reset = Branch::where(
+            'id',
+            auth()->user()->branch_id
+        )->first()->extension_time_reset;
+
+         $number_of_hours = $rate;
+         $next_extension_is_original = false;
+         while ($number_of_hours >= $extension_time_reset) {
+             $number_of_hours -= $extension_time_reset;
+             $next_extension_is_original = true;
+         }
+
+         //save check-in details
+         $checkin = CheckinDetail::create([
+            'guest_id' => $this->guest->id,
+            'frontdesk_id' => $decode_frontdesk[0],
+            'type_id' => $this->guest->type_id,
+            'room_id' => $this->guest->room_id,
+            'rate_id' => $this->guest->rate_id,
+            'static_room_amount' => $this->room_static_amount,
+            'static_amount' => $this->guest->static_amount,
+            'hours_stayed' => $this->is_longStay
+                ? 0
+                : $rate,
+            'total_deposit' => $this->save_excess
+                ? $this->excess_amount + $this->additional_charges
+                : $this->additional_charges,
+            'check_in_at' => now(),
+            'check_out_at' => $this->guest->is_long_stay
+                ? now()->addDays($this->guest->number_of_days)
+                : now()->addHours($this->stayingHour->number),
+            'is_long_stay' => $this->is_longStay != null ? true : false,
+            'number_of_hours' => $number_of_hours,
+            'next_extension_is_original' => $next_extension_is_original ? 1 : 0,
+        ]);
+
+        $users = User::role('frontdesk')->get();
+
+            $threshold = now()->subMinutes(5)->timestamp;
+
+            $onlineUsers = [];
+
+            foreach ($users as $user) {
+                if ($this->isUserOnline($user, $threshold)) {
+                    $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
+                }
+            }
+
+            $shiftLogId = collect($onlineUsers)->where('frontdesk_id', auth()->user()->id)->first()->id ?? null;
+
+        //create transaction for check-in
+         Transaction::create([
+            'branch_id' => auth()->user()->branch_id,
+            'shift_log_id' => $shiftLogId,
+            'checkin_detail_id' => $checkin->id,
+            'cash_drawer_id' => auth()->user()->cash_drawer_id,
+            'room_id' => $this->guest->room_id,
+            'guest_id' => $this->guest->id,
+            'floor_id' => Room::where('id', $this->guest->room_id)->first()->floor->id,
+            'transaction_type_id' => 1,
+            'assigned_frontdesk_id' => json_encode($assigned_frontdesk),
+            'description' => 'Guest Check In',
+            'payable_amount' => $this->room_static_amount,
+            'paid_amount' => $this->amountPaid,
+            'change_amount' =>
+                $this->excess_amount != 0 ? $this->excess_amount : 0,
+            'deposit_amount' => 0,
+            'paid_at' => now(),
+            'override_at' => null,
+            'remarks' => 'Guest Checked In at room #' . $room_number,
+            'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
+        ]);
+
+        //save cash on drawer
+        CashOnDrawer::create([
+            'branch_id' => auth()->user()->branch_id,
+            'frontdesk_id' => auth()->user()->frontdesk->id,
+            'cash_drawer_id' => auth()->user()->cash_drawer_id,
+            'amount' => $this->room_static_amount,
+            'transaction_date' => now()->toDateString(),
+            'transaction_type' => 'check-in',
+            'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
+        ]);
+        $users = User::role('frontdesk')->get();
+
+            $threshold = now()->subMinutes(5)->timestamp;
+
+            $onlineUsers = [];
+
+            foreach ($users as $user) {
+                if ($this->isUserOnline($user, $threshold)) {
+                    $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
+                }
+            }
+
+            $shiftLogId = collect($onlineUsers)->where('frontdesk_id', auth()->user()->id)->first()->id ?? null;
+        Transaction::create([
+            'branch_id' => auth()->user()->branch_id,
+            'shift_log_id' => $shiftLogId,
+            'checkin_detail_id' => $checkin->id,
+            'cash_drawer_id' => auth()->user()->cash_drawer_id,
+            'room_id' => $this->guest->room_id,
+            'guest_id' => $this->guest->id,
+            'floor_id' => Room::where('id', $this->guest->room_id)->first()->floor->id,
+            'transaction_type_id' => 2,
+            'assigned_frontdesk_id' => json_encode($assigned_frontdesk),
+            'description' => 'Deposit',
+            'payable_amount' => $this->additional_charges,
+            'paid_amount' => $this->amountPaid,
+            'change_amount' =>
+                $this->excess_amount != 0 ? $this->excess_amount : 0,
+            'deposit_amount' => $this->additional_charges,
+            'paid_at' => now(),
+            'override_at' => null,
+            'remarks' => 'Deposit From Check In (Room Key & TV Remote)',
+            'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
+        ]);
+
+        CashOnDrawer::create([
+            'branch_id' => auth()->user()->branch_id,
+            'frontdesk_id' => auth()->user()->frontdesk->id,
+            'cash_drawer_id' => auth()->user()->cash_drawer_id,
+            'amount' => $this->additional_charges,
+            'transaction_date' => now()->toDateString(),
+            'transaction_type' => 'deposit',
+            'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
+        ]);
+
+        if ($this->save_excess) {
+            $users = User::role('frontdesk')->get();
+
+            $threshold = now()->subMinutes(5)->timestamp;
+
+            $onlineUsers = [];
+
+            foreach ($users as $user) {
+                if ($this->isUserOnline($user, $threshold)) {
+                    $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
+                }
+            }
+
+            $shiftLogId = collect($onlineUsers)->where('frontdesk_id', auth()->user()->id)->first()->id ?? null;
+            Transaction::create([
+                'branch_id' => auth()->user()->branch_id,
+                'shift_log_id' => $shiftLogId,
+                'checkin_detail_id' => $checkin->id,
+                'cash_drawer_id' => auth()->user()->cash_drawer_id,
+                'room_id' => $this->guest->room_id,
+                'guest_id' => $this->guest->id,
+                'floor_id' => Room::where('id', $this->guest->room_id)->first()->floor->id,
+                'transaction_type_id' => 2,
+                'assigned_frontdesk_id' => json_encode($assigned_frontdesk),
+                'description' => 'Deposit',
+                'payable_amount' => $this->excess_amount,
+                'paid_amount' => $this->amountPaid,
+                'change_amount' => 0,
+                'deposit_amount' => $this->excess_amount,
+                'paid_at' => now(),
+                'override_at' => null,
+                'remarks' => 'Deposit From Check In (Excess Amount)',
+                'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
+            ]);
+
+             //save cash on drawer
+            CashOnDrawer::create([
+                'branch_id' => auth()->user()->branch_id,
+                'frontdesk_id' => auth()->user()->frontdesk->id,
+                'cash_drawer_id' => auth()->user()->cash_drawer_id,
+                'amount' => $this->excess_amount,
+                'transaction_date' => now()->toDateString(),
+                'transaction_type' => 'deposit',
+                'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
+            ]);
+        }
+
+        $now = Carbon::now();
+        $hour = (int) $now->format('H');
+        $shift = $now->format('H:i');
+
+        if ($hour >= 8 && $hour < 20) {
+            $shift_schedule = 'AM';
+            $shift_date = $now->format('F j, Y');
+        } else {
+            $shift_schedule = 'PM';
+            // For times between 00:00 and 07:59 the PM shift started the previous day (8pm)
+            $shift_date = $hour < 8 ? $now->copy()->subDay()->format('F j, Y') : $now->format('F j, Y');
+        }
+
+        // $shift_date = Carbon::parse(auth()->user()->time_in)->format('F j, Y');
+        // $shift = Carbon::parse(auth()->user()->time_in)->format('H:i');
+        // $hour = Carbon::parse($shift)->hour;
+
+        // if ($hour >= 8 && $hour < 20) {
+        //     $shift_schedule = 'AM';
+        // } else {
+        //     $shift_schedule = 'PM';
+        // }
+
+         $decode_frontdesk = json_decode(
+            auth()->user()->assigned_frontdesks,
+            true
+        );
+
+         NewGuestReport::create([
+            'branch_id' => auth()->user()->branch_id,
+            'checkin_details_id' => $checkin->id,
+            'room_id' => $checkin->room_id,
+            'shift_date' => $shift_date,
+            'shift' => $shift_schedule,
+            'frontdesk_id' => $decode_frontdesk[0],
+            'partner_name' => $decode_frontdesk[1],
+        ]);
+
+        $this->amountPaid = null;
+
+        if($this->change_modal)
+        {
+            $this->change_modal = false;
+        }
+
+        Room::where('id', $this->guest->room_id)
+            ->first()
+            ->update([
+                'status' => 'Occupied',
+            ]);
+
+        TemporaryCheckInKiosk::where('id', $this->temporary_checkIn->id)
+            ->first()
+            ->delete();
+
+        $this->temporary_checkIn = null;
+
+        ActivityLog::create([
+            'branch_id' => auth()->user()->branch_id,
+            'user_id' => auth()->user()->id,
+            'activity' => 'Check In from Kiosk',
+            'description' => 'Checked in guest ' . $this->guest->name . ' from kiosk',
+        ]);
+
+        DB::commit();
+        $this->dialog()->success(
+            $title = 'Success',
+            $description = 'Guest Has been Check-in'
+        );
+
+        return redirect()->route('frontdesk.room-monitoring');
+    }
+
+    private function isUserOnline($user, $threshold) { return $user->sessions() ->where('last_activity', '>=', $threshold) ->exists(); }
+
+    public function render()
+    {
+        return view('livewire.frontdesk.monitoring.check-in-from-kiosk');
+    }
+}

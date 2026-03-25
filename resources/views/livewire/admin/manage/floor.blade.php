@@ -20,8 +20,8 @@
       @forelse ($floors as $floor)
         <div class="border rounded-xl h-40 grid place-content-center relative shadow">
           <div class="absolute top-2 right-2">
-            <x-button.circle wire:click="editFloor({{ $floor->id }})" spinner="editFloor({{ $floor->id }})"
-              warning icon="pencil-alt" />
+            <x-mini-button wire:click="editFloor({{ $floor->id }})" spinner="editFloor({{ $floor->id }})"
+              warning icon="pencil-square" />
           </div>
           <svg class="w-20 h-20 text-gray-700" xmlns="http://www.w3.org/2000/svg"
             xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 16 16" fill="currentColor">
@@ -46,10 +46,10 @@
     </div>
   </div>
 
-  <x-modal wire:model.defer="add_modal" max-width="lg">
+  <x-modal wire:model="add_modal" max-width="lg">
     <x-card title="Add New">
       <div class="flex flex-col space-y-2">
-        <x-input wire:model.defer="number" label="Floor Number" placeholder="" />
+        <x-input wire:model="number" label="Floor Number" placeholder="" />
       </div>
       <x-slot name="footer">
         <div class="flex justify-end gap-x-2">
@@ -60,10 +60,10 @@
     </x-card>
   </x-modal>
 
-  <x-modal wire:model.defer="edit_modal" max-width="lg">
+  <x-modal wire:model="edit_modal" max-width="lg">
     <x-card title="Update Floor">
       <div class="flex flex-col space-y-2">
-        <x-input wire:model.defer="number" label="Floor Number" placeholder="" />
+        <x-input wire:model="number" label="Floor Number" placeholder="" />
       </div>
       <x-slot name="footer">
         <div class="flex justify-end gap-x-2">
@@ -79,7 +79,7 @@
     </div>
     {{ $this->table }}
   </div>
-  <x-modal wire:model.defer="add_modal" align="center" max-width="lg">
+  <x-modal wire:model="add_modal" align="center" max-width="lg">
     <x-card>
       <div class="header flex space-x-2 items-center">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" class="fill-gray-600">
@@ -99,14 +99,14 @@
                 @endforeach
           </x-native-select>
           @endif
-        <x-input label="Number" wire:model.defer="number" />
+        <x-input label="Number" wire:model="number" />
         </div>
       </div>
       <x-slot name="footer">
         <div class="flex justify-end gap-x-4">
           <x-button flat label="Cancel" x-on:click="close" />
 
-          <x-button positive right-icon="save-as" spinner="saveFloor" wire:click="saveFloor" label="Save" />
+          <x-button positive right-icon="arrow-down-tray" spinner="saveFloor" wire:click="saveFloor" label="Save" />
         </div>
       </x-slot>
     </x-card>

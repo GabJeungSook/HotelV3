@@ -17,7 +17,7 @@
               {{$this->table}}
           </div>
     </div>
-    <x-modal wire:model.defer="add_modal" max-width="xl">
+    <x-modal wire:model="add_modal" max-width="xl">
         <x-card title="Add New Menu">
           <div class="grid grid-cols-2 gap-4">
             <div class="col-span-2">
@@ -53,7 +53,7 @@
         </x-card>
       </x-modal>
 
-      <x-modal wire:model.defer="edit_modal" max-width="xl">
+      <x-modal wire:model="edit_modal" max-width="xl">
         <x-card title="Add New Menu">
           <div class="grid grid-cols-2 gap-4">
             <x-input label="Name" wire:model="name" />

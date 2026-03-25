@@ -17,7 +17,7 @@
               <a href="#" class="font-medium text-gray-700 text-lg uppercase hover:text-gray-600">ROOMBOY</a>
             </div>
             <div class="flex-shrink-0 pr-2">
-              <x-button.circle gray icon="arrow-right" wire:click="openReport(1)" spinner="openReport(1)" />
+              <x-mini-button gray icon="arrow-right" wire:click="openReport(1)" spinner="openReport(1)" />
             </div>
           </div>
         </li>
@@ -37,7 +37,7 @@
               <a href="#" class="font-medium text-gray-700 text-lg uppercase hover:text-gray-600">EXPENSES</a>
             </div>
             <div class="flex-shrink-0 pr-2">
-              <x-button.circle gray icon="arrow-right" wire:click="openReport(2)" spinner="openReport(2)" />
+              <x-mini-button gray icon="arrow-right" wire:click="openReport(2)" spinner="openReport(2)" />
             </div>
           </div>
         </li>
@@ -57,7 +57,7 @@
               <a href="#" class="font-medium text-gray-700 text-lg uppercase hover:text-gray-600">SALES</a>
             </div>
             <div class="flex-shrink-0 pr-2">
-              <x-button.circle gray icon="arrow-right" wire:click="openReport(3)" spinner="openReport(3)" />
+              <x-mini-button gray icon="arrow-right" wire:click="openReport(3)" spinner="openReport(3)" />
             </div>
           </div>
         </li>
@@ -65,7 +65,7 @@
       </ul>
     </div>
 
-    {{-- <x-modal.card wire:model.defer="report_modal" fullscreen>
+    {{-- <x-modal-card wire:model="report_modal" fullscreen>
       <div class="mx-auto max-w-7xl">
 
         <div class="">
@@ -123,5 +123,5 @@
         </div>
       </x-slot>
 
-    </x-modal.card> --}}
+    </x-modal-card> --}}
   </div>

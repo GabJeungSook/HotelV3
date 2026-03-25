@@ -26,7 +26,7 @@
                 </label>
                 <input
                     type="date"
-                    wire:model.defer="date"
+                    wire:model="date"
                     class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
                 />
             </div>
@@ -36,7 +36,7 @@
                     Shift
                 </label>
                 <select
-                    wire:model.defer="shift"
+                    wire:model="shift"
                     class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
                 >
                     <option value="">All</option>

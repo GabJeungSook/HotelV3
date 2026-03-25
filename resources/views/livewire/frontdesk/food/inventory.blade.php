@@ -67,19 +67,19 @@
                         </div>
                       </div>
 
-                      <x-modal wire:model.defer="add_stock_modal" max-width="xl">
+                      <x-modal wire:model="add_stock_modal" max-width="xl">
                         <x-card title="Add Stock">
                           <div class="grid grid-cols-2 gap-4">
                             <x-input label="Name" wire:model="menu_name" disabled />
                             <x-input label="Price" wire:model="menu_price" disabled />
                           </div>
                           <div class="grid grid-cols-1 mt-4">
-                            <x-inputs.maskable mask="####" label="Quantity" wire:model.defer="menu_quantity" numeric />
+                            <x-maskable mask="####" label="Quantity" wire:model="menu_quantity" numeric />
                           </div>
                           <x-slot name="footer">
                             <div class="flex justify-end gap-x-4">
                               <x-button flat label="Cancel" x-on:click="close" />
-                              <x-button positive label="Save" wire:click="saveStock" spinner="saveStock" right-icon="arrow-narrow-right" />
+                              <x-button positive label="Save" wire:click="saveStock" spinner="saveStock" right-icon="arrow-small-right" />
                             </div>
                           </x-slot>
                         </x-card>

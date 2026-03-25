@@ -7,7 +7,7 @@
     {{ $this->table }}
   </div>
 
-  <x-modal wire:model.defer="add_modal" align="center" max-width="lg">
+  <x-modal wire:model="add_modal" align="center" max-width="lg">
     <x-card>
       <div class="header flex space-x-2 items-center">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" class="fill-gray-600">
@@ -26,13 +26,13 @@
                 @endforeach
           </x-native-select>
           @endif
-        <x-input label="Name" wire:model.defer="name" />
+        <x-input label="Name" wire:model="name" />
       </div>
       <x-slot name="footer">
         <div class="flex justify-end gap-x-4">
           <x-button flat label="Cancel" x-on:click="close" />
 
-          <x-button positive right-icon="save-as" wire:click="saveDrawer" spinner="saveDrawer" label="Save" />
+          <x-button positive right-icon="arrow-down-tray" wire:click="saveDrawer" spinner="saveDrawer" label="Save" />
         </div>
       </x-slot>
     </x-card>

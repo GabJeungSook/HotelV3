@@ -40,7 +40,7 @@
               </svg>
 
               <div class="absolute top-2 right-2">
-                <x-button.circle icon="trash" wire:click="removePriority({{ $room->id }})" negative />
+                <x-mini-button icon="trash" wire:click="removePriority({{ $room->id }})" negative />
               </div>
             </div>
           @empty
@@ -82,7 +82,7 @@
                   </svg>
 
                   <div class="absolute top-2 right-2">
-                    <x-button.circle icon="trash" wire:click="removePriority({{ $room->id }})" negative />
+                    <x-mini-button icon="trash" wire:click="removePriority({{ $room->id }})" negative />
                   </div>
                 </div>
               @empty
@@ -114,7 +114,7 @@
                 <option value="{{ $type->id }}">{{ $type->name }}</optionv>
               @endforeach
             </x-native-select>
-            <x-button.circle icon="refresh" slate spinner />
+            <x-mini-button icon="arrow-path" slate spinner />
           </div>
           <div class="search flex items-center rounded-lg  px-3 py-1 w-72 border border-gray-200 shadow-sm">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="fill-gray-500" width="24"
@@ -136,7 +136,7 @@
               <div class="text-xs uppercase">{{ $room->type->name }}</div>
               <div class="mt-3 relative z-10">
                 <x-button wire:click="setPriority({{ $room->id }})" label="Set as Priority"
-                  right-icon="arrow-narrow-right" negative class="w-full" />
+                  right-icon="arrow-small-right" negative class="w-full" />
               </div>
               <svg class="w-40 h-40 absolute text-red-600 opacity-20 -top-2 -right-2" fill="currentColor"
                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">

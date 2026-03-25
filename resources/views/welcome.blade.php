@@ -191,7 +191,7 @@
   </div>
 
 
-  @livewireScripts
+  @livewireScriptConfig
 </body>
 
 </html>

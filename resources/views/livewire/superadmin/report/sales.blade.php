@@ -69,7 +69,7 @@
       <div class="flex mt-10 justify-center">
         <h1 wire:loading.remove wire.target="showExtend, showAmenities, showFood, showDamages, showDeposits" class="font-bold text-xl ">SALES REPORT</h1>
             <div wire:loading wire:target="showExtend, showAmenities, showFood, showDamages, showDeposits">
-                <x-icon.spinner class="w-6 h-6 text-amber-600 animate-spin" />
+                <svg class="w-6 h-6 text-amber-600 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
             </div>
       </div>
       <div class="mt-6">

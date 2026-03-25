@@ -15,7 +15,7 @@
                         Name
                     </label>
                     <input type="text"
-                           wire:model.defer="name"
+                           wire:model="name"
                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500"
                            placeholder="Enter guest name">
                     @error('name')

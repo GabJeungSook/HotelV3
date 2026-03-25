@@ -37,6 +37,7 @@
     }
   </style>
   @wireUiScripts
+  @filamentStyles
   <!-- Scripts -->
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   <!-- Styles -->
@@ -125,7 +126,7 @@
             @csrf
             <x-button negative label="Logout" class="ml-2"
               onclick="event.preventDefault();
-              this.closest('form').submit();" icon="logout" />
+              this.closest('form').submit();" icon="arrow-right-start-on-rectangle" />
           </form>
 
 
@@ -259,7 +260,7 @@
               @csrf
               <x-button negative label="Logout" class="ml-2"
                 onclick="event.preventDefault();
-              this.closest('form').submit();" icon="logout" />
+              this.closest('form').submit();" icon="arrow-right-start-on-rectangle" />
             </form> --}}
           </div>
         </div>
@@ -352,7 +353,8 @@
 
   <x-notifications z-index="z-50" />
   <x-dialog z-index="z-50" blur="md" align="center" />
-  @livewireScripts
+  @livewireScriptConfig
+  @filamentScripts
   @yield('scripts')
 
 </body>

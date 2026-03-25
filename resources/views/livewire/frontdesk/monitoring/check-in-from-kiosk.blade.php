@@ -70,7 +70,7 @@
             ₱
         </span>
 <input
-    wire:model.defer="amountPaid"
+    wire:model="amountPaid"
     type="number"
     autofocus
     min="0"
@@ -123,7 +123,7 @@
     </div>
 
     {{-- modal for submission --}}
-    <x-modal wire:model.defer="change_modal" align="center">
+    <x-modal wire:model="change_modal" align="center">
       <x-card>
         <div>
           <div class="header flex space-x-1 border-b items-end justify-between py-0.5">

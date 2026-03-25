@@ -30,7 +30,7 @@
         <option value="Cleaning">Cleaning</option>
         <option value="Cleaned">Cleaned</option>
       </x-native-select>
-        <x-button wire:click="redirectToScanning" label="Scan QR Code" dark icon="qrcode"/>
+        <x-button wire:click="redirectToScanning" label="Scan QR Code" dark icon="qr-code"/>
         <x-button label="Check-In C/O" icon="check" emerald wire:click="redirectToCheckInCO"
         spinner="redirectToCheckInCO" />
     </div>
@@ -252,18 +252,18 @@
                     @endif
                     {{-- <x-button wire:click="viewDetails({{ $room->guest->first()->id }})" sm icon="eye" warning /> --}}
                     <x-button wire:click="viewDetails({{ $room->latestCheckInDetail->guest_id }})" sm icon="eye" warning />
-                    {{-- <x-button href="{{ route('frontdesk.manage-guest', ['id' => $room->checkInDetails->first()->guest_id]) }}" label="Manage" class="hidden" positive sm right-icon="arrow-narrow-right" /> --}}
+                    {{-- <x-button href="{{ route('frontdesk.manage-guest', ['id' => $room->checkInDetails->first()->guest_id]) }}" label="Manage" class="hidden" positive sm right-icon="arrow-small-right" /> --}}
                         @if (auth()->user()->hasRole('frontdesk'))
-                        {{-- <x-button href="{{ route('frontdesk.guest-transaction', ['id' => $room->guest->first()->id]) }}" label="Manage" positive sm right-icon="arrow-narrow-right" /> --}}
-                        <x-button href="{{ route('frontdesk.guest-transaction', ['id' => $room->latestCheckInDetail->guest_id]) }}" label="Manage" positive sm right-icon="arrow-narrow-right" />
+                        {{-- <x-button href="{{ route('frontdesk.guest-transaction', ['id' => $room->guest->first()->id]) }}" label="Manage" positive sm right-icon="arrow-small-right" /> --}}
+                        <x-button href="{{ route('frontdesk.guest-transaction', ['id' => $room->latestCheckInDetail->guest_id]) }}" label="Manage" positive sm right-icon="arrow-small-right" />
                         @else
-                        {{-- <x-button wire:click="addTransaction({{$room->guest->first()->id}})" label="Add Transaction" slate sm right-icon="arrow-narrow-right" /> --}}
-                        <x-button wire:click="addTransaction({{$room->latestCheckInDetail->guest_id}})" label="Add Transaction" slate sm right-icon="arrow-narrow-right" />
+                        {{-- <x-button wire:click="addTransaction({{$room->guest->first()->id}})" label="Add Transaction" slate sm right-icon="arrow-small-right" /> --}}
+                        <x-button wire:click="addTransaction({{$room->latestCheckInDetail->guest_id}})" label="Add Transaction" slate sm right-icon="arrow-small-right" />
                         @endif
                   </div>
                 @elseif($room->status == 'Reserved')
                 <x-button
-                label="Check-in" wire:click="checkInReserve({{ $room->id }})" positive sm right-icon="arrow-narrow-right" />
+                label="Check-in" wire:click="checkInReserve({{ $room->id }})" positive sm right-icon="arrow-small-right" />
                 @endif
               </td>
             </tr>
@@ -418,7 +418,7 @@
     </div>
     @endif
 
-    <x-modal wire:model.defer="guest_details_modal" align="center">
+    <x-modal wire:model="guest_details_modal" align="center">
       <x-card>
         <div>
           <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
@@ -450,7 +450,7 @@
       </x-card>
     </x-modal>
 
-    <x-modal.card title="Check In Information" blur wire:model.defer="checkInModal">
+    <x-modal-card title="Check In Information" blur wire:model="checkInModal">
       @if ($temporary_checkIn != null)
         <div class="col-span-1 sm:col-span-2">
           <x-input class="text-gray-900" readonly label="QR Code" value="{{ $temporary_checkIn->guest->qr_code }}" />
@@ -519,7 +519,7 @@
             <template x-if="excess" x-cloak>
                 <div class="col-span-1">
                 <x-input wire:model="excess_amount" disabled type="number" class="text-right" />
-                <x-checkbox id="right-label" label="Save excess as deposit" wire:model.defer="save_excess" class="mx-2 mt-2" />
+                <x-checkbox id="right-label" label="Save excess as deposit" wire:model="save_excess" class="mx-2 mt-2" />
                 </div>
             </template>
 
@@ -536,9 +536,9 @@
           </div>
         </div>
       </x-slot>
-    </x-modal.card>
+    </x-modal-card>
 
-    <x-modal.card title="Check In Information" blur wire:model.defer="checkInReserveModal">
+    <x-modal-card title="Check In Information" blur wire:model="checkInReserveModal">
       @if ($temporary_reserve != null)
         <div class="col-span-1 sm:col-span-2">
           <x-input disabled label="QR Code" value="{{ $temporary_reserve->guest->qr_code }}" />
@@ -593,7 +593,7 @@
               <div class="col-span-1 flex justify-end">
               </div>
               <div class="col-span-1">
-                <x-checkbox id="right-label" label="Save excess as deposit" wire:model.defer="save_excess_reserve" />
+                <x-checkbox id="right-label" label="Save excess as deposit" wire:model="save_excess_reserve" />
               </div>
             @endif
           </div>
@@ -609,9 +609,9 @@
           </div>
         </div>
       </x-slot>
-    </x-modal.card>
+    </x-modal-card>
 
-    <x-modal wire:model.defer="guestCheckInModal" align="center">
+    <x-modal wire:model="guestCheckInModal" align="center">
       <x-card title="CHECK-IN DETAILS">
         <div class="col-span-1 sm:col-span-2">
           <x-input disabled label="QR Code" value="{{ $checkInDetails['transaction_code'] ?? 'Null' }}" />
@@ -661,7 +661,7 @@
             </div>
             <div class="col-span-1" x-show="excess" x-collapse>
               <x-input wire:model="excess_amount" disabled type="number" class="text-right" />
-              <x-checkbox id="right-label" label="Save excess as deposit" wire:model.defer="save_excess"
+              <x-checkbox id="right-label" label="Save excess as deposit" wire:model="save_excess"
                 class="mx-2 mt-2" />
             </div>
 
@@ -677,12 +677,12 @@
       </x-card>
     </x-modal>
 
-    <x-modal wire:model.defer="food_beverages_modal" align="center">
+    <x-modal wire:model="food_beverages_modal" align="center">
         <x-card>
           <div>
             <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
               <h2 class="text-lg uppercase text-gray-600 font-bold">Food and Beverages</h2>
-              <x-button.circle icon="plus" xs positive />
+              <x-mini-button icon="plus" xs positive />
             </div>
             <div class="mt-3">
               <div class="space-y-4">
@@ -717,7 +717,7 @@
           <x-slot name="footer">
             <div class="flex justify-end gap-x-2">
               <x-button flat negative label="Cancel" wire:click="closeModal" />
-              <x-button positive label="Save" wire:click="addFood" right-icon="arrow-narrow-right" />
+              <x-button positive label="Save" wire:click="addFood" right-icon="arrow-small-right" />
             </div>
           </x-slot>
         </x-card>

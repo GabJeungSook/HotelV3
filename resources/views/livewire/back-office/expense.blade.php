@@ -1,6 +1,6 @@
 <div>
   <div class="flex justify-end space-x-2 px-4">
-    <x-button label="Expense Type" icon="collection" gray wire:click=" $set('manage_modal', true)" />
+    <x-button label="Expense Type" icon="rectangle-stack" gray wire:click=" $set('manage_modal', true)" />
     <x-button label="Add New Expense" icon="plus" wire:click="$set('add_modal',true)" positive />
     <x-button label="Print Report" icon="printer" wire:click="redirectReport" amber />
   </div>
@@ -71,7 +71,7 @@
 
   </div>
 
-  <x-modal blur wire:model.defer="manage_modal" align="center">
+  <x-modal blur wire:model="manage_modal" align="center">
     <x-card>
       <div class="header flex space-x-2 items-center">
         <svg class="w-6 h-6 text-gray-600" width="24" height="24" stroke-width="1.5" viewBox="0 0 24 24"
@@ -94,7 +94,7 @@
         <h1 class="text-lg font-semibold uppercase text-gray-600 ">Expense Type</h1>
       </div>
       <div class="mt-5 px-4">
-        <x-input label="Expense Type" wire:model.defer="category_name" placeholder="" />
+        <x-input label="Expense Type" wire:model="category_name" placeholder="" />
       </div>
 
       <div class="mt-10 px-4">
@@ -103,7 +103,7 @@
             <li class="py-2 px-3 rounded-lg shadow-md flex bg-gray-100 justify-between">
               <h1 class="font-medium uppercase">{{ $category->name }}</h1>
               <x-button label="Edit" positive xs wire:click="editCategory({{ $category->id }})"
-                spinner="editCategory({{ $category->id }})" icon="pencil-alt" />
+                spinner="editCategory({{ $category->id }})" icon="pencil-square" />
             </li>
           @empty
             <div class="flex space-x-1 item-end">
@@ -121,14 +121,14 @@
       <x-slot name="footer">
         <div class="flex justify-end gap-x-4">
           <x-button flat label="Cancel" x-on:click="close" />
-          <x-button positive right-icon="save-as" wire:click="saveCategory" spinner="saveCategory"
+          <x-button positive right-icon="arrow-down-tray" wire:click="saveCategory" spinner="saveCategory"
             label="Save Category" />
         </div>
       </x-slot>
     </x-card>
   </x-modal>
 
-  <x-modal blur wire:model.defer="edit_expense_modal" align="center" max-width="lg">
+  <x-modal blur wire:model="edit_expense_modal" align="center" max-width="lg">
     <x-card>
       <div class="header flex space-x-2 items-center">
         <svg class="w-6 h-6 text-gray-600" width="24" height="24" stroke-width="1.5" viewBox="0 0 24 24"
@@ -151,7 +151,7 @@
         <h1 class="text-lg font-semibold uppercase text-gray-600 ">Update Expense Type</h1>
       </div>
       <div class="mt-5 px-4">
-        <x-input label="Expense Type" wire:model.defer="category_name" placeholder="" />
+        <x-input label="Expense Type" wire:model="category_name" placeholder="" />
       </div>
       <x-slot name="footer">
         <div class="flex justify-end gap-x-4">
@@ -164,14 +164,14 @@
         method: 'deleteCategory',
         params: {{ $category_id }}
     }" />
-          <x-button positive right-icon="save-as" wire:click="updateCategory" spinner="updateCategory"
+          <x-button positive right-icon="arrow-down-tray" wire:click="updateCategory" spinner="updateCategory"
             label="Update Category" />
         </div>
       </x-slot>
     </x-card>
   </x-modal>
 
-  <x-modal blur wire:model.defer="add_modal" align="center">
+  <x-modal blur wire:model="add_modal" align="center">
     <x-card>
       <div class="header flex space-x-2 items-center">
         <svg class="w-6 h-6 text-gray-600" width="24" height="24" stroke-width="1.5" viewBox="0 0 24 24"
@@ -212,15 +212,15 @@
           @endforeach
         </x-native-select>
         <div>
-          <x-textarea label="Description" wire:model.defer="description" />
+          <x-textarea label="Description" wire:model="description" />
         </div>
-        <x-input label="Amount" wire:model.defer="expense_amount" />
+        <x-input label="Amount" wire:model="expense_amount" />
       </div>
       <x-slot name="footer">
         <div class="flex justify-end gap-x-4">
           <x-button flat label="Cancel" x-on:click="close" />
 
-          <x-button positive right-icon="save-as" wire:click="saveExpense" spinner="saveExpense"
+          <x-button positive right-icon="arrow-down-tray" wire:click="saveExpense" spinner="saveExpense"
             label="Save Expense" />
         </div>
       </x-slot>

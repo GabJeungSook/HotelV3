@@ -70,7 +70,7 @@
             {{-- Frontdesk Filter --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Processed By (Frontdesk)</label>
-                <select wire:model.defer="frontdesk"
+                <select wire:model="frontdesk"
                         class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                     <option value="">All</option>
                     @foreach($frontdesks as $fd)
@@ -82,14 +82,14 @@
             {{-- Date From --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Date From</label>
-                <input type="date" wire:model.defer="date_from"
+                <input type="date" wire:model="date_from"
                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
             </div>
 
             {{-- Date To --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Date To</label>
-                <input type="date" wire:model.defer="date_to"
+                <input type="date" wire:model="date_to"
                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
             </div>
 
@@ -111,7 +111,7 @@
             {{-- Shift Session Selection --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Select Shift</label>
-                <select wire:model.defer="selectedShiftLogId"
+                <select wire:model="selectedShiftLogId"
                         class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                     <option value="">-- Select a completed shift --</option>
                     @foreach($availableShiftSessions as $session)
@@ -707,7 +707,7 @@
     </div>
 
     {{-- Card Detail Modal --}}
-    <x-modal wire:model.defer="showCardModal" max-width="5xl">
+    <x-modal wire:model="showCardModal" max-width="5xl">
         <x-card :title="$cardModalTitle">
             @if($filterMode === 'shift' && $selectedShiftLogId)
                 @php

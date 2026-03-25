@@ -1,7 +1,7 @@
 <div>
   <x-button label="Switch Frontdesk" icon="user" white wire:click="$set('switch_modal', true)" />
 
-  <x-modal.card fullscreen wire:model.defer="switch_modal">
+  <x-modal-card fullscreen wire:model="switch_modal">
     <div class="mx-20 ">
       <div class="flex justify-between">
         <h1 class="text-2xl font-bold text-gray-600">SHIFT REPORT</h1>
@@ -159,5 +159,5 @@
         @endif
       </div>
     </div>
-  </x-modal.card>
+  </x-modal-card>
 </div>

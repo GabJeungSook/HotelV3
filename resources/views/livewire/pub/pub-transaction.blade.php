@@ -49,12 +49,12 @@
           </div>
         </div>
       </div>
-      <x-modal wire:model.defer="food_beverages_modal" align="center">
+      <x-modal wire:model="food_beverages_modal" align="center">
         <x-card>
           <div>
             <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
               <h2 class="text-lg uppercase text-gray-600 font-bold">Food and Beverages</h2>
-              <x-button.circle icon="plus" xs positive />
+              <x-mini-button icon="plus" xs positive />
             </div>
             <div class="mt-3">
               <div class="space-y-4">
@@ -89,7 +89,7 @@
           <x-slot name="footer">
             <div class="flex justify-end gap-x-2">
               <x-button flat negative label="Cancel" wire:click="closeModal" />
-              <x-button positive label="Save" wire:click="addFood" right-icon="arrow-narrow-right" />
+              <x-button positive label="Save" wire:click="addFood" right-icon="arrow-small-right" />
             </div>
           </x-slot>
         </x-card>

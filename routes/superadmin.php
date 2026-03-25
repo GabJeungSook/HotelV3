@@ -9,6 +9,9 @@ Route::prefix('superadmin')
         Route::get('/branches', function () {
             return view('superadmin.branches');
         })->name('superadmin.branches');
+        Route::get('/branches/{id}/credentials', function ($id) {
+            return view('superadmin.branch-credentials', ['id' => $id]);
+        })->name('superadmin.branch.credentials');
         Route::get('/reports', function () {
             return view('superadmin.reports');
         })->name('superadmin.reports');

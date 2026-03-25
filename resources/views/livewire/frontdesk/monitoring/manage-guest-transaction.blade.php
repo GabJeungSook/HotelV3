@@ -3,14 +3,14 @@
     <div class="hidden lg:col-span-3 lg:block xl:col-span-2">
       <nav aria-label="Sidebar" class=" divide-y divide-gray-300">
         <!-- <nav class="flex flex-col space-y-2">
-          <x-button label="Transfer Room" md slate right-icon="external-link" wire:click=" $set('transfer_modal', true)" />
-          <x-button label="Extend" md slate right-icon="external-link" wire:click=" $set('extend_modal', true)" />
-          <x-button label="Damage Charges" md slate right-icon="external-link"
+          <x-button label="Transfer Room" md slate right-icon="arrow-top-right-on-square" wire:click=" $set('transfer_modal', true)" />
+          <x-button label="Extend" md slate right-icon="arrow-top-right-on-square" wire:click=" $set('extend_modal', true)" />
+          <x-button label="Damage Charges" md slate right-icon="arrow-top-right-on-square"
             wire:click=" $set('damage_modal', true)" />
-          <x-button label="Amenities" md slate right-icon="external-link" wire:click=" $set('amenities_modal', true)" />
-          <x-button label="Food and Beverages" md slate right-icon="external-link"
+          <x-button label="Amenities" md slate right-icon="arrow-top-right-on-square" wire:click=" $set('amenities_modal', true)" />
+          <x-button label="Food and Beverages" md slate right-icon="arrow-top-right-on-square"
             wire:click=" $set('food_beverages_modal', true)" />
-          <x-button label="Deposits" md slate right-icon="external-link" wire:click=" $set('deposit_modal', true)" />
+          <x-button label="Deposits" md slate right-icon="arrow-top-right-on-square" wire:click=" $set('deposit_modal', true)" />
         </nav> -->
         <div>
           <div class="border shadow-md rounded-lg">
@@ -81,14 +81,14 @@
     </div>
     <main class="lg:col-span-9 xl:col-span-7">
       <div class="grid grid-cols-6 gap-x-2 border rounded-lg p-4 mb-4">
-        <x-button label="Transfer Room" sm slate right-icon="external-link"
+        <x-button label="Transfer Room" sm slate right-icon="arrow-top-right-on-square"
           wire:click=" $set('transfer_modal', true)" />
-        <x-button label="Extend" sm slate right-icon="external-link" wire:click=" $set('extend_modal', true)" />
-        <x-button label="Damage Charges" sm slate right-icon="external-link" wire:click=" $set('damage_modal', true)" />
-        <x-button label="Amenities" sm slate right-icon="external-link" wire:click=" $set('amenities_modal', true)" />
-        <x-button label="Food and Beverages" sm slate right-icon="external-link"
+        <x-button label="Extend" sm slate right-icon="arrow-top-right-on-square" wire:click=" $set('extend_modal', true)" />
+        <x-button label="Damage Charges" sm slate right-icon="arrow-top-right-on-square" wire:click=" $set('damage_modal', true)" />
+        <x-button label="Amenities" sm slate right-icon="arrow-top-right-on-square" wire:click=" $set('amenities_modal', true)" />
+        <x-button label="Food and Beverages" sm slate right-icon="arrow-top-right-on-square"
           wire:click=" $set('food_beverages_modal', true)" />
-        <x-button label="Deposits" sm slate right-icon="external-link" wire:click=" $set('deposit_modal', true)" />
+        <x-button label="Deposits" sm slate right-icon="arrow-top-right-on-square" wire:click=" $set('deposit_modal', true)" />
       </div>
       <div class="border rounded-lg p-4">
         <div class="lg:flex lg:items-center lg:justify-between border-b">
@@ -99,7 +99,7 @@
                   TRANSACTIONS</h2>
               </div>
               <div class="flex space-x-2">
-                <x-button label="Back" icon="reply" negative href="{{ route('frontdesk.room-monitoring') }}" />
+                <x-button label="Back" icon="arrow-uturn-left" negative href="{{ route('frontdesk.room-monitoring') }}" />
                 <x-button label="Check Out" right-icon="arrow-right" positive wire:click="checkOut"  />
               </div>
             </div>
@@ -426,12 +426,12 @@
     </aside>
   </div>
 
-  <x-modal wire:model.defer="transfer_modal" align="center">
+  <x-modal wire:model="transfer_modal" align="center">
     <x-card>
       <div>
         <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
           <h2 class="text-lg uppercase text-gray-600 font-bold">Transfer Room</h2>
-          <x-button.circle icon="plus" xs positive />
+          <x-mini-button icon="plus" xs positive />
         </div>
         <div class="mt-3">
           <div class="grid grid-cols-2 gap-3" x-animate>
@@ -461,14 +461,14 @@
                   <option value="{{ $room->id }}">{{ $room->numberWithFormat() }}</option>
                 @endforeach
               </x-native-select>
-              <x-native-select label="Old Room Status" wire:model.defer="old_status">
+              <x-native-select label="Old Room Status" wire:model="old_status">
                 <option selected hidden>Select Status</option>
                 <option value="Uncleaned">Uncleaned</option>
                 <option value="Cleaned">Cleaned</option>
 
               </x-native-select>
               <div class="col-span-2">
-                <x-textarea label="Reason" wire:model.defer="reason" placeholder="write reason of transfer" />
+                <x-textarea label="Reason" wire:model="reason" placeholder="write reason of transfer" />
               </div>
               <div class="col-span-2 bg-gray-200 rounded-lg p-3">
                 <dl class=" space-y-3 text-sm font-medium text-gray-500">
@@ -540,18 +540,18 @@
       <x-slot name="footer">
         <div class="flex justify-end gap-x-2">
           <x-button flat negative label="Cancel" wire:click="closeModal" />
-          <x-button positive label="Save" wire:click="saveTransfer" right-icon="arrow-narrow-right" />
+          <x-button positive label="Save" wire:click="saveTransfer" right-icon="arrow-small-right" />
         </div>
       </x-slot>
     </x-card>
   </x-modal>
 
-  <x-modal wire:model.defer="deposit_modal" align="center">
+  <x-modal wire:model="deposit_modal" align="center">
     <x-card>
       <div>
         <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
           <h2 class="text-lg uppercase text-gray-600 font-bold">Add Deposit</h2>
-          <x-button.circle icon="plus" xs positive />
+          <x-mini-button icon="plus" xs positive />
         </div>
         <div class="mt-3">
           <div class="flex justify-between p-2 mb-4 bg-gray-300 rounded-md items-center">
@@ -580,18 +580,18 @@
       <x-slot name="footer">
         <div class="flex justify-end gap-x-2">
           <x-button flat negative label="Cancel" wire:click="closeModal" />
-          <x-button positive label="Save" wire:click="addNewDeposit" right-icon="arrow-narrow-right" />
+          <x-button positive label="Save" wire:click="addNewDeposit" right-icon="arrow-small-right" />
         </div>
       </x-slot>
     </x-card>
   </x-modal>
 
-  <x-modal wire:model.defer="deposit_deduct_modal" align="center">
+  <x-modal wire:model="deposit_deduct_modal" align="center">
     <x-card>
       <div>
         <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
           <h2 class="text-lg uppercase text-gray-600 font-bold">Deposit Deduction</h2>
-          <x-button.circle icon="plus" xs positive />
+          <x-mini-button icon="plus" xs positive />
         </div>
         <div class="mt-3">
           <div class="space-y-4">
@@ -603,18 +603,18 @@
       <x-slot name="footer">
         <div class="flex justify-end gap-x-2">
           <x-button flat negative label="Cancel" x-on:click="close" />
-          <x-button positive label="Save" wire:click="deductDeposit" right-icon="arrow-narrow-right" />
+          <x-button positive label="Save" wire:click="deductDeposit" right-icon="arrow-small-right" />
         </div>
       </x-slot>
     </x-card>
   </x-modal>
 
-  <x-modal wire:model.defer="extend_modal" align="center" max-width="xl">
+  <x-modal wire:model="extend_modal" align="center" max-width="xl">
     <x-card>
       <div>
         <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
           <h2 class="text-lg uppercase text-gray-600 font-bold">Extend</h2>
-          <x-button.circle icon="plus" xs positive />
+          <x-mini-button icon="plus" xs positive />
         </div>
         <div class="mt-3">
           <div>
@@ -639,18 +639,18 @@
         <div class="flex justify-end s gap-x-2">
           <x-button flat negative label="Cancel" wire:click="closeModal" />
           <x-button positive label="Save" wire:click="addExtend" spinner="addExtend"
-            right-icon="arrow-narrow-right" />
+            right-icon="arrow-small-right" />
         </div>
       </x-slot>
     </x-card>
   </x-modal>
 
-  <x-modal wire:model.defer="damage_modal" align="center">
+  <x-modal wire:model="damage_modal" align="center">
     <x-card>
       <div>
         <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
           <h2 class="text-lg uppercase text-gray-600 font-bold">Damage Charges</h2>
-          <x-button.circle icon="plus" xs positive />
+          <x-mini-button icon="plus" xs positive />
         </div>
         <div class="mt-3">
           <div class="space-y-4">
@@ -690,18 +690,18 @@
       <x-slot name="footer">
         <div class="flex justify-end gap-x-2">
           <x-button flat negative label="Cancel" wire:click="closeModal" />
-          <x-button positive label="Save" wire:click="addDamageCharges" right-icon="arrow-narrow-right" />
+          <x-button positive label="Save" wire:click="addDamageCharges" right-icon="arrow-small-right" />
         </div>
       </x-slot>
     </x-card>
   </x-modal>
 
-  <x-modal wire:model.defer="amenities_modal" align="center">
+  <x-modal wire:model="amenities_modal" align="center">
     <x-card>
       <div>
         <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
           <h2 class="text-lg uppercase text-gray-600 font-bold">Amenities</h2>
-          <x-button.circle icon="plus" xs positive />
+          <x-mini-button icon="plus" xs positive />
         </div>
         <div class="mt-3">
           <div class="space-y-4">
@@ -740,18 +740,18 @@
       <x-slot name="footer">
         <div class="flex justify-end gap-x-2">
           <x-button flat negative label="Cancel" wire:click="closeModal" />
-          <x-button positive label="Save" wire:click="addAmenities" right-icon="arrow-narrow-right" />
+          <x-button positive label="Save" wire:click="addAmenities" right-icon="arrow-small-right" />
         </div>
       </x-slot>
     </x-card>
   </x-modal>
 
-  <x-modal wire:model.defer="food_beverages_modal" align="center">
+  <x-modal wire:model="food_beverages_modal" align="center">
     <x-card>
       <div>
         <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
           <h2 class="text-lg uppercase text-gray-600 font-bold">Food and Beverages</h2>
-          <x-button.circle icon="plus" xs positive />
+          <x-mini-button icon="plus" xs positive />
         </div>
         <div class="mt-3">
           <div class="space-y-4">
@@ -786,13 +786,13 @@
       <x-slot name="footer">
         <div class="flex justify-end gap-x-2">
           <x-button flat negative label="Cancel" wire:click="closeModal" />
-          <x-button positive label="Save" wire:click="addFood" right-icon="arrow-narrow-right" />
+          <x-button positive label="Save" wire:click="addFood" right-icon="arrow-small-right" />
         </div>
       </x-slot>
     </x-card>
   </x-modal>
 
-  <x-modal wire:model.defer="autorization_modal" align="center" max-width="md">
+  <x-modal wire:model="autorization_modal" align="center" max-width="md">
     <x-card>
       <div class="flex space-x-1">
         <h1 class=" text-xl font-bold text-gray-600">AUTHORIZATION CODE</h1>
@@ -821,12 +821,12 @@
     </x-card>
   </x-modal>
 
-  <x-modal wire:model.defer="pay_modal" max-width="lg" align="center">
+  <x-modal wire:model="pay_modal" max-width="lg" align="center">
     <x-card>
       <div>
         <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
           <h2 class="text-lg uppercase text-gray-600 font-bold">Pay Transaction</h2>
-          <x-button.circle icon="cash" xs positive />
+          <x-mini-button icon="banknotes" xs positive />
         </div>
         <div class="mt-3">
           <div class="p-3 bg-gray-100 rounded-lg">
@@ -839,7 +839,7 @@
             <x-input label="Excess Amount" wire:model="pay_excess" placeholder="" />
             @if ($pay_amount > $pay_transaction_amount)
               <div>
-                <x-checkbox id="right-label" label="Save excess amount as deposit" wire:model.defer="saveAsExcess" />
+                <x-checkbox id="right-label" label="Save excess amount as deposit" wire:model="saveAsExcess" />
               </div>
             @endif
           </div>
@@ -850,7 +850,7 @@
         <div class="flex justify-end gap-x-2">
           <x-button flat negative label="Cancel" wire:click="closeModal" />
           <x-button positive wire:click="addPayment" spinner="addPayment" label="Save"
-            right-icon="arrow-narrow-right" />
+            right-icon="arrow-small-right" />
 
         </div>
       </x-slot>
@@ -871,7 +871,7 @@
           @if ($reminderIndex == 0)
           <div class="flex justify-center space-x-5 p-4">
             <x-button positive wire:click="incrementReminderIndex" label="Yes" icon="check" />
-            <x-button negative wire:click="decrementReminderIndex" label="No" icon="x" />
+            <x-button negative wire:click="decrementReminderIndex" label="No" icon="x-mark" />
           </div>
           @elseif($reminderIndex == 1)
           <div class="flex justify-center space-x-5 p-4">
@@ -885,16 +885,16 @@
         <div class="flex justify-between">
           <div>
             @if ($reminderIndex != 0)
-              <x-button slate wire:click="decrementReminderIndex" label="Back" icon="arrow-narrow-left" />
+              <x-button slate wire:click="decrementReminderIndex" label="Back" icon="arrow-small-left" />
             @endif
           </div>
           <div>
             @if ($reminderIndex > 0 && $reminderIndex != array_key_last($reminders))
-              <x-button slate wire:click="incrementReminderIndex" label="Next" right-icon="arrow-narrow-right" />
+              <x-button slate wire:click="incrementReminderIndex" label="Next" right-icon="arrow-small-right" />
             @elseif($reminderIndex == 3)
             <x-button positive label="Claim all deposit" icon="calculator" />
             @elseif($reminderIndex == array_key_last($reminders))
-              <x-button positive wire:click="proceedCheckout" label="Proceed" right-icon="arrow-narrow-right" />
+              <x-button positive wire:click="proceedCheckout" label="Proceed" right-icon="arrow-small-right" />
             @endif
           </div>
         </div>
@@ -905,12 +905,12 @@
 
 
 
-  <x-modal wire:model.defer="payWithDeposit_modal" max-width="lg" align="center">
+  <x-modal wire:model="payWithDeposit_modal" max-width="lg" align="center">
     <x-card>
       <div>
         <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
           <h2 class="text-lg uppercase text-gray-600 font-bold">Pay with Deposit Transaction</h2>
-          <x-button.circle icon="cash" xs positive />
+          <x-mini-button icon="banknotes" xs positive />
         </div>
         <div class="mt-3">
           <div class="p-3 bg-gray-100 rounded-lg">
@@ -934,10 +934,10 @@
           <x-button flat negative label="Cancel" wire:click="closeModal" />
           @if ($pay_transaction_id == null)
             <x-button positive wire:click="addAllPaymentWithDeposit" spinner="addPaymenWithDeposit"
-              label="Pay with Deposit" right-icon="arrow-narrow-right" />
+              label="Pay with Deposit" right-icon="arrow-small-right" />
           @else
             <x-button positive wire:click="addPaymentWithDeposit" spinner="addPaymenWithDeposit"
-              label="Pay with Deposit" right-icon="arrow-narrow-right" />
+              label="Pay with Deposit" right-icon="arrow-small-right" />
           @endif
 
         </div>
@@ -997,7 +997,7 @@
                 @if ($reminderIndex == 0)
                 <div class="flex justify-center space-x-5 p-4">
                   <x-button spinner="room_and_key_available" positive wire:click="room_and_key_available" label="Yes" right-icon="check" />
-                  <x-button spinner="room_and_key_unavailable" negative wire:click="room_and_key_unavailable" label="No" right-icon="x" />
+                  <x-button spinner="room_and_key_unavailable" negative wire:click="room_and_key_unavailable" label="No" right-icon="x-mark" />
                 </div>
                 @elseif($reminderIndex == 1)
                 <div class="flex justify-center space-x-5 p-4">
@@ -1008,20 +1008,20 @@
               <div class="flex justify-between">
                 <div>
                   @if ($reminderIndex != 0)
-                    <x-button slate wire:click="decrementReminderIndex" label="Back" icon="arrow-narrow-left" />
+                    <x-button slate wire:click="decrementReminderIndex" label="Back" icon="arrow-small-left" />
                   @endif
                 </div>
                 <div>
                     @if ($reminderIndex > 0 && $reminderIndex < 3)
-                    <x-button slate wire:click="incrementReminderIndex" label="Next" right-icon="arrow-narrow-right" />
+                    <x-button slate wire:click="incrementReminderIndex" label="Next" right-icon="arrow-small-right" />
                     @elseif($reminderIndex == 3)
                         @if($is_checkout || $deposit_except_remote_and_key > 0)
                         <x-button wire:click="claimAll" positive label="Claim all deposit" icon="calculator" />
                         @else
-                        <x-button slate wire:click="incrementReminderIndex" label="Next" right-icon="arrow-narrow-right" />
+                        <x-button slate wire:click="incrementReminderIndex" label="Next" right-icon="arrow-small-right" />
                         @endif
                     @elseif($reminderIndex == 4)
-                    <x-button positive wire:click="proceedCheckout" label="Proceed" right-icon="arrow-narrow-right" />
+                    <x-button positive wire:click="proceedCheckout" label="Proceed" right-icon="arrow-small-right" />
                     @endif
                 </div>
               </div>
@@ -1060,7 +1060,7 @@
                 @if ($reminderIndex == 0)
                 <div class="flex justify-center space-x-5 p-4">
                   <x-button positive wire:click="room_and_key_available" label="Yes" right-icon="check" />
-                  <x-button negative wire:click="room_and_key_unavailable" label="No" right-icon="x" />
+                  <x-button negative wire:click="room_and_key_unavailable" label="No" right-icon="x-mark" />
                 </div>
                 @elseif($reminderIndex == 1)
                 <div class="flex justify-center space-x-5 p-4">
@@ -1071,20 +1071,20 @@
               <div class="flex justify-between">
                 <div>
                   @if ($reminderIndex != 0)
-                    <x-button slate wire:click="decrementReminderIndex" label="Back" icon="arrow-narrow-left" />
+                    <x-button slate wire:click="decrementReminderIndex" label="Back" icon="arrow-small-left" />
                   @endif
                 </div>
                 <div>
                     @if ($reminderIndex > 0 && $reminderIndex < 3)
-                    <x-button slate wire:click="incrementReminderIndex" label="Next" right-icon="arrow-narrow-right" />
+                    <x-button slate wire:click="incrementReminderIndex" label="Next" right-icon="arrow-small-right" />
                     @elseif($reminderIndex == 3)
                         @if($is_checkout || $deposit_except_remote_and_key > 0)
                         <x-button wire:click="claimAll" positive label="Claim all deposit" icon="calculator" />
                         @else
-                        <x-button slate wire:click="incrementReminderIndex" label="Next" right-icon="arrow-narrow-right" />
+                        <x-button slate wire:click="incrementReminderIndex" label="Next" right-icon="arrow-small-right" />
                         @endif
                     @elseif($reminderIndex == 4)
-                    <x-button positive wire:click="proceedCheckout" label="Proceed" right-icon="arrow-narrow-right" />
+                    <x-button positive wire:click="proceedCheckout" label="Proceed" right-icon="arrow-small-right" />
                     @endif
                 </div>
               </div>
@@ -1097,12 +1097,12 @@
 </div> --}}
 
 
-  <x-modal wire:model.defer="override_modal" max-width="lg" align="center">
+  <x-modal wire:model="override_modal" max-width="lg" align="center">
     <x-card>
       <div>
         <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
           <h2 class="text-lg uppercase text-gray-600 font-bold">Override Transaction</h2>
-          <x-button.circle icon="cash" xs positive />
+          <x-mini-button icon="banknotes" xs positive />
         </div>
         <div class="mt-3">
           <div class="p-3 bg-gray-100 rounded-lg">
@@ -1111,7 +1111,7 @@
           </div>
 
           <div class="mt-4 flex flex-col space-y-3" x-animate>
-            <x-input label="Enter Amount" wire:model.defer="override_amount" placeholder="" suffix="₱" />
+            <x-input label="Enter Amount" wire:model="override_amount" placeholder="" suffix="₱" />
           </div>
         </div>
       </div>
@@ -1120,7 +1120,7 @@
         <div class="flex justify-end gap-x-2">
           <x-button flat negative label="Cancel" wire:click="closeModal" />
           <x-button negative wire:click="addOverride" spinner="addOverride" label="Override"
-            right-icon="arrow-narrow-right" />
+            right-icon="arrow-small-right" />
 
         </div>
       </x-slot>

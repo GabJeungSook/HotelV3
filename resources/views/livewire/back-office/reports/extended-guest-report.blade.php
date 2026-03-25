@@ -7,7 +7,7 @@
             {{-- Shift --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Shift</label>
-                <select wire:model.defer="shift" class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                <select wire:model="shift" class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                     <option value="">All</option>
                     <option value="AM">AM</option>
                     <option value="PM">PM</option>
@@ -17,14 +17,14 @@
             {{-- Date --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                <input type="date" wire:model.defer="date"
+                <input type="date" wire:model="date"
                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
             </div>
 
             {{-- Room --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Room</label>
-                <select wire:model.defer="room_id" class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                <select wire:model="room_id" class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                     <option value="">All</option>
                     @foreach($rooms as $room)
                         <option value="{{ $room->id }}">{{ $room->number }}</option>
