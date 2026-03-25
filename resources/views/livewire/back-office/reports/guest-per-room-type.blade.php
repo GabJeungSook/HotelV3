@@ -7,7 +7,7 @@
             {{-- Room Type --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Room Type</label>
-                <select wire:model.defer="room_type_id"
+                <select wire:model="room_type_id"
                         class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                     <option value="">All</option>
                     @foreach($room_types as $rt)
@@ -19,7 +19,7 @@
             {{-- Frontdesk --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Frontdesk</label>
-                <select wire:model.defer="frontdesk_id"
+                <select wire:model="frontdesk_id"
                         class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                     <option value="">All</option>
                     @foreach($frontdesks as $fd)
@@ -31,7 +31,7 @@
             {{-- Shift --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Shift</label>
-                <select wire:model.defer="shift"
+                <select wire:model="shift"
                         class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                     <option value="">All</option>
                     <option value="AM">AM</option>
@@ -43,7 +43,7 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
                 <input type="date"
-                       wire:model.defer="date"
+                       wire:model="date"
                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
             </div>
 
@@ -51,7 +51,7 @@
             {{-- <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Time (Optional)</label>
                 <input type="time"
-                       wire:model.defer="time"
+                       wire:model="time"
                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
             </div> --}}
 

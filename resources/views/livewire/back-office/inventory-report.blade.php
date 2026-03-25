@@ -7,7 +7,7 @@
             {{-- Category --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                <select wire:model.defer="category_id"
+                <select wire:model="category_id"
                         class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                     <option value="">All</option>
                     @foreach($categories as $cat)
@@ -19,7 +19,7 @@
             {{-- Item --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Item</label>
-                <select wire:model.defer="item_id"
+                <select wire:model="item_id"
                         class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                     <option value="">All</option>
                     @foreach($items as $item)

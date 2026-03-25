@@ -46,7 +46,7 @@
                         @if(!$hasConfirmedRoomKeyHandedOver)
                         <div class="flex justify-end gap-4">
                             <x-button wire:click="hasHandedRemote('Yes')" emerald label="Yes" icon="check"/>
-                            <x-button wire:click="hasHandedRemote('No')" negative label="No" icon="x"/>
+                            <x-button wire:click="hasHandedRemote('No')" negative label="No" icon="x-mark"/>
                         </div>
                         @endif
                     </td>
@@ -77,7 +77,7 @@
                         @endforelse
                     </td>
                     <td class="py-2 text-right">
-                        <x-button negative wire:click=" $set('damage_modal', true)" label="Damage Charges" icon="emoji-sad" />
+                        <x-button negative wire:click=" $set('damage_modal', true)" label="Damage Charges" icon="face-frown" />
                     </td>
                 </tr>
                  <tr class="border-b border-gray-200">
@@ -94,7 +94,7 @@
                         @endforeach
                     </td>
                     <td class="py-2 text-right">
-                        <x-button wire:click="checkOutGuest" emerald label="Claim All" icon="cash"/>
+                        <x-button wire:click="checkOutGuest" emerald label="Claim All" icon="banknotes"/>
                     </td>
                 </tr>
                 @endif
@@ -104,12 +104,12 @@
 
     {{-- modal --}}
 
-    <x-modal wire:model.defer="damage_modal" align="center">
+    <x-modal wire:model="damage_modal" align="center">
     <x-card>
       <div>
         <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
           <h2 class="text-lg uppercase text-gray-600 font-bold">Damage Charges</h2>
-          <x-button.circle icon="plus" xs positive />
+          <x-mini-button icon="plus" xs positive />
         </div>
         <div class="mt-3">
           <div class="space-y-4">

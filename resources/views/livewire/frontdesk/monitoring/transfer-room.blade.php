@@ -143,7 +143,7 @@
             ₱
         </span>
 <input
-    wire:model.defer="amountPaid"
+    wire:model="amountPaid"
     type="number"
     autofocus
     min="0"
@@ -210,7 +210,7 @@
     </div>
 
     {{-- modal for submission --}}
-    <x-modal wire:model.defer="save_pay_modal" align="center">
+    <x-modal wire:model="save_pay_modal" align="center">
       <x-card>
         <div>
           <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
@@ -252,7 +252,7 @@
     </x-modal>
 
     {{-- moadal for authorization code --}}
-      <x-modal wire:model.defer="authorization_modal" align="center" max-width="md">
+      <x-modal wire:model="authorization_modal" align="center" max-width="md">
     <x-card>
       <div class="flex space-x-1">
         <h1 class=" text-xl font-bold text-gray-600">AUTHORIZATION CODE</h1>

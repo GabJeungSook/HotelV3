@@ -17,7 +17,7 @@
               {{$this->table}}
           </div>
     </div>
-    <x-modal wire:model.defer="add_modal" max-width="lg">
+    <x-modal wire:model="add_modal" max-width="lg">
         <x-card title="Add New Category">
            <div class="space-y-4">
           @if(auth()->user()->hasRole('superadmin'))
@@ -28,7 +28,7 @@
                 @endforeach
           </x-native-select>
           @endif
-        <x-input label="Name" wire:model.defer="name" />
+        <x-input label="Name" wire:model="name" />
         </div>
           @error('name')@enderror
           <x-slot name="footer">
@@ -40,7 +40,7 @@
         </x-card>
       </x-modal>
 
-      <x-modal wire:model.defer="edit_modal" max-width="lg">
+      <x-modal wire:model="edit_modal" max-width="lg">
         <x-card title="Update Category">
           <div>
             <x-input label="Name" wire:model="name" />

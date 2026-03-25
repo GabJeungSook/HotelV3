@@ -103,7 +103,7 @@
                           <span>{{ \Carbon\Carbon::parse($start)->diffForHumans() }}</span>
                         </div>
                         <div class="mt-1">
-                          <x-button label="Finish Cleaning" dark right-icon="arrow-narrow-right"
+                          <x-button label="Finish Cleaning" dark right-icon="arrow-small-right"
                             x-on:confirm="{
                             title: 'Are you sure? you want to finish cleaning this room?',
                             icon: 'question',
@@ -153,7 +153,7 @@
                         </div>
                         <div class="mt-1">
                           @if ($loop->first)
-                            <x-button sm dark label="Start Cleaning" right-icon="arrow-narrow-right"
+                            <x-button sm dark label="Start Cleaning" right-icon="arrow-small-right"
                               x-on:confirm="{
                             title: 'Are you sure? you want to start cleaning this room?',
                             icon: 'question',
@@ -209,7 +209,7 @@
                         </div>
                         <div class="mt-1">
                           @if ($loop->first)
-                            <x-button sm dark label="Start Cleaning" right-icon="arrow-narrow-right"
+                            <x-button sm dark label="Start Cleaning" right-icon="arrow-small-right"
                               x-on:confirm="{
                             title: 'Are you sure? you want to start cleaning this room?',
                             icon: 'question',

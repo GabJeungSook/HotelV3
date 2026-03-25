@@ -104,7 +104,7 @@
     </div>
 
     {{-- Logout Modal --}}
-     <x-modal wire:model.defer="logout_modal" align="center">
+     <x-modal wire:model="logout_modal" align="center">
       <x-card>
         <div>
           <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
@@ -140,7 +140,7 @@
     </x-modal>
 
         {{-- Withdraw Modal --}}
-     <x-modal wire:model.defer="withdraw_modal" align="center">
+     <x-modal wire:model="withdraw_modal" align="center">
       <x-card>
         <div>
           <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
@@ -178,7 +178,7 @@
     </x-modal>
 
      {{-- moadal for authorization code --}}
-        <x-modal wire:model.defer="authorization_modal" align="center" max-width="md">
+        <x-modal wire:model="authorization_modal" align="center" max-width="md">
             <x-card>
 
                 <div class="flex">

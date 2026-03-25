@@ -36,7 +36,7 @@
             {{-- Frontdesk --}}
             <div class="flex flex-col gap-1">
                 <label class="block text-sm font-medium text-gray-700">Frontdesk</label>
-                <select wire:model.defer="frontdesk"
+                <select wire:model="frontdesk"
                         class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                     <option value="">All</option>
                     @foreach($frontdesks as $fd)
@@ -67,14 +67,14 @@
             {{-- Date From --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Date From</label>
-                <input type="date" wire:model.defer="date_from"
+                <input type="date" wire:model="date_from"
                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
             </div>
 
             {{-- Date To --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Date To</label>
-                <input type="date" wire:model.defer="date_to"
+                <input type="date" wire:model="date_to"
                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
             <div class="flex justify-end items-end gap-2 mt-3">
                     <button wire:click="generateReport" type="button"
@@ -92,14 +92,14 @@
             {{-- <div>
                 <label class="block text-sm font-medium text-gray-700">Time From</label>
                 <input type="time"
-                    wire:model.defer="time_from"
+                    wire:model="time_from"
                     class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm">
             </div> --}}
             {{-- Time To --}}
             {{-- <div>
                 <label class="block text-sm font-medium text-gray-700">Time To</label>
                 <input type="time"
-                    wire:model.defer="time_to"
+                    wire:model="time_to"
                     class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm">
 
                       
@@ -109,7 +109,7 @@
             <div class="flex flex-col gap-3">
                 {{-- <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Shift</label>
-                    <select wire:model.defer="shift"
+                    <select wire:model="shift"
                             class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="">All</option>
                         <option value="AM">AM</option>

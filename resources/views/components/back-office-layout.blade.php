@@ -25,6 +25,7 @@
     }
   </style>
   @wireUiScripts
+  @filamentStyles
   <!-- Scripts -->
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   <!-- Styles -->
@@ -288,7 +289,7 @@
                   </p>
                 </div>
               </div>
-              <x-button icon="logout" sm negative x-on:click="logout = true" />
+              <x-button icon="arrow-right-start-on-rectangle" sm negative x-on:click="logout = true" />
             </div>
           </a>
         </div>
@@ -427,11 +428,11 @@
           <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse  sm:px-6">
             <form method="POST" action="{{ route('logout') }}" class="flex space-x-2">
               @csrf
-              <x-button @click="logout=false" label="Cancel" sm icon="x" />
+              <x-button @click="logout=false" label="Cancel" sm icon="x-mark" />
               <x-button href="{{ route('logout') }}"
                 onclick="event.preventDefault();
               this.closest('form').submit();" label="Logout"
-                icon="logout" sm negative />
+                icon="arrow-right-start-on-rectangle" sm negative />
             </form>
 
           </div>
@@ -443,7 +444,8 @@
 
   @stack('scripts')
 
-  @livewireScripts
+  @livewireScriptConfig
+  @filamentScripts
   <x-dialog z-index="z-50" blur="md" align="center" />
 </body>
 

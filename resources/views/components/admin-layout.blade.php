@@ -35,6 +35,7 @@
     }
   </style>
   @wireUiScripts
+  @filamentStyles
 
   @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -245,16 +246,6 @@
                 </svg>
                 Types
               </a>
-              <a href="{{ route('admin.rate') }}"
-                class="bg-gray-500 text-white group flex items-center px-2 hover:bg-gray-400 py-2 text-sm leading-6 font-normal rounded-md"
-                aria-current="page">
-                <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 h-6 w-6 flex-shrink-0" fill="none"
-                  viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                Rates
-              </a>
               <a href="{{ route('admin.floor') }}"
                 class="bg-gray-500 text-white group flex items-center px-2 hover:bg-gray-400 py-2 text-sm leading-6 font-normal rounded-md"
                 aria-current="page">
@@ -413,7 +404,7 @@
               </div>
               <div class="mt-6 flex space-x-3 md:mt-0 md:ml-4">
                 <x-button icon="cog" href="{{ route('admin.settings') }}" slate />
-                <x-button @click="logout=true" icon="logout" red />
+                <x-button @click="logout=true" icon="arrow-right-start-on-rectangle" red />
               </div>
             </div>
           </div>
@@ -467,11 +458,11 @@
           <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse  sm:px-6">
             <form method="POST" action="{{ route('logout') }}" class="flex space-x-2">
               @csrf
-              <x-button @click="logout=false" label="Cancel" sm icon="x" />
+              <x-button @click="logout=false" label="Cancel" sm icon="x-mark" />
               <x-button href="{{ route('logout') }}"
                 onclick="event.preventDefault();
               this.closest('form').submit();" label="Logout"
-                icon="logout" sm negative />
+                icon="arrow-right-start-on-rectangle" sm negative />
             </form>
 
           </div>
@@ -483,7 +474,7 @@
 
   <x-dialog z-index="z-50" blur="md" align="center" />
 
-  @livewireScripts
+  @livewireScriptConfig
 </body>
 
 </html> --}}
@@ -508,6 +499,7 @@
 
   </style>
   @wireUiScripts
+  @filamentStyles
   <!-- Scripts -->
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   <!-- Styles -->
@@ -754,15 +746,6 @@
                 </svg>
                 Types
               </a>
-              <a href="{{ route('admin.rate') }}"
-                class="{{ request()->routeIs('admin.rate') ? 'bg-gray-100 text-[#009ff4] font-semibold text-md border-l-4 border-[#009ff4]' : 'bg-white text-gray-400 font-normal text-md' }} hover:border-l-4 hover:border-[#009ff4] hover:bg-gray-100 hover:text-[#009ff4] hover:font-semibold hover:text-md group flex items-center px-4 py-2 text-md">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                  stroke="currentColor" class="mr-3 h-6 w-6 flex-shrink-0 ">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
-                </svg>
-                Rates
-              </a>
               <a href="{{ route('admin.floor') }}"
                 class="{{ request()->routeIs('admin.floor') ? 'bg-gray-100 text-[#009ff4] font-semibold text-md border-l-4 border-[#009ff4]' : 'bg-white text-gray-400 font-normal text-md' }} hover:border-l-4 hover:border-[#009ff4] hover:bg-gray-100 hover:text-[#009ff4] hover:font-semibold hover:text-md group flex items-center px-4 py-2 text-md">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="mr-3 h-6 w-6 flex-shrink-0 ">
@@ -893,7 +876,7 @@
                   </p>
                 </div>
               </div>
-              <x-button icon="logout" sm negative x-on:click="logout = true" />
+              <x-button icon="arrow-right-start-on-rectangle" sm negative x-on:click="logout = true" />
             </div>
           </a>
         </div>
@@ -971,7 +954,7 @@
           <div class="bg-white mx-auto max-w-full sm:px-6 md:px-8">
             <!-- Replace with your content -->
             <div class="py-8">
-              <div class="h-screen p-4 ">
+              <div class="min-h-screen p-4 ">
                 {{ $slot }}
               </div>
             </div>
@@ -1021,11 +1004,11 @@
           <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse  sm:px-6">
             <form method="POST" action="{{ route('logout') }}" class="flex space-x-2">
               @csrf
-              <x-button @click="logout=false" label="Cancel" sm icon="x" />
+              <x-button @click="logout=false" label="Cancel" sm icon="x-mark" />
               <x-button href="{{ route('logout') }}"
                 onclick="event.preventDefault();
               this.closest('form').submit();" label="Logout"
-                icon="logout" sm negative />
+                icon="arrow-right-start-on-rectangle" sm negative />
             </form>
 
           </div>
@@ -1037,7 +1020,8 @@
 
 
 
-  @livewireScripts
+  @livewireScriptConfig
+  @filamentScripts
   <x-dialog z-index="z-50" blur="md" align="center" />
 </body>
 

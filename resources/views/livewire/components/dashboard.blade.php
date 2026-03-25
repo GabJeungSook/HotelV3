@@ -29,7 +29,7 @@
              <div class="flex justify-between items-center mb-4">
             <h2 class="text-lg font-semibold text-[#009ff4] uppercase">{{$cardLabel}}</h2>
             <div>
-                <select id="chartFilter" wire:model="cardFilter" class="w-36 border border-[#009ff4] rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-[#009ff4] focus:border-[#009ff4] text-[#009ff4] bg-white font-semibold shadow-sm transition">
+                <select id="chartFilter" wire:model.live="cardFilter" class="w-36 border border-[#009ff4] rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-[#009ff4] focus:border-[#009ff4] text-[#009ff4] bg-white font-semibold shadow-sm transition">
                     <option value="today">Today</option>
                     <option value="week">This Week</option>
                     <option value="month">This Month</option>

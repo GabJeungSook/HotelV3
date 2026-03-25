@@ -59,7 +59,7 @@
                         @break
 
                         @case(0)
-                          <x-button icon="times" sm label="Not Available" />
+                          <x-button icon="x-mark" sm label="Not Available" />
                         @break
 
                         @default
@@ -68,7 +68,7 @@
                     </td>
                     <td class="relative whitespace-nowrap py-3 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                       <div class="flex space-x-2 justify-end">
-                        <x-button icon="pencil-alt" wire:click="editDiscount({{ $discount->id }})"
+                        <x-button icon="pencil-square" wire:click="editDiscount({{ $discount->id }})"
                           spinner="editDiscount({{ $discount->id }})" label="Edit" xs />
                         <x-button wire:click="deleteDiscount({{ $discount->id }})"
                           spinner="deleteDiscount({{ $discount->id }})" icon="trash" label="Delete" xs />
@@ -87,12 +87,12 @@
         </div>
       </div>
     </div>
-    <x-modal wire:model.defer="add_modal" max-width="lg">
+    <x-modal wire:model="add_modal" max-width="lg">
       <x-card title="Add New">
         <div class="flex flex-col space-y-3">
-          <x-input wire:model.defer="name" label="Name" placeholder="" />
+          <x-input wire:model="name" label="Name" placeholder="" />
           <x-textarea wire:model="description" label="Description" placeholder="" />
-          <x-input wire:model.defer="amount" label="Amount" placeholder="" />
+          <x-input wire:model="amount" label="Amount" placeholder="" />
           <x-native-select label="Type" wire:model="type">
             <option selected hidden>Select Type</option>
             <option value="1">&#8369; (Peso)</option>
@@ -109,12 +109,12 @@
       </x-card>
     </x-modal>
 
-    <x-modal wire:model.defer="edit_modal" max-width="lg">
+    <x-modal wire:model="edit_modal" max-width="lg">
       <x-card title="Update Discount">
         <div class="flex flex-col space-y-3">
-          <x-input wire:model.defer="name" label="Name" placeholder="" />
+          <x-input wire:model="name" label="Name" placeholder="" />
           <x-textarea wire:model="description" label="Description" placeholder="" />
-          <x-input wire:model.defer="amount" label="Amount" placeholder="" />
+          <x-input wire:model="amount" label="Amount" placeholder="" />
           <x-native-select label="Type" wire:model="type">
             <option selected hidden>Select Type</option>
             <option value="1">&#8369; (Peso)</option>

@@ -31,7 +31,7 @@
             @endforeach
         </x-native-select>
       @if (collect($this->get_frontdesk)->count() > 0)
-        <x-button label="Save" sm positive right-icon="save-as" x-on:confirm="{
+        <x-button label="Save" sm positive right-icon="arrow-down-tray" x-on:confirm="{
         title: 'Are you sure?',
         description      : 'You want to save assigned frontdesk',
         icon: 'warning',
@@ -61,7 +61,7 @@
                 </div>
                 <div>
                   <x-button rounded label="Assign" wire:click="assignFrontdesk({{ $frontdesk->id }})"
-                    spinner="assignFrontdesk({{ $frontdesk->id }})" slate sm right-icon="arrow-narrow-right" />
+                    spinner="assignFrontdesk({{ $frontdesk->id }})" slate sm right-icon="arrow-small-right" />
                 </div>
               </div>
             </li>
@@ -76,10 +76,10 @@
 
   </div>
 
-  <x-modal wire:model.defer="partner_modal" max-width="sm" align="center">
+  <x-modal wire:model="partner_modal" max-width="sm" align="center">
     <x-card title="Partner's Name">
 
-      <x-input label="Name" placeholder="enter name" wire:model.defer="name" />
+      <x-input label="Name" placeholder="enter name" wire:model="name" />
 
       <x-slot name="footer">
         <div class="flex justify-end gap-x-4">

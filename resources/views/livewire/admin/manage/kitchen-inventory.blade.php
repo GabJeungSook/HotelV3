@@ -123,7 +123,7 @@
 
 </div>
 
-    <x-modal wire:model.defer="add_modal" max-width="xl">
+    <x-modal wire:model="add_modal" max-width="xl">
         <x-card title="Add New Menu ({{$selectedCategory?->name}})">
           <div class="grid grid-cols-1">
             <x-input label="Item Code" wire:model="item_code" />
@@ -158,7 +158,7 @@
         </x-card>
       </x-modal>
 
-      <x-modal wire:model.defer="edit_modal" max-width="xl">
+      <x-modal wire:model="edit_modal" max-width="xl">
         <x-card title="Update Menu">
           <div class="grid grid-cols-1">
             <x-input label="Item Code" wire:model="item_code" />

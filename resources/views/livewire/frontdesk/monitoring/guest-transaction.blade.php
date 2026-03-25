@@ -104,7 +104,7 @@
             </div>
             <div class="mt-4">
                 @if (!$guest->transactions->whereNotIn('transaction_type_id', [1, 2])->count() > 0)
-                <x-button wire:ignore wire:click="cancelTransaction" class="w-full" label="Cancel Transaction" icon="x" negative />
+                <x-button wire:ignore wire:click="cancelTransaction" class="w-full" label="Cancel Transaction" icon="x-mark" negative />
                 @endif
             </div>
           </div>
@@ -117,17 +117,17 @@
           $grace_end = $check_out_date?->copy()->addMinutes(15);
         @endphp
 
-        <x-button :disabled="$grace_end < Carbon\Carbon::now()"  label="Transfer Room" sm blue right-icon="external-link" wire:click="redirectToTransferRoom" />
-        {{-- <x-button :disabled="$check_out_date < Carbon\Carbon::now()" label="Transfer Room" sm blue right-icon="external-link" wire:click="$set('transfer_modal', true)" /> --}}
+        <x-button :disabled="$grace_end < Carbon\Carbon::now()"  label="Transfer Room" sm blue right-icon="arrow-top-right-on-square" wire:click="redirectToTransferRoom" />
+        {{-- <x-button :disabled="$check_out_date < Carbon\Carbon::now()" label="Transfer Room" sm blue right-icon="arrow-top-right-on-square" wire:click="$set('transfer_modal', true)" /> --}}
 
-        {{-- <x-button :disabled="$check_out_date < Carbon\Carbon::now()" label="Extend" sm blue right-icon="external-link" wire:click=" $set('extend_modal', true)" /> --}}
-        {{-- <x-button label="Extend" sm blue right-icon="external-link" wire:click=" $set('extend_modal', true)" /> --}}
-        <x-button label="Extend" sm blue right-icon="external-link" wire:click="redirectToExtendGuest" />
-        <x-button :disabled="$grace_end < Carbon\Carbon::now()" label="Damage Charges" sm blue right-icon="external-link" wire:click=" $set('damage_modal', true)" />
-        <x-button :disabled="$grace_end < Carbon\Carbon::now()" label="Amenities" sm blue right-icon="external-link" wire:click=" $set('amenities_modal', true)" />
-        <x-button :disabled="$grace_end < Carbon\Carbon::now()" label="Food and Beverages" sm blue right-icon="external-link"
+        {{-- <x-button :disabled="$check_out_date < Carbon\Carbon::now()" label="Extend" sm blue right-icon="arrow-top-right-on-square" wire:click=" $set('extend_modal', true)" /> --}}
+        {{-- <x-button label="Extend" sm blue right-icon="arrow-top-right-on-square" wire:click=" $set('extend_modal', true)" /> --}}
+        <x-button label="Extend" sm blue right-icon="arrow-top-right-on-square" wire:click="redirectToExtendGuest" />
+        <x-button :disabled="$grace_end < Carbon\Carbon::now()" label="Damage Charges" sm blue right-icon="arrow-top-right-on-square" wire:click=" $set('damage_modal', true)" />
+        <x-button :disabled="$grace_end < Carbon\Carbon::now()" label="Amenities" sm blue right-icon="arrow-top-right-on-square" wire:click=" $set('amenities_modal', true)" />
+        <x-button :disabled="$grace_end < Carbon\Carbon::now()" label="Food and Beverages" sm blue right-icon="arrow-top-right-on-square"
           wire:click=" $set('food_beverages_modal', true)" />
-        <x-button :disabled="$grace_end < Carbon\Carbon::now()" label="Deposits" sm blue right-icon="external-link" wire:click=" $set('deposit_modal', true)" />
+        <x-button :disabled="$grace_end < Carbon\Carbon::now()" label="Deposits" sm blue right-icon="arrow-top-right-on-square" wire:click=" $set('deposit_modal', true)" />
       </div>
 
       <div class="border  p-4 rounded-xl">
@@ -139,7 +139,7 @@
                   TRANSACTIONS</h2>
               </div>
               <div class="flex space-x-2">
-                <x-button label="Back" icon="reply" negative href="{{ route('frontdesk.room-monitoring') }}" />
+                <x-button label="Back" icon="arrow-uturn-left" negative href="{{ route('frontdesk.room-monitoring') }}" />
                 <x-button label="Check Out" right-icon="arrow-right" positive wire:click="checkOut" />
               </div>
             </div>
@@ -507,12 +507,12 @@
   </div>
 
 
-  <x-modal wire:model.defer="deposit_modal" align="center">
+  <x-modal wire:model="deposit_modal" align="center">
     <x-card>
       <div>
         <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
           <h2 class="text-lg uppercase text-gray-600 font-bold">Add Deposit</h2>
-          <x-button.circle icon="plus" xs positive />
+          <x-mini-button icon="plus" xs positive />
         </div>
         <div class="mt-3">
           <div class="flex justify-between p-2 mb-4 bg-gray-300 rounded-md items-center">
@@ -525,7 +525,7 @@
                 <dd class="font-medium text-gray-800">₱
                   {{ number_format($deposit_except_remote_and_key - $check_in_details->total_deduction, 2, '.', ',') }}
                 </dd>
-                <x-button wire:click="$set('deposit_deduct_modal', true)" amber icon="cash" label="Cash Out" />
+                <x-button wire:click="$set('deposit_deduct_modal', true)" amber icon="banknotes" label="Cash Out" />
               </div>
             @else
               <div class="flex items-center space-x-2">
@@ -553,12 +553,12 @@
     </x-card>
   </x-modal>
 
-  <x-modal wire:model.defer="deposit_deduct_modal" align="center" max-width="lg">
+  <x-modal wire:model="deposit_deduct_modal" align="center" max-width="lg">
     <x-card>
       <div>
         <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
           <h2 class="text-lg uppercase text-gray-600 font-bold">Cash Out</h2>
-          <x-button.circle icon="plus" xs positive />
+          <x-mini-button icon="plus" xs positive />
         </div>
         <div class="mt-3">
           <div class="space-y-4">
@@ -576,12 +576,12 @@
     </x-card>
   </x-modal>
 
-  <x-modal wire:model.defer="extend_modal" align="center" max-width="lg">
+  <x-modal wire:model="extend_modal" align="center" max-width="lg">
     <x-card>
       <div>
         <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
           <h2 class="text-lg uppercase text-gray-600 font-bold">Extend</h2>
-          <x-button.circle icon="plus" xs positive />
+          <x-mini-button icon="plus" xs positive />
         </div>
         <div class="mt-3">
           <div>
@@ -616,12 +616,12 @@
       </x-slot>
     </x-card>
   </x-modal>
-  <x-modal wire:model.defer="food_beverages_modal" align="center">
+  <x-modal wire:model="food_beverages_modal" align="center">
     <x-card>
       <div>
         <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
           <h2 class="text-lg uppercase text-gray-600 font-bold">Food and Beverages</h2>
-          <x-button.circle icon="plus" xs positive />
+          <x-mini-button icon="plus" xs positive />
         </div>
         <div class="mt-3">
           <div class="space-y-4">
@@ -670,12 +670,12 @@
     </x-card>
   </x-modal>
 
-  <x-modal wire:model.defer="amenities_modal" align="center">
+  <x-modal wire:model="amenities_modal" align="center">
     <x-card>
       <div>
         <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
           <h2 class="text-lg uppercase text-gray-600 font-bold">Amenities</h2>
-          <x-button.circle icon="plus" xs positive />
+          <x-mini-button icon="plus" xs positive />
         </div>
         <div class="mt-3">
           <div class="space-y-4">
@@ -727,12 +727,12 @@
     </x-card>
   </x-modal>
 
-  <x-modal wire:model.defer="damage_modal" align="center">
+  <x-modal wire:model="damage_modal" align="center">
     <x-card>
       <div>
         <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
           <h2 class="text-lg uppercase text-gray-600 font-bold">Damage Charges</h2>
-          <x-button.circle icon="plus" xs positive />
+          <x-mini-button icon="plus" xs positive />
         </div>
         <div class="mt-3">
           <div class="space-y-4">
@@ -784,12 +784,12 @@
     </x-card>
   </x-modal>
 
-  <x-modal wire:model.defer="transfer_modal" align="center">
+  <x-modal wire:model="transfer_modal" align="center">
     <x-card>
       <div>
         <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
           <h2 class="text-lg uppercase text-gray-600 font-bold">Transfer Room</h2>
-          <x-button.circle icon="plus" xs positive />
+          <x-mini-button icon="plus" xs positive />
         </div>
         <div class="mt-3">
           <div class="grid grid-cols-2 gap-3" x-animate>
@@ -827,7 +827,7 @@
                       <option>No Room Available</option>
                     @endforelse
                   </x-native-select>
-                  <x-native-select label="Old Room Status" wire:model.defer="old_status">
+                  <x-native-select label="Old Room Status" wire:model="old_status">
                     <option selected hidden>Select Status</option>
                     <option value="Uncleaned">Uncleaned</option>
                     <option value="Cleaned">Cleaned</option>
@@ -843,7 +843,7 @@
                     <option value="{{ $reason->id }}">{{ $reason->reason }}</option>
                 @endforeach
                 </x-native-select>
-                {{-- <x-textarea label="Reason" wire:model.defer="reason" placeholder="write reason of transfer" /> --}}
+                {{-- <x-textarea label="Reason" wire:model="reason" placeholder="write reason of transfer" /> --}}
               </div>
               <div class="col-span-2 bg-gray-200 rounded-lg p-3">
                 <dl class=" space-y-3 text-sm font-medium text-gray-500">
@@ -970,12 +970,12 @@
 
 
 
-  <x-modal wire:model.defer="pay_modal" max-width="lg" align="center">
+  <x-modal wire:model="pay_modal" max-width="lg" align="center">
     <x-card>
       <div>
         <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
           <h2 class="text-lg uppercase text-gray-600 font-bold">Pay Transaction</h2>
-          <x-button.circle icon="cash" xs positive />
+          <x-mini-button icon="banknotes" xs positive />
         </div>
         <div class="mt-3">
           <div class="p-3 bg-gray-100 rounded-lg">
@@ -991,7 +991,7 @@
             <x-input disabled label="Excess Amount" wire:model="pay_excess" placeholder="" />
             @if ($pay_amount > $pay_transaction_amount)
               <div>
-                <x-checkbox id="right-label" label="Save excess amount as deposit" wire:model.defer="saveAsExcess" />
+                <x-checkbox id="right-label" label="Save excess amount as deposit" wire:model="saveAsExcess" />
               </div>
             @endif
           </div>
@@ -1008,12 +1008,12 @@
       </x-slot>
     </x-card>
   </x-modal>
-  <x-modal wire:model.defer="payWithDeposit_modal" max-width="lg" align="center">
+  <x-modal wire:model="payWithDeposit_modal" max-width="lg" align="center">
     <x-card>
       <div>
         <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
           <h2 class="text-lg uppercase text-gray-600 font-bold">Pay with Deposit Transaction</h2>
-          <x-button.circle icon="cash" xs positive />
+          <x-mini-button icon="banknotes" xs positive />
         </div>
         <div class="mt-3">
           <div class="p-3 bg-gray-100 rounded-lg">
@@ -1047,12 +1047,12 @@
       </x-slot>
     </x-card>
   </x-modal>
-  <x-modal wire:model.defer="override_modal" max-width="lg" align="center">
+  <x-modal wire:model="override_modal" max-width="lg" align="center">
     <x-card>
       <div>
         <div class="header flex space-x-1 border-b items-end justify-between py-0.5">
           <h2 class="text-lg uppercase text-gray-600 font-bold">Override Transaction</h2>
-          <x-button.circle icon="cash" xs positive />
+          <x-mini-button icon="banknotes" xs positive />
         </div>
         <div class="mt-3">
           <div class="p-3 bg-gray-100 rounded-lg">
@@ -1061,7 +1061,7 @@
           </div>
 
           <div class="mt-4 flex flex-col space-y-3" x-animate>
-            <x-input label="Enter Amount" wire:model.defer="override_amount" placeholder="" suffix="₱" />
+            <x-input label="Enter Amount" wire:model="override_amount" placeholder="" suffix="₱" />
           </div>
         </div>
       </div>
@@ -1178,7 +1178,7 @@
       </div>
     </div>
   </div>
-  <x-modal wire:model.defer="autorization_modal" align="center" max-width="md">
+  <x-modal wire:model="autorization_modal" align="center" max-width="md">
     <x-card>
       <div class="flex space-x-1">
         <h1 class=" text-xl font-bold text-gray-600">AUTHORIZATION CODE</h1>
@@ -1212,7 +1212,7 @@
 
   {{-- Deposit Summary Modal --}}
 
-    <x-modal wire:model.defer="deposit_summary_modal" align="center" max-width="md">
+    <x-modal wire:model="deposit_summary_modal" align="center" max-width="md">
         <x-card>
         <div class="flex space-x-1">
             <h1 class=" text-xl font-bold text-gray-600">DEPOSIT SUMMARY</h1>
@@ -1242,7 +1242,7 @@
     </x-modal>
 
   {{-- authorization cancel --}}
-  <x-modal wire:model.defer="autorization_cancel_modal" align="center" max-width="md">
+  <x-modal wire:model="autorization_cancel_modal" align="center" max-width="md">
     <x-card>
       <div class="flex space-x-1">
         <h1 class=" text-xl font-bold text-gray-600">AUTHORIZATION CODE</h1>

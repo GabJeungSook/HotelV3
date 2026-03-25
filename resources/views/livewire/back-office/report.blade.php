@@ -215,7 +215,7 @@
     </ul>
   </div>
 
-  <x-modal.card wire:model.defer="report_modal" fullscreen>
+  <x-modal-card wire:model="report_modal" fullscreen>
     <div class="mx-auto max-w-7xl">
 
       <div class="">
@@ -273,5 +273,5 @@
       </div>
     </x-slot>
 
-  </x-modal.card>
+  </x-modal-card>
 </div>

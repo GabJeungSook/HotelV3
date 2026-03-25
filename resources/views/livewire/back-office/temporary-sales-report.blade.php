@@ -40,12 +40,12 @@
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">From</label>
-                <input disabled type="date" wire:model.defer="date_from" class="w-full rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
+                <input disabled type="date" wire:model="date_from" class="w-full rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">To</label>
-                <input disabled type="date" wire:model.defer="date_to" class="w-full rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
+                <input disabled type="date" wire:model="date_to" class="w-full rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
             </div>
 
             <div class="flex flex-col gap-3">

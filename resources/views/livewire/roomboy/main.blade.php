@@ -251,7 +251,7 @@
         </section>
     </div>
         {{-- moadal for authorization code --}}
-      <x-modal wire:model.defer="authorization_modal" align="center" max-width="md">
+      <x-modal wire:model="authorization_modal" align="center" max-width="md">
     <x-card>
       <div class="flex space-x-1">
         <h1 class=" text-xl font-bold text-gray-600">AUTHORIZATION CODE</h1>

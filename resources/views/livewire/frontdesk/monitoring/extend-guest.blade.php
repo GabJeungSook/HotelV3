@@ -97,7 +97,7 @@
 {{--
             <div class="mt-20">
                 <label class="block font-medium mb-1">Amount Paid</label>
-                <x-input wire:model.defer="amountPaid" type="number" placeholder="0.00" class="text-right px-2 py-2" prefix="₱" />
+                <x-input wire:model="amountPaid" type="number" placeholder="0.00" class="text-right px-2 py-2" prefix="₱" />
             </div> --}}
         </div>
     </div>
@@ -133,7 +133,7 @@
     </div>
 
     {{-- modal for submission --}}
-    <x-modal wire:model.defer="save_pay_modal" align="center">
+    <x-modal wire:model="save_pay_modal" align="center">
       <x-card>
         <div>
           <div class="header flex space-x-1 border-b items-end justify-between py-0.5">

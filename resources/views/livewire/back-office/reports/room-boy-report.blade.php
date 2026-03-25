@@ -7,7 +7,7 @@
             {{-- Roomboy --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Room Boy</label>
-                <select wire:model.defer="roomboy_id"
+                <select wire:model="roomboy_id"
                         class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                     <option value="">All</option>
                     @foreach($roomboys as $rb)
@@ -19,7 +19,7 @@
             {{-- Shift --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Shift</label>
-                <select wire:model.defer="shift"
+                <select wire:model="shift"
                         class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                     <option value="">All</option>
                     <option value="AM">AM</option>
@@ -31,7 +31,7 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
                 <input type="date"
-                       wire:model.defer="date"
+                       wire:model="date"
                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
             </div>
 

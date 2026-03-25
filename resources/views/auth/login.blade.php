@@ -44,7 +44,7 @@
             account
           </h2>
         </div>
-        <x-jet-validation-errors class="" />
+        <x-validation-errors class="" />
         <form class="space-y-6 " method="POST" action="{{ route('login') }}">
           @csrf
           <div>

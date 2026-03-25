@@ -39,6 +39,7 @@
     }
   </style>
   @wireUiScripts
+  @filamentStyles
   <!-- Scripts -->
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   <!-- Styles -->
@@ -47,7 +48,8 @@
 
 <body class="h-full relative overflow-y-hidden">
   {{ $slot }}
-  @livewireScripts
+  @livewireScriptConfig
+  @filamentScripts
 </body>
 
 </html>

@@ -63,22 +63,22 @@
   </div>
 
 
-  <x-modal blur wire:model.defer="add_modal" align="center">
+  <x-modal blur wire:model="add_modal" align="center">
     <x-card>
       <div class="header flex space-x-2 items-center">
         <h1 class="text-lg font-semibold uppercase text-gray-600 ">Add New Remittance</h1>
       </div>
       <div class="mt-5 px-4 grid grid-cols-1 gap-4">
-          <x-input label="Amount" type="number" wire:model.defer="remittance_amount" />
+          <x-input label="Amount" type="number" wire:model="remittance_amount" />
         <div>
-            <x-textarea label="Description" wire:model.defer="description" />
+            <x-textarea label="Description" wire:model="description" />
         </div>
     </div>
       <x-slot name="footer">
         <div class="flex justify-end gap-x-4">
           <x-button flat label="Cancel" x-on:click="close" />
 
-          <x-button positive right-icon="save-as" wire:click="saveRemittance" spinner="saveRemittance"
+          <x-button positive right-icon="arrow-down-tray" wire:click="saveRemittance" spinner="saveRemittance"
             label="Save Remittance" />
         </div>
       </x-slot>

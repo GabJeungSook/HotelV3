@@ -9,12 +9,12 @@
     {{ $this->table }}
   </div>
 
-  <x-modal wire:model.defer="add_modal" align="center">
+  <x-modal wire:model="add_modal" align="center">
     <x-card title="Add New Reservation">
       <div>
         <div class="header font-bold text-gray-700">GUEST INFORMATION</div>
         <div class="mt-2 grid grid-cols-2 gap-4">
-          <x-input label="Guest Name" wire:model.defer="name" placeholder="" />
+          <x-input label="Guest Name" wire:model="name" placeholder="" />
           <x-input right-icon="user" wire:model="contact_number" label="Contact Number" placeholder="09" />
         </div>
       </div>
@@ -57,7 +57,7 @@
       <x-slot name="footer">
         <div class="flex justify-end gap-x-4">
           <x-button flat label="Cancel" x-on:click="close" />
-          <x-button positive label="Save" right-icon="save-as" wire:click="saveReservation"
+          <x-button positive label="Save" right-icon="arrow-down-tray" wire:click="saveReservation"
             spinner="saveReservation" />
         </div>
       </x-slot>

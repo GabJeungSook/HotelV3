@@ -15,6 +15,7 @@
     rel="stylesheet">
 
   @wireUiScripts
+  @filamentStyles
   <!-- Scripts -->
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   <!-- Styles -->
@@ -90,7 +91,8 @@
 
     </main>
   </div>
-  @livewireScripts
+  @livewireScriptConfig
+  @filamentScripts
   <x-dialog z-index="z-50" blur="md" align="center" />
 </body>
 

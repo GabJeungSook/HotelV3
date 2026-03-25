@@ -2,16 +2,16 @@
     <div class="flex justify-between items-center mb-5">
         @if ($cash_drawers->count() > 0)
             {{-- <x-button wire:click="$set('add_modal', true)" icon="plus" blue label="Add New Frontdesk" /> --}}
-            <x-button wire:click="redirectToCashDrawerSetup" icon="cash" red label="Manage Cash Drawer" />
+            <x-button wire:click="redirectToCashDrawerSetup" icon="banknotes" red label="Manage Cash Drawer" />
         @else
             <div class="text-red-600 font-semibold text-sm">
                 Please set up cash drawer first.
             </div>
-            <x-button wire:click="redirectToCashDrawerSetup" icon="cash" red label="Set up Cash Drawer" />
+            <x-button wire:click="redirectToCashDrawerSetup" icon="banknotes" red label="Set up Cash Drawer" />
         @endif
     </div>
   {{ $this->table }}
-  <x-modal wire:model.defer="add_modal" align="center" max-width="xl">
+  <x-modal wire:model="add_modal" align="center" max-width="xl">
     <x-card>
       <div class="header flex space-x-2 items-center">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" class="fill-gray-600">
@@ -30,8 +30,8 @@
                 @endforeach
           </x-native-select>
           @endif
-        <x-input label="Name" wire:model.defer="name" />
-        <x-input label="Number" wire:model.defer="number" />
+        <x-input label="Name" wire:model="name" />
+        <x-input label="Number" wire:model="number" />
         <x-native-select label="Select Cash Drawer" wire:model="drawer">
             <option selected hidden>Select Cash Drawer</option>
             @foreach ($cash_drawers as $drawer)
@@ -43,7 +43,7 @@
         <div class="flex justify-end gap-x-4">
           <x-button flat label="Cancel" x-on:click="close" />
 
-          <x-button positive right-icon="save-as" wire:click="addFrontdesk" spinner="addFrontdesk" label="Save" />
+          <x-button positive right-icon="arrow-down-tray" wire:click="addFrontdesk" spinner="addFrontdesk" label="Save" />
         </div>
       </x-slot>
     </x-card>
