@@ -149,7 +149,7 @@
         </div>
       </div>
     </div>
-    
+
     <x-modal wire:model.defer="edit_modal" max-width="lg">
       <x-card title="Update Room">
         <div class="flex flex-col space-y-2">
@@ -192,7 +192,7 @@
 
   <div class="p-4 bg-white rounded-xl ">
     <div class=" mb-5">
-      <x-button wire:click="$set('add_modal', true)" icon="plus" slate label="Add New Room" />
+      <x-button wire:click="$set('add_modal', true)" icon="plus" blue label="Add New Room" />
       <div class="mt-5 flex space-x-2">
         <x-badge rounded class="font-normal" positive md label="Available" />
         <x-badge rounded class="font-normal" flat positive md label="Occupied" />
@@ -261,9 +261,23 @@
         <h1 class="text-lg font-semibold uppercase text-gray-600 ">Add New Room</h1>
       </div>
       <div class="mt-5 px-2 grid grid-cols-2 gap-4 ">
+         {{-- <div class="space-y-4">
+
+        <x-input label="Name" wire:model.defer="name" />
+        </div> --}}
+        <div class="col-span-2">
+         @if(auth()->user()->hasRole('superadmin'))
+          <x-native-select label="Branch" wire:model="branch_id">
+              <option selected hidden>Select Branch</option>
+                @foreach ($branches as $item)
+                    <option value="{{ $item->id }}">{{ $item->name }}</option>
+                @endforeach
+          </x-native-select>
+          @endif
+        </div>
         <x-input label="Number" wire:model.defer="number" />
         <x-native-select label="Type" wire:model.defer="type">
-          <option>Select Type</option>
+          <option selected hidden>Select Type</option>
           @foreach ($types as $type)
             <option value="{{ $type->id }}">{{ $type->name }}</option>
           @endforeach

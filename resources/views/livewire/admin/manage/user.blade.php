@@ -64,7 +64,7 @@
       </div>
     </div>
   </div> --}}
-  {{-- 
+  {{--
   <x-modal wire:model.defer="add_modal" max-width="lg">
     <x-card title="Add New">
       <div class="flex flex-col space-y-3">
@@ -127,7 +127,7 @@
             <!-- Current: "border-indigo-500 text-indigo-600", Default: "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-500" -->
             <button x-on:click="type=1" wire:click="$set('type',1)"
               :class="type == 1 ? 'border-gray-600' : 'border-transparent'"
-              class="  text-gray-500  hover:text-gray-700 hover:border-gray-500 whitespace-nowrap flex py-3  border-b-2 font-medium text-sm">
+              class="  text-gray-500  hover:text-gray-700 hover:border-gray-500 whitespace-nowrap flex py-3  border-b-2 font-semibold text-md">
               Users
 
               <!-- Current: "bg-indigo-100 text-indigo-600", Default: "bg-gray-100 text-gray-900" -->
@@ -135,7 +135,7 @@
             </button>
             <button x-on:click="type=2" wire:click="$set('type',2)"
               :class="type == 2 ? 'border-gray-600' : 'border-transparent'"
-              class=" text-gray-500 hover:text-gray-700 hover:border-gray-500 whitespace-nowrap flex py-3 px-1 border-b-2 font-medium text-sm">
+              class=" text-gray-500 hover:text-gray-700 hover:border-gray-500 whitespace-nowrap flex py-3 px-1 border-b-2 font-semibold text-md">
               Manage Frontdesk
 
               <!-- Current: "bg-indigo-100 text-indigo-600", Default: "bg-gray-100 text-gray-900" -->
@@ -143,7 +143,7 @@
             </button>
             <button x-on:click="type=3" wire:click="$set('type',3)"
               :class="type == 3 ? 'border-gray-600' : 'border-transparent'"
-              class=" text-gray-500 hover:text-gray-700 hover:border-gray-500 whitespace-nowrap flex py-3 px-1 border-b-2 font-medium text-sm">
+              class=" text-gray-500 hover:text-gray-700 hover:border-gray-500 whitespace-nowrap flex py-3 px-1 border-b-2 font-semibold text-md">
               Roomboy Designation
 
               <!-- Current: "bg-indigo-100 text-indigo-600", Default: "bg-gray-100 text-gray-900" -->
@@ -157,13 +157,13 @@
           @if ($type == 1)
             <div>
               <div class="flex mb-5">
-                <x-button wire:click="$set('add_modal', true)" icon="plus" slate label="Add New User" />
+                <x-button wire:click="$set('add_modal', true)" icon="plus" blue label="Add New User" />
               </div>
               {{ $this->table }}
             </div>
           @elseif($type == 2)
             <livewire:admin.manage-frondesk />
-          @else
+          @elseif($type == 3)
             <livewire:admin.roomboy-designation />
           @endif
 
@@ -209,6 +209,16 @@
         <h1 class="text-lg font-semibold uppercase text-gray-600 ">Add New User</h1>
       </div>
       <div class="mt-5 px-2 grid grid-cols-2 gap-4 ">
+        @if(auth()->user()->hasRole('superadmin'))
+        <div class="col-span-2">
+          <x-native-select label="Branch" wire:model="branch_id">
+              <option selected hidden>Select Branch</option>
+                @foreach ($branches as $item)
+                    <option value="{{ $item->id }}">{{ $item->name }}</option>
+                @endforeach
+          </x-native-select>
+        </div>
+        @endif
         <x-input label="Name" wire:model.defer="name" />
         <x-input label="Email" wire:model.defer="email" />
         <x-inputs.password label="Password" wire:model.defer="password" />

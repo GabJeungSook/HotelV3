@@ -30,7 +30,13 @@
   <!-- Styles -->
   @livewireStyles
 </head>
+@if(app()->environment('staging'))
+   <div class="fixed top-0 left-0 w-full bg-red-600 text-white text-center py-1 text-sm font-semibold z-50 animate-pulse">
+        STAGING ENVIRONMENT
+    </div>
 
+    <div style="height: 20px;"></div> {{-- spacer to avoid overlap --}}
+@endif
 <body class="font-sans antialiased " x-data="{ logout: false }">
   <!--
   This example requires updating your template:
@@ -215,20 +221,20 @@
               </svg>
               Dashboard
             </a>
+            <nav class="mt-2  space-y-0.5 ">
+              <a href="{{ route('back-office.report-hub') }}"
+                class="{{ request()->routeIs('back-office.report-hub') ? 'bg-gray-100 before:h-full before:w-1 relative before:bg-gray-500 before:rounded-r before:absolute before:left-0 ' : '' }} text-gray-600 group flex items-center px-4 py-2 text-sm hover:bg-gray-100 ">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                  class="mr-3 h-6 w-6 flex-shrink-0 fill-gray-600">
+                  <path fill="none" d="M0 0h24v24H0z" />
+                  <path
+                    d="M11 7h2v10h-2V7zm4 4h2v6h-2v-6zm-8 2h2v4H7v-4zm8-9H5v16h14V8h-4V4zM3 2.992C3 2.444 3.447 2 3.999 2H16l5 5v13.993A1 1 0 0 1 20.007 22H3.993A1 1 0 0 1 3 21.008V2.992z" />
+                </svg>
+                Reports
+              </a>
+            </nav>
 
-            <a href="{{ route('back-office.sales') }}"
-              class="{{ request()->routeIs('back-office.sales') ? 'bg-gray-100 before:h-full before:w-1 relative before:bg-gray-500 before:rounded-r before:absolute before:left-0 ' : '' }} text-gray-700 hover:bg-gray-100 hover:bg-opacity-75 group flex items-center px-4 py-2 text-sm ">
-              <!-- Heroicon name: outline/users -->
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1"
-                stroke="currentColor" class="mr-3 h-6 w-6 flex-shrink-0 fill-gray-600">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
-              </svg>
-
-              Sales
-            </a>
-
-            <a href="{{ route('back-office.expenses') }}"
+            {{-- <a href="{{ route('back-office.expenses') }}"
               class="{{ request()->routeIs('back-office.expenses') ? 'bg-gray-100 before:h-full before:w-1 relative before:bg-gray-500 before:rounded-r before:absolute before:left-0 ' : '' }} text-gray-700 hover:bg-gray-100 hover:bg-opacity-75 group flex items-center px-4 py-2 text-sm ">
               <!-- Heroicon name: outline/folder -->
               <svg class="w-6 h-6 mr-3  flex-shrink-0 text-gray-600" stroke-width="1.5" viewBox="0 0 24 24"
@@ -251,9 +257,9 @@
                 <path d="M3 3L21 21" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path>
               </svg>
               Expenses
-            </a>
+            </a> --}}
           </nav>
-          <div class="border-t mt-5 py-1">
+          {{-- <div class="border-t mt-5 py-1">
             <div class="px-1 text-xs font-medium">REPORTS</div>
             <nav class="mt-2  space-y-0.5 ">
               <a href="{{ route('back-office.reports') }}"
@@ -267,7 +273,7 @@
                 Reports
               </a>
             </nav>
-          </div>
+          </div> --}}
         </div>
         <div class="flex flex-shrink-0 border-t-2 border-gray-200 py-4 px-2">
           <a href="#" class="group block w-full flex-shrink-0">
@@ -277,12 +283,12 @@
                   <x-avatar sm label="AB" />
                 </div>
                 <div class="ml-3">
-                  <p class="text-sm text-gray-600">Tom Cook</p>
+
                   <p class="text-xs font-medium text-gray-500 uppercase  ">{{ auth()->user()->roles->first()->name }}
                   </p>
                 </div>
               </div>
-              <x-button icon="logout" sm gray x-on:click="logout = true" />
+              <x-button icon="logout" sm negative x-on:click="logout = true" />
             </div>
           </a>
         </div>
@@ -302,7 +308,7 @@
       </div>
       <main class="flex-1">
         <div class="py-6">
-          <div class="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+          <div class="mx-auto max-w-full px-4 sm:px-6 md:px-8">
             <div
               class="md:flex bg-white p-2 px-5 shadow-sm rounded-lg md:items-center md:justify-between md:space-x-5">
               <div class="flex items-start space-x-5">
@@ -338,7 +344,7 @@
                             d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
                             clip-rule="evenodd" />
                         </svg>
-                        <a href="#"
+                        <a href="{{ route('back-office.frontdesk-shift-table') }}"
                           class="ml-4 text-sm  text-gray-500 hover:text-gray-700">@yield('breadcrumbs')</a>
                       </div>
                     </li>
@@ -349,7 +355,7 @@
             </div>
 
           </div>
-          <div class="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+          <div class="mx-auto max-w-full">
             <!-- Replace with your content -->
             <div class="py-8">
               <div class="h-96">

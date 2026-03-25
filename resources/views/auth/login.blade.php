@@ -4,7 +4,7 @@
     <img src="{{ asset('images/homiLogo.png') }}" class="h-64 opacity-10" alt="">
   </div>
   <div class="fixed flex justify-center bottom-0 w-full">
-    <span class="font-medium text-gray-500">Powered By: J7 IT SOLUTION & SERVICES</span>
+    {{-- <span class="font-medium text-gray-500">Powered By: J7 IT SOLUTION & SERVICES</span> --}}
   </div>
   <svg
     class="absolute inset-x-0 top-0 -z-10 h-[64rem] w-full stroke-gray-200 [mask-image:radial-gradient(32rem_32rem_at_center,white,transparent)]"
@@ -50,11 +50,9 @@
           <div>
             <x-input icon="identification" label="Email Address" id="email" name="email" :value="old('email')"
               required autofocus placeholder="" />
-
           </div>
-
           <div>
-            <x-inputs.password label="Password" icon="lock-closed" id="password" name="password" required
+            <x-input icon="lock-closed" label="Password" id="password" name="password" type="password" required
               autocomplete="current-password" />
           </div>
 

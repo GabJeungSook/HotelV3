@@ -99,7 +99,7 @@
   </x-modal> --}}
   <div class="bg-white p-4 rounded-xl">
     <div class="flex mb-5">
-      <x-button wire:click="$set('add_modal', true)" icon="plus" slate label="Add New Damages" />
+      <x-button wire:click="$set('add_modal', true)" icon="plus" blue label="Add New Damages" />
     </div>
     {{ $this->table }}
   </div>
@@ -112,9 +112,17 @@
           <path
             d="M11 11V7h2v4h4v2h-4v4h-2v-4H7v-2h4zm1 11C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16z" />
         </svg>
-        <h1 class="text-lg font-semibold uppercase text-gray-600 ">Add New Room</h1>
+        <h1 class="text-lg font-semibold uppercase text-gray-600 ">Add New Damages</h1>
       </div>
       <div class="mt-5 px-2 flex flex-col space-y-3">
+         @if(auth()->user()->hasRole('superadmin'))
+          <x-native-select label="Branch" wire:model="branch_id">
+              <option selected hidden>Select Branch</option>
+                @foreach ($branches as $item)
+                    <option value="{{ $item->id }}">{{ $item->name }}</option>
+                @endforeach
+          </x-native-select>
+          @endif
         <x-input wire:model.defer="name" label="Name" placeholder="" />
         <x-input wire:model.defer="amount" label="Amount" placeholder="" />
       </div>

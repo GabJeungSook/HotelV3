@@ -9,4 +9,10 @@ Route::prefix('kiosk')
         Route::get('/check-in', function () {
             return view('kiosk.check-in');
         })->name('kiosk.check-in');
+        Route::get('/check-out', function () {
+            return view('kiosk.check-out');
+        })->name('kiosk.check-out');
+        Route::get('/check-out/success', function () {
+            return view('kiosk.partials-checkout.check-out-success');
+        })->name('kiosk.check-out-success');
     });

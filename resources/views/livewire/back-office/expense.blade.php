@@ -1,7 +1,8 @@
 <div>
   <div class="flex justify-end space-x-2 px-4">
-    <x-button label="Expenses Category" icon="collection" gray wire:click=" $set('manage_modal', true)" />
-    <x-button label="Add New" icon="plus" wire:click="$set('add_modal',true)" positive />
+    <x-button label="Expense Type" icon="collection" gray wire:click=" $set('manage_modal', true)" />
+    <x-button label="Add New Expense" icon="plus" wire:click="$set('add_modal',true)" positive />
+    <x-button label="Print Report" icon="printer" wire:click="redirectReport" amber />
   </div>
   <div class="table w-full px-4">
     <div class=" bg-white p-4 rounded-xl mt-4">
@@ -19,7 +20,11 @@
               <th scope="col"
                 class="py-3.5 w-40 pl-4 pr-3 text-left text-sm font-semibold text-gray-600 sm:pl-6 md:pl-0"></th>
               <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-600 sm:pl-6 md:pl-0">
-                EMPLOYEE NAME</th>
+                DATE</th>
+              {{-- <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-600 sm:pl-6 md:pl-0">
+                FRONTDESK NAME</th> --}}
+              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-600 sm:pl-6 md:pl-0">
+                SHIFT</th>
               <th scope="col"
                 class="hidden py-3.5 px-3 text-right text-sm font-semibold text-gray-600 sm:table-cell">DESCRIPTION</th>
               <th scope="col"
@@ -29,14 +34,20 @@
           <tbody>
             @forelse ($categories as $category)
               <tr>
-                <th colspan="4" class="bg-gray-200 text-left font-semibold uppercase text-gray-700 p-2">
+                <th colspan="6" class="bg-gray-200 text-left font-semibold uppercase text-gray-700 p-2">
                   {{ $category->name }}</th>
               </tr>
-              @forelse ($category->expenses as $expense)
+              @forelse ($category->expenses->where('branch_id', auth()->user()->branch_id)->where('user_id', $user_id)->where('shift_log_id', $current_shift->id) as $expense)
                 <tr class="border-b border-gray-200">
                   <td class="hidden py-3 px-3 text-right text-sm text-gray-500 sm:table-cell"></td>
                   <td class="py-3 pl-4 pr-3 text-sm sm:pl-6 md:pl-0">
+                    <div class="font-medium text-gray-500 uppercase">{{ Carbon\Carbon::parse($expense->created_at)->format('F d, Y h:i A') }}</div>
+                  </td>
+                  {{-- <td class="py-3 pl-4 pr-3 text-sm sm:pl-6 md:pl-0">
                     <div class="font-medium text-gray-500 uppercase">{{ $expense->name }}</div>
+                  </td> --}}
+                  <td class="py-3 pl-4 pr-3 text-sm sm:pl-6 md:pl-0">
+                    <div class="font-medium text-gray-500 uppercase">{{ $expense->shift }}</div>
                   </td>
                   <td class="hidden py-3 px-3 text-right text-sm text-gray-500 sm:table-cell">
                     {{ $expense->description ?? null }}</td>
@@ -44,6 +55,9 @@
                     &#8369; {{ number_format($expense->amount, 2) }}</td>
                 </tr>
               @empty
+              <tr>
+                <td colspan="6" class="py-3 px-3 text-center text-sm text-gray-500">No expenses recorded for this category.</td>
+              </tr>
               @endforelse
 
             @empty
@@ -77,10 +91,10 @@
             stroke-linejoin="round"></path>
           <path d="M3 3L21 21" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path>
         </svg>
-        <h1 class="text-lg font-semibold uppercase text-gray-600 ">Expenses Category</h1>
+        <h1 class="text-lg font-semibold uppercase text-gray-600 ">Expense Type</h1>
       </div>
       <div class="mt-5 px-4">
-        <x-input label="Category Name" wire:model.defer="category_name" placeholder="" />
+        <x-input label="Expense Type" wire:model.defer="category_name" placeholder="" />
       </div>
 
       <div class="mt-10 px-4">
@@ -134,10 +148,10 @@
             stroke-linecap="round" stroke-linejoin="round"></path>
           <path d="M3 3L21 21" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path>
         </svg>
-        <h1 class="text-lg font-semibold uppercase text-gray-600 ">Update Expenses Category</h1>
+        <h1 class="text-lg font-semibold uppercase text-gray-600 ">Update Expense Type</h1>
       </div>
       <div class="mt-5 px-4">
-        <x-input label="Category Name" wire:model.defer="category_name" placeholder="" />
+        <x-input label="Expense Type" wire:model.defer="category_name" placeholder="" />
       </div>
       <x-slot name="footer">
         <div class="flex justify-end gap-x-4">
@@ -179,12 +193,22 @@
         </svg>
         <h1 class="text-lg font-semibold uppercase text-gray-600 ">Add New Expenses</h1>
       </div>
-      <div class="mt-5 px-4 grid grid-cols-2 gap-4">
-        <x-input label="Employee Name" wire:model.defer="employee_name" />
+      <div class="mt-5 px-4 grid grid-cols-1 gap-4">
+         {{-- <x-native-select label="Frontdesk" wire:model="user_id">
+          <option selected hidden>Select User</option>
+          @foreach ($users as $user)
+            <option value="{{ $user->id }}">{{ $user->name }}</option>
+          @endforeach
+        </x-native-select> --}}
+        {{-- <x-native-select label="Shift" wire:model="shift">
+          <option selected hidden>Select Shift</option>
+          <option value="AM">AM</option>
+          <option value="PM">PM</option>
+        </x-native-select> --}}
         <x-native-select label="Category" wire:model="expense_category_id">
           <option selected hidden>Select Category</option>
           @foreach ($categories as $category)
-            <option value="{{ $category->id }}">{{ $category->name }}</optionc>
+            <option value="{{ $category->id }}">{{ $category->name }}</option>
           @endforeach
         </x-native-select>
         <div>

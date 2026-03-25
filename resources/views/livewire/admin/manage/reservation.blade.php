@@ -1,7 +1,9 @@
 <div>
-  <div class="flex mb-3">
-    <x-button label="New Reservation" icon="plus" positive wire:click="$set('add_modal', true)"
+  <div class="flex mb-3 space-x-4">
+    <x-button label="New Reservation" icon="plus" blue wire:click="$set('add_modal', true)"
       spinner="$set('add_modal', true)" />
+       <x-button label="Check-In C/O" icon="check" emerald wire:click="redirectToCheckInCO"
+      spinner="redirectToCheckInCO" />
   </div>
   <div>
     {{ $this->table }}
@@ -43,7 +45,7 @@
 
             @endif
             <div class="flex items-end">
-              <x-checkbox id="right-label" label="Long Stay" wire:model="is_longStay" />
+              <x-checkbox id="right-label" label="Long Stay" disabled wire:model="is_longStay" />
             </div>
             @if ($is_longStay)
               <x-input label="Number of Days" placeholder="" />

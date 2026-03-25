@@ -2,6 +2,8 @@
 
 namespace App\Http\Livewire\Admin;
 
+use App\Models\ActivityLog;
+use App\Models\CashDrawer;
 use Livewire\Component;
 use App\Models\Frontdesk;
 use WireUi\Traits\Actions;
@@ -13,15 +15,34 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Layout;
 
 class ManageFrondesk extends Component implements Tables\Contracts\HasTable
 {
     use Tables\Concerns\InteractsWithTable;
     use Actions;
     public $add_modal = false;
+
+    public $add_drawer = false;
     public $edit_modal = false;
     public $name, $number, $frontdesk_id;
     public $search;
+    public $branch_id;
+
+    public $cash_drawers;
+
+    public $drawer;
+
+    public function mount()
+    {
+         if(auth()->user()->hasRole('superadmin')){
+            $this->cash_drawers = CashDrawer::where('is_active', 1)->get();
+         }else{
+            $this->cash_drawers = CashDrawer::where('branch_id', auth()->user()->branch_id)->where('is_active', 1)->get();
+        }
+    }
+
     public function render()
     {
         return view('livewire.admin.manage-frondesk', [
@@ -29,20 +50,32 @@ class ManageFrondesk extends Component implements Tables\Contracts\HasTable
                 'branch_id',
                 auth()->user()->branch_id
             )->where('name', 'like', '%' . $this->search . '%')->get(),
+            'branches' => \App\Models\Branch::all(),
         ]);
     }
 
     protected function getTableQuery(): Builder
     {
-        return Frontdesk::query()->where(
-            'branch_id',
-            auth()->user()->branch_id
-        );
+        if(auth()->user()->hasRole('superadmin')){
+            return Frontdesk::query();
+        }else{
+            return Frontdesk::query()->where(
+                'branch_id',
+                auth()->user()->branch_id
+            );
+        }
     }
 
     protected function getTableColumns(): array
     {
         return [
+             Tables\Columns\TextColumn::make('branch.name')
+                ->label('BRANCH')
+                ->formatStateUsing(
+                     fn(string $state): string => strtoupper("{$state}")
+                )
+                ->sortable()
+                ->visible(fn () => auth()->user()->hasRole('superadmin')),
             Tables\Columns\TextColumn::make('name')
                 ->label('FRONTDESK NAME')
                 ->searchable()
@@ -51,8 +84,30 @@ class ManageFrondesk extends Component implements Tables\Contracts\HasTable
                 ->label('NUMBER')
                 ->searchable()
                 ->sortable(),
+                Tables\Columns\TextColumn::make('passcode')
+                ->label('PASSCODE')
+                ->searchable()
+                ->formatStateUsing(fn (string $state): string => ("*****"))
+                ->sortable(),
         ];
     }
+
+    protected function getTableFilters(): array
+    {
+        if(auth()->user()->hasRole('superadmin')){
+            return [
+                SelectFilter::make('branch')->relationship('branch', 'name')
+            ];
+        }else{
+            return [];
+        }
+    }
+
+    protected function getTableFiltersLayout(): ?string
+    {
+        return Layout::AboveContent;
+    }
+
 
     protected function getTableActions(): array
     {
@@ -76,7 +131,7 @@ class ManageFrondesk extends Component implements Tables\Contracts\HasTable
                                     'required|unique:frontdesks,name,' .
                                         $record->id
                                 ),
-                            TextInput::make('number')->default($record->number),
+                            TextInput::make('number')->required()->default($record->number),
                         ]),
                     ];
                 })
@@ -93,10 +148,18 @@ class ManageFrondesk extends Component implements Tables\Contracts\HasTable
             'number' => 'required',
         ]);
         Frontdesk::create([
-            'branch_id' => auth()->user()->branch_id,
+            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
             'name' => $this->name,
             'number' => $this->number,
         ]);
+
+        ActivityLog::create([
+            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
+            'user_id' => auth()->user()->id,
+            'activity' => 'Create Frontdesk',
+            'description' => 'Created frontdesk ' . $this->name,
+        ]);
+
         $this->add_modal = false;
         $this->name = '';
         $this->number = '';
@@ -109,7 +172,7 @@ class ManageFrondesk extends Component implements Tables\Contracts\HasTable
 
     public function editFrontdesk($id)
     {
-        $frontdesk = Frontdesk::where('id', $id)->first();
+        $frontdesk = Frontdesk::where('id', $id)->where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)->first();
         $this->frontdesk_id = $frontdesk->id;
         $this->name = $frontdesk->name;
         $this->number = $frontdesk->number;
@@ -129,6 +192,14 @@ class ManageFrondesk extends Component implements Tables\Contracts\HasTable
                 'name' => $this->name,
                 'number' => $this->number,
             ]);
+
+        ActivityLog::create([
+            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
+            'user_id' => auth()->user()->id,
+            'activity' => 'Update Frontdesk',
+            'description' => 'Updated frontdesk ' . $this->name,
+        ]);
+
         $this->edit_modal = false;
         $this->name = '';
         $this->number = '';
@@ -137,5 +208,10 @@ class ManageFrondesk extends Component implements Tables\Contracts\HasTable
             $title = 'Success',
             $description = 'Frontdesk updated successfully'
         );
+    }
+
+    public function redirectToCashDrawerSetup()
+    {
+        return redirect()->route('admin.cash-drawers');
     }
 }

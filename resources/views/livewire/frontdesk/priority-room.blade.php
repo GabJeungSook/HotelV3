@@ -1,4 +1,14 @@
 <div>
+  <div class="flex justify-end mb-4">
+        @if(auth()->user()->hasRole('superadmin'))
+            <x-native-select label="Branch" wire:model="branch_id">
+                <option selected hidden>Select Branch</option>
+                    @foreach ($branches as $item)
+                        <option value="{{ $item->id }}">{{ $item->name }}</option>
+                    @endforeach
+            </x-native-select>
+        @endif
+    </div>
   <div class="p-4 bg-white rounded-xl">
     <div class="grid grid-cols-2 gap-10">
       <div>
@@ -15,7 +25,7 @@
         </div>
         {{-- <div class="mt-3 grid grid-cols-2 gap-4" x-animate>
           @forelse ($types as $type)
-           
+
             <div
               class="rounded-lg bg-gradient-to-br relative from-gray-300 overflow-hidden p-5 via-gray-200 to-gray-100">
               <div class="font-bold text-xl text-gray-600">{{ $room->numberWithFormat() }}</div>
@@ -47,6 +57,10 @@
             </div>
             @php
               $rooms = \App\Models\Room::where('type_id', $type->id)
+                    ->whereIn('status', [
+                        'Available',
+                        'Cleaned ',
+                    ])
                   ->where('is_priority', true)
                   ->with('floor')
                   ->orderBy('number', 'asc')

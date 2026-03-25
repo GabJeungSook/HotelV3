@@ -20,8 +20,18 @@ class Floor extends Model
         }
     }
 
+    public function users()
+    {
+        return $this->belongsToMany(User::class);
+    }
+
     public function rooms()
     {
         return $this->hasMany(Room::class);
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
     }
 }

@@ -1,7 +1,7 @@
 <?php
 
 Route::prefix('admin')
-    ->middleware(['auth', 'role:admin'])
+    ->middleware(['auth', 'role:admin|superadmin'])
     ->group(function () {
         Route::get('/dashboard', function () {
             return view('admin.index');
@@ -21,6 +21,17 @@ Route::prefix('admin')
         Route::get('/rooms', function () {
             return view('admin.manage.room');
         })->name('admin.room');
+        Route::get('/frontdesk-kitchen', function () {
+                return view('admin.manage.kitchen-inventory');
+        })->name('admin.food-inventory');
+        Route::get('/food/category', function () {
+                return view('frontdesk.food.category');
+        })->name('frontdesk.food-category');
+        Route::get('/food/menu', function () {
+                return view('frontdesk.food.menu');
+        })->name('frontdesk.food-menu');
+        Route::get('/food/inventory/{record}', fn($record) => view('frontdesk.food.inventory', compact('record')))
+            ->name('frontdesk.food-inventories');
         Route::get('/users', function () {
             return view('admin.manage.user');
         })->name('admin.user');
@@ -49,4 +60,13 @@ Route::prefix('admin')
         Route::get('/reservation', function () {
             return view('admin.manage.reservation');
         })->name('admin.reservation');
+        Route::get('/activity-logs', function () {
+            return view('superadmin.activity-logs');
+        })->name('admin.activity-logs');
+        Route::get('/check-in-co', function () {
+            return view('admin.check-in-co-admin');
+        })->name('admin.check-in-co');
+         Route::get('/manage-cash-drawers', function () {
+            return view('admin.manage.cash-drawers');
+        })->name('admin.cash-drawers');
     });

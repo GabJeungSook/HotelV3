@@ -26,6 +26,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
+        'cash_drawer_id',
         'name',
         'email',
         'password',
@@ -35,6 +36,7 @@ class User extends Authenticatable
         'roomboy_cleaning_room_id',
         'assigned_frontdesks',
         'time_in',
+        'shift',
     ];
 
     /**
@@ -75,6 +77,47 @@ class User extends Authenticatable
     {
         return $this->hasMany(CleaningHistory::class);
     }
+
+    public function floors()
+    {
+        return $this->belongsToMany(Floor::class);
+    }
+
+    public function sessions()
+    {
+        return $this->hasMany(Session::class);
+    }
+
+    public function activity_logs()
+    {
+        return $this->hasMany(ActivityLog::class);
+    }
+
+    public function cash_drawer()
+    {
+        return $this->belongsTo(CashDrawer::class);
+    }
+
+    public function frontdesk()
+    {
+        return $this->hasOne(Frontdesk::class);
+    }
+
+    public function shiftLogs()
+    {
+        return $this->hasMany(ShiftLog::class, 'frontdesk_id');
+    }
+
+    public function expenses()
+    {
+        return $this->hasMany(Expense::class);
+    }
+
+     public function remittances()
+    {
+        return $this->hasMany(Remittance::class);
+    }
+
 
     // public function assignedFrontdesks()
     // {

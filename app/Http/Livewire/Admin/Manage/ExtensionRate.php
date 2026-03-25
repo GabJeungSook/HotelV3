@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire\Admin\Manage;
 
+use App\Models\ActivityLog;
 use Livewire\Component;
 use App\Models\ExtensionRate as extensionRateModel;
 use WireUi\Traits\Actions;
@@ -13,6 +14,8 @@ use Filament\Tables\Actions\Action;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Layout;
 
 class ExtensionRate extends Component implements Tables\Contracts\HasTable
 {
@@ -23,28 +26,43 @@ class ExtensionRate extends Component implements Tables\Contracts\HasTable
     public $edit_modal = false;
     public $hour, $amount, $extension_id;
     public $search;
+    public $branch_id;
+
     public function render()
     {
         return view('livewire.admin.manage.extension-rate', [
             'extensionRates' => extensionRateModel::where(
                 'branch_id',
-                auth()->user()->branch_id
+                auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id
             )->where('hour', 'like', '%' . $this->search . '%')
              ->orWhere('amount', 'like', '%' . $this->search . '%')->get(),
+            'branches' => \App\Models\Branch::all(),
         ]);
     }
 
     protected function getTableQuery(): Builder
     {
-        return extensionRateModel::query()->where(
-            'branch_id',
-            auth()->user()->branch_id
-        );
+        if(auth()->user()->hasRole('superadmin'))
+        {
+            return extensionRateModel::query();
+        }else{
+            return extensionRateModel::query()->where(
+                'branch_id',
+                auth()->user()->branch_id
+            );
+        }
     }
 
     protected function getTableColumns(): array
     {
         return [
+            Tables\Columns\TextColumn::make('branch.name')
+                ->label('BRANCH')
+                ->formatStateUsing(
+                     fn(string $state): string => strtoupper("{$state}")
+                )
+                ->sortable()
+                ->visible(fn () => auth()->user()->hasRole('superadmin')),
             Tables\Columns\TextColumn::make('hour')
                 ->label('HOUR')
                 ->searchable()
@@ -59,6 +77,22 @@ class ExtensionRate extends Component implements Tables\Contracts\HasTable
         ];
     }
 
+     protected function getTableFilters(): array
+    {
+        if(auth()->user()->hasRole('superadmin')){
+            return [
+                SelectFilter::make('branch')->relationship('branch', 'name')
+            ];
+        }else{
+            return [];
+        }
+    }
+
+    protected function getTableFiltersLayout(): ?string
+    {
+        return Layout::AboveContent;
+    }
+
     protected function getTableActions(): array
     {
         return [
@@ -67,6 +101,13 @@ class ExtensionRate extends Component implements Tables\Contracts\HasTable
                 ->color('success')
                 ->action(function ($record, $data) {
                     $record->update($data);
+                    ActivityLog::create([
+                        'branch_id' => auth()->user()->hasRole('superadmin') ? $record->branch_id : auth()->user()->branch_id,
+                        'user_id' => auth()->user()->id,
+                        'activity' => 'Update Extension Rate',
+                        'description' => 'Updated extension rate for ' . $record->hour . ' hour(s)',
+                    ]);
+
                     $this->dialog()->success(
                         $title = 'Update Successfully',
                         $description =
@@ -90,16 +131,23 @@ class ExtensionRate extends Component implements Tables\Contracts\HasTable
     public function saveExtension()
     {
         $this->validate([
-            'hour' =>
-                'required|unique:extension_rates,hour,branch_id' .
-                auth()->user()->branch_id,
+            'hour' => 'required|unique:extension_rates,hour,NULL,id,branch_id,' . (auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id),
             'amount' => 'required',
         ]);
 
         extensionRateModel::create([
             'hour' => $this->hour,
             'amount' => $this->amount,
-            'branch_id' => auth()->user()->branch_id,
+            'branch_id' => auth()->user()->hasRole('superadmin')
+                ? $this->branch_id
+                : auth()->user()->branch_id,
+        ]);
+
+        ActivityLog::create([
+            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
+            'user_id' => auth()->user()->id,
+            'activity' => 'Create Extension Rate',
+            'description' => 'Created extension rate for ' . $this->hour . ' hour(s)',
         ]);
 
         $this->add_modal = false;
@@ -113,7 +161,7 @@ class ExtensionRate extends Component implements Tables\Contracts\HasTable
 
     public function editExtension($extension_id)
     {
-        $extension = extensionRateModel::where('id', $extension_id)->first();
+        $extension = extensionRateModel::where('id', $extension_id)->where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)->first();
         $this->extension_id = $extension->id;
         $this->hour = $extension->hour;
         $this->amount = $extension->amount;
@@ -131,6 +179,13 @@ class ExtensionRate extends Component implements Tables\Contracts\HasTable
         extensionRateModel::where('id', $this->extension_id)->update([
             'hour' => $this->hour,
             'amount' => $this->amount,
+        ]);
+
+        ActivityLog::create([
+            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
+            'user_id' => auth()->user()->id,
+            'activity' => 'Update Extension Rate',
+            'description' => 'Updated extension rate for ' . $this->hour . ' hour(s)',
         ]);
 
         $this->edit_modal = false;

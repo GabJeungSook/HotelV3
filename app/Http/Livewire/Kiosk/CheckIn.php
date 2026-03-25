@@ -15,6 +15,7 @@ use App\Jobs\TerminationInKiosk;
 use App\Models\StayingHour;
 use App\Events\CheckInEvent;
 use App\Models\TemporaryReserved;
+use DB;
 
 class CheckIn extends Component
 {
@@ -30,9 +31,11 @@ class CheckIn extends Component
     public $rate_id;
     public $longstay;
     public $generatedQrCode;
-
+    public $discount_available = false;
+    public $discount_amount = 0;
     public $name, $contact;
 
+    public $discountEnabled = false;
     //check_in details
     public $room_number, $room_type, $room_floor, $room_rate, $room_pay;
 
@@ -52,8 +55,9 @@ class CheckIn extends Component
             ->pluck('room_id')
             ->toArray();
         return view('livewire.kiosk.check-in', [
-            'rooms' => Room::whereTypeId($this->type_id)
-                ->where('status', 'Available')
+            'rooms' => Room::where('branch_id', auth()->user()->branch_id)
+                ->whereTypeId($this->type_id)
+                ->whereIn('status', ['Available', 'Cleaned'])
                 ->whereNotIn('id', $temporaryCheckInKiosk)
                 ->whereNotIn('id', $temporaryReserved)
                 ->where('is_priority', true)
@@ -62,8 +66,7 @@ class CheckIn extends Component
                 })
                 ->with(['type.rates'])
                 ->orderBy('number', 'asc')
-                ->get()
-                ->take(10),
+                ->get(),
         ]);
     }
 
@@ -77,7 +80,9 @@ class CheckIn extends Component
     public function mount()
     {
         $this->getTypes();
-        $this->floors = Floor::get();
+        $this->floors = Floor::where('branch_id', auth()->user()->branch_id)->get();
+        $this->discountEnabled = false;
+        $this->discount_amount = 0;
 
         $this->steps = 1;
     }
@@ -91,8 +96,9 @@ class CheckIn extends Component
             ->pluck('room_id')
             ->toArray();
         if (
-            Room::where('type_id', $type_id)
-                ->where('status', 'Available')
+            Room::where('branch_id', auth()->user()->branch_id)
+                ->where('type_id', $type_id)
+                ->whereIn('status', ['Available', 'Cleaned'])
                 ->whereNotIn('id', $temporaryCheckInKiosk)
                 ->where('is_priority', true)
                 ->with(['type.rates'])
@@ -149,11 +155,20 @@ class CheckIn extends Component
                 'id',
                 $this->rate_id
             )->first()->amount;
+            $rate = Rate::where('id', $this->rate_id)->first();
+            if ($rate->has_discount && auth()->user()->branch->discount_enabled) {
+                $this->discount_available = true;
+            }
 
             $this->steps = 4;
         } else {
             $this->validate([
-                'longstay' => 'required|numeric|min:1|max:31',
+                'longstay' => 'required|integer|min:1|max:31',
+            ],[
+                'longstay.required' => 'Please enter number of days.',
+                'longstay.integer' => 'Number of days must be a whole number.',
+                'longstay.min' => 'Number of days must be at least 1.',
+                'longstay.max' => 'Number of days must not exceed 31.',
             ]);
 
             $long = StayingHour::where('branch_id', auth()->user()->branch_id)
@@ -220,43 +235,109 @@ class CheckIn extends Component
 
     public function confirmCheckIn()
     {
-        $transaction = Guest::whereYear(
-            'created_at',
-            \Carbon\Carbon::today()->year
-        )->count();
-        $transaction += 1;
-        $transaction_code =
-            auth()->user()->branch_id .
-            today()->format('y') .
-            str_pad($transaction, 4, '0', STR_PAD_LEFT);
-        $this->generatedQrCode = $transaction_code;
 
-        $guest = Guest::create([
-            'branch_id' => auth()->user()->branch_id,
-            'name' => $this->name,
-            'contact' => $this->contact == null ? 'N/A' : '09' . $this->contact,
-            'qr_code' => $transaction_code,
-            'room_id' => $this->room_id,
-            'rate_id' => $this->rate_id,
-            'type_id' => $this->type_id,
-            'static_amount' => $this->room_pay,
-            'is_long_stay' => $this->longstay != null ? true : false,
-            'number_of_days' => $this->longstay != null ? $this->longstay : 0,
-        ]);
+          DB::beginTransaction();
 
-        TemporaryCheckInKiosk::create([
-            'guest_id' => $guest->id,
-            'room_id' => $this->room_id,
-            'branch_id' => auth()->user()->branch_id,
-            'terminated_at' => Carbon::now()->addMinutes(20),
-        ]);
-        //fix this
-        TerminationInKiosk::dispatch($this->room_id)->delay(
-            Carbon::now()->addMinutes(20)
-        );
-        event(new CheckInEvent(auth()->user()->branch_id));
+            try {
 
-        $this->steps = 5;
+                $room = Room::where('branch_id', auth()->user()->branch_id)
+                    ->where('id', $this->room_id)
+                    ->where('status', 'Occupied')
+                    ->with('latestCheckInDetail')
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($room) {
+                    DB::rollBack();
+                    $this->dialog()->error(
+                        'SORRY',
+                        'Room is already occupied. Please select another room.'
+                    );
+                    return;
+                }
+
+                $temporaryCheckInKiosk = TemporaryCheckInKiosk::where('branch_id', auth()->user()->branch_id)
+                    ->where('room_id', $this->room_id)
+                    ->lockForUpdate()
+                    ->exists();
+
+                $temporaryReserved = TemporaryReserved::where('branch_id', auth()->user()->branch_id)
+                    ->where('room_id', $this->room_id)
+                    ->lockForUpdate()
+                    ->exists();
+
+                if ($temporaryCheckInKiosk || $temporaryReserved) {
+                    DB::rollBack();
+                    $this->dialog()->error(
+                        'SORRY',
+                        'Room is already reserved. Please select another room.'
+                    );
+                    return;
+                }
+
+              $transaction = Guest::whereYear('created_at', now()->year)
+                    ->lockForUpdate()
+                    ->count();
+
+                $transaction += 1;
+
+                // limit to 4 digits
+                $transaction = $transaction % 10000;
+
+                $transaction_code =
+                    auth()->user()->branch_id .
+                    now()->format('y') .
+                    str_pad($transaction, 4, '0', STR_PAD_LEFT);
+
+                // $transaction_code = sprintf('%05d', random_int(0, 99999));
+
+                $this->generatedQrCode = $transaction_code;
+
+                $guest = Guest::create([
+                    'branch_id' => auth()->user()->branch_id,
+                    'name' => $this->name,
+                    'contact' => $this->contact ? '09' . $this->contact : 'N/A',
+                    'qr_code' => $transaction_code,
+                    'room_id' => $this->room_id,
+                    'rate_id' => $this->rate_id,
+                    'type_id' => $this->type_id,
+                    'static_amount' => $this->room_pay,
+                    'is_long_stay' => $this->longstay ? true : false,
+                    'number_of_days' => $this->longstay ?? 0,
+                    'has_discount' => $this->discountEnabled,
+                    'discount_amount' => $this->discountEnabled ? $this->discount_amount : 0,
+                ]);
+
+                TemporaryCheckInKiosk::create([
+                    'guest_id' => $guest->id,
+                    'room_id' => $this->room_id,
+                    'branch_id' => auth()->user()->branch_id,
+                    'terminated_at' => now()->addMinutes(20),
+                ]);
+
+                DB::commit();
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e; // do not silently swallow errors in production
+            }
+
+            $this->steps = 5;
+    }
+
+    public function redirectToHome()
+    {
+        return redirect()->route('kiosk.dashboard');
+    }
+
+    public function applyDiscount()
+    {
+      
+       if($this->discountEnabled) {
+        $this->discount_amount = auth()->user()->branch->discount_amount;
+       } else {
+        $this->discount_amount = 0;
+       }
     }
 
     public function backRoom()

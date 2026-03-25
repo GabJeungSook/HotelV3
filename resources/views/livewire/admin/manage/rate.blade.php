@@ -127,7 +127,7 @@
           </x-slot>
         </x-card>
       </x-modal>
-     
+
 
     </div>
   </div>
@@ -135,11 +135,62 @@
 
 <div>
   <div class="bg-white p-4 rounded-xl">
-    <div class="flex mb-5">
-      <x-button wire:click="$set('add_modal', true)" icon="plus" slate label="Add New Rates" />
+    <div class="flex justify-between mb-5">
+      @if(auth()->user()->hasRole('superadmin') && $branch_id != null)
+        <div class="flex space-x-4">
+            <x-button wire:click="openAddHour" icon="plus" blue label="Add New Staying Hour" />
+            <x-button wire:click="openAdd" icon="plus" blue label="Add New Rate" />
+        </div>
+      @elseif(auth()->user()->hasRole('admin'))
+       <div class="flex space-x-4"></div>
+            <x-button wire:click="openAddHour" icon="plus" blue label="Add New Staying Hour" />
+            <x-button wire:click="openAdd" icon="plus" blue label="Add New Rate" />
+        </div>
+      @else
+      <div></div>
+      @endif
+      @if(auth()->user()->hasRole('superadmin'))
+          <x-native-select label="Branch" wire:model="branch_id">
+              <option selected hidden>Select Branch</option>
+                @foreach ($branches as $item)
+                    <option value="{{ $item->id }}">{{ $item->name }}</option>
+                @endforeach
+          </x-native-select>
+          @endif
     </div>
+    @if(auth()->user()->hasRole('superadmin'))
+    <div class="my-5 text-xl font-semibold text-gray-600">
+      {{$branch_name ?? 'No Branch Selected'}}
+    </div>
+    @endif
     {{ $this->table }}
   </div>
+
+    <x-modal wire:model.defer="add_staying_hour_modal" align="center" max-width="lg">
+    <x-card>
+      <div class="header flex space-x-2 items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" class="fill-gray-600">
+          <path fill="none" d="M0 0h24v24H0z" />
+          <path
+            d="M11 11V7h2v4h4v2h-4v4h-2v-4H7v-2h4zm1 11C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16z" />
+        </svg>
+        <h1 class="text-lg font-semibold uppercase text-gray-600 ">Add New Staying Hour</h1>
+      </div>
+      <div class="flex mt-5 px-4 flex-col space-y-3">
+        <x-input wire:model.defer="number" label="Number of Hours" placeholder="" />
+        @php
+          $types = App\Models\Type::where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)->get();
+        @endphp
+      </div>
+      <x-slot name="footer">
+        <div class="flex justify-end gap-x-4">
+          <x-button flat label="Cancel" x-on:click="close" />
+
+          <x-button positive right-icon="save-as" spinner="saveStayingHour" wire:click="saveStayingHour" label="Save" />
+        </div>
+      </x-slot>
+    </x-card>
+  </x-modal>
 
 
   <x-modal wire:model.defer="add_modal" align="center" max-width="lg">
@@ -156,12 +207,12 @@
         <x-native-select label="Select Number of Hours" wire:model="hours_id">
           <option selected hidden>Select Number of Hours</option>
           @foreach ($stayingHours as $hour)
-            <option value="{{ $hour->id }}">{{ $hour->number }} hours</option>
+            <option value="{{ $hour->id }}">{{ $hour->number }} hours ({{$hour->branch->name}})</option>
           @endforeach
         </x-native-select>
         <x-input wire:model.defer="amount" label="Amount" placeholder="" />
         @php
-          $types = App\Models\Type::where('branch_id', auth()->user()->branch_id)->get();
+          $types = App\Models\Type::where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)->get();
         @endphp
         <x-native-select label="Select Type" wire:model="type_id">
           <option selected hidden>Select Type</option>
@@ -194,12 +245,12 @@
         <x-native-select label="Select Number of Hours" wire:model="hours_id">
           <option selected hidden>Select Number of Hours</option>
           @foreach ($stayingHours as $hour)
-            <option value="{{ $hour->id }}">{{ $hour->number }} hours</option>
+            <option value="{{ $hour->id }}">{{ $hour->number  }} hours ({{$hour->branch->name}})</option>
           @endforeach
         </x-native-select>
         <x-input wire:model.defer="amount" label="Amount" placeholder="" />
         @php
-          $types = App\Models\Type::where('branch_id', auth()->user()->branch_id)->get();
+          $types = App\Models\Type::where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)->get();
         @endphp
         <x-native-select label="Select Type" wire:model="type_id">
           <option selected hidden>Select Type</option>

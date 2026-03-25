@@ -7,6 +7,7 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
   <title>{{ config('app.name', 'Laravel') }}</title>
+  <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -42,7 +43,13 @@
   <!-- Styles -->
   @livewireStyles
 </head>
+@if(app()->environment('staging'))
+   <div class="fixed top-0 left-0 w-full bg-red-600 text-white text-center py-1 text-sm font-semibold z-50 animate-pulse">
+        STAGING ENVIRONMENT
+    </div>
 
+    <div style="height: 20px;"></div> {{-- spacer to avoid overlap --}}
+@endif
 <body class="font-sans antialiased bg-gray-400" x-data="{ logout: false }">
   <div class="fixed inset-0 bg-gradient-to-t from-transparent to-gray-600 w-full h-full overflow-hidden">
     <img src="{{ asset('images/hotel-bg.jpg') }}" class="object-cover opacity-20" alt="">
@@ -50,8 +57,8 @@
 
   <div
     class="absolute text-gray-300 flex justify-end items-end pb-5 pr-10 text-sm font-rubik font-medium w-full h-full">
-    <div class="relative">
-      POWERED BY: J7 I.T SOLUTION & SERVICES</div>
+    {{-- <div class="relative">
+      POWERED BY: J7 IT SOLUTION & SERVICES</div> --}}
   </div>
 
   <div class="relative">

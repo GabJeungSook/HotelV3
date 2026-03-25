@@ -1,106 +1,140 @@
-<div>
-  <div class="my-2 hide-div  p-4 flex space-x-2   justify-start  bg-gray-100 rounded-lg">
-    <x-native-select wire:model="frontdesk_id">
-      <option>Select Frontdesk</option>
-      @foreach ($frontdesks as $item)
-        <option value="{{ $item->id }}">{{ $item->name }}</option>
-      @endforeach
-    </x-native-select>
-    <x-native-select wire:model="shift">
-      <option>Select Shift</option>
-      <option>AM</option>
-      <option>PM</option>
-    </x-native-select>
-    <x-datetime-picker placeholder="Select Date" without-time wire:model="date" />
-    <div class="w-40 ">
-      <x-time-picker placeholder="12:00 AM" wire:model="time" />
-    </div>
-  </div>
-  <div x-ref="printContainer">
-    <div class="flex">
-      <div class="flex space-x-2 items-center justify-center">
-        <x-svg.hotel class="w-10 h-10 text-gray-600" />
-        <div class="border-l-2 border-gray-500 pl-2">
-          <div class="text-gray-600 text-xl font-bold">HIMS</div>
-          <div class="text-gray-500 font-rubik border-t text-sm  leading-4">
-            {{ auth()->user()->branch_name }}
-          </div>
+<div class="max-w-full mx-auto py-8 px-4 sm:px-6 lg:px-8">
+
+    {{-- Filters --}}
+    <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 p-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+            {{-- Shift --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Shift</label>
+                <select wire:model.defer="shift" class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="">All</option>
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                </select>
+            </div>
+
+            {{-- Date --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                <input type="date" wire:model.defer="date"
+                       class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
+            </div>
+
+            {{-- Room --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Room</label>
+                <select wire:model.defer="room_id" class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="">All</option>
+                    @foreach($rooms as $room)
+                        <option value="{{ $room->id }}">{{ $room->number }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Buttons --}}
+            <div class="flex items-end gap-2">
+                <button wire:click="$refresh" type="button"
+                        class="w-full md:w-auto inline-flex justify-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
+                    Apply
+                </button>
+
+                <button wire:click="resetFilters" type="button"
+                        class="w-full md:w-auto inline-flex justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Reset
+                </button>
+            </div>
         </div>
-      </div>
     </div>
-    <div class="flex mt-10 justify-center">
-      <h1 class="font-bold text-xl ">EXTENDED GUEST REPORT</h1>
+
+    {{-- Report --}}
+    <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200 overflow-hidden">
+        @forelse($groups as $group)
+
+            {{-- Gray bar + Yellow label --}}
+            <div class="bg-gray-300 px-3 py-2">
+                <span class="inline-block bg-gray-300 px-2 py-1 text-xs font-bold tracking-wide text-gray-900">
+                    {{ $group['label'] }}
+                </span>
+            </div>
+
+            {{-- Date label --}}
+            <div class="px-3 py-2 border-b border-gray-200">
+                <span class="inline-block px-2 py-1 text-sm font-semibold text-gray-900">
+                    {{ $group['date_label'] }}
+                </span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full border-collapse">
+                    <thead>
+                        <tr>
+                            <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-28">
+                                ROOM No.
+                            </th>
+                            <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-56">
+                                Room Type
+                            </th>
+                            <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800">
+                                Date and Time
+                            </th>
+                            <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-32">
+                                No. Hrs
+                            </th>
+                            <th class="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-800 w-32">
+                                Total Hrs
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach($group['rows'] as $row)
+                            @php
+                                $entries = $row['entries'] ?? [];
+                                $rowspan = max(count($entries), 1);
+                            @endphp
+
+                            <tr>
+                                <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900 align-top" rowspan="{{ $rowspan }}">
+                                    {{ $row['number'] }}
+                                </td>
+
+                                <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900 align-top" rowspan="{{ $rowspan }}">
+                                    {{ $row['room_type'] }}
+                                </td>
+
+                                <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
+                                    {{ $entries[0]['date_time'] ?? '—' }}
+                                </td>
+
+                                <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
+                                    {{ $entries[0]['no_hrs'] ?? '—' }}
+                                </td>
+
+                                <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900 align-top" rowspan="{{ $rowspan }}">
+                                    {{ $row['total_hrs'] }}
+                                </td>
+                            </tr>
+
+                            @for($i = 1; $i < count($entries); $i++)
+                                <tr>
+                                    <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
+                                        {{ $entries[$i]['date_time'] }}
+                                    </td>
+                                    <td class="border border-gray-300 px-3 py-3 text-sm text-gray-900">
+                                        {{ $entries[$i]['no_hrs'] }}
+                                    </td>
+                                </tr>
+                            @endfor
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+        @empty
+            <div class="p-8 text-center text-sm text-gray-500">
+                No extended guest records found for the selected filters.
+            </div>
+        @endforelse
     </div>
-    <div class="mt-6">
-      <h1 class="font-bold mt-5 text-gray-700">No of New Guest: {{ $total_guest }}</h1>
-      <table id="example" class="mt-2 table-auto" style="width:100%">
-        <thead class="font-normal">
-          <tr>
-            <th class="px-2 py-2 w-32 border-gray-700 text-sm font-semibold text-left text-gray-700 border">ROOM NUMBER
-            </th>
-            <th class="px-2 py-2 border-gray-700 text-sm font-semibold text-left text-gray-700 border">GUEST NAME
-            </th>
-            <th class="px-2 py-2 border-gray-700 text-sm font-semibold text-left text-gray-700 border">CHECK-IN
-              DATE/TIME
-            </th>
-            <th class="px-2 py-2 border-gray-700 text-sm font-semibold text-left text-gray-700 border">CHECK-OUT
-              DATE/TIME
-            </th>
-            <th class="px-2 py-2 border-gray-700 text-sm font-semibold text-left text-gray-700 border">NO. OF EXTENSIONS
-            </th>
-            <th class="px-2 py-2 border-gray-700 text-sm font-semibold text-left text-gray-700 border">TOTAL HOURS
-            </th>
-            <th class="px-2 py-2 border-gray-700 text-sm font-semibold text-left text-gray-700 border">SHIFT
-            </th>
-            <th class="px-2 py-2 border-gray-700 text-sm font-semibold text-left text-gray-700 border">FRONTDESK NAME
-            </th>
-          </tr>
-        </thead>
-        <tbody class="">
-
-          @foreach ($rooms as $room)
-            <tr>
-              <td colspan="" class="px-3 border-gray-700 py-1 border">{{ $room->number }}</td>
-              <td colspan="7" class="px-3 border-gray-700 py-1 border"></td>
-            </tr>
-
-            @foreach ($room->extendedGuestReports as $item)
-              <tr>
-                <td class="px-3 border-gray-700 py-1  "></td>
-                <td class="px-3 border-gray-700 py-1 border">{{ $item->checkinDetail->guest->name }}</td>
-                <td class="px-3 border-gray-700 py-1 border">
-                  {{ \Carbon\Carbon::parse($item->created_at)->format('F d, Y h:i A') }}</td>
-                <td class="px-3 border-gray-700 py-1 border">
-                  {{ \Carbon\Carbon::parse($item->checkinDetail->check_out_at)->format('F d, Y h:i A') }}</td>
-                <td class="px-3 border-gray-700 py-1 border">{{ $item->number_of_extension }}</td>
-                <td class="px-3 border-gray-700 py-1 border">{{ $item->total_hours }}</td>
-                <td class="px-3 border-gray-700 py-1 border">{{ $item->shift }}</td>
-                <td class="px-3 border-gray-700 py-1 border">
-                  @php
-                    $user = App\Models\Frontdesk::where('id', $item->frontdesk_id)->first();
-                  @endphp
-
-                  {{ $user->name . ', ' . $item->partner_name }}
-                </td>
-              </tr>
-            @endforeach
-          @endforeach
-
-
-        </tbody>
-      </table>
-      <div class="mt-20">
-        <div class="flex flex-col space-y-7">
-          <div class="text-gray-700">
-            <h1 class="text-sm font-semibold">Prepared By:</h1>
-            <h1 class="text-sm mt-8 w-48 border-b border-gray-400"></h1>
-          </div>
-          <div class="text-gray-700">
-            <h1 class="text-sm font-semibold">Verified By:</h1>
-            <h1 class="text-sm mt-8 w-48 border-b border-gray-400"></h1>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>

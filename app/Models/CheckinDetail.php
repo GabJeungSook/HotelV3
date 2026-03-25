@@ -15,9 +15,19 @@ class CheckinDetail extends Model
         return $this->belongsTo(Room::class);
     }
 
+    public function rate()
+    {
+        return $this->belongsTo(Rate::class);
+    }
+
     public function guest()
     {
         return $this->belongsTo(Guest::class, 'guest_id');
+    }
+
+    public function latestGuest()
+    {
+        return $this->belongsTo(Guest::class, 'guest_id')->latest();
     }
 
     public function type()
@@ -32,7 +42,7 @@ class CheckinDetail extends Model
 
     public function checkOutGuestReports()
     {
-        return $this->hasMany(CheckOutGuestReport::class);
+        return $this->hasMany(CheckOutGuestReport::class, 'checkin_details_id');
     }
 
     public function roomBoyReport()
@@ -42,6 +52,21 @@ class CheckinDetail extends Model
 
     public function extendedGuestReports()
     {
-        return $this->hasMany(ExtendedGuestReport::class);
+        return $this->hasMany(ExtendedGuestReport::class, 'checkin_details_id');
+    }
+
+    public function frontdesk()
+    {
+        return $this->belongsTo(Frontdesk::class);
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class, 'checkin_detail_id');
+    }
+
+    public function transferedGuestReports()
+    {
+        return $this->hasMany(TransferedGuestReport::class);
     }
 }

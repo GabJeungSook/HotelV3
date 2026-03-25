@@ -388,7 +388,7 @@
                 <dd class="font-medium text-gray-900">₱{{ number_format($deposit_remote_and_key, 2) }}</dd>
               </div>
               <div class="flex items-center justify-between py-2">
-                <dt class="text-gray-600">Other Deposits</dt>
+                <dt class="text-gray-600">Client Deposits</dt>
                 <dd class="font-medium text-gray-900">₱{{ number_format($deposit_except_remote_and_key, 2) }}</dd>
               </div>
               <div class="flex items-center justify-between py-2">

@@ -23,8 +23,17 @@
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   <!-- Styles -->
   @livewireStyles
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js "></script>
+  <script src="https://fastly.jsdelivr.net/npm/echarts@5.4.1/dist/echarts.min.js"></script>
 </head>
+@if(app()->environment('staging'))
+   <div class="fixed top-0 left-0 w-full bg-red-600 text-white text-center py-1 text-sm font-semibold z-50 animate-pulse">
+        STAGING ENVIRONMENT
+    </div>
 
+    <div style="height: 20px;"></div> {{-- spacer to avoid overlap --}}
+@endif
 <body class="font-sans antialiased " x-data="{ logout: false }">
   {{-- <div class="min-h-full">
     <!-- Off-canvas menu for mobile, show/hide based on off-canvas menu state. -->
@@ -587,7 +596,29 @@
 
                 Menu
               </a>
+              <a href="{{ route('kitchen.inventories') }}"
+              class="{{ request()->routeIs('kitchen.inventories') ? 'bg-gray-100 text-gray-600 fill-gray-600 before:h-full before:w-1 relative before:bg-gray-500 before:rounded-r before:absolute before:left-0 ' : 'text-gray-50 fill-gray-50' }}  hover:fill-gray-600 hover:text-gray-600 group flex items-center px-4 py-2 text-sm hover:bg-gray-200 ">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor" class="mr-3 h-6 w-6 flex-shrink-0 ">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6a1.125 1.125 0 01-1.125-1.125v-3.75zM14.25 8.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v8.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-8.25zM3.75 16.125c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-2.25z" />
+              </svg>
+
+              Inventory
+            </a>
+            <a href="{{ route('kitchen.transactions') }}"
+            class="{{ request()->routeIs('kitchen.transactions') ? 'bg-gray-100 text-gray-600 fill-gray-600 before:h-full before:w-1 relative before:bg-gray-500 before:rounded-r before:absolute before:left-0 ' : 'text-gray-50 fill-gray-50' }}  hover:fill-gray-600 hover:text-gray-600 group flex items-center px-4 py-2 text-sm hover:bg-gray-200 ">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+              stroke="currentColor" class="mr-3 h-6 w-6 flex-shrink-0 ">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6a1.125 1.125 0 01-1.125-1.125v-3.75zM14.25 8.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v8.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-8.25zM3.75 16.125c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-2.25z" />
+            </svg>
+
+            Transactions
+          </a>
+
             </nav>
+            <div class="px-1 mt-2 text-xs text-white font-medium">REPORTS</div>
           </div>
         </div>
         <div class="flex flex-shrink-0 border-t-2 border-gray-200 py-4 px-2">

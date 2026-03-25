@@ -12,4 +12,11 @@ Route::prefix('kitchen')
         Route::get('/menus', function () {
             return view('kitchen.menu');
         })->name('kitchen.menu');
+        Route::get('/inventories', function () {
+            return view('kitchen.inventory');
+        })->name('kitchen.inventories');
+        Route::get('/transactions', function () {
+            // return view('kitchen.transactions');
+            return view('frontdesk.monitoring.room-monitorings');
+        })->name('kitchen.transactions');
     });

@@ -38,18 +38,18 @@
           </x-native-select>
         </div>
       </div>
-      <div class="mt-4  border-t ">
+      {{-- <div class="mt-4  border-t ">
         <h1 class="py-2 bg-gray-50">Inventory</h1>
         <div class="grid pt-2 grid-cols-1 border-t gap-4">
           <x-input label="Stock" wire:model="stock" />
         </div>
 
 
-      </div>
+      </div> --}}
       <x-slot name="footer">
         <div class="flex justify-end gap-x-4">
           <x-button flat label="Cancel" x-on:click="close" />
-          <x-button positive label="Save" wire:click="saveMenu" spinner="saveMenu" right-icon="arrow-narrow-right" />
+          <x-button positive label="Save" wire:click="saveMenu" spinner="saveMenu" />
         </div>
       </x-slot>
     </x-card>
@@ -70,7 +70,7 @@
           </x-native-select>
         </div>
       </div>
-      <div class="mt-4  border-t ">
+      {{-- <div class="mt-4  border-t ">
         <h1 class="py-2 bg-gray-50">Inventory</h1>
         <div class="grid pt-2 grid-cols-2 border-t gap-4">
           <x-input label="Stock" wire:model="stock" />
@@ -78,12 +78,11 @@
         </div>
 
 
-      </div>
+      </div> --}}
       <x-slot name="footer">
         <div class="flex justify-end gap-x-4">
           <x-button flat label="Cancel" x-on:click="close" />
-          <x-button positive label="Update" wire:click="updateMenu" spinner="updateMenu"
-            right-icon="arrow-narrow-right" />
+          <x-button positive label="Update" wire:click="updateMenu" spinner="updateMenu" />
         </div>
       </x-slot>
     </x-card>

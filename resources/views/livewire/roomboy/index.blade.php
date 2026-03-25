@@ -1,7 +1,7 @@
 <div>
-  <div x-animate x-data>
+  <div x-animate x-data class="mx-5">
     <div
-      class="max-w-3xl px-4 py-2 mx-auto bg-white rounded-t-3xl sm:px-6 md:flex md:items-center md:justify-between md:space-x-5 lg:max-w-7xl lg:px-8 xl:rounded-3xl">
+      class="max-w-full px-4 py-2 mx-auto bg-white rounded-t-3xl sm:px-4 md:flex md:items-center md:justify-between md:space-x-5 lg:max-w-full lg:px-4 xl:rounded-md shadow-lg">
       <div class="flex items-center space-x-5">
         <div class="flex-shrink-0">
           <div class="relative">
@@ -12,43 +12,50 @@
         </div>
         <div>
           <h1 class="text-2xl font-bold text-gray-700">{{ auth()->user()->name }}</h1>
-          <p class="text-sm font-medium text-gray-400 flex  items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-              class="w-4 h-4 text-green-600">
-              <path fill-rule="evenodd"
-                d="M5.25 2.25a3 3 0 00-3 3v4.318a3 3 0 00.879 2.121l9.58 9.581c.92.92 2.39 1.186 3.548.428a18.849 18.849 0 005.441-5.44c.758-1.16.492-2.629-.428-3.548l-9.58-9.581a3 3 0 00-2.122-.879H5.25zM6.375 7.5a1.125 1.125 0 100-2.25 1.125 1.125 0 000 2.25z"
-                clip-rule="evenodd" />
-            </svg>
-
-
-            <span class="ml-1">
-              @if (auth()->user()->roomboy_assigned_floor_id == null)
-                Not Assigned
-              @else
-                {{ App\Models\Floor::where('id', auth()->user()->roomboy_assigned_floor_id)->first()->numberWithFormat() }}
-              @endif
-            </span>
+          <p wire:poll.1s class="text-sm font-medium text-gray-400 flex  items-center mt-2">
+             <span class="text-sm uppercase">status: </span>
+                @if (auth()->user()->roomboy_cleaning_room_id == null)
+                    <span
+                    class="ml-2 inline-flex items-center rounded-full bg-red-100 px-3 py-0.5 text-xs font-medium text-red-800 uppercase">Not
+                    Cleaning</span>
+                @else
+                    <span
+                    class="ml-2 inline-flex items-center rounded-full bg-green-100 px-3 py-0.5 text-xs font-medium text-green-800 uppercase">
+                    Cleaning</span>  -  {{ optional(App\Models\Room::find(auth()->user()->roomboy_cleaning_room_id))->floor->numberWithFormat() ?? 'N/A' }}
+                @endif
           </p>
         </div>
       </div>
       <div
         class="flex flex-col-reverse mt-6 space-y-4 space-y-reverse justify-stretch sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
         <div class="flex items-center justify-center space-x-1">
-          <span class="text-sm">status:</span>
-          @if (auth()->user()->roomboy_cleaning_room_id == null)
-            <span
-              class="inline-flex items-center rounded-full bg-red-100 px-3 py-0.5 text-sm font-medium text-red-800">Not
-              Cleaning</span>
-          @else
-            <span
-              class="inline-flex items-center rounded-full bg-green-100 px-3 py-0.5 text-sm font-medium text-green-800">
-              Cleaning</span>
-          @endif
+            <a href="{{ route('roomboy.cleaning-history') }}"
+                      class="px-4 py-2 flex items-center text-gray-50 bg-[#009ff4] rounded-full hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12z" />
+                        <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    </svg>
+                      <span class="ml-1 hidden xl:block">
+                        View Cleaning History
+                      </span>
+                    </a>
         </div>
       </div>
     </div>
 
-    <div
+    {{-- modified functionality --}}
+    <div wire:ignore>
+        @if (request()->routeIs('roomboy.cleaning-history'))
+            <livewire:roomboy.cleaning-history />
+        @else
+            <livewire:roomboy.main />
+        @endif
+    </div>
+
+
+    {{-- <div
       class="grid max-w-3xl grid-cols-1 gap-6 mx-auto mt-5 sm:px-6 lg:max-w-7xl lg:grid-flow-col-dense lg:grid-cols-3">
       <div class="space-y-6 lg:col-span-2 lg:col-start-1">
         <!-- Description list-->
@@ -222,10 +229,6 @@
               </div>
             </div>
           </div>
-          {{-- <x-confirm name="clean-assigned-room" title="Confirm"
-                message="Are you sure you want to clean this room?" onConfirm="cleanAssignedRoom(params.id)" />
-              <x-confirm name="finish-cleaning" title="Confirm"
-                message="Are you sure you want to finish cleaning this room?" onConfirm="finishCleaing()" /> --}}
         </section>
 
       </div>
@@ -244,11 +247,13 @@
                     <div class="relative flex space-x-3">
                       <div>
                         <span
-                          class="flex items-center justify-center w-8 h-8 
-                        
-                        @if ($history->delayed_cleaning == 0) bg-green-500
+                          class="flex items-center justify-center w-8 h-8
+
+                        @if ($history->delayed_cleaning == 0)
+                            bg-green-500
                         @else
-                            bg-red-500 @endif
+                            bg-red-500
+                        @endif
                         rounded-full ring-8 ring-white">
                           <!-- Heroicon name: mini/user -->
                           <svg class="w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -283,7 +288,7 @@
           </div>
         </div>
       </section>
-    </div>
+    </div> --}}
   </div>
 
 </div>

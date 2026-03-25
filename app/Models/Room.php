@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CheckinDetail;
 
 class Room extends Model
 {
@@ -16,7 +17,7 @@ class Room extends Model
     }
     public function type()
     {
-        return $this->belongsTo(Type::class);
+        return $this->belongsTo(Type::class, 'type_id');
     }
 
     public function numberWithFormat()
@@ -34,6 +35,11 @@ class Room extends Model
         return $this->hasMany(Guest::class);
     }
 
+    // public function latestGuest()
+    // {
+    //     return $this->hasOne(Guest::class)->latest();
+    // }
+
     public function rates()
     {
         return $this->hasMany(Rate::class);
@@ -42,6 +48,25 @@ class Room extends Model
     public function temporaryCheckInKiosk()
     {
         return $this->hasOne(TemporaryCheckInKiosk::class);
+    }
+
+    public function latestGuest()
+    {
+        return $this->hasOne(Guest::class)->latestOfMany(); // uses created_at by default
+    }
+
+    public function latestCheckInDetail()
+    {
+        return $this->hasOne(CheckinDetail::class)->ofMany([
+            'created_at' => 'max',
+        ], function ($query) {
+            $query->where('is_check_out', false);
+        });
+    }
+
+    public function checkInDetail()
+    {
+        return $this->hasOne(CheckinDetail::class);
     }
 
     public function checkInDetails()
@@ -59,13 +84,51 @@ class Room extends Model
         return $this->hasMany(Transaction::class);
     }
 
+    public function extendTransactions()
+    {
+       //Transactions where transaction_type_id is 3
+        return $this->hasMany(Transaction::class)->where('transaction_type_id', 6);
+    }
+
+     public function amenitiesTransactions()
+    {
+       //Transactions where transaction_type_id is 3
+        return $this->hasMany(Transaction::class)->where('transaction_type_id', 8);
+    }
+
+     public function foodTransactions()
+    {
+       //Transactions where transaction_type_id is 3
+        return $this->hasMany(Transaction::class)->where('transaction_type_id', 9);
+    }
+
+    public function damagesTransactions()
+    {
+       //Transactions where transaction_type_id is 3
+        return $this->hasMany(Transaction::class)->where('transaction_type_id', 4);
+    }
+
+    public function depositTransactions()
+    {
+       //Transactions where transaction_type_id is 3
+        return $this->hasMany(Transaction::class)->where('transaction_type_id', 2);
+    }
+
+    public function depositTransactionsRoomKeyRemote()
+    {
+       //Transactions where transaction_type_id is 3
+        return $this->hasMany(Transaction::class)->where('transaction_type_id', 2)
+        ->where('remarks', 'Deposit From Check In (Room Key & TV Remote)');
+    }
+
+
     public function newGuestReports()
     {
         return $this->hasMany(NewGuestReport::class);
     }
     public function checkOutGuestReports()
     {
-        return $this->hasMany(CheckOutGuestReport::class);
+        return $this->hasMany(CheckOutGuestReport::class, 'room_id', 'id');
     }
     public function roomBoyReport()
     {
@@ -79,6 +142,11 @@ class Room extends Model
 
     public function temporary_reserved()
     {
-        return $this->hasMany(TemporaryReserve::class);
+        return $this->hasMany(TemporaryReserved::class);
+    }
+
+    public function transferedGuestReports()
+    {
+        return $this->hasMany(TransferedGuestReport::class);
     }
 }

@@ -94,6 +94,8 @@ class Reservation extends Component implements Tables\Contracts\HasTable
 
     public function saveReservation()
     {
+
+        if ($this->is_longStay == true) {
         $room_pay = Rate::where('id', $this->rate_id)->first()->amount;
         $transaction = Guest::whereYear(
             'created_at',
@@ -104,9 +106,7 @@ class Reservation extends Component implements Tables\Contracts\HasTable
             auth()->user()->branch_id .
             today()->format('y') .
             str_pad($transaction, 4, '0', STR_PAD_LEFT);
-        $this->generatedQrCode = $transaction_code;
-
-        if ($this->is_longStay == true) {
+        $generatedQrCode = $transaction_code;
             $this->validate([
                 'name' => 'required',
                 'type_id' => 'required',
@@ -136,6 +136,9 @@ class Reservation extends Component implements Tables\Contracts\HasTable
                 'room_id' => $this->room_id,
                 'guest_id' => $guest->id,
             ]);
+
+            Room::where('id', $this->room_id)->update(['status' => 'Reserved']);
+
             Db::commit();
             $this->add_modal = false;
             $this->dialog()->success(
@@ -143,6 +146,17 @@ class Reservation extends Component implements Tables\Contracts\HasTable
                 $description = 'Reservation has been added successfully.'
             );
         } else {
+        $room_pay = Rate::where('id', $this->rate_id)->first()?->amount;
+        $transaction = Guest::whereYear(
+            'created_at',
+            \Carbon\Carbon::today()->year
+        )->count();
+        $transaction += 1;
+        $transaction_code =
+            auth()->user()->branch_id .
+            today()->format('y') .
+            str_pad($transaction, 4, '0', STR_PAD_LEFT);
+        $generatedQrCode = $transaction_code;
             $this->validate([
                 'name' => 'required',
                 'type_id' => 'required',
@@ -165,12 +179,15 @@ class Reservation extends Component implements Tables\Contracts\HasTable
                 'is_long_stay' => $this->is_longStay != null ? true : false,
                 'number_of_days' =>
                     $this->is_longStay != null ? $this->is_longStay : 0,
+                'is_co' => true,
             ]);
             TemporaryReserved::create([
                 'branch_id' => auth()->user()->branch_id,
                 'room_id' => $this->room_id,
                 'guest_id' => $guest->id,
             ]);
+            Room::where('id', $this->room_id)->update(['status' => 'Reserved']);
+
             Db::commit();
             $this->add_modal = false;
             $this->dialog()->success(
@@ -178,5 +195,10 @@ class Reservation extends Component implements Tables\Contracts\HasTable
                 $description = 'Reservation has been added successfully.'
             );
         }
+    }
+
+    public function redirectToCheckInCO()
+    {
+        return redirect()->route('admin.check-in-co');
     }
 }

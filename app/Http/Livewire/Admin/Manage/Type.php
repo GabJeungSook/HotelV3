@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire\Admin\Manage;
 
+use App\Models\ActivityLog;
 use Livewire\Component;
 use App\Models\Type as typeModel;
 use WireUi\Traits\Actions;
@@ -13,6 +14,8 @@ use Filament\Tables\Actions\Action;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Layout;
 
 class Type extends Component implements Tables\Contracts\HasTable
 {
@@ -23,10 +26,14 @@ class Type extends Component implements Tables\Contracts\HasTable
     public $edit_modal = false;
     public $name;
     public $type_id;
+    public $branch_id;
     public function render()
     {
         return view(
-            'livewire.admin.manage.type'
+            'livewire.admin.manage.type',
+            [
+                'branches' => \App\Models\Branch::all(),
+            ]
             // , [
             //     'types' => typeModel::where('branch_id', auth()->user()->branch_id)
             //         ->where('name', 'like', '%' . $this->search . '%')
@@ -37,21 +44,32 @@ class Type extends Component implements Tables\Contracts\HasTable
 
     protected function getTableQuery(): Builder
     {
-        return typeModel::query()->where(
-            'branch_id',
-            auth()->user()->branch_id
-        );
+        if(auth()->user()->hasRole('superadmin')){
+            return typeModel::query();
+        }else{
+            return typeModel::query()->where(
+                'branch_id',
+                auth()->user()->branch_id
+            );
+        }
     }
 
     protected function getTableColumns(): array
     {
         return [
+             Tables\Columns\TextColumn::make('branch.name')
+                 ->label('BRANCH')
+                 ->formatStateUsing(
+                     fn(string $state): string => strtoupper("{$state}")
+                 )
+                 ->sortable()
+                 ->visible(fn () => auth()->user()->hasRole('superadmin')),
             Tables\Columns\TextColumn::make('name')
                 ->label('NAME')
                 ->formatStateUsing(
                     fn(string $state): string => strtoupper("{$state}")
                 )
-                ->searchable('search name')
+                ->searchable()
                 ->sortable(),
         ];
     }
@@ -64,6 +82,14 @@ class Type extends Component implements Tables\Contracts\HasTable
                 ->color('success')
                 ->action(function ($record, $data) {
                     $record->update($data);
+
+                    ActivityLog::create([
+                        'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
+                        'user_id' => auth()->user()->id,
+                        'activity' => 'Update Type',
+                        'description' => 'Updated type ' . $record->id,
+                    ]);
+
                     $this->dialog()->success(
                         $title = 'Type Updated',
                         $description = 'Type was successfully updated'
@@ -80,19 +106,46 @@ class Type extends Component implements Tables\Contracts\HasTable
                 })
                 ->modalHeading('Update Type')
                 ->modalWidth('lg'),
+                Tables\Actions\DeleteAction::make('delete')
+                ->requiresConfirmation()
+                ->visible(fn ($record) => $record->rooms->count() === 0)
         ];
+    }
+
+    protected function getTableFilters(): array
+    {
+        if(auth()->user()->hasRole('superadmin')){
+            return [
+                SelectFilter::make('branch')->relationship('branch', 'name')
+            ];
+        }else{
+            return [];
+        }
+    }
+
+    protected function getTableFiltersLayout(): ?string
+    {
+        return Layout::AboveContent;
     }
 
     public function saveType()
     {
         $this->validate([
-            'name' => 'required|unique:types,name',
+            'name' => 'required|unique:types,name,NULL,id,branch_id,' . (auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id),
         ]);
 
         typeModel::create([
-            'branch_id' => auth()->user()->branch_id,
-            'name' => $this->name . ' size bed',
+            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
+            'name' => $this->name,
         ]);
+
+        ActivityLog::create([
+            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
+            'user_id' => auth()->user()->id,
+            'activity' => 'Create Type',
+            'description' => 'Created type ' . $this->name,
+        ]);
+
         $this->reset(['name']);
         $this->dialog()->success(
             $title = 'Type Saved',
@@ -103,7 +156,7 @@ class Type extends Component implements Tables\Contracts\HasTable
 
     public function editType($id)
     {
-        $type = typeModel::where('id', $id)->first();
+        $type = typeModel::where('id', $id)->where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)->first();
         $this->type_id = $type->id;
         $this->name = $type->name;
         $this->edit_modal = true;
@@ -117,6 +170,14 @@ class Type extends Component implements Tables\Contracts\HasTable
         typeModel::where('id', $this->type_id)->update([
             'name' => $this->name,
         ]);
+
+        ActivityLog::create([
+            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
+            'user_id' => auth()->user()->id,
+            'activity' => 'Update Type',
+            'description' => 'Updated type ' . $this->type_id,
+        ]);
+
         $this->reset(['name']);
         $this->dialog()->success(
             $title = 'Type Updated',

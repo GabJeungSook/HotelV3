@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Branch;
+use App\Models\CashDrawer;
+use App\Models\Frontdesk;
 use App\Models\User;
 
 class BranchSeeder extends Seeder
@@ -19,6 +21,8 @@ class BranchSeeder extends Seeder
         $branch = Branch::create([
             'name' => 'ALMA RESIDENCES GENSAN',
             'address' => 'Brgy. 1, Gensan, South Cotabato',
+            'autorization_code' => 12345,
+            'extension_time_reset' => 24
         ]);
 
         $superadmin = User::create([
@@ -50,6 +54,13 @@ class BranchSeeder extends Seeder
         ]);
 
         $frontdesk->assignRole('frontdesk');
+
+        $fdesk = Frontdesk::create([
+            'name' => $frontdesk->name,
+            'number' => '+639000000000',
+            'branch_id' => $branch->id,
+            'user_id' => $frontdesk->id,
+        ]);
 
         $kiosk = User::create([
             'name' => 'Kiosk',
@@ -90,5 +101,18 @@ class BranchSeeder extends Seeder
         ]);
 
         $roomboy->assignRole('roomboy');
+
+        $cash_drawer_1 = CashDrawer::create([
+            'name' => 'Drawer 1',
+            'branch_id' => $branch->id,
+            'is_active' => 0,
+        ]);
+
+        $cash_drawer_2 = CashDrawer::create([
+            'name' => 'Drawer 2',
+            'branch_id' => $branch->id,
+            'is_active' => 0,
+        ]);
+
     }
 }

@@ -41,8 +41,17 @@
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   <!-- Styles -->
   @livewireStyles
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js "></script>
+  <script src="https://fastly.jsdelivr.net/npm/echarts@5.4.1/dist/echarts.min.js"></script>
 </head>
+@if(app()->environment('staging'))
+   <div class="fixed top-0 left-0 w-full bg-red-600 text-white text-center py-1 text-sm font-semibold z-50 animate-pulse">
+        STAGING ENVIRONMENT
+    </div>
 
+    <div style="height: 20px;"></div> {{-- spacer to avoid overlap --}}
+@endif
 <body class="font-sans antialiased" x-data="{ logout: false }">
 
   {{-- <div>
@@ -154,8 +163,11 @@
         <div class="hidden md:flex md:flex-1 md:items-center md:justify-between">
           <nav class="flex space-x-10">
             <div class="flex space-x-10">
+              @php
+                  $isBeginningCash = request()->routeIs('frontdesk.beginning-cash');
+              @endphp
               <!-- Item active: "text-gray-900", Item inactive: "text-gray-500" -->
-              <a href="{{ route('frontdesk.dashboard') }}"
+              <a href="{{ $isBeginningCash ? '#' : route('frontdesk.dashboard') }}"
                 class="text-gray-500 fill-gray-500 group inline-flex items-center rounded-md bg-white text-base font-medium hover:text-gray-900 "
                 aria-expanded="false">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" class="mr-2"
@@ -166,7 +178,7 @@
                 </svg>
                 <span>Dashboard</span>
               </a>
-              <a href="{{ route('frontdesk.room-monitoring') }}"
+              <a href="{{ $isBeginningCash ? '#' : route('frontdesk.room-monitoring') }}"
                 class="text-gray-500 fill-gray-500 group inline-flex items-center rounded-md bg-white text-base font-medium hover:text-gray-900 "
                 aria-expanded="false">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"
@@ -177,17 +189,78 @@
                 </svg>
                 <span>Room Monitoring</span>
               </a>
+              <a href="{{ $isBeginningCash ? '#' : route('frontdesk.frontdesk-extension') }}"
+                class="text-gray-500 fill-gray-500 group inline-flex items-center rounded-md bg-white text-base font-medium hover:text-gray-900 "
+                aria-expanded="false">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24" class="mr-2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                </svg>
+
+                <span>Extension Report</span>
+              </a>
+               <a href="{{ $isBeginningCash ? '#' : route('frontdesk.expenses') }}"
+                class="text-gray-500 fill-gray-500 group inline-flex items-center rounded-md bg-white text-base font-medium hover:text-gray-900 "
+                aria-expanded="false">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24" class="mr-2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
+
+
+                <span>Expenses</span>
+              </a>
+               <a href="{{ $isBeginningCash ? '#' : route('frontdesk.remittance') }}"
+                class="text-gray-500 fill-gray-500 group inline-flex items-center rounded-md bg-white text-base font-medium hover:text-gray-900 "
+                aria-expanded="false">
+                {{-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg> --}}
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24" class="mr-2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+                </svg>
+
+
+
+                <span>Remittance</span>
+              </a>
+              {{-- <a href="{{ $isBeginningCash ? '#' : route('frontdesk.point-of-sale') }}"
+                class="text-gray-500 fill-gray-500 group inline-flex items-center rounded-md bg-white text-base font-medium hover:text-gray-900 "
+                aria-expanded="false">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24" class="mr-2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
+                </svg>
+
+                <span>Point of Sale</span>
+              </a> --}}
+
+              {{-- <a href="{{ route('frontdesk.food-inventory') }}"
+              class="text-gray-500 fill-gray-400 group inline-flex items-center rounded-md bg-white text-base font-medium hover:text-gray-800 "
+              aria-expanded="false">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="24" height="24" class="mr-2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+              </svg>
+              <span>Food Inventory</span>
+            </a> --}}
 
 
             </div>
           </nav>
           <div class="flex items-center md:ml-12">
-            <form method="POST" action="{{ route('logout') }}">
+            <a href="{{ $isBeginningCash ? '#' : route('frontdesk.cash-on-hand') }}"
+                class="text-gray-500 fill-gray-500 group inline-flex items-center rounded-md bg-white text-base font-medium hover:text-gray-900"
+                aria-expanded="false">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24" class="mr-2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25" />
+                </svg>
+
+
+                <span>End Shift</span>
+              </a>
+            {{-- <form method="POST" action="{{ route('logout') }}">
               @csrf
               <x-button negative label="Logout" class="ml-2"
                 onclick="event.preventDefault();
               this.closest('form').submit();" icon="logout" />
-            </form>
+            </form> --}}
           </div>
         </div>
       </div>
@@ -215,8 +288,8 @@
                   <div class="flex items-center">
                     <x-avatar md label="AB" class="mr-3" />
                     <div>
-                      <p class="text-sm text-white leading-4 mb-1">{{ auth()->user()->name }}</p>
-                      <p class="text-xs text-gray-400 uppercase leading-4">{{ auth()->user()->roles->first()->name }}
+                      <p class="text-sm text-white leading-4 mb-1">{{ auth()->user()->name }} - ({{ auth()->user()->shift }} Shift)</p>
+                      <p class="text-xs text-gray-400 uppercase leading-4">{{ auth()->user()->roles->first()->name }} - ({{ auth()->user()->cash_drawer?->name }})
                       </p>
                     </div>
                   </div>
@@ -224,8 +297,16 @@
                     <h4 class="text-2xl font-bold leading-tight text-white mb-2">
                       @if (request()->routeIs('frontdesk.dashboard'))
                         Dashboard
-                      @else
+                      @elseif(request()->routeIs('frontdesk.room-monitoring'))
                         Room Monitoring
+                      @elseif(request()->routeIs('frontdesk.check-in-from-kiosk'))
+                        Check-in Information
+                      @elseif(request()->routeIs('frontdesk.extend-guest'))
+                        Extend Guest Stay
+                      @elseif(request()->routeIs('frontdesk.transfer-room'))
+                        Transfer Room
+                      @else
+                        {{-- Transactions --}}
                       @endif
                     </h4>
                     <p class="flex items-center text-gray-300 text-xs">
@@ -272,6 +353,8 @@
   <x-notifications z-index="z-50" />
   <x-dialog z-index="z-50" blur="md" align="center" />
   @livewireScripts
+  @yield('scripts')
+
 </body>
 
 </html>

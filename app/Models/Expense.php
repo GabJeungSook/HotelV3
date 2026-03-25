@@ -14,4 +14,14 @@ class Expense extends Model
     {
         return $this->belongsTo(ExpenseCategory::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function shift_log()
+    {
+        return $this->belongsTo(ShiftLog::class, 'shift_log_id');
+    }
 }
