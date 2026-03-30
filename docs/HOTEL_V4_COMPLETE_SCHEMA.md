@@ -41,11 +41,16 @@ This applies to: `stays`, `stay_extensions`, `room_transfers`, `applied_discount
 |--------|------|----------|---------|-------------|
 | id | bigint | NO | auto | Primary key |
 | branch_id | foreignId | NO | | FK to branches (unique) |
-| initial_deposit | decimal(10,2) | NO | 200.00 | Default deposit amount |
+| initial_deposit | decimal(10,2) | NO | 200.00 | Default deposit amount (key & remote) |
 | kiosk_time_limit | integer | NO | 10 | Kiosk request expiry (minutes) |
 | extension_cycle_threshold | integer | NO | 24 | Hours per cycle before reset |
 | authorization_code | string | YES | NULL | Code for overrides (transaction, cleaning, transfer) |
 | discounts_enabled | boolean | NO | true | Master switch — if false, no discounts at this branch |
+| cleaning_min_minutes | integer | NO | 15 | Minimum cleaning time before roomboy can finish |
+| cleaning_deadline_hours | integer | NO | 3 | Hours after checkout for cleaning deadline |
+| stale_shift_hours | integer | NO | 14 | Auto-close shifts open longer than this |
+| shift_am_start | integer | NO | 8 | AM shift starts at this hour (24h format) |
+| shift_pm_start | integer | NO | 20 | PM shift starts at this hour (24h format) |
 | created_at | timestamp | YES | | |
 | updated_at | timestamp | YES | | |
 
