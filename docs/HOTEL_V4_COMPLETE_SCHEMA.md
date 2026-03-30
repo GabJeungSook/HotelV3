@@ -1,8 +1,8 @@
 # HotelV4 — Complete Schema (Reviewed & Corrected)
 
 **Date:** March 30, 2026
-**Modules Completed:** Branches, Roles, Users, User Profiles, Kiosk, Rooms, Floors, Pricing, Extensions, Discounts, Guest Lifecycle, Shifts & Cash, Transactions, Housekeeping, Activity Logs
-**Remaining:** POS & Menu (deferred), Reports (deferred — computed from existing tables)
+**Modules Completed:** Branches, Roles, Users, User Profiles, Kiosk, Rooms, Floors, Pricing, Extensions, Discounts, Guest Lifecycle, Shifts & Cash, Transactions, Housekeeping, Activity Logs, POS & Menu
+**Remaining:** Reports (deferred — computed from existing tables)
 
 ---
 
@@ -14,7 +14,7 @@ This applies to: `stays`, `stay_extensions`, `room_transfers`, `applied_discount
 
 ---
 
-## All Tables (30 custom + 5 Spatie + 1 package = 36 total)
+## All Tables (35 custom + 5 Spatie + 1 package = 41 total)
 
 ### 1. `branches`
 
@@ -542,6 +542,45 @@ SELECT SUM(CASE WHEN type IN ('payment','deposit_in') THEN amount ELSE 0 END) - 
 
 ---
 
+### 25b. `transaction_items`
+
+Line items for food/amenity orders. One transaction can have multiple items (like a cart).
+
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| id | bigint | NO | auto | Primary key |
+| transaction_id | foreignId | NO | | FK to transactions |
+| menu_item_id | foreignId | YES | NULL | FK to menu_items (null for non-menu charges like damage) |
+| name | string | NO | | **Snapshot:** item name at time of order |
+| quantity | integer | NO | 1 | |
+| unit_price | decimal(10,2) | NO | | **Snapshot:** price per unit at time of order |
+| amount | decimal(10,2) | NO | | quantity × unit_price |
+| created_at | timestamp | YES | | |
+
+> **Snapshot rule applies:** `name` and `unit_price` are frozen at order time. If menu price changes later, past orders still show the original price.
+
+**When used:**
+- `type = 'food'` → transaction_items has each food item (Burger x2, Coke x1, etc.)
+- `type = 'amenity'` → transaction_items has each amenity (Extra towel x1, Pillow x2)
+- `type = 'damage'` → transaction_items has each damaged item (Lost key x1, Broken remote x1)
+- `type = 'room_charge'` → no transaction_items (amount is on the transaction itself)
+- `type = 'extension'` → no transaction_items (amount is on the transaction itself)
+
+**Example:**
+```
+transactions:
+  #45  type=food  amount=290.00  description="Food order"  stay_id=500
+
+transaction_items:
+  transaction_id=45  name="Burger"  qty=2  unit_price=75.00  amount=150.00
+  transaction_id=45  name="Coke"    qty=2  unit_price=40.00  amount=80.00
+  transaction_id=45  name="Fries"   qty=1  unit_price=60.00  amount=60.00
+```
+
+Guest bill shows one line "Food order ₱290". Drill down shows the 3 items.
+
+---
+
 ### 26. `cleaning_tasks`
 
 **Replaces V3's `cleaning_histories` + `room_boy_reports`.** One table per cleaning event.
@@ -611,6 +650,8 @@ Roomboy floor assignments. Many-to-many.
 | Floor | number |
 | CashDrawer | name, is_active |
 | TransferReason | reason, is_active |
+| MenuItem | name, price, is_active |
+| MenuCategory | name, service_area, is_active |
 
 Automatically logs create/update/delete with before/after values in JSON `properties` column.
 
@@ -627,7 +668,86 @@ Automatically logs create/update/delete with before/after values in JSON `proper
 
 ---
 
-### 29. Spatie Permission Tables (Standard)
+### 29. `menu_categories`
+
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| id | bigint | NO | auto | Primary key |
+| branch_id | foreignId | NO | | FK to branches |
+| service_area | string | NO | | kitchen / frontdesk / pub |
+| name | string | NO | | Category name |
+| sort_order | integer | NO | 0 | Display ordering |
+| is_active | boolean | NO | true | |
+| created_at | timestamp | YES | | |
+| updated_at | timestamp | YES | | |
+
+---
+
+### 30. `menu_items`
+
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| id | bigint | NO | auto | Primary key |
+| branch_id | foreignId | NO | | FK to branches |
+| menu_category_id | foreignId | NO | | FK to menu_categories |
+| name | string | NO | | Item name |
+| price | decimal(10,2) | NO | | Proper decimal |
+| item_code | string | YES | NULL | SKU/code |
+| image_path | string | YES | NULL | Item photo |
+| is_active | boolean | NO | true | |
+| created_at | timestamp | YES | | |
+| updated_at | timestamp | YES | | |
+
+> Service area inherited from category. `menu_items` → `menu_categories.service_area`.
+
+---
+
+### 31. `menu_inventories`
+
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| id | bigint | NO | auto | Primary key |
+| branch_id | foreignId | NO | | FK to branches |
+| menu_item_id | foreignId | NO | | FK to menu_items (unique) |
+| stock | decimal(10,2) | NO | 0 | Current available servings |
+| created_at | timestamp | YES | | |
+| updated_at | timestamp | YES | | |
+
+> **Unique constraint:** `(menu_item_id)`
+
+---
+
+### 32. `menu_stock_logs`
+
+Audit trail for every stock movement. Who added/deducted, when, why, before/after.
+
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| id | bigint | NO | auto | Primary key |
+| branch_id | foreignId | NO | | FK to branches |
+| menu_item_id | foreignId | NO | | FK to menu_items |
+| type | string | NO | | stock_in / stock_out |
+| quantity | decimal(10,2) | NO | | Amount added or deducted |
+| stock_before | decimal(10,2) | NO | | Stock level before change |
+| stock_after | decimal(10,2) | NO | | Stock level after change |
+| reason | string | NO | | manual_add / guest_order / spoilage / adjustment |
+| reference_type | string | YES | NULL | Polymorphic (transaction, etc.) |
+| reference_id | bigint | YES | NULL | Which record caused this |
+| performed_by | foreignId | NO | | FK to users |
+| created_at | timestamp | YES | | |
+
+> **No `updated_at`** — stock logs are immutable.
+
+**How POS integrates with transactions:**
+- Food/amenity orders create a `transactions` record (`type = 'food'` or `type = 'amenity'`)
+- Stock deduction creates a `menu_stock_logs` record with `reference_type = 'transaction'`
+- No separate POS transaction table — it's the same `transactions` table
+
+**Eliminates V3's:** 9 duplicate POS tables (`menu_categories` + `frontdesk_categories` + `pub_categories` + `menus` + `frontdesk_menus` + `pub_menus` + `inventories` + `frontdesk_inventories` + `pub_inventories`), string prices, no stock audit trail.
+
+---
+
+### 33. Spatie Permission Tables (Standard)
 
 - `roles`, `permissions`, `model_has_roles`, `model_has_permissions`, `role_has_permissions`
 - **6 Roles:** superadmin, admin, frontdesk, back_office, roomboy, kitchen_staff
