@@ -4,6 +4,111 @@
 
 ---
 
+## The Core Problem: V3 Reports Will Never Be Fully Accurate
+
+**This is the single biggest reason for the V4 rebuild.** The V3 report system is fundamentally broken — not because of bad code, but because the database schema makes accurate reporting impossible. Here's the justification:
+
+### 1. Transactions Can Exist Without a Shift
+
+`shift_log_id` on the transactions table is **nullable** — it was added late (March 2026 migration) as a retrofit. Many transactions, especially from the kitchen module, have `shift_log_id = NULL`. These transactions are **invisible to shift reports**. Revenue is lost in the numbers. There is no way to retroactively fix these records because the system doesn't know which shift they belonged to.
+
+**Impact:** Shift sales report under-counts revenue. Cash reconciliation doesn't match actual cash in drawer. Management can't trust the numbers.
+
+### 2. Forwarded Deposit Calculation Is a Cascading Chain
+
+When a guest spans multiple shifts, V3 calculates the "forwarded deposit" by walking through **every single previous shift chronologically**, building a running balance:
+
+```
+Shift 1 balance = deposits - cashouts
+Shift 2 balance = Shift 1 balance + deposits - cashouts
+Shift 3 balance = Shift 2 balance + deposits - cashouts
+...
+```
+
+If **any single shift** in this chain has wrong data (missing transaction, wrong timing, overlapping shift boundary), **every subsequent shift's report is wrong**. And the error compounds — it never self-corrects. The team spent over a month debugging report inaccuracies caused by this cascading chain.
+
+**Impact:** Forwarded deposit amounts don't match reality. Shift reports show wrong numbers for every shift after the first error.
+
+### 3. Room Deposit Hardcoded to ₱200
+
+The deposit amount is hardcoded as `200` in **13+ places** across the codebase — in check-in, reports, reconciliation, and forwarding calculations. The database already has `branches.initial_deposit` as a configurable setting, but **the code ignores it and uses the hardcoded value**. If any branch changes their deposit to ₱300, every report calculation using `count × 200` is immediately wrong.
+
+```php
+// V3 SalesReportV2.php line 506 — hardcoded, ignores branch setting
+$this->forwardedRoomDeposit = $this->forwardedCount * 200;
+```
+
+**Impact:** Any branch with a non-200 deposit gets wrong deposit totals on every report.
+
+### 4. Deposit Type Detection Uses String Matching
+
+V3 distinguishes "room key deposit" from "guest deposit" by checking the **remarks string**:
+
+```php
+str_contains(strtolower($t->remarks), 'room key')
+str_contains(strtolower($t->remarks), 'tv remote')
+```
+
+If anyone types the remark slightly differently — "Room Key and TV Remote" instead of "Room Key & TV Remote", or "room key deposit" — the filter fails silently. The deposit gets miscategorized, and the report shows wrong breakdowns.
+
+**Impact:** Deposit categorization is fragile. One typo in remarks = wrong report numbers. No way to detect or prevent this.
+
+### 5. Transactions Are Mutated After Creation
+
+When a guest pays, V3 **updates the original transaction record**:
+
+```php
+$transaction->update(['paid_amount' => $amount, 'paid_at' => now()]);
+```
+
+When a guest transfers rooms, V3 **rewrites the original check-in transaction**:
+
+```php
+Transaction::where('description', 'Guest Check In')->update([
+    'payable_amount' => $new_room_rate,
+    'paid_amount' => $new_room_rate,
+]);
+```
+
+The original values are **gone forever**. You can't tell what was originally charged, when it was paid, or how many times it was modified. Historical data is destroyed.
+
+**Impact:** No audit trail. Can't reconstruct what actually happened. Reports show current values, not historical truth.
+
+### 6. Report Tables Must Stay in Sync (They Don't)
+
+V3 creates separate records in `new_guest_reports`, `check_out_guest_reports`, `extended_guest_reports`, and `transfered_guest_reports` alongside the actual data. These report tables must be created at the exact same time as the operational records. If the code misses creating one (due to a bug, timeout, or edge case), the report is wrong — and there's no automated way to detect or fix the drift.
+
+**Impact:** Reports can silently show fewer check-ins, checkouts, or extensions than actually occurred. No reconciliation mechanism exists.
+
+### 7. Inventory Report Calculation Is Wrong
+
+The stock-in value is set equal to the opening stock, which means the closing stock formula effectively ignores stock additions during the period:
+
+```php
+$stockIn = $inventory->number_of_serving; // WRONG — this is current stock, not stock added
+$closingStock = $opening - ($stockOut + $wastage); // Ignores stock-in entirely
+```
+
+**Impact:** Inventory reports show wrong closing stock. Stock valuation is incorrect.
+
+### Why V4 Fixes This Permanently
+
+| V3 Root Cause | V4 Design |
+|---------------|-----------|
+| Optional shift link | `shift_id` is NOT NULL — every transaction must belong to a shift |
+| Cascading deposit chain | `SUM(deposit_in - deposit_out)` per stay — one query, no chain |
+| Hardcoded ₱200 | All values read from `branch_settings` — no magic numbers |
+| String matching on remarks | Transaction `type` column — no string parsing needed |
+| Mutable transactions | Immutable — payments are new records, voids create new records |
+| Separate report tables | No report tables — all reports query core data directly |
+| Wrong inventory math | `menu_stock_logs` with before/after audit trail |
+
+**V4 reports are accurate by design** because they query the actual data, not copies or chains or hardcoded assumptions.
+
+---
+
+---
+
 ## Schema & Data Type Issues
 
 | # | Problem | Impact | V4 Solution |
