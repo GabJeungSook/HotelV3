@@ -43,7 +43,7 @@ SELECT
     THEN t.amount ELSE 0 END), 0) as cash_in,
 
   -- Cash OUT during shift (deposit refunds only)
-  COALESCE(SUM(CASE WHEN t.type = 'deposit_out' AND t.references_id IS NULL
+  COALESCE(SUM(CASE WHEN t.type = 'deposit_out' AND t.linked_transaction_id IS NULL
     THEN t.amount ELSE 0 END), 0) as cash_out,
 
   -- Remittances
@@ -55,7 +55,7 @@ SELECT
   -- Expected cash
   s.opening_cash
     + COALESCE(SUM(CASE WHEN t.type IN ('payment','deposit_in') THEN t.amount ELSE 0 END), 0)
-    - COALESCE(SUM(CASE WHEN t.type = 'deposit_out' AND t.references_id IS NULL THEN t.amount ELSE 0 END), 0)
+    - COALESCE(SUM(CASE WHEN t.type = 'deposit_out' AND t.linked_transaction_id IS NULL THEN t.amount ELSE 0 END), 0)
     - (SELECT COALESCE(SUM(amount),0) FROM remittances WHERE shift_id = s.id)
     - (SELECT COALESCE(SUM(amount),0) FROM expenses WHERE shift_id = s.id) as expected_cash,
 
@@ -326,7 +326,7 @@ SELECT
   orig.id as original_id, orig.amount as original_amount, orig.description as original_desc,
   up.first_name as voided_by
 FROM transactions t
-JOIN transactions orig ON orig.id = t.references_id
+JOIN transactions orig ON orig.id = t.linked_transaction_id
 JOIN user_profiles up ON up.user_id = t.processed_by
 WHERE t.type = 'void'
 AND t.branch_id = :branch_id

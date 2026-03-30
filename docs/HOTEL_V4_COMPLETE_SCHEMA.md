@@ -120,15 +120,15 @@ Personal information, separated from auth. 1:1 with users.
 |--------|------|----------|---------|-------------|
 | id | bigint | NO | auto | Primary key |
 | branch_id | foreignId | NO | | FK to branches |
-| number | integer | NO | | Floor number |
+| floor_number | integer | NO | | Floor number |
 | created_at | timestamp | YES | | |
 | updated_at | timestamp | YES | | |
 
 ---
 
-### 6. `types`
+### 6. `room_types`
 
-Room types — for categorization and display only. NOT for pricing.
+Room categories — for display and filtering only. NOT for pricing.
 
 | Column | Type | Nullable | Default | Description |
 |--------|------|----------|---------|-------------|
@@ -148,8 +148,8 @@ Room types — for categorization and display only. NOT for pricing.
 | id | bigint | NO | auto | Primary key |
 | branch_id | foreignId | NO | | FK to branches |
 | floor_id | foreignId | NO | | FK to floors |
-| type_id | foreignId | NO | | FK to types (display/filtering only) |
-| number | integer | NO | | Room number |
+| room_type_id | foreignId | NO | | FK to room_types (display/filtering only) |
+| room_number | integer | NO | | Room number |
 | bed_type | string | NO | | single / double / twin / queen / king |
 | area | string | YES | NULL | Building wing (e.g., "Main", "Annex") |
 | status | string | NO | 'available' | Room status |
@@ -167,7 +167,7 @@ Room types — for categorization and display only. NOT for pricing.
 |--------|------|----------|---------|-------------|
 | id | bigint | NO | auto | Primary key |
 | branch_id | foreignId | NO | | FK to branches |
-| number | integer | NO | | Number of hours (6, 12, 18, 24) |
+| hours | integer | NO | | Number of hours (6, 12, 18, 24) |
 | created_at | timestamp | YES | | |
 | updated_at | timestamp | YES | | |
 
@@ -198,7 +198,7 @@ Check-in pricing. Per-room.
 |--------|------|----------|---------|-------------|
 | id | bigint | NO | auto | Primary key |
 | branch_id | foreignId | NO | | FK to branches |
-| number | integer | NO | | Number of hours (1, 2, 3, 6) |
+| hours | integer | NO | | Number of hours (1, 2, 3, 6) |
 | created_at | timestamp | YES | | |
 | updated_at | timestamp | YES | | |
 
@@ -255,11 +255,11 @@ Extension pricing. Per-room.
 | actual_checkout_at | datetime | YES | NULL | Actual checkout time (null while active) |
 | **Cycle Tracking** | | | | |
 | cycle_hours | integer | NO | 0 | Position in extension cycle (0 to threshold) |
-| use_original_rate_next | boolean | NO | false | Next extension at original rate? |
+| charge_original_rate_next | boolean | NO | false | Next extension charges original rate? |
 | **Payment Summary (Running totals)** | | | | |
-| deposit_amount | decimal(10,2) | NO | 0 | Deposit collected |
-| total_charges | decimal(10,2) | NO | 0 | Running total of all charges |
-| total_paid | decimal(10,2) | NO | 0 | Running total of all payments |
+| total_deposit_in | decimal(10,2) | NO | 0 | Cache: total deposit collected |
+| total_charges | decimal(10,2) | NO | 0 | Cache: running total of all charges |
+| total_paid | decimal(10,2) | NO | 0 | Cache: running total of all payments |
 | **Status** | | | | |
 | status | string | NO | 'active' | active / checked_out / cancelled |
 | **Audit** | | | | |
@@ -329,8 +329,8 @@ Extension pricing. Per-room.
 | branch_id | foreignId | NO | | FK to branches |
 | name | string | NO | | Discount name |
 | description | string | YES | NULL | Description |
-| type | string | NO | | 'percentage' or 'fixed' |
-| value | decimal(10,2) | NO | | 20.00 for 20%, or 50.00 for ₱50 |
+| discount_type | string | NO | | 'percentage' or 'fixed' |
+| discount_value | decimal(10,2) | NO | | 20.00 for 20%, or 50.00 for ₱50 |
 | max_discount | decimal(10,2) | YES | NULL | Cap for percentage discounts |
 | requires_verification | boolean | NO | false | Needs ID check? |
 | is_active | boolean | NO | true | Active status |
@@ -384,11 +384,11 @@ Temporary. Deleted after resolution.
 | id | bigint | NO | auto | Primary key |
 | branch_id | foreignId | NO | | FK to branches |
 | kiosk_terminal_id | foreignId | NO | | FK to kiosk_terminals |
-| type | string | NO | | check_in / check_out |
+| request_type | string | NO | | check_in / check_out |
 | stay_id | foreignId | YES | NULL | FK to stays (check-out only) |
 | guest_name | string | YES | NULL | Check-in only |
 | guest_contact | string | YES | NULL | Check-in only |
-| type_id | foreignId | YES | NULL | Check-in only |
+| room_type_id | foreignId | YES | NULL | Check-in only |
 | rate_id | foreignId | YES | NULL | Check-in only |
 | room_id | foreignId | YES | NULL | Room guest selected |
 | expires_at | datetime | NO | | Auto-expiry time |
@@ -421,16 +421,16 @@ Temporary. Deleted after resolution.
 | partner_user_id | foreignId | YES | NULL | FK to users (partner) |
 | partner_name | string | YES | NULL | If partner not a system user |
 | cash_drawer_id | foreignId | NO | | FK to cash_drawers |
-| shift_type | string | NO | | 'AM' or 'PM' |
+| shift_period | string | NO | | 'AM' or 'PM' |
 | started_at | datetime | NO | | Shift start |
 | ended_at | datetime | YES | NULL | Shift end |
 | opening_cash | decimal(10,2) | NO | | Cash at start |
 | closing_cash | decimal(10,2) | YES | NULL | Cash at end |
-| total_income | decimal(10,2) | NO | 0 | All payments received |
-| total_deposits_in | decimal(10,2) | NO | 0 | Deposits collected |
-| total_deposits_out | decimal(10,2) | NO | 0 | Deposits refunded |
-| total_remittances | decimal(10,2) | NO | 0 | Cash to management |
-| total_expenses | decimal(10,2) | NO | 0 | Expenses paid |
+| total_payments | decimal(10,2) | NO | 0 | Cache: all payments received |
+| total_deposit_collected | decimal(10,2) | NO | 0 | Cache: deposits collected |
+| total_deposit_refunded | decimal(10,2) | NO | 0 | Cache: deposits refunded |
+| total_remittances | decimal(10,2) | NO | 0 | Cache: cash to management |
+| total_expenses | decimal(10,2) | NO | 0 | Cache: expenses paid |
 | expected_cash | decimal(10,2) | YES | NULL | Calculated at shift close |
 | difference | decimal(10,2) | YES | NULL | closing - expected |
 | status | string | NO | 'active' | active / closed |
@@ -498,17 +498,17 @@ Temporary. Deleted after resolution.
 | amount | decimal(10,2) | NO | | Always positive. Direction determined by type. |
 | description | string | NO | | Human-readable (e.g., "Room Charge 6hrs Room #101") |
 | remarks | text | YES | NULL | Extra notes |
-| references_id | foreignId | YES | NULL | FK to transactions (payment → which charge it pays) |
+| linked_transaction_id | foreignId | YES | NULL | FK to transactions (payment → charge, void → charge) |
 | source_type | string | YES | NULL | Polymorphic: 'stay_extension', 'room_transfer' |
 | source_id | bigint | YES | NULL | Polymorphic FK to originating record |
-| processed_by | foreignId | NO | | FK to users (who created this) |
+| created_by | foreignId | NO | | FK to users (who created this) |
 | created_at | timestamp | YES | | Immutable — no updated_at |
 
 > **No `updated_at`** — transactions are immutable. Never update, only insert.
 
 **10 Transaction Types:**
 
-| Type | What | references_id | Cash Effect |
+| Type | What | linked_transaction_id | Cash Effect |
 |------|------|---------------|-------------|
 | room_charge | Check-in room rate | NULL | — |
 | extension | Stay extension charge | NULL | — |
@@ -524,14 +524,14 @@ Temporary. Deleted after resolution.
 **Void flow (for overrides/corrections):**
 ```
 #45  food     300.00   "Burger x2" (original — wrong amount)
-#46  void     300.00   references_id=45  "Voided: price correction, auth by Admin Maria"
+#46  void     300.00   linked_transaction_id=45  "Voided: price correction, auth by Admin Maria"
 #47  food     150.00   "Burger x2" (corrected charge)
 ```
 Immutability preserved. Full audit trail. Admin must provide authorization_code.
 
 **Rules:**
-1. Every charge gets paid by exactly ONE `payment` or `deposit_out` with `references_id` pointing to the charge.
-2. Deposit refund at checkout: `deposit_out` with `references_id = NULL`.
+1. Every charge gets paid by exactly ONE `payment` or `deposit_out` with `linked_transaction_id` pointing to the charge.
+2. Deposit refund at checkout: `deposit_out` with `linked_transaction_id = NULL`.
 3. "Pay All" creates one payment record per unpaid charge (same shift_id, same created_at).
 4. No partial payments on a single charge.
 5. `stays.status = 'checked_out'` = bill is fully settled.
@@ -540,13 +540,13 @@ Immutability preserved. Full audit trail. Admin must provide authorization_code.
 ```sql
 -- Unpaid charges
 SELECT * FROM transactions t WHERE t.stay_id = ? AND t.type IN ('room_charge','extension','food','amenity','damage','transfer_fee')
-AND t.id NOT IN (SELECT references_id FROM transactions WHERE references_id IS NOT NULL AND type IN ('payment','deposit_out'))
+AND t.id NOT IN (SELECT linked_transaction_id FROM transactions WHERE linked_transaction_id IS NOT NULL AND type IN ('payment','deposit_out'))
 
 -- Deposit balance
 SELECT SUM(CASE WHEN type='deposit_in' THEN amount ELSE 0 END) - SUM(CASE WHEN type='deposit_out' THEN amount ELSE 0 END) FROM transactions WHERE stay_id = ?
 
 -- Cash in drawer for shift
-SELECT SUM(CASE WHEN type IN ('payment','deposit_in') THEN amount ELSE 0 END) - SUM(CASE WHEN type='deposit_out' AND references_id IS NULL THEN amount ELSE 0 END) FROM transactions WHERE shift_id = ?
+SELECT SUM(CASE WHEN type IN ('payment','deposit_in') THEN amount ELSE 0 END) - SUM(CASE WHEN type='deposit_out' AND linked_transaction_id IS NULL THEN amount ELSE 0 END) FROM transactions WHERE shift_id = ?
 ```
 
 **Eliminates V3's:** `cash_on_drawers` table, `transaction_types` seeder, mutating paid_amount/paid_at, JSON assigned_frontdesk_id, integer amounts, dead Type 3, unused is_co/is_override columns.
@@ -602,7 +602,7 @@ Guest bill shows one line "Food order ₱290". Drill down shows the 3 items.
 | branch_id | foreignId | NO | | FK to branches |
 | room_id | foreignId | NO | | FK to rooms |
 | stay_id | foreignId | NO | | FK to stays (which guest caused this) |
-| roomboy_id | foreignId | YES | NULL | FK to users (NULL until claimed) |
+| assigned_to | foreignId | YES | NULL | FK to users (NULL until claimed) |
 | checkout_at | datetime | NO | | When guest checked out |
 | deadline_at | datetime | NO | | Cleaning deadline (checkout + 3hrs) |
 | started_at | datetime | YES | NULL | When roomboy started |
@@ -611,7 +611,7 @@ Guest bill shows one line "Food order ₱290". Drill down shows the 3 items.
 | is_delayed | boolean | NO | false | completed_at > deadline_at |
 | is_on_assigned_floor | boolean | NO | false | Room's floor is roomboy's assigned floor |
 | status | string | NO | 'pending' | pending / in_progress / completed |
-| override_by | foreignId | YES | NULL | FK to users (admin override of 15-min minimum) |
+| overridden_by | foreignId | YES | NULL | FK to users (admin override of 15-min minimum) |
 | override_reason | string | YES | NULL | Why override was needed |
 | created_at | timestamp | YES | | |
 
@@ -651,7 +651,7 @@ Roomboy floor assignments. Many-to-many.
 |-------|----------------|
 | Rate | amount, is_available |
 | ExtensionRate | amount |
-| Room | status, type_id, floor_id, is_priority |
+| Room | status, room_type_id, floor_id, is_priority |
 | Branch | name, is_active |
 | BranchSettings | initial_deposit, kiosk_time_limit, extension_cycle_threshold |
 | User | email, is_active |
@@ -744,7 +744,7 @@ Audit trail for every stock movement. Who added/deducted, when, why, before/afte
 | reason | string | NO | | manual_add / guest_order / spoilage / adjustment |
 | reference_type | string | YES | NULL | Polymorphic (transaction, etc.) |
 | reference_id | bigint | YES | NULL | Which record caused this |
-| performed_by | foreignId | NO | | FK to users |
+| created_by | foreignId | NO | | FK to users |
 | created_at | timestamp | YES | | |
 
 > **No `updated_at`** — stock logs are immutable.
@@ -761,7 +761,7 @@ Audit trail for every stock movement. Who added/deducted, when, why, before/afte
 ### 33. Spatie Permission Tables (Standard)
 
 - `roles`, `permissions`, `model_has_roles`, `model_has_permissions`, `role_has_permissions`
-- **6 Roles:** superadmin, admin, frontdesk, back_office, roomboy, kitchen_staff
+- **7 Roles:** superadmin, admin, frontdesk, back_office, roomboy, kitchen_staff, pub_staff
 
 ---
 
@@ -880,6 +880,13 @@ Audit trail for every stock movement. Who added/deducted, when, why, before/afte
 - `pub` — bar/drinks managed by pub staff
 - `amenity` — requestable items (extra towel, pillow, etc.) — replaces V3's `requestable_items` table
 - `damage` — damage charge catalog (lost key, broken remote, etc.) — replaces V3's `hotel_items` table
+
+### Cache Columns (Source of Truth = Transactions)
+These columns are **convenience caches** for fast reads. The `transactions` table is always the source of truth.
+- `stays.total_deposit_in`, `stays.total_charges`, `stays.total_paid` — recomputable from transactions per stay
+- `shifts.total_payments`, `shifts.total_deposit_collected`, `shifts.total_deposit_refunded`, `shifts.total_remittances`, `shifts.total_expenses` — recomputable from transactions/remittances/expenses per shift
+
+If cache ever drifts, recalculate from transactions. Never trust cache over source.
 
 ### Standard Laravel Tables (not custom, no design needed)
 - `sessions` — session driver (used for online user detection)
