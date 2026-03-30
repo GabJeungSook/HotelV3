@@ -44,6 +44,8 @@ This applies to: `stays`, `stay_extensions`, `room_transfers`, `applied_discount
 | initial_deposit | decimal(10,2) | NO | 200.00 | Default deposit amount |
 | kiosk_time_limit | integer | NO | 10 | Kiosk request expiry (minutes) |
 | extension_cycle_threshold | integer | NO | 24 | Hours per cycle before reset |
+| authorization_code | string | YES | NULL | Code for overrides (transaction, cleaning, transfer) |
+| discounts_enabled | boolean | NO | true | Master switch — if false, no discounts at this branch |
 | created_at | timestamp | YES | | |
 | updated_at | timestamp | YES | | |
 
@@ -504,7 +506,7 @@ Temporary. Deleted after resolution.
 
 > **No `updated_at`** — transactions are immutable. Never update, only insert.
 
-**9 Transaction Types:**
+**10 Transaction Types:**
 
 | Type | What | references_id | Cash Effect |
 |------|------|---------------|-------------|
@@ -513,10 +515,19 @@ Temporary. Deleted after resolution.
 | transfer_fee | Room transfer price difference | NULL | — |
 | food | Food & beverages | NULL | — |
 | amenity | Hotel items (towel, etc.) | NULL | — |
-| damage | Damage charges | NULL | — |
+| damage | Damage charges (lost key, broken remote) | NULL | — |
 | deposit_in | Deposit collected (check-in, excess) | NULL | Cash IN |
 | deposit_out | Deposit used to pay charge or refunded | → charge ID or NULL | Cash OUT if refund (NULL ref) |
 | payment | Cash received for a charge | → charge ID | Cash IN |
+| void | Cancel/correct a charge (requires auth code) | → voided charge ID | Reverses original |
+
+**Void flow (for overrides/corrections):**
+```
+#45  food     300.00   "Burger x2" (original — wrong amount)
+#46  void     300.00   references_id=45  "Voided: price correction, auth by Admin Maria"
+#47  food     150.00   "Burger x2" (corrected charge)
+```
+Immutability preserved. Full audit trail. Admin must provide authorization_code.
 
 **Rules:**
 1. Every charge gets paid by exactly ONE `payment` or `deposit_out` with `references_id` pointing to the charge.
@@ -674,7 +685,7 @@ Automatically logs create/update/delete with before/after values in JSON `proper
 |--------|------|----------|---------|-------------|
 | id | bigint | NO | auto | Primary key |
 | branch_id | foreignId | NO | | FK to branches |
-| service_area | string | NO | | kitchen / frontdesk / pub |
+| service_area | string | NO | | kitchen / frontdesk / pub / amenity / damage |
 | name | string | NO | | Category name |
 | sort_order | integer | NO | 0 | Display ordering |
 | is_active | boolean | NO | true | |
@@ -788,6 +799,11 @@ Audit trail for every stock movement. Who added/deducted, when, why, before/afte
 | 21 | V3 activity logs inconsistent, missing events | Spatie Activitylog package with auto + manual logging |
 | 22 | V3 shift forwarding requires complex cumulative chain | V4: every transaction has `shift_id`, reports just query by shift |
 | 23 | V3 `frontdesk_shifts` 50+ string columns | Eliminated — all computed from transactions at report time |
+| 24 | V3 `autorization_code` typo on branches | Fixed: `authorization_code` on `branch_settings` |
+| 25 | V3 transaction override mutates original record | V4 uses `void` type + new corrected charge (immutable) |
+| 26 | V3 no branch-level discount master switch in settings | Added `discounts_enabled` to `branch_settings` |
+| 27 | V3 `hotel_items` and `requestable_items` are separate tables | Merged into `menu_items` with `service_area = 'damage'` and `'amenity'` |
+| 28 | V3 reports use 5 separate report tables | All eliminated — reports query `stays`, `transactions`, `cleaning_tasks` directly |
 
 ---
 
@@ -814,7 +830,8 @@ Audit trail for every stock movement. Who added/deducted, when, why, before/afte
 | `room_boy_reports` | `cleaning_tasks` |
 | `unoccupied_room_reports` | Query rooms + stays |
 | `activity_logs` | Spatie Activitylog package (`activity_log` table) |
-| `hotel_items` / `requestable_items` | POS module (deferred) |
+| `hotel_items` | `menu_items` with `service_area = 'damage'` |
+| `requestable_items` | `menu_items` with `service_area = 'amenity'` |
 
 ---
 
@@ -853,5 +870,20 @@ Audit trail for every stock movement. Who added/deducted, when, why, before/afte
 
 | # | Module | Key Notes |
 |---|--------|-----------|
-| 1 | **POS & Menu** | Deferred. Unify 3 duplicate menu systems (kitchen/frontdesk/pub) into one with service areas. |
-| 2 | **Reports** | Deferred. All computed from `stays` + `stay_extensions` + `room_transfers` + `transactions` + `cleaning_tasks`. No separate report tables needed. |
+| 1 | **Reports** | Deferred. All computed from `stays` + `stay_extensions` + `room_transfers` + `transactions` + `cleaning_tasks`. No separate report tables needed. |
+
+## Notes
+
+### Service Areas for menu_items
+- `kitchen` — food items managed by kitchen staff
+- `frontdesk` — quick items at frontdesk counter
+- `pub` — bar/drinks managed by pub staff
+- `amenity` — requestable items (extra towel, pillow, etc.) — replaces V3's `requestable_items` table
+- `damage` — damage charge catalog (lost key, broken remote, etc.) — replaces V3's `hotel_items` table
+
+### Standard Laravel Tables (not custom, no design needed)
+- `sessions` — session driver (used for online user detection)
+- `password_reset_tokens` — password resets
+- `personal_access_tokens` — Sanctum API tokens
+- `jobs` / `failed_jobs` — queue system
+- `cache` / `cache_locks` — cache driver (if database)
