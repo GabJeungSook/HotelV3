@@ -500,7 +500,200 @@ class TransactionObserver
 
 ---
 
-## 9. Claude Skills (for Development)
+## 9. Complete Model Relationships Map
+
+Every model and its relationships for V4.
+
+### Branch
+```
+belongsTo: —
+hasOne:    BranchSettings
+hasMany:   Room, Floor, RoomType, StayingHour, ExtensionHour, Rate, ExtensionRate,
+           Stay, Shift, Transaction, Remittance, Expense, ExpenseCategory,
+           MenuCategory, MenuItem, MenuInventory, MenuStockLog,
+           Discount, CashDrawer, KioskTerminal, KioskRequest, TransferReason,
+           CleaningTask
+belongsToMany: User (via branch_user)
+```
+
+### BranchSettings
+```
+belongsTo: Branch
+```
+
+### User
+```
+belongsTo: —
+hasOne:    UserProfile
+hasMany:   Shift, Remittance, Expense
+belongsToMany: Branch (via branch_user), Floor (via floor_user)
+```
+
+### UserProfile
+```
+belongsTo: User
+```
+
+### Floor
+```
+belongsTo: Branch
+hasMany:   Room
+belongsToMany: User (via floor_user — roomboy assignments)
+```
+
+### RoomType
+```
+belongsTo: Branch
+hasMany:   Room
+```
+
+### Room
+```
+belongsTo: Branch, Floor, RoomType
+hasMany:   Rate, ExtensionRate, Stay, CleaningTask
+```
+
+### StayingHour
+```
+belongsTo: Branch
+hasMany:   Rate
+```
+
+### Rate
+```
+belongsTo: Branch, Room, StayingHour
+```
+
+### ExtensionHour
+```
+belongsTo: Branch
+hasMany:   ExtensionRate
+```
+
+### ExtensionRate
+```
+belongsTo: Branch, Room, ExtensionHour
+```
+
+### Stay
+```
+belongsTo: Branch, Room, Rate, User (checked_in_by), User (checked_out_by)
+hasMany:   StayExtension, RoomTransfer, Transaction, CleaningTask
+morphMany: AppliedDiscount (discountable)
+```
+
+### StayExtension
+```
+belongsTo: Stay, Room
+morphTo:   rateSource (Rate or ExtensionRate)
+```
+
+### RoomTransfer
+```
+belongsTo: Stay, Room (from_room), Room (to_room), TransferReason, User (transferred_by)
+```
+
+### TransferReason
+```
+belongsTo: Branch
+hasMany:   RoomTransfer
+```
+
+### Discount
+```
+belongsTo: Branch
+hasMany:   AppliedDiscount
+```
+
+### AppliedDiscount
+```
+belongsTo: Discount, User (applied_by), User (verified_by)
+morphTo:   discountable (Stay, Transaction, etc.)
+```
+
+### KioskTerminal
+```
+belongsTo: Branch
+hasMany:   KioskRequest
+```
+
+### KioskRequest
+```
+belongsTo: Branch, KioskTerminal, Stay (checkout only), Room, RoomType, Rate
+```
+
+### CashDrawer
+```
+belongsTo: Branch
+hasMany:   Shift
+```
+
+### Shift
+```
+belongsTo: Branch, User (user_id), User (partner_user_id), CashDrawer
+hasMany:   Transaction, Remittance, Expense
+```
+
+### Remittance
+```
+belongsTo: Branch, Shift, User
+```
+
+### ExpenseCategory
+```
+belongsTo: Branch
+hasMany:   Expense
+```
+
+### Expense
+```
+belongsTo: Branch, Shift, User, ExpenseCategory
+```
+
+### Transaction
+```
+belongsTo: Branch, Stay, Shift, User (created_by), Transaction (linked_transaction_id)
+hasMany:   TransactionItem, Transaction (as linked — voids/payments pointing to this)
+morphTo:   source (StayExtension, RoomTransfer)
+```
+
+### TransactionItem
+```
+belongsTo: Transaction, MenuItem
+```
+
+### CleaningTask
+```
+belongsTo: Branch, Room, Stay, User (assigned_to), User (overridden_by)
+```
+
+### MenuCategory
+```
+belongsTo: Branch
+hasMany:   MenuItem
+```
+
+### MenuItem
+```
+belongsTo: Branch, MenuCategory
+hasOne:    MenuInventory
+hasMany:   MenuStockLog, TransactionItem
+```
+
+### MenuInventory
+```
+belongsTo: Branch, MenuItem
+```
+
+### MenuStockLog
+```
+belongsTo: Branch, MenuItem, User (created_by)
+morphTo:   reference (Transaction, etc.)
+```
+
+---
+
+## 10. Claude Skills (for Development)
 
 These skills should be set up in `.claude/skills/` for the V4 project:
 

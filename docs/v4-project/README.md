@@ -276,29 +276,90 @@ Every flow is documented with realistic data in `examples/`:
 
 ---
 
+## Entity Relationship Diagram
+
+```
+Branch (1) ─────────┬──── (1) BranchSettings
+                     │
+                     ├──── (*) Floor ──── (*) Room
+                     │                     ├── belongsTo RoomType
+                     │                     ├── (*) Rate ── belongsTo StayingHour
+                     │                     └── (*) ExtensionRate ── belongsTo ExtensionHour
+                     │
+                     ├──── (*) Stay
+                     │       ├── belongsTo Room, Rate
+                     │       ├── (*) StayExtension
+                     │       ├── (*) RoomTransfer ── belongsTo TransferReason
+                     │       ├── (*) Transaction ── (*) TransactionItem ── belongsTo MenuItem
+                     │       ├── (*) CleaningTask ── belongsTo User (assigned_to)
+                     │       └── (*) AppliedDiscount ── belongsTo Discount
+                     │
+                     ├──── (*) Shift ── belongsTo User, CashDrawer
+                     │       ├── (*) Transaction
+                     │       ├── (*) Remittance
+                     │       └── (*) Expense ── belongsTo ExpenseCategory
+                     │
+                     ├──── (*) MenuCategory ── (*) MenuItem ── (1) MenuInventory
+                     │                                       └── (*) MenuStockLog
+                     │
+                     ├──── (*) KioskTerminal ── (*) KioskRequest
+                     │
+                     ├──── (*) Discount
+                     ├──── (*) CashDrawer
+                     ├──── (*) TransferReason
+                     └──── (*) ExpenseCategory
+
+User (1) ──── (1) UserProfile
+         ├──── belongsToMany Branch (via branch_user)
+         ├──── belongsToMany Floor (via floor_user — roomboy)
+         ├──── (*) Shift (as primary or partner)
+         └──── (*) CleaningTask (as assigned_to)
+
+Transaction:
+  belongsTo Stay, Shift
+  belongsTo Transaction (linked_transaction_id — payment→charge, void→charge)
+  hasMany TransactionItem
+  morphTo source (StayExtension or RoomTransfer)
+```
+
+---
+
 ## Documentation Index
 
 ```
 docs/v4-project/
-├── README.md                              ← This file
-├── HOTEL_V4_COMPLETE_SCHEMA.md            ← Full schema (35 tables)
-├── V4_DESIGN_DECISIONS.md                 ← 14 business rules
-├── V4_REPORT_VERIFICATION.md              ← 14 reports with SQL
-├── V4_BRAND_AND_THEME.md                  ← Colors, fonts, assets
-├── V4_TECH_STACK.md                       ← Packages, architecture
+├── README.md                              ← This file (project overview)
+├── HOTEL_V4_COMPLETE_SCHEMA.md            ← Full schema (35 tables, every column)
+├── V4_DESIGN_DECISIONS.md                 ← 14 business rules & constraints
+├── V4_REPORT_VERIFICATION.md              ← 14 reports proven with SQL queries
+├── V4_BRAND_AND_THEME.md                  ← Brand color #009EF5, fonts, room status colors
+├── V4_TECH_STACK.md                       ← Laravel 12/13, Filament 5, packages, folder structure
 ├── v3-problems/
-│   └── V3_PROBLEMS_SOLVED.md              ← 28 issues fixed
-├── assets/                                ← Logos, backgrounds (9 files)
-├── reference/                             ← Architecture patterns
-│   ├── bootstrap/app.php                  ← Laravel 12 bootstrap pattern
-│   ├── api/                               ← API route + controller + resource patterns
-│   ├── traits/                            ← Scopes, relations, API response
-│   ├── concerns/                          ← Validation rules
-│   ├── enums/                             ← PHP enum patterns
-│   └── skills/                            ← Claude skills (Livewire, Flux, Pest, Tailwind)
+│   └── V3_PROBLEMS_SOLVED.md              ← 28 issues documented with V3→V4 solutions
+├── reference/
+│   └── ARCHITECTURE_PATTERNS.md           ← All code patterns: bootstrap, scoping trait,
+│                                             relation traits, 6 PHP enums, services, API,
+│                                             middleware, observer, complete relationship map
+├── assets/                                ← 9 files: logos, favicon, backgrounds, placeholders
 └── examples/
-    ├── journeys/ (7 docs)                 ← Role-based walkthroughs
-    └── flows/ (9 docs)                    ← Feature-specific examples
+    ├── journeys/ (7 docs)
+    │   ├── V4_GUEST_FULL_JOURNEY.md       ← Walk-in: 13 transactions traced
+    │   ├── V4_GUEST_JOURNEY_KIOSK_PATH.md ← Kiosk: senior, POS, cycle reset, 16 transactions
+    │   ├── V4_FRONTDESK_JOURNEY.md        ← Full shift: 18 transactions, reconciliation
+    │   ├── V4_ROOMBOY_JOURNEY.md          ← 5 rooms cleaned, override, delayed
+    │   ├── V4_KIOSK_JOURNEY.md            ← Device auth, check-in/out flows
+    │   ├── V4_ADMIN_JOURNEY.md            ← Rooms, rates, staff, settings, menu
+    │   └── V4_SUPERADMIN_JOURNEY.md       ← Multi-branch: create, deploy, reports
+    └── flows/ (9 docs)
+        ├── V4_EXTENSION_CYCLE_EXAMPLE.md  ← 72hrs, 10 extensions, 3 cycles
+        ├── V4_PAYMENT_FLOW_EXAMPLES.md    ← 9 payment scenarios
+        ├── V4_ROOM_TRANSFER_EXAMPLE.md    ← Upgrade, downgrade, override
+        ├── V4_SHIFT_LIFECYCLE_EXAMPLE.md  ← Dual frontdesk, reconciliation
+        ├── V4_DISCOUNT_FLOW.md            ← Senior verify, promo, cap, disabled
+        ├── V4_VOID_OVERRIDE_FLOW.md       ← Wrong price, duplicate, void restore
+        ├── V4_INVENTORY_STOCK_FLOW.md     ← Restock, order, spoilage, adjustment
+        ├── V4_KIOSK_DEVICE_SETUP_FLOW.md  ← Register, connect, deactivate
+        └── V4_MULTI_BRANCH_STAFF_FLOW.md  ← Deploy, branch select, oversight
 ```
 
 ---
