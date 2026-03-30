@@ -1204,13 +1204,126 @@ Queued jobs.
 
 ---
 
+## Transaction System — Deep Analysis
+
+### How Transactions Work (Money Flow)
+
+Every financial event during a guest's stay creates a `transactions` record. The flow:
+
+```
+CHECK-IN
+├── Type 1: Room Charge (₱500) ──── PAID immediately
+├── Type 2: Deposit (₱200) ──────── PAID (held for key/remote)
+└── Type 2: Excess Deposit ──────── PAID (if guest overpaid)
+
+DURING STAY (all created UNPAID, paid separately)
+├── Type 6: Extension ──── charged when guest extends
+├── Type 9: Food & Bev ── frontdesk/kitchen adds food order
+├── Type 8: Amenities ──── frontdesk adds item charges
+├── Type 4: Damage ─────── damaged items charged
+└── Type 7: Transfer ───── room transfer (reference record)
+
+PAYMENT (two methods)
+├── Cash: updates transaction.paid_amount, paid_at; excess → Type 2 deposit
+└── Deposit: updates transaction.paid_amount; creates Type 5 cashout
+
+CHECK-OUT
+├── Settle all unpaid transactions
+├── Refund remaining deposit
+└── Room → Uncleaned
+```
+
+### Transaction Types (from TransactionTypeSeeder)
+
+| ID | Name | Direction | Created When | Paid Immediately? |
+|----|------|-----------|-------------|-------------------|
+| 1 | Check In | Money IN | At check-in | Yes |
+| 2 | Deposit | Money HELD | Check-in, excess payments, transfers | Yes |
+| 3 | Kitchen Order | — | **NEVER USED (dead code)** | N/A |
+| 4 | Damage Charges | Money IN | During stay or checkout | No |
+| 5 | Cashout | Money OUT | When deposit pays a bill | Yes (auto) |
+| 6 | Extension | Money IN | When guest extends | No |
+| 7 | Transfer Room | Reference | When guest transfers | Marked paid (amount often 0) |
+| 8 | Amenities | Money IN | Frontdesk adds charges | No |
+| 9 | Food and Beverages | Money IN | Frontdesk/kitchen adds food | No |
+
+### Cash Tracking (Dual System)
+
+Cash is tracked in TWO places that must stay in sync manually:
+- `transactions` — records what happened financially
+- `cash_on_drawers` — records physical cash movement in the drawer
+
+Every transaction creation also creates a `CashOnDrawer` record. If one is missed, shift reconciliation breaks.
+
+### Payment Logic
+
+```
+payable_amount = what customer owes
+paid_amount    = what customer actually paid (cash given)
+change_amount  = cash returned to customer
+deposit_amount = excess saved as guest deposit
+
+Cash payment:  paid_amount = user input, change = excess, deposit = excess
+Deposit payment: paid_amount = payable, change = 0, creates Type 5 cashout
+```
+
+### Deposit Tracking
+
+```
+Available Deposit = checkin_details.total_deposit - checkin_details.total_deduction
+```
+- `total_deposit` increases when: initial deposit, excess payments, transfer excess
+- `total_deduction` increases when: deposit used to pay a bill (Type 5 cashout created)
+
+### Where Transactions Are Created (Code Locations)
+
+| Type | Component | Method |
+|------|-----------|--------|
+| 1 | CheckInFromKiosk, RoomMonitoring, CheckInCo | saveCheckIn(), storeGuest(), saveCheckInCO() |
+| 2 | CheckInFromKiosk, GuestTransaction, TransferRoom, CheckOutGuest | Multiple (deposits from various sources) |
+| 4 | GuestTransaction, CheckOutGuest, ManageGuestTransaction | addDamageCharges() |
+| 5 | GuestTransaction | addPaymentWithDeposit(), deductDeposit() |
+| 6 | ExtendGuest, GuestTransaction, ManageGuestTransaction | saveExtend() |
+| 7 | TransferRoom, GuestTransaction, ManageGuestTransaction | saveTransfer() |
+| 8 | GuestTransaction, ManageGuestTransaction | addAmenities() |
+| 9 | GuestTransaction, ManageGuestTransaction, Kitchen/Transaction | addFood() |
+
+---
+
 ## Known Issues & Notes for Rebuild
 
+### Transaction System Problems
+
+1. **All amounts are integers** — `payable_amount`, `paid_amount`, `change_amount`, `deposit_amount` are all `integer`. No decimal support (₱499.50 impossible).
+
+2. **`assigned_frontdesk_id` is JSON but model uses belongsTo** — Column stores `json_encode([id, "Name"])` but model defines `belongsTo(User::class)`. Relationship is broken.
+
+3. **`deposit_amount` is overloaded** — At check-in it means "deposit collected". During payment it means "excess change saved as deposit". Ambiguous.
+
+4. **Type 3 "Kitchen Order" is dead** — Seeded but never created anywhere. Kitchen uses Type 9 instead.
+
+5. **`is_co` column never used** — Added to transactions AND guests tables but never set to `true` or queried.
+
+6. **`is_override` only set in one place** — Only TransferRoom sets it. Never queried in reports.
+
+7. **Kitchen module skips shift_log_id and cash_drawer_id** — All other creation paths populate these. Kitchen doesn't.
+
+8. **Payments mutate the original transaction** — `paid_amount` and `paid_at` are updated on the same record. No separate payment record. Can't tell if guest paid in multiple attempts or whether it was cash vs deposit.
+
+9. **Transfer rewrites the original check-in transaction** — `TransferRoom.php` finds the Type 1 transaction and CHANGES its `payable_amount` and `paid_amount` to the new room rate. Destroys historical data.
+
+10. **Missing columns without migrations** — `override_at` and `transfer_reason_id` are used in code but no migration creates them. Suggests manual DB changes or lost migrations.
+
+11. **Checkout flow is incomplete** — `checkOutGuest()` and `payDamageCharge()` methods are called from Blade views but not implemented in the component.
+
+12. **shift_log_id detection is fragile** — Uses "online in last 5 minutes" session check to find the active shift. Race conditions possible.
+
 ### Data Type Inconsistencies
-- `menus.price`, `frontdesk_menus.price`, `pub_menus.price` are `string` - should be `decimal`
-- `expenses.amount` is `string` - should be `decimal`
-- `stay_extensions.hours`, `stay_extensions.amount` are `string` - should be `integer`/`decimal`
-- Many `frontdesk_shifts` columns are `string` - should be appropriate numeric types
+- `transactions` amounts are `integer` — should be `decimal(10,2)`
+- `menus.price`, `frontdesk_menus.price`, `pub_menus.price` are `string` — should be `decimal`
+- `expenses.amount` is `string` — should be `decimal`
+- `stay_extensions.hours`, `stay_extensions.amount` are `string` — should be `integer`/`decimal`
+- Many `frontdesk_shifts` columns are `string` — should be numeric types
 
 ### Denormalized Data
 - `users.branch_name` duplicates `branches.name`
