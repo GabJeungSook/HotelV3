@@ -1,0 +1,377 @@
+<mxfile host="app.diagrams.net" modified="2026-03-30T00:00:00.000Z" agent="Claude Code" version="21.0.0">
+  <diagram id="hotelv4-flow" name="HOMI System Flow">
+    <mxGraphModel dx="3000" dy="2400" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="4000" pageHeight="3000" background="#1a1a2e" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- TITLE -->
+        <mxCell id="title" value="HOMI Hotel System Flow" style="text;html=1;fontSize=28;fontStyle=1;fontColor=#FFFFFF;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="20" width="600" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="Multi-Branch Hotel Management — Guest Lifecycle, Shifts, Kiosk, POS &amp; Housekeeping" style="text;html=1;fontSize=14;fontColor=#AAAAAA;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="55" width="1000" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- SECTION 1: GUEST CHECK-IN -->
+        <!-- ═══════════════════════════════════════════ -->
+        <mxCell id="s1_label" value="1. Guest Check-In" style="text;html=1;fontSize=20;fontStyle=1;fontColor=#FFFFFF;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="100" width="300" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="s1_num" value="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;fillColor=#009EF5;fontColor=#FFFFFF;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="40" y="140" width="35" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- Guest -->
+        <mxCell id="guest1" value="Guest&#xa;Arrives at hotel" style="shape=mxgraph.basic.person;fillColor=#16213e;strokeColor=#009EF5;fontColor=#FFFFFF;fontSize=11;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="90" y="140" width="80" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow to kiosk or frontdesk -->
+        <mxCell id="arr1a" value="Self-service" style="endArrow=classic;html=1;strokeColor=#009EF5;fontColor=#AAAAAA;fontSize=10;exitX=1;exitY=0.5;" edge="1" source="guest1" target="kiosk1" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr1b" value="Walk-in" style="endArrow=classic;html=1;strokeColor=#009EF5;fontColor=#AAAAAA;fontSize=10;" edge="1" source="guest1" target="fd_checkin" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="or1" value="or" style="text;html=1;fontSize=11;fontColor=#888888;align=center;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="220" y="165" width="30" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Kiosk path -->
+        <mxCell id="kiosk1" value="Kiosk Tablet&#xa;Self-service terminal&#xa;(multiple per branch)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16213e;strokeColor=#009EF5;fontColor=#FFFFFF;fontSize=11;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="280" y="110" width="170" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_k1" value="Select room,&#xa;hours, name" style="endArrow=classic;html=1;strokeColor=#009EF5;fontColor=#AAAAAA;fontSize=10;" edge="1" source="kiosk1" target="kiosk_req" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kiosk_req" value="Kiosk Request&#xa;Created&#xa;(expires in 10 min)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a3a5c;strokeColor=#009EF5;fontColor=#FFFFFF;fontSize=11;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="510" y="110" width="170" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_k2" value="Pusher&#xa;real-time" style="endArrow=classic;html=1;strokeColor=#F97316;fontColor=#F97316;fontSize=10;dashed=1;" edge="1" source="kiosk_req" target="fd_checkin" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Frontdesk path -->
+        <mxCell id="fd_checkin" value="Frontdesk&#xa;Verifies guest,&#xa;collects payment" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16213e;strokeColor=#009EF5;fontColor=#FFFFFF;fontSize=11;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="510" y="200" width="170" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_f1" value="Creates stay +&#xa;transactions" style="endArrow=classic;html=1;strokeColor=#22C55E;fontColor=#22C55E;fontSize=10;" edge="1" source="fd_checkin" target="stay_created" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Stay created -->
+        <mxCell id="stay_created" value="✓ Stay Created&#xa;Room → Occupied&#xa;QR Code generated" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a3a1a;strokeColor=#22C55E;fontColor=#FFFFFF;fontSize=11;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="760" y="150" width="180" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Transactions created box -->
+        <mxCell id="txn_checkin" value="Transactions Created:&#xa;• room_charge (₱500)&#xa;• payment (₱500 cash)&#xa;• deposit_in (₱200)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2a1a1a;strokeColor=#EF4444;fontColor=#FFFFFF;fontSize=10;arcSize=10;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="760" y="230" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_txn1" style="endArrow=classic;html=1;strokeColor=#EF4444;dashed=1;" edge="1" source="stay_created" target="txn_checkin" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- SECTION 2: DURING STAY -->
+        <!-- ═══════════════════════════════════════════ -->
+        <mxCell id="s2_label" value="2. During Stay" style="text;html=1;fontSize=20;fontStyle=1;fontColor=#FFFFFF;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="360" width="300" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="s2_num" value="2" style="ellipse;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;fillColor=#009EF5;fontColor=#FFFFFF;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="40" y="400" width="35" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- Guest in room -->
+        <mxCell id="guest_room" value="Guest&#xa;Staying in Room" style="shape=mxgraph.basic.person;fillColor=#16213e;strokeColor=#009EF5;fontColor=#FFFFFF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="90" y="400" width="80" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Extension -->
+        <mxCell id="ext_box" value="Extend Stay&#xa;+3hrs, +6hrs, etc.&#xa;(cycle reset at 24hrs)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16213e;strokeColor=#EAB308;fontColor=#FFFFFF;fontSize=11;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="260" y="370" width="180" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_ext" style="endArrow=classic;html=1;strokeColor=#EAB308;" edge="1" source="guest_room" target="ext_box" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Food order -->
+        <mxCell id="food_box" value="Order Food&#xa;Kitchen / Frontdesk / Pub&#xa;(POS → transaction)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16213e;strokeColor=#F97316;fontColor=#FFFFFF;fontSize=11;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="260" y="440" width="180" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_food" style="endArrow=classic;html=1;strokeColor=#F97316;" edge="1" source="guest_room" target="food_box" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Room transfer -->
+        <mxCell id="transfer_box" value="Room Transfer&#xa;Upgrade / Downgrade&#xa;(price diff charged)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16213e;strokeColor=#3B82F6;fontColor=#FFFFFF;fontSize=11;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="260" y="510" width="180" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_transfer" style="endArrow=classic;html=1;strokeColor=#3B82F6;" edge="1" source="guest_room" target="transfer_box" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- All go to transactions -->
+        <mxCell id="txn_during" value="All → transactions table&#xa;(immutable, shift-linked)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2a1a1a;strokeColor=#EF4444;fontColor=#FFFFFF;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="530" y="430" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_t1" style="endArrow=classic;html=1;strokeColor=#EF4444;dashed=1;" edge="1" source="ext_box" target="txn_during" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_t2" style="endArrow=classic;html=1;strokeColor=#EF4444;dashed=1;" edge="1" source="food_box" target="txn_during" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_t3" style="endArrow=classic;html=1;strokeColor=#EF4444;dashed=1;" edge="1" source="transfer_box" target="txn_during" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Payment options -->
+        <mxCell id="pay_box" value="Payment Options:&#xa;• Cash → payment txn&#xa;• Deposit → deposit_out txn&#xa;• Pay All → one per charge" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a2a1a;strokeColor=#22C55E;fontColor=#FFFFFF;fontSize=10;arcSize=10;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="530" y="510" width="200" height="75" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- SECTION 3: CHECK-OUT -->
+        <!-- ═══════════════════════════════════════════ -->
+        <mxCell id="s3_label" value="3. Check-Out" style="text;html=1;fontSize=20;fontStyle=1;fontColor=#FFFFFF;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="640" width="300" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="s3_num" value="3" style="ellipse;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;fillColor=#009EF5;fontColor=#FFFFFF;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="40" y="680" width="35" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- Kiosk checkout -->
+        <mxCell id="kiosk_co" value="Guest at Kiosk&#xa;Scans QR code&#xa;Sees bill summary" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16213e;strokeColor=#009EF5;fontColor=#FFFFFF;fontSize=11;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="90" y="680" width="170" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_co1" value="Proceed&#xa;to counter" style="endArrow=classic;html=1;strokeColor=#009EF5;fontColor=#AAAAAA;fontSize=10;" edge="1" source="kiosk_co" target="fd_settle" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Frontdesk settles -->
+        <mxCell id="fd_settle" value="Frontdesk Settles&#xa;1. Pay all unpaid charges&#xa;2. Key returned?&#xa;3. Refund deposit" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16213e;strokeColor=#009EF5;fontColor=#FFFFFF;fontSize=11;arcSize=15;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="370" y="670" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_co2" value="" style="endArrow=classic;html=1;strokeColor=#22C55E;" edge="1" source="fd_settle" target="co_done" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Checkout complete -->
+        <mxCell id="co_done" value="✓ Checked Out&#xa;Stay → checked_out&#xa;Room → uncleaned" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a3a1a;strokeColor=#22C55E;fontColor=#FFFFFF;fontSize=11;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="660" y="675" width="170" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_co3" value="Auto-creates" style="endArrow=classic;html=1;strokeColor=#A855F7;fontColor=#A855F7;fontSize=10;" edge="1" source="co_done" target="clean_task" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- SECTION 4: HOUSEKEEPING -->
+        <!-- ═══════════════════════════════════════════ -->
+        <mxCell id="s4_label" value="4. Housekeeping" style="text;html=1;fontSize=20;fontStyle=1;fontColor=#FFFFFF;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="800" width="300" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="s4_num" value="4" style="ellipse;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;fillColor=#A855F7;fontColor=#FFFFFF;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="40" y="840" width="35" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- Cleaning task -->
+        <mxCell id="clean_task" value="Cleaning Task&#xa;Created (pending)&#xa;Deadline: checkout + 3hrs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1a2e;strokeColor=#A855F7;fontColor=#FFFFFF;fontSize=11;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="90" y="840" width="190" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_cl1" value="Roomboy&#xa;claims" style="endArrow=classic;html=1;strokeColor=#A855F7;fontColor=#AAAAAA;fontSize=10;" edge="1" source="clean_task" target="cleaning" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Cleaning -->
+        <mxCell id="cleaning" value="Cleaning&#xa;(in_progress)&#xa;Min 15 min" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1a2e;strokeColor=#A855F7;fontColor=#FFFFFF;fontSize=11;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="370" y="840" width="150" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_cl2" value="Finish" style="endArrow=classic;html=1;strokeColor=#A855F7;fontColor=#AAAAAA;fontSize=10;" edge="1" source="cleaning" target="room_avail" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Room available -->
+        <mxCell id="room_avail" value="✓ Room Available&#xa;Ready for next guest" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a3a1a;strokeColor=#22C55E;fontColor=#FFFFFF;fontSize=11;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="610" y="840" width="170" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- RIGHT SIDE: SHIFT & CASH MANAGEMENT -->
+        <!-- ═══════════════════════════════════════════ -->
+        <mxCell id="shift_border" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#EF4444;strokeWidth=2;dashed=1;arcSize=5;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="100" width="520" height="500" as="geometry" />
+        </mxCell>
+        <mxCell id="shift_title" value="Shift &amp; Cash Management" style="text;html=1;fontSize=18;fontStyle=1;fontColor=#FFFFFF;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="110" width="320" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Shift start -->
+        <mxCell id="shift_start" value="Frontdesk Starts Shift&#xa;1. Select cash drawer&#xa;2. Count opening cash&#xa;3. Shift created (AM/PM)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2a1a1a;strokeColor=#EF4444;fontColor=#FFFFFF;fontSize=11;arcSize=15;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="160" width="210" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_sh1" value="" style="endArrow=classic;html=1;strokeColor=#EF4444;" edge="1" source="shift_start" target="shift_during" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- During shift -->
+        <mxCell id="shift_during" value="During Shift&#xa;Every transaction tagged with shift_id&#xa;Cash IN: payments, deposits&#xa;Cash OUT: deposit refunds" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2a1a1a;strokeColor=#EF4444;fontColor=#FFFFFF;fontSize=11;arcSize=15;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="270" width="220" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Remittance -->
+        <mxCell id="remittance" value="Remittance&#xa;Cash → Management" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2a1a1a;strokeColor=#F97316;fontColor=#FFFFFF;fontSize=11;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="1340" y="270" width="150" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_rem" style="endArrow=classic;html=1;strokeColor=#F97316;" edge="1" source="shift_during" target="remittance" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Expense -->
+        <mxCell id="expense" value="Expense&#xa;Supplies, etc." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2a1a1a;strokeColor=#F97316;fontColor=#FFFFFF;fontSize=11;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="1340" y="330" width="150" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_exp" style="endArrow=classic;html=1;strokeColor=#F97316;" edge="1" source="shift_during" target="expense" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr_sh2" value="" style="endArrow=classic;html=1;strokeColor=#EF4444;" edge="1" source="shift_during" target="shift_close" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Shift close -->
+        <mxCell id="shift_close" value="End Shift&#xa;1. Count closing cash&#xa;2. Expected = opening + payments&#xa;   + deposits - refunds&#xa;   - remittances - expenses&#xa;3. Difference = actual - expected" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2a1a1a;strokeColor=#EF4444;fontColor=#FFFFFF;fontSize=11;arcSize=15;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="420" width="240" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- Reconciliation result -->
+        <mxCell id="recon" value="₱0 difference = ✓&#xa;-₱100 difference = shortage!" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1a1a;strokeColor=#EAB308;fontColor=#EAB308;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1350" y="450" width="200" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_recon" style="endArrow=classic;html=1;strokeColor=#EAB308;" edge="1" source="shift_close" target="recon" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- RIGHT SIDE: POS & MENU -->
+        <!-- ═══════════════════════════════════════════ -->
+        <mxCell id="pos_border" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#F97316;strokeWidth=2;dashed=1;arcSize=5;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="640" width="520" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="pos_title" value="POS &amp; Menu System (Unified)" style="text;html=1;fontSize=18;fontStyle=1;fontColor=#FFFFFF;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="650" width="320" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Service areas -->
+        <mxCell id="kitchen" value="Kitchen Staff&#xa;service_area = kitchen&#xa;Food items" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1a2e;strokeColor=#F97316;fontColor=#FFFFFF;fontSize=11;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="700" width="150" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="frontdesk_pos" value="Frontdesk&#xa;service_area = frontdesk&#xa;Quick items" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1a2e;strokeColor=#F97316;fontColor=#FFFFFF;fontSize=11;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="770" width="150" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="pub" value="Pub Staff&#xa;service_area = pub&#xa;Drinks" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1a2e;strokeColor=#F97316;fontColor=#FFFFFF;fontSize=11;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="840" width="150" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- All go to same tables -->
+        <mxCell id="pos_tables" value="Same Tables:&#xa;menu_categories&#xa;menu_items&#xa;menu_inventories&#xa;menu_stock_logs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2a1a0a;strokeColor=#F97316;fontColor=#FFFFFF;fontSize=11;arcSize=10;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="1300" y="710" width="160" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_p1" style="endArrow=classic;html=1;strokeColor=#F97316;" edge="1" source="kitchen" target="pos_tables" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_p2" style="endArrow=classic;html=1;strokeColor=#F97316;" edge="1" source="frontdesk_pos" target="pos_tables" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_p3" style="endArrow=classic;html=1;strokeColor=#F97316;" edge="1" source="pub" target="pos_tables" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Creates transaction -->
+        <mxCell id="pos_txn" value="→ Creates transaction&#xa;   (type = food/amenity)&#xa;→ Deducts stock&#xa;→ Logs in menu_stock_logs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2a1a1a;strokeColor=#EF4444;fontColor=#FFFFFF;fontSize=10;arcSize=10;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="1300" y="830" width="200" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_p4" style="endArrow=classic;html=1;strokeColor=#EF4444;dashed=1;" edge="1" source="pos_tables" target="pos_txn" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- FAR RIGHT: KIOSK DEVICE ARCHITECTURE -->
+        <!-- ═══════════════════════════════════════════ -->
+        <mxCell id="kiosk_border" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#14B8A6;strokeWidth=2;dashed=1;arcSize=5;" vertex="1" parent="1">
+          <mxGeometry x="1650" y="100" width="380" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="kiosk_title" value="Kiosk ↔ Server Communication" style="text;html=1;fontSize=16;fontStyle=1;fontColor=#FFFFFF;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1700" y="110" width="280" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- Server -->
+        <mxCell id="server" value="HOMI Server&#xa;(Laravel Backend)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0a2a2a;strokeColor=#14B8A6;fontColor=#FFFFFF;fontSize=12;fontStyle=1;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="1720" y="150" width="170" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Kiosk device -->
+        <mxCell id="kiosk_device" value="Kiosk Tablet&#xa;(Sanctum API Token)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0a2a2a;strokeColor=#14B8A6;fontColor=#FFFFFF;fontSize=12;fontStyle=1;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="1720" y="260" width="170" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Arrows between -->
+        <mxCell id="arr_api1" value="API Requests&#xa;(Sanctum token)" style="endArrow=classic;html=1;strokeColor=#14B8A6;fontColor=#14B8A6;fontSize=10;" edge="1" source="kiosk_device" target="server" parent="1">
+          <mxGeometry x="-0.3" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1700" y="230" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arr_api2" value="Pusher Events&#xa;(real-time)" style="endArrow=classic;html=1;strokeColor=#F97316;fontColor=#F97316;fontSize=10;" edge="1" source="server" target="kiosk_device" parent="1">
+          <mxGeometry x="0.3" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1930" y="230" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- API endpoints box -->
+        <mxCell id="api_box" value="Kiosk API Endpoints:&#xa;• POST /activate (code)&#xa;• POST /heartbeat&#xa;• GET /rooms, /rates&#xa;• POST /check-in&#xa;• POST /check-out" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0a1a1a;strokeColor=#14B8A6;fontColor=#14B8A6;fontSize=10;arcSize=10;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="1930" y="140" width="180" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- Pusher box -->
+        <mxCell id="pusher_box" value="Pusher Events:&#xa;• New kiosk request&#xa;• Request confirmed&#xa;• Request expired" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a0a0a;strokeColor=#F97316;fontColor=#F97316;fontSize=10;arcSize=10;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="1930" y="260" width="180" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- BOTTOM: REPORTS (computed) -->
+        <!-- ═══════════════════════════════════════════ -->
+        <mxCell id="s5_label" value="5. Reports (All Computed — No Report Tables)" style="text;html=1;fontSize=20;fontStyle=1;fontColor=#FFFFFF;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="950" width="500" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="rep1" value="Sales Report&#xa;transactions&#xa;by shift/date" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1a2e;strokeColor=#6366F1;fontColor=#FFFFFF;fontSize=10;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1000" width="120" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="rep2" value="Cash Recon&#xa;shifts +&#xa;transactions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1a2e;strokeColor=#6366F1;fontColor=#FFFFFF;fontSize=10;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="200" y="1000" width="120" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="rep3" value="Guest Reports&#xa;stays by&#xa;date range" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1a2e;strokeColor=#6366F1;fontColor=#FFFFFF;fontSize=10;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="340" y="1000" width="120" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="rep4" value="Cleaning&#xa;cleaning_tasks&#xa;performance" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1a2e;strokeColor=#6366F1;fontColor=#FFFFFF;fontSize=10;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="480" y="1000" width="120" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="rep5" value="Inventory&#xa;menu_stock_logs&#xa;in/out/spoilage" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1a2e;strokeColor=#6366F1;fontColor=#FFFFFF;fontSize=10;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="620" y="1000" width="120" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="rep6" value="Discount&#xa;applied_discounts&#xa;usage + audit" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1a2e;strokeColor=#6366F1;fontColor=#FFFFFF;fontSize=10;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="760" y="1000" width="120" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="rep7" value="Void Audit&#xa;transactions&#xa;type = void" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1a2e;strokeColor=#6366F1;fontColor=#FFFFFF;fontSize=10;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="900" y="1000" width="120" height="55" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
