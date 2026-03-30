@@ -73,6 +73,13 @@
         <mxCell id="transfer_box" parent="1" style="rounded=1;html=1;fillColor=#111111;strokeColor=#3B82F6;fontColor=#FFFFFF;fontSize=10;arcSize=20;whiteSpace=wrap;" value="Room Transfer&lt;br&gt;&lt;font style=&quot;font-size:9px;color:#3b82f6&quot;&gt;Upgrade / Downgrade (price diff)&lt;/font&gt;" vertex="1">
           <mxGeometry height="35" width="190" x="220" y="370" as="geometry" />
         </mxCell>
+        <!-- Room Transfer Detail -->
+        <mxCell id="transfer_detail" parent="1" style="rounded=1;html=1;fillColor=#0a0a0a;strokeColor=#3B82F6;fontColor=#FFFFFF;fontSize=9;arcSize=10;whiteSpace=wrap;align=left;spacingLeft=8;" value="&lt;font style=&quot;font-size:9px;color:#60a5fa&quot;&gt;Transfer Flow:&lt;br&gt;• Old room → uncleaned (cleaning task)&lt;br&gt;• New room → occupied&lt;br&gt;• Price diff → transfer_fee or deposit_in&lt;br&gt;• room_transfers record created&lt;/font&gt;" vertex="1">
+          <mxGeometry height="75" width="230" x="490" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="b7" edge="1" parent="1" source="transfer_box" style="endArrow=block;endSize=4;html=1;strokeColor=#3B82F6;strokeWidth=0.5;dashed=1;dashPattern=3 3;" target="transfer_detail">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
         <mxCell id="txn_during" parent="1" style="rounded=1;html=1;fillColor=#0a0a0a;strokeColor=#EF4444;fontColor=#FFFFFF;fontSize=10;arcSize=15;whiteSpace=wrap;" value="All → &lt;b&gt;transactions&lt;/b&gt; table&lt;br&gt;&lt;font style=&quot;font-size:9px;color:#CCCCCC&quot;&gt;(immutable, shift-linked)&lt;/font&gt;" vertex="1">
           <mxGeometry height="35" width="180" x="490" y="305" as="geometry" />
         </mxCell>
