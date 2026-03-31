@@ -1,73 +1,39 @@
 <x-kiosk-layout-update>
-  <div class="px-4 md:px-10">
-    <h1 class="text-3xl md:text-5xl pt-10 md:pt-20 text-gray-600 uppercase font-extrabold text-center">Select Transaction</h1>
-    <div class="pt-10 md:pt-16 flex flex-col xl:flex-row items-center md:space-x-10 space-y-8 md:space-y-0 justify-center">
-      <a href="{{ route('kiosk.check-in') }}"
-        class="w-full max-w-md md:w-[28rem] border relative h-64 md:h-80 bg-gradient-to-bl overflow-hidden from-green-800 shadow-xl via-green-800 to-transparent rounded-2xl flex-shrink-0">
-        <svg class="h-48 md:h-72 text-white absolute -right-16 md:-right-28 opacity-10 top-0" xmlns="http://www.w3.org/2000/svg"
-          xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 36 36" preserveAspectRatio="xMidYMid meet"
-          fill="currentColor">
-          <title>login-solid</title>
-          <path
-            d="M28,4H12a2,2,0,0,0-2,2v7h8.5L15.12,9.71a1,1,0,0,1,1.41-1.41l5.79,5.79-5.79,5.79a1,1,0,0,1-1.41-1.41L18.5,15H10V30a2,2,0,0,0,2,2H28a2,2,0,0,0,2-2V6A2,2,0,0,0,28,4Z"
-            class="clr-i-solid clr-i-solid-path-1"></path>
-          <path d="M10,13H4a1,1,0,0,0-1,1,1,1,0,0,0,1,1h6Z" class="clr-i-solid clr-i-solid-path-2"></path>
-          <rect x="0" y="0" width="36" height="36" fill-opacity="0"></rect>
-        </svg>
-        <div class="pt-4 md:pt-6 px-6 md:px-10 pb-6 md:pb-10">
-          <h1 class="font-bold text-white text-xl md:text-3xl">CHECK-IN</h1>
-        </div>
-        <div class="flex justify-center items-center">
-          <div class="w-24 h-24 md:w-40 md:h-40 flex justify-center items-center rounded-full p-2 md:p-3 shadow-xl bg-green-700">
-            <svg class="h-16 w-16 md:h-28 md:w-28 text-white" xmlns="http://www.w3.org/2000/svg"
-              xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 36 36"
-              preserveAspectRatio="xMidYMid meet" fill="currentColor">
-              <title>login-solid</title>
-              <path
-                d="M28,4H12a2,2,0,0,0-2,2v7h8.5L15.12,9.71a1,1,0,0,1,1.41-1.41l5.79,5.79-5.79,5.79a1,1,0,0,1-1.41-1.41L18.5,15H10V30a2,2,0,0,0,2,2H28a2,2,0,0,0,2-2V6A2,2,0,0,0,28,4Z"
-                class="clr-i-solid clr-i-solid-path-1"></path>
-              <path d="M10,13H4a1,1,0,0,0-1,1,1,1,0,0,0,1,1h6Z" class="clr-i-solid clr-i-solid-path-2"></path>
-              <rect x="0" y="0" width="36" height="36" fill-opacity="0"></rect>
-            </svg>
-          </div>
-        </div>
-      </a>
-      <span class="font-bold text-lg text-gray-50 md:mx-0 mx-auto">OR</span>
-      <a href="{{ route('kiosk.check-out') }}"
-        class="w-full max-w-md md:w-[28rem] border relative h-64 md:h-80 bg-gradient-to-bl shadow-xl overflow-hidden from-red-800 via-red-800 to-transparent rounded-2xl flex-shrink-0">
+  <div class="flex flex-col items-center justify-center min-h-[calc(100vh-120px)] px-6">
+    {{-- Logo --}}
+    <div class="mb-10">
+      <img src="{{ asset('images/homiLogo.png') }}" alt="HOMI" class="h-20 mx-auto">
+    </div>
 
-        <svg class="h-48 md:h-72 text-white absolute -right-16 md:-right-28 opacity-10 top-0" xmlns="http://www.w3.org/2000/svg"
-          xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 36 36"
-          preserveAspectRatio="xMidYMid meet" fill="currentColor">
-          <title>logout-solid</title>
-          <path
-            d="M23,4H7A2,2,0,0,0,5,6V30a2,2,0,0,0,2,2H23a2,2,0,0,0,2-2V24H15.63a1,1,0,0,1-1-1,1,1,0,0,1,1-1H25V6A2,2,0,0,0,23,4Z"
-            class="clr-i-solid clr-i-solid-path-1"></path>
-          <path d="M28.16,17.28a1,1,0,0,0-1.41,1.41L30.13,22H25v2h5.13l-3.38,3.46a1,1,0,1,0,1.41,1.41L34,23.07Z"
-            class="clr-i-solid clr-i-solid-path-2"></path>
-          <rect x="0" y="0" width="36" height="36" fill-opacity="0"></rect>
-        </svg>
-        <div class="pt-4 md:pt-6 px-6 md:px-10 pb-6 md:pb-10">
-          <h1 class="font-bold text-white text-xl md:text-3xl">CHECK-OUT</h1>
+    {{-- Welcome --}}
+    <div class="text-center mb-14">
+      <h1 class="text-5xl md:text-6xl font-bold text-gray-800">Welcome to HOMI</h1>
+      <p class="mt-4 text-xl text-gray-400">Tap an option to get started</p>
+    </div>
+
+    {{-- Cards --}}
+    <div class="flex flex-col md:flex-row items-center gap-8 w-full max-w-4xl justify-center">
+      <a href="{{ route('kiosk.check-in') }}"
+        class="group w-full bg-white rounded-3xl shadow-lg border border-gray-100 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 p-10 flex flex-col items-center justify-center h-72 md:h-80">
+        <div class="w-24 h-24 rounded-2xl bg-blue-50 flex items-center justify-center mb-6 group-hover:bg-[#009EF5]/10 transition-colors duration-300">
+          <svg class="w-12 h-12 text-[#009EF5]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+          </svg>
         </div>
-        <div class="flex justify-center items-center">
-          <div class="w-24 h-24 md:w-40 md:h-40 flex justify-center items-center rounded-full p-2 md:p-3 shadow-xl bg-red-700">
-            <svg class="h-16 w-16 md:h-28 md:w-28 text-white" xmlns="http://www.w3.org/2000/svg"
-              xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 36 36"
-              preserveAspectRatio="xMidYMid meet" fill="currentColor">
-              <title>logout-solid</title>
-              <path
-                d="M23,4H7A2,2,0,0,0,5,6V30a2,2,0,0,0,2,2H23a2,2,0,0,0,2-2V24H15.63a1,1,0,0,1-1-1,1,1,0,0,1,1-1H25V6A2,2,0,0,0,23,4Z"
-                class="clr-i-solid clr-i-solid-path-1"></path>
-              <path d="M28.16,17.28a1,1,0,0,0-1.41,1.41L30.13,22H25v2h5.13l-3.38,3.46a1,1,0,1,0,1.41,1.41L34,23.07Z"
-                class="clr-i-solid clr-i-solid-path-2"></path>
-              <rect x="0" y="0" width="36" height="36" fill-opacity="0"></rect>
-            </svg>
-          </div>
+        <h2 class="text-3xl font-bold text-gray-800">CHECK-IN</h2>
+        <p class="mt-2 text-lg text-gray-400">Start your stay with us</p>
+      </a>
+
+      <a href="{{ route('kiosk.check-out') }}"
+        class="group w-full bg-white rounded-3xl shadow-lg border border-gray-100 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 p-10 flex flex-col items-center justify-center h-72 md:h-80">
+        <div class="w-24 h-24 rounded-2xl bg-blue-50 flex items-center justify-center mb-6 group-hover:bg-[#009EF5]/10 transition-colors duration-300">
+          <svg class="w-12 h-12 text-[#009EF5]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0110.5 3h6a2.25 2.25 0 012.25 2.25v13.5A2.25 2.25 0 0116.5 21h-6a2.25 2.25 0 01-2.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+          </svg>
         </div>
+        <h2 class="text-3xl font-bold text-gray-800">CHECK-OUT</h2>
+        <p class="mt-2 text-lg text-gray-400">Complete your checkout</p>
       </a>
     </div>
   </div>
-  <script>
-</script>
 </x-kiosk-layout-update>

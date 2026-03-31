@@ -1,66 +1,40 @@
-<div class="pt-10 ">
-  <div class="flex items-end justify-between">
-    <div>
-      <h1 class="font-bold text-red-600">CHECK-OUT</h1>
-      <h1 class="text-3xl uppercase font-extrabold text-gray-600">Input QR Code</h1>
-    </div>
-    <div>
-        <button x-on:click="step--" wire:click="backRoom"
-        class="bg-gray-50 outline-blue-500 border border-blue-500 p-2 px-4 flex space-x-1 rounded-full">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-            stroke="currentColor" class="w-6 text-blue-500 h-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18" />
-          </svg>
-          <span class="font-semibold text-blue-500 uppercase">Back</span>
-        </button>
-    </div>
-  </div>
-<div class="mt-5">
-  <div class="flex justify-center ">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-24 w-24">
+<div class="px-4">
+  <div class="max-w-lg mx-auto bg-white rounded-2xl shadow-md border border-gray-100 p-8 text-center">
+    <div class="flex justify-center mb-4">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-20 w-20 text-[#009EF5]">
         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" />
         <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z" />
-    </svg>
+      </svg>
+    </div>
 
-      {{-- <h1 class="text-6xl text-center font-bold text-gray-700 mt-5">SCAN QR CODE (CHECK-OUT)</h1> --}}
-  </div>
-  <div class="flex justify-center mt-16">
-      <input wire:model="qr_code" type="text" id="qr_code" class="text-center p-4 text-2xl focus:outline-none w-full mx-14 rounded-md" autofocus autocomplete="off" />
-  </div>
-  <small  class="flex justify-center mt-3 font-medium text-red-600">*Input QR Code Here*</small>
-</div>
+    <h1 class="text-xl font-bold text-gray-800">Scan QR Code</h1>
+    <p class="text-sm text-gray-500 mt-1 mb-6">Scan or enter your transaction code below</p>
 
-<div class="fixed bottom-20 right-0 left-0">
-  <div class="flex justify-center">
-    @if ($qr_code)
-     <button 
-           wire:click="validateQR"
-          class="font-medium px-8 py-3 text-white bg-green-600 rounded-2xl flex items-center gap-2">
-          
-          NEXT
-          
-          <svg xmlns="http://www.w3.org/2000/svg" 
-              class="w-14 h-14" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M13 7l5 5m0 0l-5 5m5-5H6" />
-          </svg>
+    <input wire:model="qr_code" type="text" id="qr_code"
+      class="w-full text-center text-2xl p-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#009EF5] focus:border-transparent transition-all duration-200"
+      autofocus autocomplete="off" placeholder="QR Code" />
 
+    <div class="flex justify-center gap-3 mt-8">
+      <button x-on:click="step--" wire:click="backRoom"
+        class="px-6 py-3 rounded-xl font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 transition-all duration-200">
+        Back
       </button>
-      {{-- <x-button label="NEXT" wire:click="validateQR" lg class="font-medium " right-icon="chevron-double-right"
-        spinner green /> --}}
-    @endif
+      @if ($qr_code)
+        <button wire:click="validateQR"
+          class="px-8 py-3 rounded-xl font-semibold text-white bg-[#009EF5] hover:bg-[#0080cc] shadow-lg shadow-[#009EF5]/25 transition-all duration-200 flex items-center gap-2">
+          NEXT
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </button>
+      @endif
+    </div>
   </div>
 </div>
 
 <script>
-    const qrInput = document.getElementById('qr_code');
-    qrInput.addEventListener('blur', () => {
-        qrInput.focus();
-    });
+  const qrInput = document.getElementById('qr_code');
+  qrInput.addEventListener('blur', () => {
+    qrInput.focus();
+  });
 </script>
-
-  </div>
-

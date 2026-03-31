@@ -3,114 +3,121 @@
 namespace App\Livewire\Admin\Manage;
 
 use Livewire\Component;
-use App\Models\Discount as discountModel;
 use WireUi\Traits\WireUiActions;
-use Livewire\WithPagination;
+use Filament\Tables;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Enums\FiltersLayout;
+use Illuminate\Database\Eloquent\Builder;
+use App\Models\DiscountConfiguration;
+use App\Models\Type;
+use App\Models\StayingHour;
+use App\Models\Branch;
 
-class Discount extends Component
+class Discount extends Component implements Tables\Contracts\HasTable, \Filament\Forms\Contracts\HasForms
 {
+    use Tables\Concerns\InteractsWithTable;
+    use \Filament\Forms\Concerns\InteractsWithForms;
     use WireUiActions;
-    use WithPagination;
-    public $add_modal = false;
-    public $edit_modal = false;
-    public $search;
-    public $discount_id, $name, $description, $amount, $type;
+
+    public $branchId;
+    public $discountAmount;
+    public $discountEnabled;
+
+    public function mount()
+    {
+        $this->branchId = auth()->user()->branch_id;
+        $this->loadBranchSettings();
+        $this->ensureAllCombinationsExist();
+    }
+
+    public function updatedBranchId()
+    {
+        $this->loadBranchSettings();
+        $this->ensureAllCombinationsExist();
+    }
+
+    private function loadBranchSettings()
+    {
+        $branch = Branch::find($this->branchId);
+        $this->discountAmount = $branch?->discount_amount ?? 0;
+        $this->discountEnabled = $branch?->discount_enabled ?? false;
+    }
+
+    private function ensureAllCombinationsExist()
+    {
+        $types = Type::where('branch_id', $this->branchId)->get();
+        $stayingHours = StayingHour::where('branch_id', $this->branchId)->get();
+
+        foreach ($types as $type) {
+            foreach ($stayingHours as $sh) {
+                DiscountConfiguration::firstOrCreate([
+                    'branch_id' => $this->branchId,
+                    'type_id' => $type->id,
+                    'staying_hour_id' => $sh->id,
+                ], [
+                    'is_enabled' => false,
+                ]);
+            }
+        }
+    }
+
+    public function saveGlobalSettings()
+    {
+        $this->validate([
+            'discountAmount' => 'required|numeric|min:0',
+        ]);
+
+        Branch::where('id', $this->branchId)->update([
+            'discount_amount' => $this->discountAmount,
+            'discount_enabled' => $this->discountEnabled,
+        ]);
+
+        $this->dialog()->success('Saved', 'Discount settings updated.');
+    }
+
+    protected function getTableQuery(): Builder
+    {
+        return DiscountConfiguration::query()
+            ->where('branch_id', $this->branchId)
+            ->with(['type', 'stayingHour']);
+    }
+
+    protected function getTableColumns(): array
+    {
+        return [
+            Tables\Columns\TextColumn::make('type.name')
+                ->label('ROOM TYPE')
+                ->sortable()
+                ->searchable(),
+            Tables\Columns\TextColumn::make('stayingHour.number')
+                ->label('HOURS')
+                ->formatStateUsing(fn ($state) => $state . ' Hours')
+                ->sortable(),
+            Tables\Columns\ToggleColumn::make('is_enabled')
+                ->label('DISCOUNT ENABLED')
+                ->onColor('success')
+                ->offColor('danger'),
+        ];
+    }
+
+    protected function getTableFilters(): array
+    {
+        return [
+            SelectFilter::make('type_id')
+                ->label('Room Type')
+                ->options(Type::where('branch_id', $this->branchId)->pluck('name', 'id')),
+        ];
+    }
+
+    protected function getTableFiltersLayout(): ?string
+    {
+        return FiltersLayout::AboveContent->value;
+    }
 
     public function render()
     {
         return view('livewire.admin.manage.discount', [
-            'discounts' => discountModel::where(
-                'branch_id',
-                auth()->user()->branch_id
-            )->where('name', 'like', '%' . $this->search . '%')->get(),
+            'branches' => auth()->user()->hasRole('superadmin') ? Branch::all() : collect(),
         ]);
-    }
-
-    public function saveDiscount()
-    {
-        $this->validate([
-            'name' => 'required|unique:discounts,name,',
-            'description' => 'required',
-            'amount' => 'required|integer|regex:/^\d+$/',
-            'type' => 'required',
-        ]);
-
-        discountModel::create([
-            'name' => $this->name,
-            'description' => $this->description,
-            'amount' => $this->amount,
-            'is_percentage' => $this->type == '2' ? true : false,
-            'branch_id' => auth()->user()->branch_id,
-        ]);
-
-        $this->dialog()->success(
-            $title = 'Discount saved',
-            $description = 'Discount was successfully saved'
-        );
-        $this->add_modal = false;
-        $this->reset(['name', 'description', 'amount', 'type']);
-    }
-
-    public function editDiscount($discount_id)
-    {
-        $discount = discountModel::where('id', $discount_id)->where('branch_id', auth()->user()->branch_id)->first();
-        $this->discount_id = $discount->id;
-        $this->name = $discount->name;
-        $this->description = $discount->description;
-        $this->amount = $discount->amount;
-        $this->type = $discount->is_percentage ? '2' : '1';
-        $this->edit_modal = true;
-    }
-
-    public function updateDiscount()
-    {
-        $this->validate([
-            'name' => 'required|unique:discounts,name,' . $this->discount_id,
-            'description' => 'required',
-            'amount' => 'required|integer|regex:/^\d+$/',
-            'type' => 'required',
-        ]);
-
-        discountModel::where('id', $this->discount_id)->update([
-            'name' => $this->name,
-            'description' => $this->description,
-            'amount' => $this->amount,
-            'is_percentage' => $this->type == '2' ? true : false,
-        ]);
-
-        $this->dialog()->success(
-            $title = 'Discount Updated',
-            $description = 'The discount has been updated successfully.'
-        );
-
-        $this->edit_modal = false;
-        $this->reset(['name', 'description', 'amount', 'type']);
-    }
-
-    public function deleteDiscount($discount_id)
-    {
-        $this->dialog()->confirm([
-            'title' => 'Are you Sure?',
-            'description' => 'delete this discount?',
-            'icon' => 'question',
-            'accept' => [
-                'label' => 'Yes, delete this discount',
-                'method' => 'confirmDelete',
-                'params' => [$discount_id],
-            ],
-            'reject' => [
-                'label' => 'No, cancel',
-            ],
-        ]);
-    }
-
-    public function confirmDelete($discount_id)
-    {
-        discountModel::where('id', $discount_id)->delete();
-
-        $this->dialog()->success(
-            $title = 'Discount Deleted',
-            $description = 'The discount has been deleted successfully.'
-        );
     }
 }

@@ -1,133 +1,43 @@
 <div>
-  <div class="mt-5">
-    <div class="flex items-end">
-      <div class="sm:flex-auto">
-        <div class="search flex items-center rounded-lg  px-3 py-1 w-72 border border-gray-300 bg-white shadow-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="fill-gray-500" width="24" height="24">
-            <path fill="none" d="M0 0h24v24H0z" />
-            <path
-              d="M11 2c4.968 0 9 4.032 9 9s-4.032 9-9 9-9-4.032-9-9 4.032-9 9-9zm0 16c3.867 0 7-3.133 7-7 0-3.868-3.133-7-7-7-3.868 0-7 3.132-7 7 0 3.867 3.132 7 7 7zm8.485.071l2.829 2.828-1.415 1.415-2.828-2.829 1.414-1.414z" />
-          </svg>
-          <input type="text" wire:model="search"
-            class="outline:none  h-8 focus:ring-0 flex-1 border-0 focus:border-0 rounded-md" placeholder="Search">
+    {{-- Branch selector (superadmin) --}}
+    @if($branches->isNotEmpty())
+        <div class="mb-4 flex justify-end">
+            <select wire:model.live="branchId" class="rounded-lg border-gray-200 text-sm focus:ring-[#009EF5] focus:border-[#009EF5]">
+                @foreach($branches as $branch)
+                    <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                @endforeach
+            </select>
         </div>
-      </div>
-      <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-        <x-button wire:click="$set('add_modal', true)" icon="plus" blue label="Add New" />
-      </div>
-    </div>
+    @endif
 
-
-    <div class="mt-3 flex flex-col">
-      <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-        <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-          <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-            <table class="min-w-full divide-y divide-gray-300">
-              <thead class="bg-blue-500">
-                <tr>
-                  <th scope="col"
-                    class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold uppercase text-white sm:pl-6">
-                    Name</th>
-                  <th scope="col"
-                    class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold uppercase text-white sm:pl-6">
-                    DESCRIPTION</th>
-                  <th scope="col"
-                    class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold uppercase text-white sm:pl-6">
-                    AMOUNT</th>
-                  <th scope="col"
-                    class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold uppercase text-white sm:pl-6">
-                    AVAILABLE</th>
-                  <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                    <span class="sr-only">Edit</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200 bg-white">
-                @forelse ($discounts as $discount)
-                  <tr>
-                    <td class="whitespace-nowrap py-3 pl-4 pr-3 text-sm   text-gray-700 sm:pl-6">
-                      {{ $discount->name }}</td>
-                    <td class="whitespace-nowrap py-3 pl-4 pr-3 text-sm   text-gray-700 sm:pl-6">
-                      {{ $discount->description }}</td>
-                    <td class="whitespace-nowrap py-3 pl-4 pr-3 text-sm uppercase font-medium text-gray-700 sm:pl-6">
-                      {{ $discount->is_percentage ? $discount->amount . '%' : '₱' . number_format($discount->amount, 2) }}
-                    </td>
-                    <td class="whitespace-nowrap py-3 pl-4 pr-3 text-sm uppercase font-medium text-gray-700 sm:pl-6">
-                      @switch($discount->is_available)
-                        @case(1)
-                          <x-button icon="check" sm positive label="Available" />
-                        @break
-
-                        @case(0)
-                          <x-button icon="x-mark" sm label="Not Available" />
-                        @break
-
-                        @default
-                      @endswitch
-
-                    </td>
-                    <td class="relative whitespace-nowrap py-3 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                      <div class="flex space-x-2 justify-end">
-                        <x-button icon="pencil-square" wire:click="editDiscount({{ $discount->id }})"
-                          spinner="editDiscount({{ $discount->id }})" label="Edit" xs />
-                        <x-button wire:click="deleteDiscount({{ $discount->id }})"
-                          spinner="deleteDiscount({{ $discount->id }})" icon="trash" label="Delete" xs />
-                      </div>
-                    </td>
-                  </tr>
-                  @empty
-                    <td colspan="5" class="py-3 pl-4 pr-3 text-sm text-gray-700 sm:pl-6">
-                      <span class="flex justify-center text-lg italic"> No data found</span>
-                    </td>
-                  @endforelse
-                </tbody>
-              </table>
+    {{-- Global settings card --}}
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 mb-5">
+        <h3 class="text-sm font-bold text-gray-800 mb-3">Branch Discount Settings</h3>
+        <div class="flex flex-wrap items-end gap-4">
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Discount Amount</label>
+                <div class="flex items-center">
+                    <span class="inline-flex items-center rounded-l-lg border border-r-0 border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-500">₱</span>
+                    <input type="number" wire:model="discountAmount" min="0" step="1"
+                        class="w-32 rounded-r-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#009EF5] focus:ring-2 focus:ring-[#009EF5]/20 focus:outline-none">
+                </div>
             </div>
-          </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Global Switch</label>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" wire:model="discountEnabled" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-[#009EF5]/20 rounded-full peer peer-checked:bg-[#009EF5] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+                    <span class="ml-2 text-sm font-medium {{ $discountEnabled ? 'text-[#009EF5]' : 'text-gray-400' }}">
+                        {{ $discountEnabled ? 'Enabled' : 'Disabled' }}
+                    </span>
+                </label>
+            </div>
+            <button wire:click="saveGlobalSettings" class="rounded-lg bg-[#009EF5] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0080cc] transition shadow-sm">
+                Save Settings
+            </button>
         </div>
-      </div>
     </div>
-    <x-modal wire:model="add_modal" max-width="lg">
-      <x-card title="Add New">
-        <div class="flex flex-col space-y-3">
-          <x-input wire:model="name" label="Name" placeholder="" />
-          <x-textarea wire:model="description" label="Description" placeholder="" />
-          <x-input wire:model="amount" label="Amount" placeholder="" />
-          <x-native-select label="Type" wire:model="type">
-            <option selected hidden>Select Type</option>
-            <option value="1">&#8369; (Peso)</option>
-            <option value="2">% (Percentage)</option>
 
-          </x-native-select>
-        </div>
-        <x-slot name="footer">
-          <div class="flex justify-end gap-x-2">
-            <x-button flat label="Cancel" x-on:click="close" />
-            <x-button wire:click="saveDiscount" spinner="saveDiscount" positive label="Save" />
-          </div>
-        </x-slot>
-      </x-card>
-    </x-modal>
-
-    <x-modal wire:model="edit_modal" max-width="lg">
-      <x-card title="Update Discount">
-        <div class="flex flex-col space-y-3">
-          <x-input wire:model="name" label="Name" placeholder="" />
-          <x-textarea wire:model="description" label="Description" placeholder="" />
-          <x-input wire:model="amount" label="Amount" placeholder="" />
-          <x-native-select label="Type" wire:model="type">
-            <option selected hidden>Select Type</option>
-            <option value="1">&#8369; (Peso)</option>
-            <option value="2">% (Percentage)</option>
-
-          </x-native-select>
-        </div>
-        <x-slot name="footer">
-          <div class="flex justify-end gap-x-2">
-            <x-button flat label="Cancel" x-on:click="close" />
-            <x-button wire:click="updateDiscount" spinner="updateDiscount" positive label="Update" />
-          </div>
-        </x-slot>
-      </x-card>
-    </x-modal>
-  </div>
+    {{-- Discount configurations table --}}
+    {{ $this->table }}
+</div>
