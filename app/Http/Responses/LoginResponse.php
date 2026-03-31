@@ -11,7 +11,12 @@ class LoginResponse implements LoginResponseContract
         // Flash = available for the next request only
         session()->flash('from_login', true);
 
-        return redirect()->intended(config('fortify.home'));
+        // Always redirect to /dashboard for role-based routing.
+        // Never use intended() — it would send users to the previous
+        // session's last URL, which may belong to a different role.
+        session()->forget('url.intended');
+
+        return redirect('/dashboard');
     }
 
     public function goToCashOnHand()

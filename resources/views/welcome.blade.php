@@ -1,197 +1,190 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="csrf-token" content="{{ csrf_token() }}">
-
-  <title>HOMI</title>
-
-  <!-- Fonts -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap">
-  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-  <!-- Styles -->
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-
-
-
+  <title>HOMI — Hotel Management System</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Alkatra:wght@400;500;600;700&family=Montserrat:wght@900&display=swap"
-    rel="stylesheet">
-  @livewireStyles
-
-  <!-- Scripts -->
-  @vite(['resources/css/app.css', 'resources/js/app.js'])
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  @vite(['resources/css/app.css'])
+  <style>
+    body { font-family: 'DM Sans', sans-serif; }
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .animate-float { animation: float 6s ease-in-out infinite; }
+    .animate-fade-up { animation: fadeUp 0.8s ease-out forwards; }
+    .animate-fade-up-delay-1 { animation: fadeUp 0.8s ease-out 0.15s forwards; opacity: 0; }
+    .animate-fade-up-delay-2 { animation: fadeUp 0.8s ease-out 0.3s forwards; opacity: 0; }
+    .animate-fade-up-delay-3 { animation: fadeUp 0.8s ease-out 0.45s forwards; opacity: 0; }
+    .animate-fade-in { animation: fadeIn 1.2s ease-out forwards; }
+  </style>
 </head>
-@if(app()->environment('staging'))
-   <div class="fixed top-0 left-0 w-full bg-red-600 text-white text-center py-1 text-sm font-semibold z-50 animate-pulse">
-        STAGING ENVIRONMENT
+<body class="bg-white antialiased overflow-x-hidden">
+
+  @if(app()->environment('staging'))
+    <div class="fixed top-0 left-0 w-full bg-red-600 text-white text-center py-1 text-xs font-semibold z-50">
+      STAGING ENVIRONMENT
     </div>
+  @endif
 
-    <div style="height: 20px;"></div> {{-- spacer to avoid overlap --}}
-@endif
-
-<body class="font-sans antialiased overflow-hidden">
-
-  <div class="absolute bottom-0 right-0">
-    <img src="{{ asset('images/homiLogo.png') }}" class="h-96 opacity-10" alt="">
+  {{-- Background pattern + decorations --}}
+  <div class="fixed inset-0 -z-10 overflow-hidden">
+    {{-- Subtle dot pattern --}}
+    <svg class="absolute inset-0 h-full w-full" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="dot-pattern" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+          <circle cx="1.5" cy="1.5" r="1.2" fill="#d1d5db" opacity="0.7" />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#dot-pattern)" />
+    </svg>
+    {{-- Gradient blobs --}}
+    <div class="absolute -top-40 -right-40 h-[500px] w-[500px] rounded-full bg-[#009EF5]/5 blur-3xl"></div>
+    <div class="absolute -bottom-40 -left-40 h-[400px] w-[400px] rounded-full bg-[#009EF5]/5 blur-3xl"></div>
+    <div class="absolute top-1/3 right-1/4 h-[300px] w-[300px] rounded-full bg-[#009EF5]/[0.03] blur-3xl"></div>
   </div>
-  <div class="bg-white">
-    <header class="absolute inset-x-0 top-0 z-50">
-      <nav class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8" aria-label="Global">
-        <div class="flex lg:flex-1">
-          <a href="#" class="-m-1.5 p-1.5">
-            <span class="sr-only">Your Company</span>
-            <img class="h-12 w-auto" src="{{ asset('images/homiLogo.png') }}"
-              alt="">
+
+  {{-- Navigation --}}
+  <nav class="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-6 py-6 lg:px-8">
+    <a href="/" class="flex items-center">
+      <img src="{{ asset('images/homiLogo.png') }}" alt="HOMI" class="h-9 w-auto">
+    </a>
+    <a href="{{ route('login') }}" class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-all duration-200">
+      Sign In
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+    </a>
+  </nav>
+
+  {{-- Hero Section --}}
+  <section class="relative z-10 mx-auto max-w-6xl px-6 lg:px-8 pt-16 sm:pt-24 lg:pt-32 pb-20">
+    <div class="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
+      {{-- Left: Text --}}
+      <div class="flex-1 text-center lg:text-left">
+        <div class="animate-fade-up inline-flex items-center gap-2 rounded-full bg-[#009EF5]/10 px-4 py-1.5 mb-6">
+          <div class="h-1.5 w-1.5 rounded-full bg-[#009EF5] animate-pulse"></div>
+          <span class="text-xs font-semibold text-[#009EF5] uppercase tracking-wider">Hotel Management System</span>
+        </div>
+
+        <h1 class="animate-fade-up-delay-1 text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-[1.1] tracking-tight">
+          Smarter way to
+          <span class="relative">
+            <span class="text-[#009EF5]">manage</span>
+            <svg class="absolute -bottom-1 left-0 w-full" viewBox="0 0 200 8" fill="none"><path d="M1 5.5C47 2 153 2 199 5.5" stroke="#009EF5" stroke-width="2" stroke-linecap="round" opacity="0.3"/></svg>
+          </span>
+          <br>your hotel.
+        </h1>
+
+        <p class="animate-fade-up-delay-2 mt-6 text-lg text-gray-500 max-w-lg mx-auto lg:mx-0 leading-relaxed">
+          Streamline check-ins, room management, billing, and operations — all from one powerful platform.
+        </p>
+
+        <div class="animate-fade-up-delay-3 mt-10 flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
+          <a href="{{ route('login') }}" class="group inline-flex items-center gap-2.5 rounded-xl bg-[#009EF5] px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#009EF5]/25 hover:bg-[#0080cc] hover:shadow-[#009EF5]/40 transition-all duration-300">
+            Get Started
+            <svg class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
           </a>
         </div>
-        <div class="flex lg:hidden">
-          <button type="button" class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700">
-            <span class="sr-only">Open main menu</span>
-            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-              aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-            </svg>
-          </button>
-        </div>
+      </div>
 
-      </nav>
-      <!-- Mobile menu, show/hide based on menu open state. -->
-      {{-- <div class="lg:hidden" role="dialog" aria-modal="true">
-        <!-- Background backdrop, show/hide based on slide-over state. -->
-        <div class="fixed inset-0 z-50"></div>
-        <div
-          class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
-          <div class="flex items-center justify-between">
-            <a href="#" class="-m-1.5 p-1.5">
-              <span class="sr-only">Your Company</span>
-              <img class="h-8 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-                alt="">
-            </a>
-            <button type="button" class="-m-2.5 rounded-md p-2.5 text-gray-700">
-              <span class="sr-only">Close menu</span>
-              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-  </div>
-  </div> --}}
-    </header>
-    <main>
-      <div class="relative isolate">
-        <svg
-          class="absolute inset-x-0 top-0 -z-10 h-[64rem] w-full stroke-gray-200 [mask-image:radial-gradient(32rem_32rem_at_center,white,transparent)]"
-          aria-hidden="true">
-          <defs>
-            <pattern id="1f932ae7-37de-4c0a-a8b0-a6e3b4d44b84" width="200" height="200" x="50%"
-              y="-1" patternUnits="userSpaceOnUse">
-              <path d="M.5 200V.5H200" fill="none" />
-            </pattern>
-          </defs>
-          <svg x="50%" y="-1" class="overflow-visible fill-gray-50">
-            <path d="M-200 0h201v201h-201Z M600 0h201v201h-201Z M-400 600h201v201h-201Z M200 800h201v201h-201Z"
-              stroke-width="0" />
-          </svg>
-          <rect width="100%" height="100%" stroke-width="0" fill="url(#1f932ae7-37de-4c0a-a8b0-a6e3b4d44b84)" />
-        </svg>
-        <div
-          class="absolute left-1/2 right-0 top-0 -z-10 -ml-24 transform-gpu overflow-hidden blur-3xl lg:ml-24 xl:ml-48"
-          aria-hidden="true">
-          <div class="aspect-[801/1036] w-[50.0625rem] bg-gradient-to-tr from-[#009EF5] to-gray-300 opacity-30"
-            style="clip-path: polygon(63.1% 29.5%, 100% 17.1%, 76.6% 3%, 48.4% 0%, 44.6% 4.7%, 54.5% 25.3%, 59.8% 49%, 55.2% 57.8%, 44.4% 57.2%, 27.8% 47.9%, 35.1% 81.5%, 0% 97.7%, 39.2% 100%, 35.2% 81.4%, 97.2% 52.8%, 63.1% 29.5%)">
-          </div>
-        </div>
-
-        <div class="overflow-hidden">
-          <div class="mx-auto max-w-7xl px-6 pb-32 pt-36 sm:pt-60 lg:px-8 lg:pt-32">
-            <div class="mx-auto max-w-2xl gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
-              <div class="w-full max-w-xl lg:shrink-0 xl:max-w-2xl">
-                <h1
-                  class="animate__animated animate__slideInDown font-alkatra text-4xl font-bold tracking-tight  text-gray-700 sm:text-6xl">
-                  Revolutionizing Hospitality with <span class="font-sans  text-blue-600 font-bold">HOMI</span></h1>
-                <p
-                  class="animate__animated animate__slideInDown relative mt-6 text-lg leading-8 text-gray-600 sm:max-w-md lg:max-w-none">
-                  Your Ultimate Hotel Management Solution.</p>
-                {{-- <p
-                  class="animate__animated animate__slideInDown relative mt-1 text-sm leading-8 text-gray-500 sm:max-w-md lg:max-w-none">
-                  Powered By: J7 IT SOLUTION & SERVICES</p> --}}
-                <div class="mt-10 flex items-center gap-x-6">
-                  <a href="{{ route('login') }}"
-                    class="animate__animated animate__slideInUp rounded-md  bg-dlogo px-3.5 py-2 text-sm font-semibold flex space-x-1 items-center text-white shadow-sm hover:bg-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                    <span> LOGIN</span> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                      class="fill-white h-6 w-6 rotate-180">
-                      <path
-                        d="M11 20L1 12L11 4V9C16.5228 9 21 13.4772 21 19C21 19.2729 20.9891 19.5433 20.9676 19.8107C19.4605 16.9502 16.458 15 13 15H11V20Z">
-                      </path>
-                    </svg></a>
+      {{-- Right: Room Preview --}}
+      <div class="flex-1 relative animate-fade-in">
+        <div class="relative max-w-md mx-auto">
+          {{-- Main room image --}}
+          <div class="animate-float rounded-2xl overflow-hidden shadow-2xl shadow-gray-300/40">
+            <img src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=800&q=80" alt="Hotel Room" class="w-full h-72 object-cover">
+            {{-- Overlay gradient --}}
+            <div class="absolute inset-0 bg-gradient-to-t from-gray-900/60 via-transparent to-transparent rounded-2xl"></div>
+            {{-- Room info overlay --}}
+            <div class="absolute bottom-0 left-0 right-0 p-5">
+              <div class="flex items-end justify-between">
+                <div>
+                  <p class="text-white/70 text-[10px] uppercase tracking-widest font-medium">Deluxe Room</p>
+                  <p class="text-white text-lg font-bold mt-0.5">Modern Comfort</p>
+                </div>
+                <div class="flex items-center gap-1 rounded-full bg-white/20 backdrop-blur-sm px-2.5 py-1">
+                  <div class="h-1.5 w-1.5 rounded-full bg-emerald-400"></div>
+                  <span class="text-white text-[10px] font-semibold">Available</span>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <div class=" mt-14 flex justify-end gap-8 sm:-mt-44 sm:justify-start sm:pl-20 lg:mt-0 lg:pl-0">
-                <div
-                  class="ml-auto w-44 flex-none space-y-8 pt-32 sm:ml-0 sm:pt-80 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
-                  <div class="relative">
-                    <img
-                      src="https://images.unsplash.com/photo-1541971875076-8f970d573be6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1074&q=80"
-                      src="" alt=""
-                      class="aspect-[2/3] animate__animated animate__fadeInUp  w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
-                    <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10">
-                    </div>
-                  </div>
-                </div>
-                <div class="mr-auto w-44 flex-none space-y-8 sm:mr-0 sm:pt-52 lg:pt-36 ">
-                  <div class="relative ">
-                    <img
-                      src="https://images.unsplash.com/photo-1518733057094-95b53143d2a7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=665&q=80"
-                      alt=""
-                      class="aspect-[2/3] animate__animated animate__fadeInRight w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
-                    <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10">
-                    </div>
-                  </div>
-                  <div class="relative">
-                    <img
-                      src="https://images.unsplash.com/photo-1629140727571-9b5c6f6267b4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=627&q=80"
-                      alt=""
-                      class="aspect-[2/3] animate__animated animate__fadeInLeft w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
-                    <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10">
-                    </div>
-                  </div>
-                </div>
-                <div class="w-44 flex-none space-y-8 pt-32 sm:pt-0">
-                  <div class="relative">
-                    <img
-                      src="https://images.unsplash.com/photo-1585551897231-77fe523c288a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-                      alt=""
-                      class="aspect-[2/3] animate__animated animate__fadeInTopRight w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
-                    <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10">
-                    </div>
-                  </div>
-                  <div class="relative">
-                    <img
-                      src="https://images.unsplash.com/photo-1562778612-e1e0cda9915c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-                      alt=""
-                      class="aspect-[2/3] animate__animated animate__fadeInBottomRight w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
-                    <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10">
-                    </div>
-                  </div>
-                </div>
+          {{-- Floating type cards from DB --}}
+          @if($types->count() > 0)
+          <div class="absolute -top-3 -right-3 sm:-right-6 rounded-xl overflow-hidden shadow-lg border-2 border-white animate-fade-up-delay-2 w-28" style="animation-delay: 0.6s;">
+            <img src="https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=300&q=80" alt="{{ $types[0]->name }}" class="w-full h-20 object-cover">
+            <div class="bg-white px-2 py-1.5">
+              <p class="text-[10px] font-bold text-gray-800">{{ $types[0]->name }}</p>
+              <p class="text-[9px] text-[#009EF5] font-semibold">{{ $types[0]->rooms_count }} Rooms</p>
+            </div>
+          </div>
+          @endif
+
+          @if($types->count() > 1)
+          <div class="absolute -bottom-3 -left-3 sm:-left-6 rounded-xl overflow-hidden shadow-lg border-2 border-white animate-fade-up-delay-3 w-28" style="animation-delay: 0.9s;">
+            <img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=300&q=80" alt="{{ $types[1]->name }}" class="w-full h-20 object-cover">
+            <div class="bg-white px-2 py-1.5">
+              <p class="text-[10px] font-bold text-gray-800">{{ $types[1]->name }}</p>
+              <p class="text-[9px] text-[#009EF5] font-semibold">{{ $types[1]->rooms_count }} Rooms</p>
+            </div>
+          </div>
+          @endif
+
+          {{-- Total rooms pill --}}
+          <div class="absolute top-3 -left-3 sm:-left-6 rounded-xl bg-white shadow-lg border border-gray-100 px-3 py-2.5 animate-fade-up-delay-2" style="animation-delay: 0.5s;">
+            <div class="flex items-center gap-2">
+              <div class="flex h-7 w-7 items-center justify-center rounded-full bg-[#009EF5]/10">
+                <svg class="h-3.5 w-3.5 text-[#009EF5]" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-gray-800">{{ $totalRooms }}</p>
+                <p class="text-[9px] text-gray-400 -mt-0.5">Total Rooms</p>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </main>
-  </div>
+    </div>
+  </section>
 
+  {{-- Features Section --}}
+  <section class="relative z-10 mx-auto max-w-6xl px-6 lg:px-8 pb-24">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <div class="rounded-2xl bg-white border border-gray-100 shadow-sm p-6 hover:shadow-md hover:border-gray-200 transition-all duration-300">
+        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 mb-4">
+          <svg class="h-5 w-5 text-[#009EF5]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-1.997M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
+        </div>
+        <h3 class="text-sm font-bold text-gray-800">Guest Management</h3>
+        <p class="mt-1.5 text-xs text-gray-400 leading-relaxed">Seamless check-in, check-out, and guest tracking with real-time room monitoring.</p>
+      </div>
 
-  @livewireScriptConfig
+      <div class="rounded-2xl bg-white border border-gray-100 shadow-sm p-6 hover:shadow-md hover:border-gray-200 transition-all duration-300">
+        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 mb-4">
+          <svg class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 7.5h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" /></svg>
+        </div>
+        <h3 class="text-sm font-bold text-gray-800">Multi-Branch</h3>
+        <p class="mt-1.5 text-xs text-gray-400 leading-relaxed">Manage multiple hotel branches from a single dashboard with role-based access control.</p>
+      </div>
+
+      <div class="rounded-2xl bg-white border border-gray-100 shadow-sm p-6 hover:shadow-md hover:border-gray-200 transition-all duration-300">
+        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 mb-4">
+          <svg class="h-5 w-5 text-violet-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
+        </div>
+        <h3 class="text-sm font-bold text-gray-800">Reports & Analytics</h3>
+        <p class="mt-1.5 text-xs text-gray-400 leading-relaxed">Comprehensive reports on occupancy, revenue, and operations to drive better decisions.</p>
+      </div>
+    </div>
+  </section>
+
+  {{-- Footer --}}
+  <footer class="relative z-10 border-t border-gray-100 py-6">
+    <div class="mx-auto max-w-6xl px-6 lg:px-8 flex items-center justify-between">
+      <img src="{{ asset('images/homiLogo.png') }}" alt="HOMI" class="h-6 w-auto opacity-40">
+      <p class="text-xs text-gray-300">&copy; {{ date('Y') }} HOMI. All rights reserved.</p>
+    </div>
+  </footer>
+
 </body>
-
 </html>

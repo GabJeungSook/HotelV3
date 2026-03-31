@@ -13,7 +13,13 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    $totalRooms = \App\Models\Room::count();
+    $types = \App\Models\Type::withCount('rooms')->orderByDesc('rooms_count')->limit(2)->get();
+
+    return view('welcome', [
+        'totalRooms' => $totalRooms,
+        'types' => $types,
+    ]);
 });
 
 
