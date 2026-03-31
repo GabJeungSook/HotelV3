@@ -14,7 +14,7 @@ This applies to: `stays`, `stay_extensions`, `room_transfers`, `applied_discount
 
 ---
 
-## All Tables (35 custom + 5 Spatie + 1 package = 41 total)
+## All Tables (36 custom + 5 Spatie + 1 package = 42 total)
 
 ### 1. `branches`
 
@@ -141,6 +141,22 @@ Room categories — for display and filtering only. NOT for pricing.
 | branch_id | foreignId | NO | | FK to branches |
 | name | string | NO | | Type name (Standard, Deluxe, Suite) |
 | description | string | YES | NULL | Type description |
+| is_active | boolean | NO | true | |
+| created_at | timestamp | YES | | |
+| updated_at | timestamp | YES | | |
+
+---
+
+### 6b. `bed_types`
+
+Bed type categories — admin-manageable per branch.
+
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| id | bigint | NO | auto | Primary key |
+| branch_id | foreignId | NO | | FK to branches |
+| name | string | NO | | Bed type name (Single, Double, Queen, King, Family, etc.) |
+| is_active | boolean | NO | true | |
 | created_at | timestamp | YES | | |
 | updated_at | timestamp | YES | | |
 
@@ -155,7 +171,7 @@ Room categories — for display and filtering only. NOT for pricing.
 | floor_id | foreignId | NO | | FK to floors |
 | room_type_id | foreignId | NO | | FK to room_types (display/filtering only) |
 | room_number | integer | NO | | Room number |
-| bed_type | string | NO | | single / double / twin / queen / king |
+| bed_type_id | foreignId | NO | | FK to bed_types |
 | area | string | YES | NULL | Building wing (e.g., "Main", "Annex") |
 | status | string | NO | 'available' | Room status |
 | is_priority | boolean | NO | false | Priority room flag |
@@ -246,7 +262,7 @@ Extension pricing. Per-room.
 | **Snapshots (Frozen at check-in — never change)** | | | | |
 | snapshot_room_number | integer | NO | | Room number at check-in |
 | snapshot_room_type_name | string | NO | | Room type name at check-in |
-| snapshot_bed_type | string | NO | | Bed type at check-in |
+| snapshot_bed_type_name | string | NO | | Bed type name at check-in (snapshot) |
 | snapshot_floor_number | integer | NO | | Floor number at check-in |
 | snapshot_rate_hours | integer | NO | | Hours from the rate at check-in |
 | snapshot_rate_amount | decimal(10,2) | NO | | Rate amount at check-in |

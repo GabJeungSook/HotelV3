@@ -592,9 +592,15 @@ belongsTo: Branch
 hasMany:   Room
 ```
 
+### BedType
+```
+belongsTo: Branch
+hasMany:   Room
+```
+
 ### Room
 ```
-belongsTo: Branch, Floor, RoomType
+belongsTo: Branch, Floor, RoomType, BedType
 hasMany:   Rate, ExtensionRate, Stay, CleaningTask
 ```
 
