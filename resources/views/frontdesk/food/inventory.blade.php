@@ -1,6 +1,6 @@
 @section('breadcrumbs', 'Food Inventory')
-<x-admin-layout>
+<x-shared-admin-layout>
     <div>
     <livewire:frontdesk.food.inventory :record="$record" />
     </div>
-  </x-admin-layout>
+  </x-shared-admin-layout>

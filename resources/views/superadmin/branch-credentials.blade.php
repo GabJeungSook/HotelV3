@@ -1,8 +1,8 @@
 @section('breadcrumbs')
   Branch Credentials
 @endsection
-<x-superadmin>
+<x-shared-admin-layout>
   <div class="xl:max-w-full">
     <livewire:superadmin.branch-credentials :id="$id" />
   </div>
-</x-superadmin>
+</x-shared-admin-layout>

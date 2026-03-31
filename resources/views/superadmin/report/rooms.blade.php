@@ -1,4 +1,4 @@
-<x-superadmin>
+<x-shared-admin-layout>
       @section('breadcrumbs', 'Room Boy Reports')
     <div>
     <livewire:superadmin.report.rooms />
@@ -24,4 +24,4 @@
 
     }
   </script>
-  </x-superadmin>
+  </x-shared-admin-layout>

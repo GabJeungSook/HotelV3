@@ -1,5 +1,5 @@
 @section('breadcrumbs', 'Kitchen')
-<x-admin-layout>
+<x-shared-admin-layout>
     {{-- <div class="container items-center py-8 m-auto mt-5">
         <div class="flex flex-wrap pb-3 mx-2 md:mx-24 lg:mx-0">
           <div class="w-72 p-2 lg:w-72 md:w-72">
@@ -44,4 +44,4 @@
       </div> --}}
 
 
-  </x-admin-layout>
+  </x-shared-admin-layout>

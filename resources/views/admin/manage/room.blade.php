@@ -1,6 +1,6 @@
 @section('breadcrumbs')
   Manage Rooms
 @endsection
-<x-admin-layout>
+<x-shared-admin-layout>
   <livewire:admin.manage.room />
-</x-admin-layout>
+</x-shared-admin-layout>

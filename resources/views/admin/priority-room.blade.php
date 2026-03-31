@@ -1,7 +1,7 @@
 @section('breadcrumbs')
   Priority Rooms
 @endsection
-<x-admin-layout>
+<x-shared-admin-layout>
   <livewire:frontdesk.priority-room />
-</x-admin-layout>
+</x-shared-admin-layout>
 <!-- hahahaha -->

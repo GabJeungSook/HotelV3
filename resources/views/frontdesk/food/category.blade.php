@@ -1,6 +1,6 @@
 @section('breadcrumbs', 'Food Category')
-<x-admin-layout>
+<x-shared-admin-layout>
     <div>
       <livewire:frontdesk.food.category />
     </div>
-  </x-admin-layout>
+  </x-shared-admin-layout>

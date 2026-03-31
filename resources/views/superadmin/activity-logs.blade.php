@@ -1,7 +1,7 @@
-<x-superadmin>
+<x-shared-admin-layout>
    @section('breadcrumbs', 'Activity Logs')
 
   <livewire:superadmin.activity-logs />
 
 
-</x-superadmin>
+</x-shared-admin-layout>

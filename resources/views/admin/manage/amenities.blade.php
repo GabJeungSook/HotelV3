@@ -1,7 +1,7 @@
 @section('breadcrumbs')
   Manage Amenities
 @endsection
-<x-admin-layout>
+<x-shared-admin-layout>
 
   <livewire:admin.manage.amenities />
-</x-admin-layout>
+</x-shared-admin-layout>

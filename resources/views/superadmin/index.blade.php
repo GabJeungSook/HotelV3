@@ -1,4 +1,4 @@
-<x-superadmin>
+<x-shared-admin-layout>
  @section('breadcrumbs', 'Superadmin Dashboard')
 
     <div>
@@ -6,4 +6,4 @@
     </div>
 
 
-  </x-superadmin>
+  </x-shared-admin-layout>

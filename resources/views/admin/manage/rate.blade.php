@@ -1,6 +1,6 @@
 @section('breadcrumbs')
   Manage Rates
 @endsection
-<x-admin-layout>
+<x-shared-admin-layout>
   <livewire:admin.manage.rate />
-</x-admin-layout>
+</x-shared-admin-layout>

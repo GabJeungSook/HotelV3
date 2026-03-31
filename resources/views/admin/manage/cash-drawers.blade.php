@@ -1,7 +1,7 @@
 @section('breadcrumbs')
   Manage Cash Drawers
 @endsection
-<x-admin-layout>
+<x-shared-admin-layout>
 
   <livewire:admin.manage.manage-cash-drawers />
-</x-admin-layout>
+</x-shared-admin-layout>

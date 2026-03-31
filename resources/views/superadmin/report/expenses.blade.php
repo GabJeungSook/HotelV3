@@ -1,4 +1,4 @@
-<x-superadmin>
+<x-shared-admin-layout>
      @section('breadcrumbs', 'Expenses Reports')
     <div>
     <livewire:superadmin.report.expenses />
@@ -24,4 +24,4 @@
 
     }
   </script>
-  </x-superadmin>
+  </x-shared-admin-layout>

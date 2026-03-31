@@ -1,7 +1,7 @@
-<x-superadmin>
+<x-shared-admin-layout>
    @section('breadcrumbs', 'Branches')
 
   <livewire:superadmin.manage-branch />
 
 
-</x-superadmin>
+</x-shared-admin-layout>

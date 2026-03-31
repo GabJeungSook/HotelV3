@@ -1,6 +1,6 @@
 @section('breadcrumbs')
   Manage Types
 @endsection
-<x-admin-layout>
+<x-shared-admin-layout>
   <livewire:admin.manage.type />
-</x-admin-layout>
+</x-shared-admin-layout>

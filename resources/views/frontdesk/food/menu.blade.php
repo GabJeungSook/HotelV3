@@ -1,5 +1,5 @@
-<x-admin-layout>
+<x-shared-admin-layout>
     <div>
       <livewire:frontdesk.food.menu />
     </div>
-  </x-admin-layout>
+  </x-shared-admin-layout>
