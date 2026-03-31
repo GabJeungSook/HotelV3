@@ -265,6 +265,51 @@ enum CleaningStatus: string
     case InProgress = 'in_progress';
     case Completed = 'completed';
 }
+
+// app/Enums/StockReason.php
+enum StockReason: string
+{
+    case ManualAdd = 'manual_add';
+    case GuestOrder = 'guest_order';
+    case Spoilage = 'spoilage';
+    case Adjustment = 'adjustment';
+}
+
+// app/Enums/AssignmentType.php
+enum AssignmentType: string
+{
+    case Primary = 'primary';
+    case Deployed = 'deployed';
+    case Oversight = 'oversight';
+}
+
+// NOTE: bed_type on rooms is a free string, NOT an enum
+// Admin can enter any value: single, double, twin, queen, king, family, bunk, etc.
+// Do not create a BedType enum — keep it flexible.
+```
+
+---
+
+## 4b. Key Database Indexes
+
+```sql
+-- Performance-critical indexes (add in migrations)
+
+-- Transactions: all financial queries filter by stay + type
+CREATE INDEX idx_transactions_stay_type ON transactions(stay_id, type);
+CREATE INDEX idx_transactions_shift ON transactions(shift_id);
+CREATE INDEX idx_transactions_linked ON transactions(linked_transaction_id);
+
+-- Stays: room monitoring, active stays by branch
+CREATE INDEX idx_stays_branch_status ON stays(branch_id, status);
+CREATE INDEX idx_stays_room_status ON stays(room_id, status);
+
+-- Cleaning: roomboy dashboard
+CREATE INDEX idx_cleaning_status ON cleaning_tasks(status);
+CREATE INDEX idx_cleaning_assigned ON cleaning_tasks(assigned_to, status);
+
+-- Rooms: availability checks
+CREATE INDEX idx_rooms_branch_status ON rooms(branch_id, status);
 ```
 
 ---

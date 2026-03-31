@@ -159,6 +159,7 @@ Room categories — for display and filtering only. NOT for pricing.
 | area | string | YES | NULL | Building wing (e.g., "Main", "Annex") |
 | status | string | NO | 'available' | Room status |
 | is_priority | boolean | NO | false | Priority room flag |
+| is_active | boolean | NO | true | Can be deactivated (permanently closed) without deletion |
 | created_at | timestamp | YES | | |
 | updated_at | timestamp | YES | | |
 
@@ -263,6 +264,7 @@ Extension pricing. Per-room.
 | charge_original_rate_next | boolean | NO | false | Next extension charges original rate? |
 | **Payment Summary (Running totals)** | | | | |
 | total_deposit_in | decimal(10,2) | NO | 0 | Cache: total deposit collected |
+| total_deposit_out | decimal(10,2) | NO | 0 | Cache: total deposit used/refunded |
 | total_charges | decimal(10,2) | NO | 0 | Cache: running total of all charges |
 | total_paid | decimal(10,2) | NO | 0 | Cache: running total of all payments |
 | **Status** | | | | |
@@ -396,6 +398,7 @@ Temporary. Deleted after resolution.
 | room_type_id | foreignId | YES | NULL | Check-in only |
 | rate_id | foreignId | YES | NULL | Check-in only |
 | room_id | foreignId | YES | NULL | Room guest selected |
+| discount_id | foreignId | YES | NULL | Check-in only: discount guest selected at kiosk |
 | expires_at | datetime | NO | | Auto-expiry time |
 | created_at | timestamp | YES | | |
 
@@ -467,6 +470,7 @@ Temporary. Deleted after resolution.
 | id | bigint | NO | auto | Primary key |
 | branch_id | foreignId | NO | | FK to branches |
 | name | string | NO | | Category name |
+| is_active | boolean | NO | true | Can be deactivated without deletion |
 | created_at | timestamp | YES | | |
 | updated_at | timestamp | YES | | |
 

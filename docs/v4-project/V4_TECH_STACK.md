@@ -38,9 +38,10 @@ Packages, tools, and architecture decisions for the V4 rebuild.
 | laravel/jetstream | ^5.0 | **Review** | May not need if using Filament auth |
 | laravel/sanctum | ^4.0 | Keep (latest) | API auth for kiosk |
 | spatie/laravel-permission | ^6.0 | Keep | RBAC |
-| wireui/wireui | ^2.0 | Keep or switch to Flux UI | Dialog, notifications |
+| livewire/flux | ^2.9 | **Replace WireUI** | Flux UI Free — built by Livewire team, used in general-pos |
+| wireui/wireui | ^2.0 | **Remove** | Replaced by Flux UI |
 | pusher/pusher-php-server | ^7.2 | Keep | Real-time notifications |
-| blade-ui-kit/blade-ui-kit | ^0.5 | **Review** | May not need with Filament 5 |
+| blade-ui-kit/blade-ui-kit | ^0.5 | **Remove** | Only used for x-countdown — replace with pure Alpine.js timer (10 lines) |
 | spatie/laravel-db-snapshots | * | **Remove** | Dev tool, not for production |
 | guzzlehttp/guzzle | ^7.2 | Keep | HTTP client |
 | laravel/tinker | ^2.9 | Keep | Dev tool |
@@ -75,9 +76,47 @@ Packages, tools, and architecture decisions for the V4 rebuild.
 | pusher-js | ^8.0.1 | Keep (latest) | Pusher client |
 | postcss | ^8.4.14 | Keep (latest) | CSS processing |
 | autoprefixer | ^10.4.13 | Keep (latest) | CSS vendor prefixes |
-| lodash | ^4.17.19 | **Review** | May not need full lodash |
-| @formkit/addons | ^1.0.0-beta.12 | **Remove** | Beta, not used meaningfully |
-| @formkit/auto-animate | ^1.0.0-beta.5 | **Remove** | Beta, replaced by Alpine transitions |
+| lodash | ^4.17.19 | **Remove** | Not needed — use native JS |
+| @formkit/addons | ^1.0.0-beta.12 | **Remove** | Beta, never used in V3 code |
+| @formkit/auto-animate | ^1.0.0-beta.5 | **Remove** | Beta, never used in V3 code |
+
+### V3 Package Decisions Summary
+
+| V3 Package | V4 Decision | Why |
+|------------|-------------|-----|
+| blade-ui-kit | **Remove** | Only used for `x-countdown` timer — replace with 10-line Alpine.js snippet |
+| wireui | **Remove** | Replace with Flux UI Free (built by Livewire team, same as general-pos) |
+| @formkit/addons | **Remove** | Beta, never used in V3 code |
+| @formkit/auto-animate | **Remove** | Beta, never used in V3 code |
+| lodash | **Remove** | Use native JS instead |
+| chart.js (CDN) | **Remove** | Use Filament 5 built-in chart widgets |
+| laravel/jetstream | **Remove** | Filament handles auth, or use Laravel starter kit |
+| spatie/laravel-db-snapshots | **Remove** | Dev tool only |
+
+### V4 Countdown Timer (Replaces blade-ui-kit x-countdown)
+
+```html
+<!-- Pure Alpine.js — no package needed -->
+<div x-data="countdown('{{ $deadline }}')" class="font-mono text-red-500">
+    <span x-text="days">00</span>:<span x-text="hours">00</span>:<span x-text="minutes">00</span>:<span x-text="seconds">00</span>
+</div>
+
+<script>
+function countdown(deadline) {
+    return {
+        days: '00', hours: '00', minutes: '00', seconds: '00',
+        init() { this.update(); setInterval(() => this.update(), 1000); },
+        update() {
+            const diff = Math.max(0, new Date(deadline) - new Date());
+            this.days = String(Math.floor(diff / 86400000)).padStart(2, '0');
+            this.hours = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
+            this.minutes = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+            this.seconds = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+        }
+    }
+}
+</script>
+```
 
 ---
 
