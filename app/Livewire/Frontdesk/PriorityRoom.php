@@ -2,77 +2,102 @@
 
 namespace App\Livewire\Frontdesk;
 
-use Livewire\Component;
+use App\Models\ActivityLog;
 use App\Models\Room;
 use App\Models\Type;
-use Livewire\WithPagination;
+use App\Models\Floor;
+use Livewire\Component;
 use WireUi\Traits\WireUiActions;
 
 class PriorityRoom extends Component
 {
     use WireUiActions;
-    use WithPagination;
-    public $search;
-    public $filter = 1;
+
+    public $filterType = '';
+    public $filterFloor = '';
+    public $filterPriority = '';
     public $branch_id;
 
-    public function render()
+    private function getBranchId(): int
     {
-        return view('livewire.frontdesk.priority-room', [
-            'types' => Type::where(
-                'branch_id',
-                auth()->user()->hasRole('superadmin')
-                    ? $this->branch_id
-                    : auth()->user()->branch_id
-            )->get(),
+        return auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id;
+    }
 
-            'available_rooms' => Room::where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)->whereIn('status', [
-                'Available',
-                'Cleaned ',
-            ])
-                ->where('is_priority', false)
-                ->orderBy('number', 'asc')
-                ->when($this->search, function ($query) {
-                    $query->where('number', $this->search);
-                })
-                ->when($this->filter, function ($query) {
-                    $query->where('type_id', $this->filter);
-                })
-                ->with('floor')
-                ->paginate(8),
-                'branches' => \App\Models\Branch::all(),
+    public function togglePriority($roomId)
+    {
+        $room = Room::find($roomId);
+        if (!$room) return;
+
+        $room->update(['is_priority' => !$room->is_priority]);
+
+        ActivityLog::create([
+            'branch_id' => $this->getBranchId(),
+            'user_id' => auth()->id(),
+            'activity' => $room->is_priority ? 'Set Priority' : 'Remove Priority',
+            'description' => 'Room #' . $room->number . ($room->is_priority ? ' set as priority' : ' removed from priority'),
         ]);
     }
 
-    public function setPriority($room_id)
+    public function bulkSetPriority()
     {
-        $room = Room::where('id', $room_id)->first();
+        $query = Room::where('branch_id', $this->getBranchId())
+            ->whereIn('status', ['Available', 'Cleaned'])
+            ->where('is_priority', false)
+            ->when($this->filterType, fn ($q) => $q->where('type_id', $this->filterType))
+            ->when($this->filterFloor, fn ($q) => $q->where('floor_id', $this->filterFloor));
 
-        if ($room->is_priority == false) {
-            $room->update([
-                'is_priority' => true,
-            ]);
-            $this->notification()->success(
-                $title = 'Priority saved',
-                $description =
-                    'Room ' . $room->number . ' is now a priority room'
-            );
-        }
+        $count = $query->count();
+        $query->update(['is_priority' => true]);
+
+        ActivityLog::create([
+            'branch_id' => $this->getBranchId(),
+            'user_id' => auth()->id(),
+            'activity' => 'Bulk Set Priority',
+            'description' => 'Set ' . $count . ' rooms as priority',
+        ]);
     }
 
-    public function removePriority($room_id)
+    public function bulkRemovePriority()
     {
-        $room = Room::where('id', $room_id)->first();
+        $query = Room::where('branch_id', $this->getBranchId())
+            ->whereIn('status', ['Available', 'Cleaned'])
+            ->where('is_priority', true)
+            ->when($this->filterType, fn ($q) => $q->where('type_id', $this->filterType))
+            ->when($this->filterFloor, fn ($q) => $q->where('floor_id', $this->filterFloor));
 
-        if ($room->is_priority == true) {
-            $room->update([
-                'is_priority' => false,
-            ]);
-            $this->notification()->success(
-                $title = 'Priority removed',
-                $description =
-                    'Room ' . $room->number . ' is no longer a priority room'
-            );
-        }
+        $count = $query->count();
+        $query->update(['is_priority' => false]);
+
+        ActivityLog::create([
+            'branch_id' => $this->getBranchId(),
+            'user_id' => auth()->id(),
+            'activity' => 'Bulk Remove Priority',
+            'description' => 'Removed ' . $count . ' rooms from priority',
+        ]);
+    }
+
+    public function render()
+    {
+        $branchId = $this->getBranchId();
+
+        $rooms = Room::where('branch_id', $branchId)
+            ->whereIn('status', ['Available', 'Cleaned'])
+            ->with(['type', 'floor'])
+            ->when($this->filterType, fn ($q) => $q->where('type_id', $this->filterType))
+            ->when($this->filterFloor, fn ($q) => $q->where('floor_id', $this->filterFloor))
+            ->when($this->filterPriority === 'yes', fn ($q) => $q->where('is_priority', true))
+            ->when($this->filterPriority === 'no', fn ($q) => $q->where('is_priority', false))
+            ->orderBy('is_priority', 'desc')
+            ->orderBy('number', 'asc')
+            ->get();
+
+        return view('livewire.frontdesk.priority-room', [
+            'rooms' => $rooms,
+            'priorityCount' => $rooms->where('is_priority', true)->count(),
+            'availableCount' => $rooms->where('is_priority', false)->count(),
+            'types' => Type::where('branch_id', $branchId)->get(),
+            'floors' => Floor::where('branch_id', $branchId)->orderBy('number')->get(),
+            'branches' => auth()->user()->hasRole('superadmin') ? \App\Models\Branch::all() : collect(),
+        ]);
     }
 }

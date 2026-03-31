@@ -55,7 +55,7 @@ class ManageStayingHours extends Component implements Tables\Contracts\HasTable,
                         ->label('Hours')
                         ->numeric()
                         ->required(),
-                ])->color('warning')
+                ])->color('success')
                 ->button(),
             Tables\Actions\DeleteAction::make()
                 ->button(),
@@ -77,7 +77,7 @@ class ManageStayingHours extends Component implements Tables\Contracts\HasTable,
                 })
                 ->label('Add New')
                 ->button()
-                ->color('primary')
+                ->color('info')
                 ->icon('heroicon-o-plus')
                 ->form([
                     Select::make('branch_id')

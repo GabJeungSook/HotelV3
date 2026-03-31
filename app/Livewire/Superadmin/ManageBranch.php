@@ -55,7 +55,7 @@ class ManageBranch extends Component implements Tables\Contracts\HasTable, \Fila
         return [
             Tables\Actions\EditAction::make()
                 ->form($this->getBranchFormSchema())
-                ->color('warning')
+                ->color('success')
                 ->button(),
             Tables\Actions\Action::make('credentials')
                 ->label('Credentials')
@@ -88,7 +88,7 @@ class ManageBranch extends Component implements Tables\Contracts\HasTable, \Fila
                 })
                 ->label('Add New Branch')
                 ->button()
-                ->color('primary')
+                ->color('info')
                 ->icon('heroicon-o-plus')
                 ->form($this->getBranchFormSchema())
                 ->mutateFormDataUsing(function (array $data): array {

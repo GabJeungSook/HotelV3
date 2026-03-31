@@ -10,17 +10,13 @@ use App\Models\Floor;
 use App\Models\Rate;
 use App\Models\StayingHour;
 use WireUi\Traits\WireUiActions;
-use Livewire\WithPagination;
 use Filament\Tables;
-use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\CreateAction;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
-use Filament\Tables\Columns\BadgeColumn;
-use Filament\Tables\Columns\SelectColumn;
-use Filament\Forms\Components\MarkdownEditor;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Enums\FiltersLayout;
 
@@ -29,49 +25,17 @@ class Room extends Component implements Tables\Contracts\HasTable, \Filament\For
     use Tables\Concerns\InteractsWithTable;
     use \Filament\Forms\Concerns\InteractsWithForms;
     use WireUiActions;
-    public $add_modal = false;
-    public $edit_modal = false;
-    public $types;
-    public $number, $floor, $type, $status, $room_id;
-    public $floors;
-    public $area;
-    public $filter_status, $filter_floor;
-    public $search;
+
     public $branch_id;
-
-    public function mount()
-    {
-
-        $this->types = Type::where(
-            'branch_id',
-            auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id
-        )->get();
-
-        $this->floors = Floor::where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)
-            ->orderBy('number', 'asc')
-            ->get();
-    }
-
-    public function updatedBranchId()
-    {
-        $this->types = Type::where(
-            'branch_id',
-            $this->branch_id
-        )->get();
-
-        $this->floors = Floor::where('branch_id', $this->branch_id)
-            ->orderBy('number', 'asc')
-            ->get();
-    }
 
     protected function getTableQuery(): Builder
     {
-        if(auth()->user()->hasRole('superadmin')){
+        if (auth()->user()->hasRole('superadmin')) {
             return roomModel::query()
             ->with(['type', 'floor', 'branch'])
             ->orderBy('branch_id', 'asc')
             ->orderBy('number', 'asc');
-        }else{
+        } else {
             return roomModel::query()
             ->with(['type', 'floor', 'branch'])
             ->where('branch_id', auth()->user()->branch_id)
@@ -81,10 +45,7 @@ class Room extends Component implements Tables\Contracts\HasTable, \Filament\For
 
     public function render()
     {
-        return view('livewire.admin.manage.room',
-        [
-            'branches' => \App\Models\Branch::all(),
-        ]);
+        return view('livewire.admin.manage.room');
     }
 
     protected function getTableColumns(): array
@@ -198,13 +159,104 @@ class Room extends Component implements Tables\Contracts\HasTable, \Filament\For
         ];
     }
 
+    protected function getTableHeaderActions(): array
+    {
+        return [
+            CreateAction::make('add_room')
+                ->label('Add New Room')
+                ->icon('heroicon-o-plus')
+                ->color('info')
+                ->button()
+                ->disableCreateAnother()
+                ->modalHeading('Add New Room')
+                ->form([
+                    Grid::make(2)->schema([
+                        Select::make('branch_id')
+                            ->label('Branch')
+                            ->options(\App\Models\Branch::pluck('name', 'id'))
+                            ->required()
+                            ->reactive()
+                            ->visible(fn () => auth()->user()->hasRole('superadmin'))
+                            ->columnSpan(2),
+                        TextInput::make('number')
+                            ->required(),
+                        Select::make('type_id')
+                            ->label('Type')
+                            ->options(function (callable $get) {
+                                $branchId = auth()->user()->hasRole('superadmin')
+                                    ? $get('branch_id')
+                                    : auth()->user()->branch_id;
+                                return $branchId
+                                    ? Type::where('branch_id', $branchId)->pluck('name', 'id')
+                                    : [];
+                            })
+                            ->required(),
+                        Select::make('floor_id')
+                            ->label('Floor')
+                            ->options(function (callable $get) {
+                                $branchId = auth()->user()->hasRole('superadmin')
+                                    ? $get('branch_id')
+                                    : auth()->user()->branch_id;
+                                return $branchId
+                                    ? Floor::where('branch_id', $branchId)->pluck('number', 'id')
+                                    : [];
+                            })
+                            ->required(),
+                        Select::make('status')
+                            ->options([
+                                'Available' => 'Available',
+                                'Occupied' => 'Occupied',
+                                'Reserved' => 'Reserved',
+                                'Maintenance' => 'Maintenance',
+                                'Uncleaned' => 'Uncleaned',
+                                'Cleaning' => 'Cleaning',
+                                'Cleaned' => 'Cleaned',
+                            ])
+                            ->required(),
+                        Select::make('area')
+                            ->options([
+                                'Main' => 'Main',
+                                'Extension' => 'Extension',
+                            ])
+                            ->columnSpan(2),
+                    ]),
+                ])
+                ->action(function (array $data) {
+                    $branchId = auth()->user()->hasRole('superadmin')
+                        ? $data['branch_id']
+                        : auth()->user()->branch_id;
+
+                    roomModel::create([
+                        'branch_id' => $branchId,
+                        'number' => $data['number'],
+                        'type_id' => $data['type_id'],
+                        'floor_id' => $data['floor_id'],
+                        'status' => $data['status'],
+                        'area' => $data['area'] ?? null,
+                    ]);
+
+                    ActivityLog::create([
+                        'branch_id' => $branchId,
+                        'user_id' => auth()->user()->id,
+                        'activity' => 'Create Room',
+                        'description' => 'Created room ' . $data['number'],
+                    ]);
+
+                    $this->dialog()->success(
+                        $title = 'Room Saved',
+                        $description = 'The room has been saved successfully.'
+                    );
+                }),
+        ];
+    }
+
     protected function getTableActions(): array
     {
         return [
             Action::make('manage_rates')
                 ->label('Rates')
                 ->icon('heroicon-o-currency-dollar')
-                ->color('primary')
+                ->color('info')
                 ->button()
                 ->modalHeading(fn ($record) => 'Manage Rates - Room #' . $record->number)
                 ->modalWidth('xl')
@@ -246,14 +298,15 @@ class Room extends Component implements Tables\Contracts\HasTable, \Filament\For
                         $description = 'Room rates have been updated successfully.'
                     );
                 }),
-            Tables\Actions\EditAction::make('type.edit')
-                ->icon('heroicon-o-pencil-square')
+            Tables\Actions\EditAction::make()
                 ->color('success')
+                ->button()
+                ->size('sm')
                 ->action(function ($record, $data) {
                     $record->update($data);
 
                     ActivityLog::create([
-                        'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
+                        'branch_id' => auth()->user()->hasRole('superadmin') ? $record->branch_id : auth()->user()->branch_id,
                         'user_id' => auth()->user()->id,
                         'activity' => 'Update Room',
                         'description' => 'Updated room ' . $record->number,
@@ -279,7 +332,7 @@ class Room extends Component implements Tables\Contracts\HasTable, \Filament\For
                                         $record->branch_id
                                     )->pluck('name', 'id')
                                 )
-                                ->default($record->id),
+                                ->default($record->type_id),
                             Select::make('floor_id')
                              ->disablePlaceholderSelection()
                                 ->label('Floor')
@@ -289,7 +342,7 @@ class Room extends Component implements Tables\Contracts\HasTable, \Filament\For
                                         $record->branch_id
                                     )->pluck('number', 'id')
                                 )
-                                ->default($record->id),
+                                ->default($record->floor_id),
                             Select::make('status')
                              ->disablePlaceholderSelection()
                                 ->options([
@@ -312,14 +365,16 @@ class Room extends Component implements Tables\Contracts\HasTable, \Filament\For
                         ]),
                     ];
                 })
-                ->modalHeading('Update Room')
-                ->modalWidth('xl'),
+                ->modalHeading('Update Room'),
+            Tables\Actions\DeleteAction::make()
+                ->button()
+                ->size('sm'),
         ];
     }
 
     protected function getTableFilters(): array
     {
-        if(auth()->user()->hasRole('superadmin')){
+        if (auth()->user()->hasRole('superadmin')) {
             return [
                 SelectFilter::make('branch')->relationship('branch', 'name'),
                 SelectFilter::make('Status')
@@ -359,7 +414,7 @@ class Room extends Component implements Tables\Contracts\HasTable, \Filament\For
                         })
                 ),
             ];
-        }else{
+        } else {
         return [
             SelectFilter::make('type_id')
                 ->label('Select Type')
@@ -411,100 +466,5 @@ class Room extends Component implements Tables\Contracts\HasTable, \Filament\For
      protected function getTableFiltersLayout(): ?string
     {
         return FiltersLayout::AboveContent->value;
-    }
-
-    public function clearFilter()
-    {
-        $this->filter_status = null;
-        $this->filter_floor = null;
-    }
-
-    public function saveRoom()
-    {
-        $this->validate([
-            'number' => 'required|string|unique:rooms,number,NULL,id,branch_id,' . (auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id),
-            'type' => 'required',
-            'floor' => 'required',
-            'status' => 'required',
-        ],
-        [
-            'number.required' => 'The room number is required.',
-            'number.unique' => 'The room number has already been taken.',
-            'type.required' => 'The room type is required.',
-            'floor.required' => 'The floor is required.',
-            'status.required' => 'The status is required.',
-        ]);
-
-        roomModel::create([
-            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
-            'number' => $this->number,
-            'type_id' => $this->type,
-            'floor_id' => $this->floor,
-            'status' => $this->status,
-            'area' => $this->area,
-        ]);
-
-        ActivityLog::create([
-            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
-            'user_id' => auth()->user()->id,
-            'activity' => 'Create Room',
-            'description' => 'Created room ' . $this->number,
-        ]);
-
-        $this->dialog()->success(
-            $title = 'Room saved',
-            $description = 'The room has been saved successfully.'
-        );
-
-        $this->add_modal = false;
-        $this->reset(['number', 'type', 'floor', 'status', 'area']);
-    }
-
-    public function editRoom($room_id)
-    {
-        $room = roomModel::where('id', $room_id)->where('branch_id', $this->branch_id)->first();
-        $this->room_id = $room->id;
-        $this->number = $room->number;
-        $this->type = $room->type_id;
-        $this->floor = $room->floor_id;
-        $this->area = $room->area;
-        $this->status = $room->status;
-        $this->edit_modal = true;
-    }
-
-    public function updateRoom()
-    {
-        $this->validate([
-            'number' => 'required|string|unique:rooms,number,NULL,id,branch_id,' . (auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id),
-            'type' =>
-                'required|exists:types,id,branch_id,' .
-                auth()->user()->branch_id,
-            'floor' =>
-                'required|exists:floors,id,branch_id,' .
-                auth()->user()->branch_id,
-        ]);
-
-        $room = roomModel::where('id', $this->room_id)->where('branch_id', $this->branch_id)->first();
-        $room->update([
-            'number' => $this->number,
-            'type_id' => $this->type,
-            'floor_id' => $this->floor,
-            'status' => $this->status,
-        ]);
-
-        ActivityLog::create([
-            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
-            'user_id' => auth()->user()->id,
-            'activity' => 'Update Room',
-            'description' => 'Updated room ' . $this->number,
-        ]);
-
-        $this->dialog()->success(
-            $title = 'Room Updated',
-            $description = 'The room has been updated successfully.'
-        );
-        $this->reset(['number', 'type', 'floor', 'status', 'room_id']);
-
-        $this->edit_modal = false;
     }
 }

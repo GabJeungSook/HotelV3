@@ -2,10 +2,10 @@
 
 namespace App\Livewire\Pub;
 
-use App\Models\PubMenu;
+use App\Models\MenuItem;
 use App\Models\Guest;
 use Livewire\Component;
-use App\Models\PubInventory;
+use App\Models\ItemInventory;
 use App\Models\Transaction as TransactionModel;
 use App\Models\CheckinDetail;
 use WireUi\Traits\WireUiActions;
@@ -38,7 +38,8 @@ class PubTransaction extends Component
     public function updatedFoodId()
     {
         if ($this->food_id != 'Select Item') {
-            $price = PubMenu::where('branch_id', auth()->user()->branch_id)
+            $price = MenuItem::where('branch_id', auth()->user()->branch_id)
+                ->where('department_id', \App\Models\Department::PUB)
                 ->where('id', $this->food_id)
                 ->first()->price;
             if ($this->food_quantity == null || $this->food_quantity == 0) {
@@ -56,7 +57,8 @@ class PubTransaction extends Component
     public function updatedFoodQuantity()
     {
         if ($this->food_id != 'Select Item') {
-            $price = PubMenu::where('branch_id', auth()->user()->branch_id)
+            $price = MenuItem::where('branch_id', auth()->user()->branch_id)
+                ->where('department_id', \App\Models\Department::PUB)
                 ->where('id', $this->food_id)
                 ->first()->price;
             if ($this->food_quantity == null || $this->food_quantity == 0) {
@@ -94,11 +96,11 @@ class PubTransaction extends Component
             $this->guest->id
         )->first();
 
-        $food = PubMenu::where('branch_id', auth()->user()->branch_id)
+        $food = MenuItem::where('branch_id', auth()->user()->branch_id)
+            ->where('department_id', \App\Models\Department::PUB)
             ->where('id', $this->food_id)
             ->first();
-        $inventory = PubInventory::where('branch_id', auth()->user()->branch_id)
-            ->where('pub_menu_id', $this->food_id)
+        $inventory = ItemInventory::where('menu_item_id', $this->food_id)
             ->first();
         if($inventory != null)
         {
@@ -150,7 +152,7 @@ class PubTransaction extends Component
                 ->whereHas('checkInDetail', function ($query) {
                     $query->where('is_check_out', false);
                 })->get(),
-            'foods' => PubMenu::where('branch_id', auth()->user()->branch_id)->get(),
+            'foods' => MenuItem::where('branch_id', auth()->user()->branch_id)->where('department_id', \App\Models\Department::PUB)->get(),
         ]);
     }
 }

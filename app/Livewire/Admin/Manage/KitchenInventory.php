@@ -3,16 +3,20 @@
 namespace App\Livewire\Admin\Manage;
 
 use App\Models\ActivityLog;
+use App\Models\Department;
+use App\Models\ItemCategory;
+use App\Models\MenuItem;
+use App\Models\ItemInventory;
 use Livewire\Component;
 use WireUi\Traits\WireUiActions;
-use App\Models\FrontdeskMenu;
-use App\Models\FrontdeskCategory;
-use App\Models\FrontdeskInventory;
 use Illuminate\Support\Facades\DB;
 use Livewire\WithFileUploads;
 
 class KitchenInventory extends Component
 {
+    use WireUiActions;
+    use WithFileUploads;
+
     public $categories;
     public $selectedCategoryId = null;
     public $selectedCategory;
@@ -32,41 +36,35 @@ class KitchenInventory extends Component
 
     public $selectedMenu;
 
-    use WireUiActions;
-    use WithFileUploads;
-
     public function mount()
     {
-        if(auth()->user()->hasRole('superadmin'))
-        {
-            $this->categories = FrontdeskCategory::where('branch_id', $this->branch_id)->get();
-        }else{
-            $this->categories = FrontdeskCategory::where('branch_id', auth()->user()->branch_id)->get();
-        }
+        $branchId = auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id;
+        $this->categories = ItemCategory::where('branch_id', $branchId)->subcategories()->get();
         $this->selectedCategoryId = $this->categories->first()->id ?? null;
         $this->selectedCategory = $this->categories->first() ?? null;
     }
 
     public function updatedBranchId($value)
     {
-       $this->mount();
+        $this->mount();
     }
 
     public function selectCategory($categoryId)
     {
         $this->selectedCategoryId = $categoryId;
-        $this->menu = FrontdeskMenu::where('frontdesk_category_id', $this->selectedCategoryId)
+        $this->menu = MenuItem::where('category_id', $this->selectedCategoryId)
+            ->where('department_id', Department::FRONTDESK)
             ->get();
-        $this->selectedCategory = FrontdeskCategory::find($categoryId);
+        $this->selectedCategory = ItemCategory::find($categoryId);
     }
 
-     public function addMenu()
+    public function addMenu()
     {
-        $this->reset(['item_code','name', 'price', 'image']);
+        $this->reset(['item_code', 'name', 'price', 'image']);
         $this->add_modal = true;
     }
 
-     public function saveMenu()
+    public function saveMenu()
     {
         $this->validate([
             'item_code' => 'required',
@@ -82,37 +80,29 @@ class KitchenInventory extends Component
             'image.max' => 'The image must not be greater than 25MB',
         ]);
 
+        $branchId = auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id;
+
         DB::beginTransaction();
-        $menu = FrontdeskMenu::create([
-            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
+        MenuItem::create([
+            'branch_id' => $branchId,
+            'department_id' => Department::FRONTDESK,
             'item_code' => $this->item_code,
             'name' => $this->name,
             'price' => $this->price,
             'image' => $this->image ? $this->image->store('menu_images', 'public') : null,
-            'frontdesk_category_id' => $this->selectedCategory->id,
+            'category_id' => $this->selectedCategory->id,
         ]);
 
         ActivityLog::create([
-            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
+            'branch_id' => $branchId,
             'user_id' => auth()->user()->id,
             'activity' => 'Create Menu',
             'description' => 'Created menu ' . $this->name,
         ]);
-
-        // Inventory::create([
-        //     'branch_id' => auth()->user()->branch_id,
-        //     'menu_id' => $menu->id,
-        //     'number_of_serving' => $this->stock,
-        // ]);
         DB::commit();
 
         $this->add_modal = false;
-        $this->reset(
-            'item_code',
-            'name',
-            'price',
-            'image',
-        );
+        $this->reset('item_code', 'name', 'price', 'image');
 
         $this->dialog()->success(
             $title = 'Success',
@@ -120,34 +110,32 @@ class KitchenInventory extends Component
         );
     }
 
-      public function saveStock()
+    public function saveStock()
     {
         $this->validate([
-            'menu_quantity' => 'required|numeric|min:1'
+            'menu_quantity' => 'required|numeric|min:1',
         ]);
 
-        if($this->menu_item->inventory === null)
-        {
-            FrontdeskInventory::create([
-                'branch_id' =>  auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
-                'frontdesk_menu_id' => $this->menu_item->id,
-                'number_of_serving' => $this->menu_quantity
+        $branchId = auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id;
+
+        if ($this->menu_item->inventory === null) {
+            ItemInventory::create([
+                'branch_id' => $branchId,
+                'menu_item_id' => $this->menu_item->id,
+                'number_of_serving' => $this->menu_quantity,
             ]);
 
             ActivityLog::create([
-                'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
+                'branch_id' => $branchId,
                 'user_id' => auth()->user()->id,
                 'activity' => 'Add Inventory',
                 'description' => 'Added inventory for menu ' . $this->menu_item->name,
             ]);
-
-        }else{
+        } else {
             $this->menu_item->inventory->update([
                 'number_of_serving' => $this->menu_item->inventory->number_of_serving + $this->menu_quantity,
             ]);
         }
-
-
 
         $this->add_modal = false;
         $this->menu_quantity = '';
@@ -161,13 +149,14 @@ class KitchenInventory extends Component
     public function editMenu($id)
     {
         $this->edit_modal = true;
-        $this->selectedMenu = FrontdeskMenu::find($id);
+        $this->selectedMenu = MenuItem::find($id);
         $this->item_code = $this->selectedMenu->item_code;
         $this->name = $this->selectedMenu->name;
         $this->price = $this->selectedMenu->price;
     }
 
-    public function updateMenu(){
+    public function updateMenu()
+    {
         $this->validate([
             'item_code' => 'required',
             'name' => 'required',
@@ -210,9 +199,12 @@ class KitchenInventory extends Component
 
     public function render()
     {
-
         return view('livewire.admin.manage.kitchen-inventory', [
-            'menus' => $this->selectedCategoryId ? FrontdeskMenu::where('frontdesk_category_id', $this->selectedCategoryId)->get() : [],
+            'menus' => $this->selectedCategoryId
+                ? MenuItem::where('category_id', $this->selectedCategoryId)
+                    ->where('department_id', Department::FRONTDESK)
+                    ->get()
+                : [],
             'branches' => \App\Models\Branch::all(),
         ]);
     }

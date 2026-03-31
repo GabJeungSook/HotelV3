@@ -3,10 +3,10 @@
 namespace App\Livewire\Kitchen;
 
 use Livewire\Component;
-use App\Models\MenuCategory;
-use App\Models\Menu as menuModel;
-use App\Models\Inventory;
-use DB;
+use App\Models\ItemCategory;
+use App\Models\MenuItem;
+use App\Models\ItemInventory;
+use Illuminate\Support\Facades\DB;
 use WireUi\Traits\WireUiActions;
 use Filament\Tables;
 use Illuminate\Contracts\View\View;
@@ -28,19 +28,19 @@ class Menu extends Component implements Tables\Contracts\HasTable, \Filament\For
 
     protected function getTableQuery(): Builder
     {
-        return menuModel::query()->where(
+        return MenuItem::query()->where(
             'branch_id',
             auth()->user()->branch_id
-        );
+        )->where('department_id', \App\Models\Department::KITCHEN);
     }
 
     public function render()
     {
         return view('livewire.kitchen.menu', [
-            'categories' => MenuCategory::where(
+            'categories' => ItemCategory::where(
                 'branch_id',
                 auth()->user()->branch_id
-            )->get(),
+            )->subcategories()->get(),
         ]);
     }
 
@@ -62,7 +62,7 @@ class Menu extends Component implements Tables\Contracts\HasTable, \Filament\For
                 })
                 ->searchable()
                 ->sortable(),
-            TextColumn::make('menuCategory.name')
+            TextColumn::make('category.name')
                 ->label('CATEGORY')
                 ->searchable()
                 ->sortable(),
@@ -78,18 +78,14 @@ class Menu extends Component implements Tables\Contracts\HasTable, \Filament\For
         ]);
 
         DB::beginTransaction();
-        $menu = menuModel::create([
+        $menu = MenuItem::create([
             'branch_id' => auth()->user()->branch_id,
             'name' => $this->name,
             'price' => $this->price,
-            'menu_category_id' => $this->category_id,
+            'department_id' => \App\Models\Department::KITCHEN,
+            'category_id' => $this->category_id,
         ]);
 
-        // Inventory::create([
-        //     'branch_id' => auth()->user()->branch_id,
-        //     'menu_id' => $menu->id,
-        //     'number_of_serving' => $this->stock,
-        // ]);
         DB::commit();
 
         $this->add_modal = false;
@@ -139,30 +135,22 @@ class Menu extends Component implements Tables\Contracts\HasTable, \Filament\For
 
     public function editItem($menu_id)
     {
-        $menu = menuModel::where('id', $menu_id)->first();
+        $menu = MenuItem::where('id', $menu_id)->first();
         $this->menu_id = $menu->id;
         $this->name = $menu->name;
         $this->price = $menu->price;
-        $this->category_id = $menu->menu_category_id;
-        // $this->stock = $menu->inventory->stock;
-        // $this->default_serving = $menu->inventory->default_serving;
+        $this->category_id = $menu->category_id;
         $this->edit_modal = true;
     }
 
     public function updateMenu()
     {
-        $menu = menuModel::where('id', $this->menu_id)->first();
+        $menu = MenuItem::where('id', $this->menu_id)->first();
         $menu->update([
             'name' => $this->name,
             'price' => $this->price,
-            'menu_category_id' => $this->category_id,
+            'category_id' => $this->category_id,
         ]);
-
-        // $menu->inventory->update([
-        //     'stock' => $this->stock,
-        //     'default_serving' => $this->default_serving,
-        //     'number_of_serving' => $this->stock / $this->default_serving,
-        // ]);
 
         $this->edit_modal = false;
         $this->reset(
@@ -178,10 +166,8 @@ class Menu extends Component implements Tables\Contracts\HasTable, \Filament\For
 
     public function deleteMenu($menu_id)
     {
-        $menu = menuModel::where('id', $menu_id)->first();
+        $menu = MenuItem::where('id', $menu_id)->first();
         $menu->delete();
-
-        $menu->inventory->delete();
 
         $this->dialog()->success(
             $title = 'Success',

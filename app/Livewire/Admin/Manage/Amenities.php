@@ -6,11 +6,9 @@ use App\Models\ActivityLog;
 use Livewire\Component;
 use App\Models\RequestableItem;
 use WireUi\Traits\WireUiActions;
-use Livewire\WithPagination;
 use Filament\Tables;
-use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\CreateAction;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
@@ -22,41 +20,29 @@ class Amenities extends Component implements Tables\Contracts\HasTable, \Filamen
     use Tables\Concerns\InteractsWithTable;
     use \Filament\Forms\Concerns\InteractsWithForms;
     use WireUiActions;
-    public $name, $amount, $request_id;
-    public $add_modal = false;
-    public $edit_modal = false;
-    public $search;
+
     public $branch_id;
 
     public function render()
     {
-        return view('livewire.admin.manage.amenities', [
-            'requestable_items' => RequestableItem::where(
-                'branch_id',
-                auth()->user()->hasRole('superadmin')
-                    ? $this->branch_id
-                    : auth()->user()->branch_id
-            )->where('name', 'like', '%' . $this->search . '%')->get(),
-            'branches' => \App\Models\Branch::all(),
-        ]);
+        return view('livewire.admin.manage.amenities');
     }
 
     protected function getTableQuery(): Builder
     {
-        if(auth()->user()->hasRole('superadmin'))
-        {
+        if (auth()->user()->hasRole('superadmin')) {
             return RequestableItem::query();
-        }else{
+        } else {
             return RequestableItem::query()->where(
                 'branch_id',
                 auth()->user()->branch_id
             );
         }
     }
+
     protected function getTableColumns(): array
     {
         return [
-
             Tables\Columns\TextColumn::make('branch.name')
                 ->label('BRANCH')
                 ->formatStateUsing(
@@ -78,13 +64,13 @@ class Amenities extends Component implements Tables\Contracts\HasTable, \Filamen
         ];
     }
 
-        protected function getTableFilters(): array
+    protected function getTableFilters(): array
     {
-        if(auth()->user()->hasRole('superadmin')){
+        if (auth()->user()->hasRole('superadmin')) {
             return [
                 SelectFilter::make('branch')->relationship('branch', 'name')
             ];
-        }else{
+        } else {
             return [];
         }
     }
@@ -94,26 +80,79 @@ class Amenities extends Component implements Tables\Contracts\HasTable, \Filamen
         return FiltersLayout::AboveContent->value;
     }
 
+    protected function getTableHeaderActions(): array
+    {
+        return [
+            CreateAction::make('add_amenity')
+                ->label('Add New Amenity')
+                ->icon('heroicon-o-plus')
+                ->color('info')
+                ->button()
+                ->disableCreateAnother()
+                ->modalHeading('Add New Amenity')
+                ->form([
+                    Grid::make(1)->schema([
+                        Select::make('branch_id')
+                            ->label('Branch')
+                            ->options(\App\Models\Branch::pluck('name', 'id'))
+                            ->required()
+                            ->visible(fn () => auth()->user()->hasRole('superadmin')),
+                        TextInput::make('name')
+                            ->required()
+                            ->rules('required'),
+                        TextInput::make('price')
+                            ->label('Amount')
+                            ->required()
+                            ->numeric()
+                            ->rules('required|numeric|regex:/^\d+$/'),
+                    ]),
+                ])
+                ->action(function (array $data) {
+                    $branchId = auth()->user()->hasRole('superadmin')
+                        ? $data['branch_id']
+                        : auth()->user()->branch_id;
+
+                    RequestableItem::create([
+                        'name' => $data['name'],
+                        'price' => $data['price'],
+                        'branch_id' => $branchId,
+                    ]);
+
+                    ActivityLog::create([
+                        'branch_id' => $branchId,
+                        'user_id' => auth()->user()->id,
+                        'activity' => 'Create Requestable Item',
+                        'description' => 'Created requestable item for ' . $data['name'],
+                    ]);
+
+                    $this->dialog()->success(
+                        $title = 'Requestable Item Saved',
+                        $description = 'Item has been saved successfully'
+                    );
+                }),
+        ];
+    }
+
     protected function getTableActions(): array
     {
         return [
-            Tables\Actions\EditAction::make('type.edit')
-                ->icon('heroicon-o-pencil-square')
+            Tables\Actions\EditAction::make()
                 ->color('success')
+                ->button()
+                ->size('sm')
                 ->action(function ($record, $data) {
                     $record->update($data);
 
                     ActivityLog::create([
                         'branch_id' => auth()->user()->hasRole('superadmin') ? $record->branch_id : auth()->user()->branch_id,
                         'user_id' => auth()->user()->id,
-                        'activity' => 'Update Extension Rate',
-                        'description' => 'Updated extension rate for ' . $record->hour . ' hour',
+                        'activity' => 'Update Requestable Item',
+                        'description' => 'Updated requestable item ' . $record->name,
                     ]);
 
                     $this->dialog()->success(
                         $title = 'Update Successfully',
-                        $description =
-                            'Extension rate has been updated successfully'
+                        $description = 'Amenity has been updated successfully'
                     );
                 })
                 ->form(function ($record) {
@@ -131,111 +170,10 @@ class Amenities extends Component implements Tables\Contracts\HasTable, \Filamen
                         ]),
                     ];
                 })
-                ->modalHeading('Update Extension Rate')
-                ->modalWidth('lg'),
-            Tables\Actions\DeleteAction::make('user.destroy'),
+                ->modalHeading('Update Amenity'),
+            Tables\Actions\DeleteAction::make()
+                ->button()
+                ->size('sm'),
         ];
-    }
-
-    
-
-    public function saveRequest()
-    {
-        $this->validate([
-            'name' => 'required|unique:requestable_items,name,NULL,id,branch_id,' . (auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id),
-            'amount' => 'required|numeric|regex:/^\d+$/',
-        ]);
-
-        RequestableItem::create([
-            'name' => $this->name,
-            'price' => $this->amount,
-            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
-        ]);
-
-        ActivityLog::create([
-            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
-            'user_id' => auth()->user()->id,
-            'activity' => 'Create Requestable Item',
-            'description' => 'Created requestable item for ' . $this->name,
-        ]);
-
-        $this->dialog()->success(
-            $title = 'Requestable Item Saved',
-            $description = 'Item has been saved successfully'
-        );
-        $this->add_modal = false;
-        $this->name = null;
-        $this->amount = null;
-    }
-
-    public function editItem($item_id)
-    {
-        $item = RequestableItem::where('id', $item_id)->where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)->first();
-        $this->item_id = $item->id;
-        $this->name = $item->name;
-        $this->amount = $item->price;
-        $this->edit_modal = true;
-    }
-
-    public function updateItems()
-    {
-        $this->validate([
-            'name' =>
-                'required|unique:requestable_items,name,' . $this->item_id,
-            'amount' => 'required|numeric|regex:/^\d+$/',
-        ]);
-
-        RequestableItem::where('id', $this->item_id)->update([
-            'name' => $this->name,
-            'price' => $this->amount,
-        ]);
-
-        ActivityLog::create([
-            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
-            'user_id' => auth()->user()->id,
-            'activity' => 'Update Damage Charges',
-            'description' => 'Updated damage charges for ' . $this->name,
-        ]);
-
-        $this->dialog()->success(
-            $title = 'Item Updated',
-            $description = 'item has been updated successfully'
-        );
-        $this->edit_modal = false;
-        $this->name = null;
-        $this->amount = null;
-    }
-
-    public function deleteItem($item_id)
-    {
-        $this->dialog()->confirm([
-            'title' => 'Are you Sure?',
-            'description' => 'delete Damage Charges',
-            'icon' => 'question',
-            'accept' => [
-                'label' => 'Yes, delete it',
-                'method' => 'confirmDelete',
-                'params' => [$item_id],
-            ],
-            'reject' => [
-                'label' => 'No, cancel',
-            ],
-        ]);
-    }
-
-    public function confirmDelete($item_id)
-    {
-        RequestableItem::where('id', $item_id)->delete();
-        ActivityLog::create([
-            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
-            'user_id' => auth()->user()->id,
-            'activity' => 'Delete Damage Charges',
-            'description' => 'Deleted damage charges ID ' . $item_id,
-        ]);
-
-        $this->dialog()->success(
-            $title = 'Item Deleted',
-            $description = 'item has been deleted successfully'
-        );
     }
 }

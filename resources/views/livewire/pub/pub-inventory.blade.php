@@ -26,7 +26,7 @@
                           <tr>
                             <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6 lg:pl-8">{{$item->name}}</td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">₱ {{number_format($item->price, 2)}}</td>
-                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6 lg:pl-8">{{$item->pubInventory === null ? '0' : $item->pubInventory->number_of_serving}}</td>
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6 lg:pl-8">{{$item->inventory === null ? '0' : $item->inventory->number_of_serving}}</td>
                             {{-- <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                 <input type="number" name="quantity" wire:model="quantities.{{ $loop->index }}" class="w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                             </td> --}}

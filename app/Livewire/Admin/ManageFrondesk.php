@@ -3,18 +3,13 @@
 namespace App\Livewire\Admin;
 
 use App\Models\ActivityLog;
-use App\Models\CashDrawer;
-use Livewire\Component;
 use App\Models\Frontdesk;
+use Livewire\Component;
 use WireUi\Traits\WireUiActions;
 use Filament\Tables;
-use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Actions\Action;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Enums\FiltersLayout;
 
@@ -23,58 +18,22 @@ class ManageFrondesk extends Component implements Tables\Contracts\HasTable, \Fi
     use Tables\Concerns\InteractsWithTable;
     use \Filament\Forms\Concerns\InteractsWithForms;
     use WireUiActions;
-    public $add_modal = false;
-
-    public $add_drawer = false;
-    public $edit_modal = false;
-    public $name, $number, $frontdesk_id;
-    public $search;
-    public $branch_id;
-
-    public $cash_drawers;
-
-    public $drawer;
-
-    public function mount()
-    {
-         if(auth()->user()->hasRole('superadmin')){
-            $this->cash_drawers = CashDrawer::where('is_active', 1)->get();
-         }else{
-            $this->cash_drawers = CashDrawer::where('branch_id', auth()->user()->branch_id)->where('is_active', 1)->get();
-        }
-    }
-
-    public function render()
-    {
-        return view('livewire.admin.manage-frondesk', [
-            'frontdesks' => Frontdesk::where(
-                'branch_id',
-                auth()->user()->branch_id
-            )->where('name', 'like', '%' . $this->search . '%')->get(),
-            'branches' => \App\Models\Branch::all(),
-        ]);
-    }
 
     protected function getTableQuery(): Builder
     {
-        if(auth()->user()->hasRole('superadmin')){
+        if (auth()->user()->hasRole('superadmin')) {
             return Frontdesk::query();
-        }else{
-            return Frontdesk::query()->where(
-                'branch_id',
-                auth()->user()->branch_id
-            );
         }
+
+        return Frontdesk::query()->where('branch_id', auth()->user()->branch_id);
     }
 
     protected function getTableColumns(): array
     {
         return [
-             Tables\Columns\TextColumn::make('branch.name')
+            Tables\Columns\TextColumn::make('branch.name')
                 ->label('BRANCH')
-                ->formatStateUsing(
-                     fn(string $state): string => strtoupper("{$state}")
-                )
+                ->formatStateUsing(fn (string $state): string => strtoupper($state))
                 ->sortable()
                 ->visible(fn () => auth()->user()->hasRole('superadmin')),
             Tables\Columns\TextColumn::make('name')
@@ -85,23 +44,61 @@ class ManageFrondesk extends Component implements Tables\Contracts\HasTable, \Fi
                 ->label('NUMBER')
                 ->searchable()
                 ->sortable(),
-                Tables\Columns\TextColumn::make('passcode')
+            Tables\Columns\TextColumn::make('passcode')
                 ->label('PASSCODE')
-                ->searchable()
-                ->formatStateUsing(fn (string $state): string => ("*****"))
+                ->formatStateUsing(fn () => '*****')
                 ->sortable(),
+        ];
+    }
+
+    protected function getTableActions(): array
+    {
+        return [
+            Tables\Actions\EditAction::make()
+                ->color('success')
+                ->button()
+                ->size('sm')
+                ->action(function ($record, $data) {
+                    $record->update($data);
+
+                    ActivityLog::create([
+                        'branch_id' => $record->branch_id,
+                        'user_id' => auth()->id(),
+                        'activity' => 'Update Frontdesk',
+                        'description' => 'Updated frontdesk ' . $record->name,
+                    ]);
+
+                    $this->dialog()->success('Frontdesk Updated', 'Updated successfully.');
+                })
+                ->form(function ($record) {
+                    return [
+                        Grid::make(2)->schema([
+                            TextInput::make('name')
+                                ->default($record->name)
+                                ->required(),
+                            TextInput::make('number')
+                                ->default($record->number)
+                                ->required(),
+                        ]),
+                    ];
+                })
+                ->modalHeading('Update Frontdesk')
+                ->modalWidth('lg'),
+            Tables\Actions\DeleteAction::make()
+                ->button()
+                ->size('sm'),
         ];
     }
 
     protected function getTableFilters(): array
     {
-        if(auth()->user()->hasRole('superadmin')){
+        if (auth()->user()->hasRole('superadmin')) {
             return [
-                SelectFilter::make('branch')->relationship('branch', 'name')
+                SelectFilter::make('branch')->relationship('branch', 'name'),
             ];
-        }else{
-            return [];
         }
+
+        return [];
     }
 
     protected function getTableFiltersLayout(): ?string
@@ -109,110 +106,8 @@ class ManageFrondesk extends Component implements Tables\Contracts\HasTable, \Fi
         return FiltersLayout::AboveContent->value;
     }
 
-
-    protected function getTableActions(): array
+    public function render()
     {
-        return [
-            Tables\Actions\EditAction::make('fr.edit')
-                ->icon('heroicon-o-pencil-square')
-                ->color('success')
-                ->action(function ($record, $data) {
-                    $record->update($data);
-                    $this->dialog()->success(
-                        $title = 'Room Updated',
-                        $description = 'The room has been updated successfully.'
-                    );
-                })
-                ->form(function ($record) {
-                    return [
-                        Grid::make(2)->schema([
-                            TextInput::make('name')
-                                ->default($record->name)
-                                ->rules(
-                                    'required|unique:frontdesks,name,' .
-                                        $record->id
-                                ),
-                            TextInput::make('number')->required()->default($record->number),
-                        ]),
-                    ];
-                })
-                ->modalHeading('Update Frontdesk')
-                ->modalWidth('lg'),
-            Tables\Actions\DeleteAction::make('frontdesk.delete'),
-        ];
-    }
-
-    public function addFrontdesk()
-    {
-        $this->validate([
-            'name' => 'required',
-            'number' => 'required',
-        ]);
-        Frontdesk::create([
-            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
-            'name' => $this->name,
-            'number' => $this->number,
-        ]);
-
-        ActivityLog::create([
-            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
-            'user_id' => auth()->user()->id,
-            'activity' => 'Create Frontdesk',
-            'description' => 'Created frontdesk ' . $this->name,
-        ]);
-
-        $this->add_modal = false;
-        $this->name = '';
-        $this->number = '';
-
-        $this->dialog()->success(
-            $title = 'Success',
-            $description = 'Frontdesk added successfully'
-        );
-    }
-
-    public function editFrontdesk($id)
-    {
-        $frontdesk = Frontdesk::where('id', $id)->where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)->first();
-        $this->frontdesk_id = $frontdesk->id;
-        $this->name = $frontdesk->name;
-        $this->number = $frontdesk->number;
-
-        $this->edit_modal = true;
-    }
-
-    public function updateFrontdesk()
-    {
-        $this->validate([
-            'name' => 'required',
-            'number' => 'required',
-        ]);
-        Frontdesk::where('id', $this->frontdesk_id)
-            ->first()
-            ->update([
-                'name' => $this->name,
-                'number' => $this->number,
-            ]);
-
-        ActivityLog::create([
-            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
-            'user_id' => auth()->user()->id,
-            'activity' => 'Update Frontdesk',
-            'description' => 'Updated frontdesk ' . $this->name,
-        ]);
-
-        $this->edit_modal = false;
-        $this->name = '';
-        $this->number = '';
-
-        $this->dialog()->success(
-            $title = 'Success',
-            $description = 'Frontdesk updated successfully'
-        );
-    }
-
-    public function redirectToCashDrawerSetup()
-    {
-        return redirect()->route('admin.cash-drawers');
+        return view('livewire.admin.manage-frondesk');
     }
 }

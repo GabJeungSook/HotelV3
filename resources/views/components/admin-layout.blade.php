@@ -503,10 +503,10 @@
   <!-- Scripts -->
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   <!-- Styles -->
-  @livewireStyles
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js "></script>
   <script src="https://fastly.jsdelivr.net/npm/echarts@5.4.1/dist/echarts.min.js"></script>
+  @livewireStyles
 </head>
 @if(app()->environment('staging'))
    <div class="fixed top-0 left-0 w-full bg-red-600 text-white text-center py-1 text-sm font-semibold z-50 animate-pulse">
@@ -1020,9 +1020,9 @@
 
 
 
-  @livewireScriptConfig
   @filamentScripts
   <x-dialog z-index="z-50" blur="md" align="center" />
+  @livewireScriptConfig
 </body>
 
 </html>

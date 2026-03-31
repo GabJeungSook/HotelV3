@@ -6,11 +6,9 @@ use App\Models\ActivityLog;
 use Livewire\Component;
 use App\Models\ExtensionRate as extensionRateModel;
 use WireUi\Traits\WireUiActions;
-use Livewire\WithPagination;
 use Filament\Tables;
-use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\CreateAction;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
@@ -23,30 +21,18 @@ class ExtensionRate extends Component implements Tables\Contracts\HasTable, \Fil
     use \Filament\Forms\Concerns\InteractsWithForms;
     use WireUiActions;
 
-    public $add_modal = false;
-    public $edit_modal = false;
-    public $hour, $amount, $extension_id;
-    public $search;
     public $branch_id;
 
     public function render()
     {
-        return view('livewire.admin.manage.extension-rate', [
-            'extensionRates' => extensionRateModel::where(
-                'branch_id',
-                auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id
-            )->where('hour', 'like', '%' . $this->search . '%')
-             ->orWhere('amount', 'like', '%' . $this->search . '%')->get(),
-            'branches' => \App\Models\Branch::all(),
-        ]);
+        return view('livewire.admin.manage.extension-rate');
     }
 
     protected function getTableQuery(): Builder
     {
-        if(auth()->user()->hasRole('superadmin'))
-        {
+        if (auth()->user()->hasRole('superadmin')) {
             return extensionRateModel::query();
-        }else{
+        } else {
             return extensionRateModel::query()->where(
                 'branch_id',
                 auth()->user()->branch_id
@@ -78,13 +64,13 @@ class ExtensionRate extends Component implements Tables\Contracts\HasTable, \Fil
         ];
     }
 
-     protected function getTableFilters(): array
+    protected function getTableFilters(): array
     {
-        if(auth()->user()->hasRole('superadmin')){
+        if (auth()->user()->hasRole('superadmin')) {
             return [
                 SelectFilter::make('branch')->relationship('branch', 'name')
             ];
-        }else{
+        } else {
             return [];
         }
     }
@@ -94,12 +80,62 @@ class ExtensionRate extends Component implements Tables\Contracts\HasTable, \Fil
         return FiltersLayout::AboveContent->value;
     }
 
+    protected function getTableHeaderActions(): array
+    {
+        return [
+            CreateAction::make('add_extension_rate')
+                ->label('Add New Extension Rate')
+                ->icon('heroicon-o-plus')
+                ->color('info')
+                ->button()
+                ->disableCreateAnother()
+                ->modalHeading('Add New Extension Rate')
+                ->form([
+                    Grid::make(1)->schema([
+                        Select::make('branch_id')
+                            ->label('Branch')
+                            ->options(\App\Models\Branch::pluck('name', 'id'))
+                            ->required()
+                            ->visible(fn () => auth()->user()->hasRole('superadmin')),
+                        TextInput::make('hour')
+                            ->required(),
+                        TextInput::make('amount')
+                            ->required(),
+                    ]),
+                ])
+                ->action(function (array $data) {
+                    $branchId = auth()->user()->hasRole('superadmin')
+                        ? $data['branch_id']
+                        : auth()->user()->branch_id;
+
+                    extensionRateModel::create([
+                        'hour' => $data['hour'],
+                        'amount' => $data['amount'],
+                        'branch_id' => $branchId,
+                    ]);
+
+                    ActivityLog::create([
+                        'branch_id' => $branchId,
+                        'user_id' => auth()->user()->id,
+                        'activity' => 'Create Extension Rate',
+                        'description' => 'Created extension rate for ' . $data['hour'] . ' hour(s)',
+                    ]);
+
+                    $this->dialog()->success(
+                        $title = 'Extension Saved',
+                        $description = 'Extension rate has been saved successfully'
+                    );
+                }),
+        ];
+    }
+
     protected function getTableActions(): array
     {
         return [
-            Tables\Actions\EditAction::make('type.edit')
-                ->icon('heroicon-o-pencil-square')
+            Tables\Actions\EditAction::make()
                 ->color('success')
+                ->button()
+                ->size('sm')
                 ->action(function ($record, $data) {
                     $record->update($data);
                     ActivityLog::create([
@@ -111,8 +147,7 @@ class ExtensionRate extends Component implements Tables\Contracts\HasTable, \Fil
 
                     $this->dialog()->success(
                         $title = 'Update Successfully',
-                        $description =
-                            'Extension rate has been updated successfully'
+                        $description = 'Extension rate has been updated successfully'
                     );
                 })
                 ->form(function ($record) {
@@ -123,104 +158,10 @@ class ExtensionRate extends Component implements Tables\Contracts\HasTable, \Fil
                         ]),
                     ];
                 })
-                ->modalHeading('Update Extension Rate')
-                ->modalWidth('lg'),
-            Tables\Actions\DeleteAction::make('user.destroy'),
+                ->modalHeading('Update Extension Rate'),
+            Tables\Actions\DeleteAction::make()
+                ->button()
+                ->size('sm'),
         ];
-    }
-
-    public function saveExtension()
-    {
-        $this->validate([
-            'hour' => 'required|unique:extension_rates,hour,NULL,id,branch_id,' . (auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id),
-            'amount' => 'required',
-        ]);
-
-        extensionRateModel::create([
-            'hour' => $this->hour,
-            'amount' => $this->amount,
-            'branch_id' => auth()->user()->hasRole('superadmin')
-                ? $this->branch_id
-                : auth()->user()->branch_id,
-        ]);
-
-        ActivityLog::create([
-            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
-            'user_id' => auth()->user()->id,
-            'activity' => 'Create Extension Rate',
-            'description' => 'Created extension rate for ' . $this->hour . ' hour(s)',
-        ]);
-
-        $this->add_modal = false;
-        $this->reset(['hour', 'amount']);
-
-        $this->dialog()->success(
-            $title = 'Extension Saved',
-            $description = 'Extension rate has been saved successfully'
-        );
-    }
-
-    public function editExtension($extension_id)
-    {
-        $extension = extensionRateModel::where('id', $extension_id)->where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)->first();
-        $this->extension_id = $extension->id;
-        $this->hour = $extension->hour;
-        $this->amount = $extension->amount;
-        $this->edit_modal = true;
-    }
-
-    public function updateExtension()
-    {
-        $this->validate([
-            'hour' =>
-                'required|unique:extension_rates,hour,' . $this->extension_id,
-            'amount' => 'required',
-        ]);
-
-        extensionRateModel::where('id', $this->extension_id)->update([
-            'hour' => $this->hour,
-            'amount' => $this->amount,
-        ]);
-
-        ActivityLog::create([
-            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
-            'user_id' => auth()->user()->id,
-            'activity' => 'Update Extension Rate',
-            'description' => 'Updated extension rate for ' . $this->hour . ' hour(s)',
-        ]);
-
-        $this->edit_modal = false;
-        $this->reset(['hour', 'amount']);
-
-        $this->dialog()->success(
-            $title = 'Extension Updated',
-            $description = 'Extension has been updated successfully'
-        );
-    }
-
-    public function deleteExtension($extension_id)
-    {
-        $this->dialog()->confirm([
-            'title' => 'Are you Sure?',
-            'description' => 'delete this extension?',
-            'icon' => 'question',
-            'accept' => [
-                'label' => 'Yes, delete it',
-                'method' => 'confirmDeleteExtension',
-                'params' => [$extension_id],
-            ],
-            'reject' => [
-                'label' => 'No, cancel',
-            ],
-        ]);
-    }
-
-    public function confirmDeleteExtension($extension_id)
-    {
-        extensionRateModel::where('id', $extension_id)->delete();
-        $this->dialog()->success(
-            $title = 'Extension Deleted',
-            $description = 'Extension has been deleted successfully'
-        );
     }
 }

@@ -54,7 +54,7 @@ class RoomTransferReasons extends Component implements Tables\Contracts\HasTable
                 ->default(auth()->user()->branch_id),
                 Textarea::make('reason')->label("Reason")->required(),
 
-            ])->color('warning')
+            ])->color('success')
             ->button(),
         ];
     }
@@ -74,7 +74,7 @@ class RoomTransferReasons extends Component implements Tables\Contracts\HasTable
             })
             ->label('Add New')
             ->button()
-            ->color('primary')
+            ->color('info')
             ->icon('heroicon-o-plus')
             ->form([
                 Select::make('branch_id')

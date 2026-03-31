@@ -24,14 +24,6 @@ Route::prefix('admin')
         Route::get('/frontdesk-kitchen', function () {
                 return view('admin.manage.kitchen-inventory');
         })->name('admin.food-inventory');
-        Route::get('/food/category', function () {
-                return view('frontdesk.food.category');
-        })->name('frontdesk.food-category');
-        Route::get('/food/menu', function () {
-                return view('frontdesk.food.menu');
-        })->name('frontdesk.food-menu');
-        Route::get('/food/inventory/{record}', fn($record) => view('frontdesk.food.inventory', compact('record')))
-            ->name('frontdesk.food-inventories');
         Route::get('/users', function () {
             return view('admin.manage.user');
         })->name('admin.user');
@@ -63,9 +55,10 @@ Route::prefix('admin')
         Route::get('/activity-logs', function () {
             return view('superadmin.activity-logs');
         })->name('admin.activity-logs');
-        Route::get('/check-in-co', function () {
-            return view('admin.check-in-co-admin');
-        })->name('admin.check-in-co');
+        // Check-In C/O merged into reservation page
+        // Route::get('/check-in-co', function () {
+        //     return view('admin.check-in-co-admin');
+        // })->name('admin.check-in-co');
          Route::get('/manage-cash-drawers', function () {
             return view('admin.manage.cash-drawers');
         })->name('admin.cash-drawers');

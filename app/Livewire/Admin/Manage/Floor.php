@@ -7,11 +7,9 @@ use Livewire\Component;
 use App\Models\Floor as floorModel;
 use WireUi\Traits\WireUiActions;
 use Filament\Tables;
-use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\CreateAction;
 use Filament\Forms\Components\Grid;
-// use Filament\Tables\Columns\Layout\Grid;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Filters\SelectFilter;
@@ -22,23 +20,12 @@ class Floor extends Component implements Tables\Contracts\HasTable, \Filament\Fo
     use Tables\Concerns\InteractsWithTable;
     use \Filament\Forms\Concerns\InteractsWithForms;
     use WireUiActions;
-    public $add_modal = false;
-    public $edit_modal = false;
-    public $number, $floor_id;
-    public $search;
+
     public $branch_id;
+
     public function render()
     {
-        return view('livewire.admin.manage.floor', [
-            'floors' => floorModel::where(
-                'branch_id',
-                auth()->user()->branch_id
-            )
-                ->where('number', 'like', '%' . $this->search . '%')
-                ->orderBy('number', 'asc')
-                ->get(),
-            'branches' => \App\Models\Branch::all(),
-        ]);
+        return view('livewire.admin.manage.floor');
     }
 
     protected function getTableColumns(): array
@@ -97,13 +84,13 @@ class Floor extends Component implements Tables\Contracts\HasTable, \Filament\Fo
         ];
     }
 
-     protected function getTableFilters(): array
+    protected function getTableFilters(): array
     {
-        if(auth()->user()->hasRole('superadmin')){
+        if (auth()->user()->hasRole('superadmin')) {
             return [
                 SelectFilter::make('branch')->relationship('branch', 'name')
             ];
-        }else{
+        } else {
             return [];
         }
     }
@@ -113,17 +100,75 @@ class Floor extends Component implements Tables\Contracts\HasTable, \Filament\Fo
         return FiltersLayout::AboveContent->value;
     }
 
+    protected function getTableHeaderActions(): array
+    {
+        return [
+            CreateAction::make('add_floor')
+                ->label('Add New Floor')
+                ->icon('heroicon-o-plus')
+                ->color('info')
+                ->button()
+                ->disableCreateAnother()
+                ->modalHeading('Add New Floor')
+                ->form([
+                    Grid::make(1)->schema([
+                        Select::make('branch_id')
+                            ->label('Branch')
+                            ->options(\App\Models\Branch::pluck('name', 'id'))
+                            ->required()
+                            ->visible(fn () => auth()->user()->hasRole('superadmin')),
+                        TextInput::make('number')
+                            ->label('Floor Number')
+                            ->required()
+                            ->numeric()
+                            ->rules('required|integer|regex:/^\d+$/'),
+                    ]),
+                ])
+                ->action(function (array $data) {
+                    $branchId = auth()->user()->hasRole('superadmin')
+                        ? $data['branch_id']
+                        : auth()->user()->branch_id;
+
+                    floorModel::create([
+                        'branch_id' => $branchId,
+                        'number' => $data['number'],
+                    ]);
+
+                    ActivityLog::create([
+                        'branch_id' => $branchId,
+                        'user_id' => auth()->user()->id,
+                        'activity' => 'Create Floor',
+                        'description' => 'Created floor ' . $data['number'],
+                    ]);
+
+                    $this->dialog()->success(
+                        $title = 'Floor Saved',
+                        $description = 'The floor has been saved successfully.'
+                    );
+                }),
+        ];
+    }
+
     protected function getTableActions(): array
     {
         return [
-            Tables\Actions\EditAction::make('floor.edit')
-                ->icon('heroicon-o-pencil-square')
+            Tables\Actions\EditAction::make()
                 ->color('success')
+                ->button()
+                ->size('sm')
                 ->action(function ($record, $data) {
                     $record->update($data);
+
+                    ActivityLog::create([
+                        'branch_id' => auth()->user()->hasRole('superadmin') ? $record->branch_id : auth()->user()->branch_id,
+                        'user_id' => auth()->user()->id,
+                        'activity' => 'Update Floor',
+                        'description' => 'Updated floor ' . $record->number,
+                    ]);
+
                     $this->dialog()->success(
                         $title = 'Floor Updated',
-                        $description = 'The room has been updated successfully.'
+                        $description = 'The floor has been updated successfully.'
                     );
                 })
                 ->form(function ($record) {
@@ -135,83 +180,21 @@ class Floor extends Component implements Tables\Contracts\HasTable, \Filament\Fo
                         ]),
                     ];
                 })
-                ->modalHeading('Update Floor')
-                ->modalWidth('xl'),
+                ->modalHeading('Update Floor'),
+            Tables\Actions\DeleteAction::make()
+                ->button()
+                ->size('sm'),
         ];
     }
 
     protected function getTableQuery(): Builder
     {
-         if(auth()->user()->hasRole('superadmin')){
+         if (auth()->user()->hasRole('superadmin')) {
             return floorModel::query()->orderBy('branch_id', 'asc')->orderBy('number', 'asc');
-         }else{
+         } else {
             return floorModel::query()
                 ->where('branch_id', auth()->user()->branch_id)
                 ->orderBy('number', 'asc');
          }
-    }
-
-    public function saveFloor()
-    {
-        $this->validate([
-            'number' => 'required|integer|regex:/^\d+$/',
-        ]);
-        floorModel::create([
-            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
-            'number' => $this->number,
-        ]);
-
-        ActivityLog::create([
-            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
-            'user_id' => auth()->user()->id,
-            'activity' => 'Create Floor',
-            'description' => 'Created floor ' . $this->number,
-        ]);
-
-        $this->dialog()->success(
-            $title = 'Floor saved',
-            $description = 'The floor has been saved successfully.'
-        );
-
-        $this->add_modal = false;
-        $this->reset(['number']);
-    }
-
-    public function editFloor($floor_id)
-    {
-        $floor = floorModel::where('id', $floor_id)->where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)->first();
-        $this->floor_id = $floor_id;
-        $this->number = $floor->number;
-        $this->edit_modal = true;
-    }
-
-    public function updateFloor()
-    {
-        $this->validate([
-            'number' =>
-                'required|integer|regex:/^\d+$/' .
-                $this->floor_id,
-        ]);
-
-        floorModel::where('id', $this->floor_id)
-            ->first()
-            ->update([
-                'number' => $this->number,
-            ]);
-
-        ActivityLog::create([
-            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
-            'user_id' => auth()->user()->id,
-            'activity' => 'Update Floor',
-            'description' => 'Updated floor ' . $this->number,
-        ]);
-
-        $this->dialog()->success(
-            $title = 'Floor updated',
-            $description = 'The floor has been updated successfully.'
-        );
-
-        $this->edit_modal = false;
-        $this->reset(['number']);
     }
 }

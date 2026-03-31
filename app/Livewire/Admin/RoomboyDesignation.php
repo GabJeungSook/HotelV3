@@ -8,13 +8,10 @@ use App\Models\User;
 use App\Models\Floor;
 use WireUi\Traits\WireUiActions;
 use Filament\Tables;
-use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\Action;
 use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
-use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Enums\FiltersLayout;
 
@@ -23,33 +20,21 @@ class RoomboyDesignation extends Component implements Tables\Contracts\HasTable,
     use Tables\Concerns\InteractsWithTable;
     use \Filament\Forms\Concerns\InteractsWithForms;
     use WireUiActions;
-    public $assign_modal = false;
-    public $roomboy_id;
-    public $floor;
+
     public $branch_id;
 
     public function render()
     {
-        return view('livewire.admin.roomboy-designation', [
-            'roomboys' => User::whereHas('roles', function ($q) {
-                $q->where('name', 'roomboy');
-            })->get(),
-            'floors' => Floor::where(
-                'branch_id',
-                auth()->user()->branch_id
-            )->get(),
-            'branches' => \App\Models\Branch::all(),
-        ]);
+        return view('livewire.admin.roomboy-designation');
     }
 
     protected function getTableQuery(): Builder
     {
-        if(auth()->user()->hasRole('superadmin'))
-        {
+        if (auth()->user()->hasRole('superadmin')) {
             return User::query()->whereHas('roles', function ($q) {
-            $q->where('name', 'roomboy');
-        });
-        }else{
+                $q->where('name', 'roomboy');
+            });
+        } else {
             return User::query()->where(
                 'branch_id',
                 auth()->user()->branch_id
@@ -97,31 +82,16 @@ class RoomboyDesignation extends Component implements Tables\Contracts\HasTable,
                 ->sortable(),
             Tables\Columns\ViewColumn::make('floors')->view('tables.columns.roomboy-assigned-floors')
                 ->label('FLOOR DESIGNATIONS'),
-            // Tables\Columns\TextColumn::make('floors')
-            //     ->label('FLOOR DESIGNATIONS')
-            //     ->formatStateUsing(
-            //         function ($record) {
-            //             if (!$record->floors || $record->floors->isEmpty()) {
-            //                 return 'Not Assigned';
-            //             }
-            //             return $record->floors
-            //                 ->map(function ($floor) {
-            //                     return $floor->numberWithFormat();
-            //                 })
-            //                 ->implode(', ');
-            //         }
-            //     )
-            //     ->sortable(),
         ];
     }
 
     protected function getTableFilters(): array
     {
-        if(auth()->user()->hasRole('superadmin')){
+        if (auth()->user()->hasRole('superadmin')) {
             return [
                 SelectFilter::make('branch')->relationship('branch', 'name')
             ];
-        }else{
+        } else {
             return [];
         }
     }
@@ -136,7 +106,9 @@ class RoomboyDesignation extends Component implements Tables\Contracts\HasTable,
         return [
             Action::make('Manage Designation')
                 ->icon('heroicon-o-pencil-square')
+                ->color('success')
                 ->button()
+                ->size('sm')
                 ->action(function ($record, $data) {
                     $record->floors()->sync($data['floors']); // floor IDs
                     $record->update([
@@ -151,8 +123,8 @@ class RoomboyDesignation extends Component implements Tables\Contracts\HasTable,
                     ]);
 
                     $this->dialog()->success(
-                        $title = 'Room Updated',
-                        $description = 'The room has been updated successfully.'
+                        $title = 'Designation Updated',
+                        $description = 'The roomboy designation has been updated successfully.'
                     );
                 })
                 ->form(function ($record) {
@@ -179,36 +151,5 @@ class RoomboyDesignation extends Component implements Tables\Contracts\HasTable,
                 ->modalHeading('Manage Designation')
                 ->modalWidth('lg'),
         ];
-    }
-
-    public function manageDesignation($roomboy_id)
-    {
-        $this->assign_modal = true;
-        $this->roomboy_id = $roomboy_id;
-    }
-
-    public function saveDesignation()
-    {
-        $this->Validate([
-            'floor' => 'required',
-        ]);
-
-        $roomboy = User::where('id', $this->roomboy_id)->first();
-        $roomboy->update([
-            'roomboy_assigned_floor_id' => $this->floor,
-        ]);
-
-        ActivityLog::create([
-            'branch_id' => auth()->user()->hasRole('superadmin') ? $roomboy->branch_id : auth()->user()->branch_id,
-            'user_id' => auth()->user()->id,
-            'activity' => 'Update Roomboy Designation',
-            'description' => 'Updated roomboy designation for ' . $roomboy->name,
-        ]);
-
-        $this->dialog()->success(
-            $title = 'Success',
-            $description = 'Roomboy Designation Updated Successfully'
-        );
-        $this->assign_modal = false;
     }
 }

@@ -2,11 +2,11 @@
 
 namespace App\Livewire\Pub;
 
-use App\Models\PubMenu;
+use App\Models\MenuItem;
 use Livewire\Component;
-use App\Models\PubInventory as InventoryModel;
+use App\Models\ItemInventory;
 use WireUi\Traits\WireUiActions;
-use App\Models\PubCategory;
+use App\Models\ItemCategory;
 
 class PubInventory extends Component
 {
@@ -23,14 +23,14 @@ class PubInventory extends Component
 
     public function mount()
     {
-        $this->category = PubCategory::all();
+        $this->category = ItemCategory::where('branch_id', auth()->user()->branch_id)->subcategories()->get();
     }
 
     public function addStock($id)
     {
         $this->add_stock_modal = true;
 
-        $this->menu_item = PubMenu::where('id', $id)->first();
+        $this->menu_item = MenuItem::where('id', $id)->first();
         $this->menu_name = $this->menu_item->name;
         $this->menu_price = '₱ '.number_format($this->menu_item->price, 2);
     }
@@ -43,14 +43,14 @@ class PubInventory extends Component
 
         if($this->menu_item->inventory === null)
         {
-            InventoryModel::create([
+            ItemInventory::create([
                 'branch_id' =>  auth()->user()->branch_id,
-                'pub_menu_id' => $this->menu_item->id,
+                'menu_item_id' => $this->menu_item->id,
                 'number_of_serving' => $this->menu_quantity
             ]);
         }else{
-            $this->menu_item->pubInventory->update([
-                'number_of_serving' => $this->menu_item->pubInventory->number_of_serving + $this->menu_quantity,
+            $this->menu_item->inventory->update([
+                'number_of_serving' => $this->menu_item->inventory->number_of_serving + $this->menu_quantity,
             ]);
         }
 
@@ -70,7 +70,7 @@ class PubInventory extends Component
     public function render()
     {
         return view('livewire.pub.pub-inventory', [
-            'menus' => $this->selectedItem ? PubMenu::where('pub_category_id', $this->selectedItem)->get() : [],
+            'menus' => $this->selectedItem ? MenuItem::where('category_id', $this->selectedItem)->where('department_id', \App\Models\Department::PUB)->get() : [],
         ]);
     }
 }

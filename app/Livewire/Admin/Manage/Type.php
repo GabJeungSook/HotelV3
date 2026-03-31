@@ -6,11 +6,9 @@ use App\Models\ActivityLog;
 use Livewire\Component;
 use App\Models\Type as typeModel;
 use WireUi\Traits\WireUiActions;
-use Livewire\WithPagination;
 use Filament\Tables;
-use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\CreateAction;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
@@ -19,35 +17,22 @@ use Filament\Tables\Enums\FiltersLayout;
 
 class Type extends Component implements Tables\Contracts\HasTable, \Filament\Forms\Contracts\HasForms
 {
-    // use WithPagination;
     use Tables\Concerns\InteractsWithTable;
     use \Filament\Forms\Concerns\InteractsWithForms;
     use WireUiActions;
-    public $add_modal = false;
-    public $edit_modal = false;
-    public $name;
-    public $type_id;
+
     public $branch_id;
+
     public function render()
     {
-        return view(
-            'livewire.admin.manage.type',
-            [
-                'branches' => \App\Models\Branch::all(),
-            ]
-            // , [
-            //     'types' => typeModel::where('branch_id', auth()->user()->branch_id)
-            //         ->where('name', 'like', '%' . $this->search . '%')
-            //         ->paginate(10),
-            // ]
-        );
+        return view('livewire.admin.manage.type');
     }
 
     protected function getTableQuery(): Builder
     {
-        if(auth()->user()->hasRole('superadmin')){
+        if (auth()->user()->hasRole('superadmin')) {
             return typeModel::query();
-        }else{
+        } else {
             return typeModel::query()->where(
                 'branch_id',
                 auth()->user()->branch_id
@@ -75,17 +60,80 @@ class Type extends Component implements Tables\Contracts\HasTable, \Filament\For
         ];
     }
 
+    protected function getTableFilters(): array
+    {
+        if (auth()->user()->hasRole('superadmin')) {
+            return [
+                SelectFilter::make('branch')->relationship('branch', 'name')
+            ];
+        } else {
+            return [];
+        }
+    }
+
+    protected function getTableFiltersLayout(): ?string
+    {
+        return FiltersLayout::AboveContent->value;
+    }
+
+    protected function getTableHeaderActions(): array
+    {
+        return [
+            CreateAction::make('add_type')
+                ->label('Add New Type')
+                ->icon('heroicon-o-plus')
+                ->color('info')
+                ->button()
+                ->disableCreateAnother()
+                ->modalHeading('Add New Type')
+                ->form([
+                    Grid::make(1)->schema([
+                        Select::make('branch_id')
+                            ->label('Branch')
+                            ->options(\App\Models\Branch::pluck('name', 'id'))
+                            ->required()
+                            ->visible(fn () => auth()->user()->hasRole('superadmin')),
+                        TextInput::make('name')
+                            ->required(),
+                    ]),
+                ])
+                ->action(function (array $data) {
+                    $branchId = auth()->user()->hasRole('superadmin')
+                        ? $data['branch_id']
+                        : auth()->user()->branch_id;
+
+                    typeModel::create([
+                        'branch_id' => $branchId,
+                        'name' => $data['name'],
+                    ]);
+
+                    ActivityLog::create([
+                        'branch_id' => $branchId,
+                        'user_id' => auth()->user()->id,
+                        'activity' => 'Create Type',
+                        'description' => 'Created type ' . $data['name'],
+                    ]);
+
+                    $this->dialog()->success(
+                        $title = 'Type Saved',
+                        $description = 'Type was successfully saved'
+                    );
+                }),
+        ];
+    }
+
     protected function getTableActions(): array
     {
         return [
-            Tables\Actions\EditAction::make('type.edit')
-                ->icon('heroicon-o-pencil-square')
+            Tables\Actions\EditAction::make()
                 ->color('success')
+                ->button()
+                ->size('sm')
                 ->action(function ($record, $data) {
                     $record->update($data);
 
                     ActivityLog::create([
-                        'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
+                        'branch_id' => auth()->user()->hasRole('superadmin') ? $record->branch_id : auth()->user()->branch_id,
                         'user_id' => auth()->user()->id,
                         'activity' => 'Update Type',
                         'description' => 'Updated type ' . $record->id,
@@ -105,85 +153,11 @@ class Type extends Component implements Tables\Contracts\HasTable, \Filament\For
                         ]),
                     ];
                 })
-                ->modalHeading('Update Type')
-                ->modalWidth('lg'),
-                Tables\Actions\DeleteAction::make('delete')
-                ->requiresConfirmation()
-                ->visible(fn ($record) => $record->rooms->count() === 0)
+                ->modalHeading('Update Type'),
+            Tables\Actions\DeleteAction::make()
+                ->button()
+                ->size('sm')
+                ->visible(fn ($record) => $record->rooms->count() === 0),
         ];
-    }
-
-    protected function getTableFilters(): array
-    {
-        if(auth()->user()->hasRole('superadmin')){
-            return [
-                SelectFilter::make('branch')->relationship('branch', 'name')
-            ];
-        }else{
-            return [];
-        }
-    }
-
-    protected function getTableFiltersLayout(): ?string
-    {
-        return FiltersLayout::AboveContent->value;
-    }
-
-    public function saveType()
-    {
-        $this->validate([
-            'name' => 'required|unique:types,name,NULL,id,branch_id,' . (auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id),
-        ]);
-
-        typeModel::create([
-            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
-            'name' => $this->name,
-        ]);
-
-        ActivityLog::create([
-            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
-            'user_id' => auth()->user()->id,
-            'activity' => 'Create Type',
-            'description' => 'Created type ' . $this->name,
-        ]);
-
-        $this->reset(['name']);
-        $this->dialog()->success(
-            $title = 'Type Saved',
-            $description = 'Type was successfully saved'
-        );
-        $this->add_modal = false;
-    }
-
-    public function editType($id)
-    {
-        $type = typeModel::where('id', $id)->where('branch_id', auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id)->first();
-        $this->type_id = $type->id;
-        $this->name = $type->name;
-        $this->edit_modal = true;
-    }
-
-    public function updateType()
-    {
-        $this->validate([
-            'name' => 'required',
-        ]);
-        typeModel::where('id', $this->type_id)->update([
-            'name' => $this->name,
-        ]);
-
-        ActivityLog::create([
-            'branch_id' => auth()->user()->hasRole('superadmin') ? $this->branch_id : auth()->user()->branch_id,
-            'user_id' => auth()->user()->id,
-            'activity' => 'Update Type',
-            'description' => 'Updated type ' . $this->type_id,
-        ]);
-
-        $this->reset(['name']);
-        $this->dialog()->success(
-            $title = 'Type Updated',
-            $description = 'Type was successfully updated'
-        );
-        $this->edit_modal = false;
     }
 }

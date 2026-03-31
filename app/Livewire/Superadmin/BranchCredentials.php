@@ -63,7 +63,7 @@ class BranchCredentials extends Component implements Tables\Contracts\HasTable, 
         return [
             Tables\Actions\EditAction::make()
                 ->form($this->getUserFormSchema(isEdit: true))
-                ->color('warning')
+                ->color('success')
                 ->button()
                 ->mutateFormDataUsing(function (array $data): array {
                     if (!empty($data['password'])) {
@@ -98,7 +98,7 @@ class BranchCredentials extends Component implements Tables\Contracts\HasTable, 
                 ->modalButton('Save')
                 ->label('Add New')
                 ->button()
-                ->color('primary')
+                ->color('info')
                 ->icon('heroicon-o-plus')
                 ->form($this->getUserFormSchema(isEdit: false))
                 ->action(function (array $data) {

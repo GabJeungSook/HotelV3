@@ -2,10 +2,10 @@
 
 namespace App\Livewire\Kitchen;
 
-use App\Models\Menu;
+use App\Models\MenuItem;
 use App\Models\Guest;
 use Livewire\Component;
-use App\Models\Inventory;
+use App\Models\ItemInventory;
 use App\Models\Transaction as TransactionModel;
 use App\Models\CheckinDetail;
 use WireUi\Traits\WireUiActions;
@@ -38,7 +38,8 @@ class Transaction extends Component
     public function updatedFoodId()
     {
         if ($this->food_id != 'Select Item') {
-            $price = Menu::where('branch_id', auth()->user()->branch_id)
+            $price = MenuItem::where('branch_id', auth()->user()->branch_id)
+                ->where('department_id', \App\Models\Department::KITCHEN)
                 ->where('id', $this->food_id)
                 ->first()->price;
             if ($this->food_quantity == null || $this->food_quantity == 0) {
@@ -56,7 +57,8 @@ class Transaction extends Component
     public function updatedFoodQuantity()
     {
         if ($this->food_id != 'Select Item') {
-            $price = Menu::where('branch_id', auth()->user()->branch_id)
+            $price = MenuItem::where('branch_id', auth()->user()->branch_id)
+                ->where('department_id', \App\Models\Department::KITCHEN)
                 ->where('id', $this->food_id)
                 ->first()->price;
             if ($this->food_quantity == null || $this->food_quantity == 0) {
@@ -94,11 +96,11 @@ class Transaction extends Component
             $this->guest->id
         )->first();
 
-        $food = Menu::where('branch_id', auth()->user()->branch_id)
+        $food = MenuItem::where('branch_id', auth()->user()->branch_id)
+            ->where('department_id', \App\Models\Department::KITCHEN)
             ->where('id', $this->food_id)
             ->first();
-        $inventory = Inventory::where('branch_id', auth()->user()->branch_id)
-            ->where('menu_id', $this->food_id)
+        $inventory = ItemInventory::where('menu_item_id', $this->food_id)
             ->first();
         if($inventory != null)
         {
@@ -149,7 +151,7 @@ class Transaction extends Component
                 ->whereHas('checkInDetail', function ($query) {
                     $query->where('is_check_out', false);
                 })->get(),
-            'foods' => Menu::where('branch_id', auth()->user()->branch_id)->get(),
+            'foods' => MenuItem::where('branch_id', auth()->user()->branch_id)->where('department_id', \App\Models\Department::KITCHEN)->get(),
         ]);
     }
 }

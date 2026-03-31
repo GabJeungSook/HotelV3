@@ -1,155 +1,120 @@
 <div>
-  <div class="flex justify-end mb-4">
-        @if(auth()->user()->hasRole('superadmin'))
-            <x-native-select label="Branch" wire:model="branch_id">
-                <option selected hidden>Select Branch</option>
-                    @foreach ($branches as $item)
-                        <option value="{{ $item->id }}">{{ $item->name }}</option>
-                    @endforeach
-            </x-native-select>
+    {{-- Header --}}
+    <div class="mb-4 flex items-center justify-between">
+        <div>
+            <h1 class="text-lg font-bold text-[#009EF5]">Priority Rooms</h1>
+            <p class="text-xs text-gray-400">Click a room to toggle priority. Priority rooms are offered first to kiosk guests.</p>
+        </div>
+        @if($branches->isNotEmpty())
+            <select wire:model.live="branch_id" class="rounded-md border-gray-300 text-sm focus:ring-[#009EF5] focus:border-[#009EF5]">
+                @foreach($branches as $branch)
+                    <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                @endforeach
+            </select>
         @endif
     </div>
-  <div class="p-4 bg-white rounded-xl">
-    <div class="grid grid-cols-2 gap-10">
-      <div>
-        <div class="header flex space-x-2 text-green-700 items-center py-2 border-y">
-          <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none">
-            <path
-              d="M7.18301 2.11333C7.29885 2.01836 7.45117 1.98034 7.59806 2.00971L12.5981 3.00971C12.8318 3.05646 13 3.26166 13 3.5V12.4969C13 12.7352 12.8318 12.9404 12.5981 12.9872L7.59806 13.9872C7.45117 14.0166 7.29885 13.9785 7.18301 13.8836C7.06716 13.7886 7 13.6467 7 13.4969V2.5M10 7.99841C10 7.72227 9.77614 7.49841 9.5 7.49841C9.22386 7.49841 9 7.72227 9 7.99841C9 8.27456 9.22386 8.49841 9.5 8.49841C9.77614 8.49841 10 8.27456 10 7.99841Z"
-              fill="currentColor"></path>
-            <path d="M6 3H3.5C3.22386 3 3 3.22386 3 3.5V12.4969C3 12.773 3.22386 12.9969 3.5 12.9969H6V3Z"
-              fill="currentColor"></path>
-            <path d="M7.18301 2.11333C7.06716 2.2083 7 2.35021 7 2.5Z" fill="currentColor"></path>
-          </svg>
-          <span class="font-semibold text-xl">PRIORITY ROOMS</span>
-        </div>
-        {{-- <div class="mt-3 grid grid-cols-2 gap-4" x-animate>
-          @forelse ($types as $type)
 
-            <div
-              class="rounded-lg bg-gradient-to-br relative from-gray-300 overflow-hidden p-5 via-gray-200 to-gray-100">
-              <div class="font-bold text-xl text-gray-600">{{ $room->numberWithFormat() }}</div>
-              <div class="text-xs">{{ $room->floor->numberWithFormat() }}</div>
-
-              <svg class="w-28 h-28 absolute text-green-600 opacity-20 -top-2 -right-2" fill="currentColor"
-                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                <!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. -->
-                <path
-                  d="M336 352c97.2 0 176-78.8 176-176S433.2 0 336 0S160 78.8 160 176c0 18.7 2.9 36.8 8.3 53.7L7 391c-4.5 4.5-7 10.6-7 17v80c0 13.3 10.7 24 24 24h80c13.3 0 24-10.7 24-24V448h40c13.3 0 24-10.7 24-24V384h40c6.4 0 12.5-2.5 17-7l33.3-33.3c16.9 5.4 35 8.3 53.7 8.3zm40-176c-22.1 0-40-17.9-40-40s17.9-40 40-40s40 17.9 40 40s-17.9 40-40 40z">
-                </path>
-              </svg>
-
-              <div class="absolute top-2 right-2">
-                <x-mini-button icon="trash" wire:click="removePriority({{ $room->id }})" negative />
-              </div>
+    {{-- Stats + Bulk Actions --}}
+    <div class="flex items-center justify-between mb-4">
+        <div class="flex gap-3">
+            <div class="flex items-center gap-2 rounded-lg bg-blue-50 border border-blue-200 px-3 py-1.5">
+                <div class="h-2.5 w-2.5 rounded-full bg-[#009EF5]"></div>
+                <span class="text-sm font-semibold text-[#009EF5]">{{ $priorityCount }} Priority</span>
             </div>
-          @empty
-            <div class="mt-3">
-              <h1>No Priority rooms available</h1>
+            <div class="flex items-center gap-2 rounded-lg bg-gray-50 border border-gray-200 px-3 py-1.5">
+                <div class="h-2.5 w-2.5 rounded-full bg-gray-400"></div>
+                <span class="text-sm font-semibold text-gray-500">{{ $availableCount }} Available</span>
             </div>
-          @endforelse
-        </div> --}}
-
-        <div class="mt-3">
-          @foreach ($types as $type)
-            <div>
-              <h1 class="font-bold text-gray-600 text-xl uppercase">{{ $type->name }}</h1>
-            </div>
-            @php
-              $rooms = \App\Models\Room::where('type_id', $type->id)
-                    ->whereIn('status', [
-                        'Available',
-                        'Cleaned ',
-                    ])
-                  ->where('is_priority', true)
-                  ->with('floor')
-                  ->orderBy('number', 'asc')
-                  ->get();
-            @endphp
-            <div class="mt-1 grid grid-cols-2 gap-4 mb-2" x-animate>
-              @forelse ($rooms as $room)
-                <div
-                  class="rounded-lg bg-gradient-to-br relative from-gray-300 overflow-hidden p-5 via-gray-200 to-gray-100">
-                  <div class="font-bold text-xl text-gray-600">{{ $room->numberWithFormat() }}</div>
-                  <div class="text-xs">{{ $room->floor->numberWithFormat() }}</div>
-                  <div class="text-xs uppercase">{{ $room->type->name }}</div>
-                  <svg class="w-28 h-28 absolute text-green-600 opacity-20 -top-2 -right-2" fill="currentColor"
-                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                    <!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. -->
-                    <path
-                      d="M336 352c97.2 0 176-78.8 176-176S433.2 0 336 0S160 78.8 160 176c0 18.7 2.9 36.8 8.3 53.7L7 391c-4.5 4.5-7 10.6-7 17v80c0 13.3 10.7 24 24 24h80c13.3 0 24-10.7 24-24V448h40c13.3 0 24-10.7 24-24V384h40c6.4 0 12.5-2.5 17-7l33.3-33.3c16.9 5.4 35 8.3 53.7 8.3zm40-176c-22.1 0-40-17.9-40-40s17.9-40 40-40s40 17.9 40 40s-17.9 40-40 40z">
-                    </path>
-                  </svg>
-
-                  <div class="absolute top-2 right-2">
-                    <x-mini-button icon="trash" wire:click="removePriority({{ $room->id }})" negative />
-                  </div>
-                </div>
-              @empty
-                <div class="mt-3">
-                  <h1>No Priority rooms available</h1>
-                </div>
-              @endforelse
-            </div>
-          @endforeach
         </div>
-      </div>
-      <div>
-        <div class="header flex space-x-2 text-red-700 items-center py-2 border-y">
-          <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none">
-            <path
-              d="M7.18301 2.11333C7.29885 2.01836 7.45117 1.98034 7.59806 2.00971L12.5981 3.00971C12.8318 3.05646 13 3.26166 13 3.5V12.4969C13 12.7352 12.8318 12.9404 12.5981 12.9872L7.59806 13.9872C7.45117 14.0166 7.29885 13.9785 7.18301 13.8836C7.06716 13.7886 7 13.6467 7 13.4969V2.5M10 7.99841C10 7.72227 9.77614 7.49841 9.5 7.49841C9.22386 7.49841 9 7.72227 9 7.99841C9 8.27456 9.22386 8.49841 9.5 8.49841C9.77614 8.49841 10 8.27456 10 7.99841Z"
-              fill="currentColor"></path>
-            <path d="M6 3H3.5C3.22386 3 3 3.22386 3 3.5V12.4969C3 12.773 3.22386 12.9969 3.5 12.9969H6V3Z"
-              fill="currentColor"></path>
-            <path d="M7.18301 2.11333C7.06716 2.2083 7 2.35021 7 2.5Z" fill="currentColor"></path>
-          </svg>
-          <span class="font-semibold text-xl">AVAILABLE ROOMS (CLEANED ROOM)</span>
-        </div>
-        <div class="mt-3 flex justify-between">
-          <div class="flex space-x-2">
-            <x-native-select wire:model="filter">
-              <option selected hidden>Select Type</option>
-              @foreach ($types as $type)
-                <option value="{{ $type->id }}">{{ $type->name }}</optionv>
-              @endforeach
-            </x-native-select>
-            <x-mini-button icon="arrow-path" slate spinner />
-          </div>
-          <div class="search flex items-center rounded-lg  px-3 py-1 w-72 border border-gray-200 shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="fill-gray-500" width="24"
-              height="24">
-              <path fill="none" d="M0 0h24v24H0z" />
-              <path
-                d="M11 2c4.968 0 9 4.032 9 9s-4.032 9-9 9-9-4.032-9-9 4.032-9 9-9zm0 16c3.867 0 7-3.133 7-7 0-3.868-3.133-7-7-7-3.868 0-7 3.132-7 7 0 3.867 3.132 7 7 7zm8.485.071l2.829 2.828-1.415 1.415-2.828-2.829 1.414-1.414z" />
-            </svg>
-            <input type="text" wire:model="search"
-              class="outline:none  h-8 focus:ring-0 flex-1 border-0 focus:border-0" placeholder="Search">
-          </div>
-        </div>
-        <div class="mt-3 grid grid-cols-2 gap-4" x-animate>
-          @forelse ($available_rooms as $room)
-            <div
-              class="rounded-lg bg-gradient-to-br relative from-gray-300 overflow-hidden p-5 via-gray-200 to-gray-100">
-              <div class="font-bold text-xl text-gray-600">{{ $room->numberWithFormat() }}</div>
-              <div class="text-xs uppercase">{{ $room->floor->numberWithFormat() }}</div>
-              <div class="text-xs uppercase">{{ $room->type->name }}</div>
-              <div class="mt-3 relative z-10">
-                <x-button wire:click="setPriority({{ $room->id }})" label="Set as Priority"
-                  right-icon="arrow-small-right" negative class="w-full" />
-              </div>
-              <svg class="w-40 h-40 absolute text-red-600 opacity-20 -top-2 -right-2" fill="currentColor"
-                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                <!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. -->
-                <path
-                  d="M336 352c97.2 0 176-78.8 176-176S433.2 0 336 0S160 78.8 160 176c0 18.7 2.9 36.8 8.3 53.7L7 391c-4.5 4.5-7 10.6-7 17v80c0 13.3 10.7 24 24 24h80c13.3 0 24-10.7 24-24V448h40c13.3 0 24-10.7 24-24V384h40c6.4 0 12.5-2.5 17-7l33.3-33.3c16.9 5.4 35 8.3 53.7 8.3zm40-176c-22.1 0-40-17.9-40-40s17.9-40 40-40s40 17.9 40 40s-17.9 40-40 40z">
-                </path>
-              </svg>
+        @if($filterType || $filterFloor)
+            <div class="flex gap-2">
+                <button wire:click="bulkSetPriority"
+                    class="inline-flex items-center gap-1.5 rounded-lg bg-[#009EF5] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0080cc] transition active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    Set All as Priority
+                </button>
+                <button wire:click="bulkRemovePriority"
+                    class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-50 transition active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Remove All Priority
+                </button>
             </div>
-          @empty
-          @endforelse
-        </div>
-      </div>
+        @endif
     </div>
-  </div>
+
+    {{-- Filters --}}
+    <div class="flex flex-wrap gap-3 mb-5">
+        <select wire:model.live="filterType" class="rounded-lg border-gray-300 text-sm focus:ring-[#009EF5] focus:border-[#009EF5] min-w-[140px]">
+            <option value="">All Types</option>
+            @foreach($types as $type)
+                <option value="{{ $type->id }}">{{ $type->name }}</option>
+            @endforeach
+        </select>
+        <select wire:model.live="filterFloor" class="rounded-lg border-gray-300 text-sm focus:ring-[#009EF5] focus:border-[#009EF5] min-w-[140px]">
+            <option value="">All Floors</option>
+            @foreach($floors as $floor)
+                <option value="{{ $floor->id }}">Floor {{ $floor->number }}</option>
+            @endforeach
+        </select>
+        <select wire:model.live="filterPriority" class="rounded-lg border-gray-300 text-sm focus:ring-[#009EF5] focus:border-[#009EF5] min-w-[140px]">
+            <option value="">All Rooms</option>
+            <option value="yes">Priority Only</option>
+            <option value="no">Available Only</option>
+        </select>
+    </div>
+
+    {{-- Room Grid --}}
+    <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+        @forelse($rooms as $room)
+            <button wire:click="togglePriority({{ $room->id }})"
+                class="relative rounded-xl border-2 p-3 text-left transition-all duration-150 hover:shadow-md active:scale-95 cursor-pointer
+                {{ $room->is_priority
+                    ? 'border-[#009EF5] bg-blue-50 hover:border-[#0080cc]'
+                    : 'border-gray-200 bg-white hover:border-[#009EF5]/40' }}">
+
+                {{-- Priority star --}}
+                @if($room->is_priority)
+                    <div class="absolute top-2 right-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#009EF5]" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                    </div>
+                @endif
+
+                {{-- Room number --}}
+                <div class="text-base font-bold {{ $room->is_priority ? 'text-[#009EF5]' : 'text-gray-800' }}">
+                    #{{ $room->number }}
+                </div>
+
+                {{-- Floor --}}
+                <div class="text-xs text-gray-400 mt-0.5">
+                    Floor {{ $room->floor?->number }}
+                </div>
+
+                {{-- Type badge --}}
+                <div class="mt-1.5">
+                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium
+                        {{ $room->is_priority ? 'bg-blue-100 text-[#009EF5]' : 'bg-gray-100 text-gray-600' }}">
+                        {{ $room->type?->name }}
+                    </span>
+                </div>
+
+                {{-- Status --}}
+                <div class="mt-1 text-[10px] font-medium {{ $room->is_priority ? 'text-[#009EF5]' : 'text-gray-400' }}">
+                    {{ $room->is_priority ? 'PRIORITY' : $room->status }}
+                </div>
+            </button>
+        @empty
+            <div class="col-span-full py-16 text-center text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                <p class="text-sm">No available or cleaned rooms found.</p>
+            </div>
+        @endforelse
+    </div>
 </div>

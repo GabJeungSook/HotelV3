@@ -565,9 +565,9 @@
 
 
 
-  @livewireScriptConfig
   @filamentScripts
   <x-dialog z-index="z-50" blur="md" align="center" />
+  @livewireScriptConfig
 </body>
 
 </html>

@@ -3,7 +3,7 @@
 namespace App\Livewire\Kitchen;
 
 use Livewire\Component;
-use App\Models\MenuCategory;
+use App\Models\ItemCategory;
 use WireUi\Traits\WireUiActions;
 use Filament\Tables;
 use Illuminate\Contracts\View\View;
@@ -19,20 +19,23 @@ class Category extends Component implements Tables\Contracts\HasTable, \Filament
     use WireUiActions;
     public $name;
     public $category_id;
+    public $parent_id;
     public $add_modal = false;
     public $edit_modal = false;
 
     protected function getTableQuery(): Builder
     {
-        return MenuCategory::query()->where(
+        return ItemCategory::query()->where(
             'branch_id',
             auth()->user()->branch_id
-        );
+        )->subcategories();
     }
 
     public function render()
     {
-        return view('livewire.kitchen.category');
+        return view('livewire.kitchen.category', [
+            'mainCategories' => ItemCategory::where('branch_id', auth()->user()->branch_id)->mainCategories()->get(),
+        ]);
     }
 
     protected function getTableColumns(): array
@@ -40,6 +43,10 @@ class Category extends Component implements Tables\Contracts\HasTable, \Filament
         return [
             TextColumn::make('name')
                 ->label('CATEGORY NAME')
+                ->searchable()
+                ->sortable(),
+            TextColumn::make('parent.name')
+                ->label('MAIN CATEGORY')
                 ->searchable()
                 ->sortable(),
         ];
@@ -77,23 +84,25 @@ class Category extends Component implements Tables\Contracts\HasTable, \Filament
     {
         $this->validate([
             'name' => 'required',
+            'parent_id' => 'required',
         ]);
 
-        MenuCategory::create([
+        ItemCategory::create([
             'name' => $this->name,
             'branch_id' => auth()->user()->branch_id,
+            'parent_id' => $this->parent_id,
         ]);
         $this->add_modal = false;
         $this->dialog()->success(
             $title = 'Success',
             $description = 'Category Added Successfully'
         );
-        $this->reset('name');
+        $this->reset('name', 'parent_id');
     }
 
     public function editItem($item_id)
     {
-        $item = MenuCategory::where('id', $item_id)->first();
+        $item = ItemCategory::where('id', $item_id)->first();
         $this->name = $item->name;
         $this->category_id = $item->id;
 
@@ -106,7 +115,7 @@ class Category extends Component implements Tables\Contracts\HasTable, \Filament
             'name' => 'required',
         ]);
 
-        MenuCategory::where('id', $this->category_id)->update([
+        ItemCategory::where('id', $this->category_id)->update([
             'name' => $this->name,
         ]);
         $this->edit_modal = false;
@@ -118,7 +127,7 @@ class Category extends Component implements Tables\Contracts\HasTable, \Filament
 
     public function deleteItem($item_id)
     {
-        MenuCategory::where('id', $item_id)->delete();
+        ItemCategory::where('id', $item_id)->delete();
         $this->dialog()->success(
             $title = 'Success',
             $description = 'Category Deleted Successfully'

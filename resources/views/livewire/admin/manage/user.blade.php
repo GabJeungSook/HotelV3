@@ -1,88 +1,44 @@
 <div>
-  <div class="bg-white p-4 rounded-xl">
-    <div>
+    <nav class="fi-tabs flex max-w-full gap-x-1 overflow-x-auto fi-contained border-b border-gray-200 px-3 py-2.5">
+        <button type="button" wire:click="$set('type', 1)"
+            class="fi-tabs-item group flex items-center justify-center gap-x-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium outline-none transition duration-75
+            {{ $type == 1 ? 'fi-active fi-tabs-item-active' : 'hover:bg-gray-50' }}"
+            style="{{ $type == 1 ? 'background-color: rgba(0, 158, 245, 0.08);' : '' }}">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                class="h-5 w-5 shrink-0 transition duration-75 {{ $type == 1 ? 'text-[#009EF5]' : 'text-gray-400' }}">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-1.997M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+            </svg>
+            <span class="fi-tabs-item-label transition duration-75 {{ $type == 1 ? 'text-[#009EF5]' : 'text-gray-500' }}">Users</span>
+        </button>
+        <button type="button" wire:click="$set('type', 2)"
+            class="fi-tabs-item group flex items-center justify-center gap-x-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium outline-none transition duration-75
+            {{ $type == 2 ? 'fi-active fi-tabs-item-active' : 'hover:bg-gray-50' }}"
+            style="{{ $type == 2 ? 'background-color: rgba(0, 158, 245, 0.08);' : '' }}">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                class="h-5 w-5 shrink-0 transition duration-75 {{ $type == 2 ? 'text-[#009EF5]' : 'text-gray-400' }}">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
+            </svg>
+            <span class="fi-tabs-item-label transition duration-75 {{ $type == 2 ? 'text-[#009EF5]' : 'text-gray-500' }}">Manage Frontdesk</span>
+        </button>
+        <button type="button" wire:click="$set('type', 3)"
+            class="fi-tabs-item group flex items-center justify-center gap-x-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium outline-none transition duration-75
+            {{ $type == 3 ? 'fi-active fi-tabs-item-active' : 'hover:bg-gray-50' }}"
+            style="{{ $type == 3 ? 'background-color: rgba(0, 158, 245, 0.08);' : '' }}">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                class="h-5 w-5 shrink-0 transition duration-75 {{ $type == 3 ? 'text-[#009EF5]' : 'text-gray-400' }}">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17l-5.384 3.112 1.03-5.994-4.354-4.247 6.02-.876L11.42 1.5l2.689 5.665 6.02.876-4.354 4.247 1.03 5.994-5.384-3.112z" />
+            </svg>
+            <span class="fi-tabs-item-label transition duration-75 {{ $type == 3 ? 'text-[#009EF5]' : 'text-gray-500' }}">Roomboy Designation</span>
+        </button>
+    </nav>
 
-      <div class="hidden sm:block" x-data="{ type: 1 }" x-animate>
-        <div class="border-b border-gray-200">
-          <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-            <button x-on:click="type=1" wire:click="$set('type',1)"
-              :class="type == 1 ? 'border-gray-600' : 'border-transparent'"
-              class="  text-gray-500  hover:text-gray-700 hover:border-gray-500 whitespace-nowrap flex py-3  border-b-2 font-semibold text-md">
-              Users
-            </button>
-            <button x-on:click="type=2" wire:click="$set('type',2)"
-              :class="type == 2 ? 'border-gray-600' : 'border-transparent'"
-              class=" text-gray-500 hover:text-gray-700 hover:border-gray-500 whitespace-nowrap flex py-3 px-1 border-b-2 font-semibold text-md">
-              Manage Frontdesk
-            </button>
-            <button x-on:click="type=3" wire:click="$set('type',3)"
-              :class="type == 3 ? 'border-gray-600' : 'border-transparent'"
-              class=" text-gray-500 hover:text-gray-700 hover:border-gray-500 whitespace-nowrap flex py-3 px-1 border-b-2 font-semibold text-md">
-              Roomboy Designation
-            </button>
-          </nav>
-        </div>
-        <div class="p-4">
-          @if ($type == 1)
-            <div>
-              <div class="flex mb-5">
-                <x-button wire:click="$set('add_modal', true)" icon="plus" blue label="Add New User" />
-              </div>
-              {{ $this->table }}
-            </div>
-          @elseif($type == 2)
+    <div class="pt-2">
+        @if ($type == 1)
+            {{ $this->table }}
+        @elseif ($type == 2)
             <livewire:admin.manage-frondesk />
-          @elseif($type == 3)
+        @elseif ($type == 3)
             <livewire:admin.roomboy-designation />
-          @endif
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <x-modal wire:model="add_modal" align="center" max-width="xl">
-    <x-card>
-      <div class="header flex space-x-2 items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" class="fill-gray-600">
-          <path fill="none" d="M0 0h24v24H0z" />
-          <path
-            d="M11 11V7h2v4h4v2h-4v4h-2v-4H7v-2h4zm1 11C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16z" />
-        </svg>
-        <h1 class="text-lg font-semibold uppercase text-gray-600 ">Add New User</h1>
-      </div>
-      <div class="mt-5 px-2 grid grid-cols-2 gap-4 ">
-        @if(auth()->user()->hasRole('superadmin'))
-        <div class="col-span-2">
-          <x-native-select label="Branch" wire:model="branch_id">
-              <option selected hidden>Select Branch</option>
-                @foreach ($branches as $item)
-                    <option value="{{ $item->id }}">{{ $item->name }}</option>
-                @endforeach
-          </x-native-select>
-        </div>
         @endif
-        <x-input label="Name" wire:model="name" />
-        <x-input label="Email" wire:model="email" />
-        <x-password label="Password" wire:model="password" />
-        <x-native-select label="Role" wire:model="role">
-          <option selected hidden>Select Role</option>
-          <option value="admin">Admin</option>
-          <option value="frontdesk">Frontdesk</option>
-          <option value="kiosk">Kiosk</option>
-          <option value="kitchen">Kitchen</option>
-          <option value="roomboy">Roomboy</option>
-          <option value="back_office">Back_Office</option>
-        </x-native-select>
-
-
-      </div>
-      <x-slot name="footer">
-        <div class="flex justify-end gap-x-4">
-          <x-button flat label="Cancel" x-on:click="close" />
-
-          <x-button positive right-icon="arrow-down-tray" wire:click="saveUser" spinner="saveUser" label="Save" />
-        </div>
-      </x-slot>
-    </x-card>
-  </x-modal>
+    </div>
 </div>

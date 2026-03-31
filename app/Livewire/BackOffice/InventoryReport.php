@@ -3,7 +3,9 @@
 namespace App\Livewire\BackOffice;
 
 use Livewire\Component;
-use App\Models\FrontdeskInventory;
+use App\Models\ItemInventory;
+use App\Models\ItemCategory;
+use App\Models\MenuItem;
 
 class InventoryReport extends Component
 {
@@ -14,26 +16,24 @@ class InventoryReport extends Component
     {
         $branchId = auth()->user()->branch_id;
 
-        $inventories = FrontdeskInventory::query()
+        $inventories = ItemInventory::query()
             ->where('branch_id', $branchId)
-            ->with(['frontdesk_menus.frontdeskCategory'])
+            ->with(['menuItem.category'])
             ->when($this->category_id, function ($q) {
-                $q->whereHas('frontdesk_menus.frontdeskCategory', function ($q2) {
-                    $q2->where('id', $this->category_id);
+                $q->whereHas('menuItem', function ($q2) {
+                    $q2->where('category_id', $this->category_id);
                 });
             })
             ->when($this->item_id, function ($q) {
-                $q->whereHas('frontdesk_menus', function ($q2) {
-                    $q2->where('id', $this->item_id);
-                });
+                $q->where('menu_item_id', $this->item_id);
             })
             ->get()
             ->map(function ($inventory) {
-                $menu = $inventory->frontdesk_menus()->first(); // 1 menu per inventory record (assumption)
-                $category = $menu?->frontdeskCategory;
+                $menu = $inventory->menuItem;
+                $category = $menu?->category;
 
                 $openingStock = (int) ($inventory->number_of_serving ?? 0);
-                $stockIn      = (int) ($inventory->number_of_serving ?? 0); // kept from your logic
+                $stockIn      = (int) ($inventory->number_of_serving ?? 0);
                 $stockOut     = (int) ($inventory->stock_out ?? 0);
                 $wastage      = (int) ($inventory->wastage ?? 0);
 
@@ -57,24 +57,15 @@ class InventoryReport extends Component
                 ];
             });
 
-        // filter dropdown sources
-        $categories = FrontdeskInventory::query()
-            ->where('branch_id', $branchId)
-            ->with('frontdesk_menus.frontdeskCategory')
-            ->get()
-            ->pluck('frontdesk_menus.0.frontdeskCategory')
-            ->filter()
-            ->unique('id')
-            ->values();
+        // Filter dropdown sources
+        $categories = ItemCategory::where('branch_id', $branchId)
+            ->subcategories()
+            ->whereHas('menuItems.inventory')
+            ->get();
 
-        $items = FrontdeskInventory::query()
-            ->where('branch_id', $branchId)
-            ->with('frontdesk_menus')
-            ->get()
-            ->pluck('frontdesk_menus.0')
-            ->filter()
-            ->unique('id')
-            ->values();
+        $items = MenuItem::where('branch_id', $branchId)
+            ->whereHas('inventory')
+            ->get();
 
         return view('livewire.back-office.inventory-report', [
             'inventories' => $inventories,

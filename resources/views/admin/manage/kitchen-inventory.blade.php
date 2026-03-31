@@ -1,6 +1,8 @@
 @section('breadcrumbs')
-Kitchen
+Food & Beverage Management
 @endsection
 <x-admin-layout>
-  <livewire:admin.manage.kitchen-inventory />
+  <div class="xl:max-w-full">
+    <livewire:shared.menu-management department="frontdesk" />
+  </div>
 </x-admin-layout>

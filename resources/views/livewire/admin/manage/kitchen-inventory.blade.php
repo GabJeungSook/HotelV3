@@ -99,7 +99,7 @@
                 </div>
                 <div class="flex justify-between items-center px-4 py-2">
                     <h3 class="text-sm font-semibold text-gray-800 text-left">{{$item->name}}</h3>
-                    <p class="text-xs text-[#009ff4] mt-1 text-left">{{$item->frontdeskInventory?->number_of_serving ?? 0}} serving(s)</p>
+                    <p class="text-xs text-[#009ff4] mt-1 text-left">{{$item->inventory?->number_of_serving ?? 0}} serving(s)</p>
                 </div>
             </button>
         @endforeach
