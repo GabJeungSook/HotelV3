@@ -4,7 +4,7 @@ namespace App\Livewire\Frontdesk\Monitoring;
 
 use DB;
 use Carbon\Carbon;
-use App\Models\Menu;
+use App\Models\MenuItem;
 use App\Models\Rate;
 use App\Models\Room;
 use App\Models\Type;
@@ -78,10 +78,7 @@ class RoomMonitoring extends Component
     public function getListeners()
     {
         return [
-             "echo-private:newcheckin.auth()->user()->branch_id,CheckInEvent" => 'searchKiosk',
-            'echo-private:newcheckin.' .
-            auth()->user()->branch_id .
-            ',CheckInEvent' => 'searchKiosk',
+            'echo-private:newcheckin.' . auth()->user()->branch_id . ',CheckInEvent' => 'searchKiosk',
         ];
     }
     public function mount()
@@ -119,7 +116,7 @@ class RoomMonitoring extends Component
     public function updatedFoodId()
     {
         if ($this->food_id != 'Select Item') {
-            $price = Menu::where('branch_id', auth()->user()->branch_id)
+            $price = MenuItem::forBranch()
                 ->where('id', $this->food_id)
                 ->first()->price;
             if ($this->food_quantity == null || $this->food_quantity == 0) {
@@ -137,7 +134,7 @@ class RoomMonitoring extends Component
     public function updatedFoodQuantity()
     {
         if ($this->food_id != 'Select Item') {
-            $price = Menu::where('branch_id', auth()->user()->branch_id)
+            $price = MenuItem::forBranch()
                 ->where('id', $this->food_id)
                 ->first()->price;
             if ($this->food_quantity == null || $this->food_quantity == 0) {
@@ -175,12 +172,10 @@ class RoomMonitoring extends Component
             $this->guest->id
         )->first();
 
-        $food = Menu::where('branch_id', auth()->user()->branch_id)
+        $food = MenuItem::forBranch()
             ->where('id', $this->food_id)
             ->first();
-        $inventory = Inventory::where('branch_id', auth()->user()->branch_id)
-            ->where('menu_id', $this->food_id)
-            ->first();
+        $inventory = $food?->inventory;
         if($inventory != null)
         {
             $users = User::role('frontdesk')->get();
@@ -275,7 +270,7 @@ class RoomMonitoring extends Component
                 'guests' => Guest::whereHas('checkInDetail', function ($query) {
                 $query->where('is_check_out', false);
             })->get(),
-            'foods' => Menu::where('branch_id', auth()->user()->branch_id)->get(),
+            'foods' => MenuItem::forBranch()->get(),
         ]);
     }
 
@@ -788,6 +783,7 @@ class RoomMonitoring extends Component
             'guest_id' => $guest->id,
             'floor_id' => Room::where('id', $this->room_id)->first()->floor->id,
             'transaction_type_id' => 2,
+            'deposit_type' => 'room_key',
             'assigned_frontdesk_id' => json_encode($assigned_frontdesk),
             'description' => 'Deposit',
             'payable_amount' => 200,
@@ -825,6 +821,7 @@ class RoomMonitoring extends Component
                 'floor_id' => Room::where('id', $this->room_id)->first()->floor
                     ->id,
                 'transaction_type_id' => 2,
+                'deposit_type' => 'guest',
                 'assigned_frontdesk_id' => json_encode($assigned_frontdesk),
                 'description' => 'Deposit',
                 'payable_amount' => $this->excess_amount,
@@ -869,11 +866,10 @@ class RoomMonitoring extends Component
             true
         );
         $number_of_hours = $this->stayingHour->number;
-        $next_extension_is_original = false;
         while ($number_of_hours >= auth()->user()->branch->extension_time_reset) {
             $number_of_hours -= auth()->user()->branch->extension_time_reset;
-            $next_extension_is_original = true;
         }
+        $next_extension_is_original = ($number_of_hours == 0);
 
         $checkin = CheckinDetail::create([
             'guest_id' => $this->guest->id,
@@ -958,6 +954,7 @@ class RoomMonitoring extends Component
             'guest_id' => $this->guest->id,
             'floor_id' => $this->room->floor_id,
             'transaction_type_id' => 2,
+            'deposit_type' => 'room_key',
             'assigned_frontdesk_id' => json_encode($assigned_frontdesk),
             'description' => 'Deposit',
             'payable_amount' => $this->additional_charges,
@@ -994,6 +991,7 @@ class RoomMonitoring extends Component
                 'guest_id' => $this->guest->id,
                 'floor_id' => $this->room->floor_id,
                 'transaction_type_id' => 2,
+                'deposit_type' => 'guest',
                 'assigned_frontdesk_id' => json_encode($assigned_frontdesk),
                 'description' => 'Deposit',
                 'payable_amount' => $this->excess_amount,
@@ -1078,11 +1076,10 @@ class RoomMonitoring extends Component
         );
 
         $number_of_hours_reserve = $this->stayingHour_reserve->number;
-        $next_extension_is_original_reserve = false;
         while ($number_of_hours_reserve >= auth()->user()->branch->extension_time_reset) {
             $number_of_hours_reserve -= auth()->user()->branch->extension_time_reset;
-            $next_extension_is_original_reserve = true;
         }
+        $next_extension_is_original_reserve = ($number_of_hours_reserve == 0);
 
         $checkin = CheckinDetail::create([
             'guest_id' => $this->guest_reserve->id,
@@ -1172,6 +1169,7 @@ class RoomMonitoring extends Component
             'guest_id' => $this->guest_reserve->id,
             'floor_id' => $this->room_reserve->floor_id,
             'transaction_type_id' => 2,
+            'deposit_type' => 'room_key',
             'assigned_frontdesk_id' => json_encode($assigned_frontdesk),
             'description' => 'Deposit',
             'payable_amount' => $this->additional_charges_reserve,
@@ -1211,6 +1209,7 @@ class RoomMonitoring extends Component
                 'guest_id' => $this->guest_reserve->id,
                 'floor_id' => $this->room_reserve->floor_id,
                 'transaction_type_id' => 2,
+                'deposit_type' => 'guest',
                 'assigned_frontdesk_id' => json_encode($assigned_frontdesk),
                 'description' => 'Deposit',
                 'payable_amount' => $this->excess_amount_reserve,

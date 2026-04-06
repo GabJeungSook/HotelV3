@@ -69,4 +69,14 @@ class CheckinDetail extends Model
     {
         return $this->hasMany(TransferedGuestReport::class);
     }
+
+    public function checkInShiftSession()
+    {
+        return $this->belongsTo(ShiftSession::class, 'check_in_shift_session_id');
+    }
+
+    public function forwardedInSessions()
+    {
+        return $this->hasMany(ShiftForwardedGuest::class);
+    }
 }

@@ -3,7 +3,6 @@
 namespace App\Livewire\Frontdesk\Monitoring;
 
 use App\Models\ActivityLog;
-use App\Models\User;
 use App\Models\CashOnDrawer;
 use App\Models\CheckinDetail;
 use App\Models\Floor;
@@ -52,6 +51,12 @@ class TransferRoom extends Component
     public $code;
     public $current_room_rate;
     public $new_room_rate;
+    public $save_type = 'save';
+    public $available_deposit = 0;
+    public $amount_paid;
+    public $payment_excess = 0;
+    public $change_modal = false;
+    public $deposit_pay_modal = false;
 
     public function mount($record)
     {
@@ -80,6 +85,7 @@ class TransferRoom extends Component
 
         $this->reasons = TransferReason::where('branch_id', auth()->user()->branch_id)
             ->get();
+        $this->available_deposit = $this->guest->checkInDetail->deposit_balance ?? 0;
     }
 
      public function updatedSelectedTypeId()
@@ -93,11 +99,18 @@ class TransferRoom extends Component
         $kiosk_reservation = TemporaryCheckInKiosk::where('branch_id', auth()->user()->branch_id)
             ->pluck('room_id')->toArray();
 
+        $reserved = \App\Models\TemporaryReserved::where('branch_id', auth()->user()->branch_id)->pluck('room_id')->toArray();
+
+        $occupied = CheckinDetail::where('is_check_out', false)
+            ->whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))
+            ->pluck('room_id')->toArray();
+
+        $excludedRoomIds = array_merge($kiosk_reservation, $reserved, $occupied);
 
         $this->rooms = Room::where('branch_id', auth()->user()->branch_id)
             ->where('type_id', $this->selected_type_id)
             ->where('floor_id', $this->selected_floor_id)
-            ->whereNotIn('id', $kiosk_reservation)
+            ->whereNotIn('id', $excludedRoomIds)
             ->where('status', 'Available')
             ->get();
         $this->room_count = Room::where('branch_id', auth()->user()->branch_id)
@@ -122,10 +135,19 @@ class TransferRoom extends Component
     {
          $kiosk_reservation = TemporaryCheckInKiosk::where('branch_id', auth()->user()->branch_id)
             ->pluck('room_id')->toArray();
+
+        $reserved = \App\Models\TemporaryReserved::where('branch_id', auth()->user()->branch_id)->pluck('room_id')->toArray();
+
+        $occupied = CheckinDetail::where('is_check_out', false)
+            ->whereHas('room', fn($q) => $q->where('branch_id', auth()->user()->branch_id))
+            ->pluck('room_id')->toArray();
+
+        $excludedRoomIds = array_merge($kiosk_reservation, $reserved, $occupied);
+
         $this->rooms = Room::where('branch_id', auth()->user()->branch_id)
             ->where('type_id', $this->selected_type_id)
             ->where('floor_id', $this->selected_floor_id)
-            ->whereNotIn('id', $kiosk_reservation)
+            ->whereNotIn('id', $excludedRoomIds)
             ->where('status', 'Available')
             ->get();
 
@@ -136,9 +158,12 @@ class TransferRoom extends Component
         }
     }
 
-    public function confirmTransfer()
+    /**
+     * Validate all form fields.
+     */
+    private function validateFields()
     {
-         $this->validate([
+        $this->validate([
             'selected_type_id' => 'required',
             'selected_floor_id' => 'required',
             'selected_room_id' => 'required',
@@ -151,76 +176,132 @@ class TransferRoom extends Component
             'selected_status.required' => 'Please select a status.',
             'selected_reason.required' => 'Please select a reason for transfer.',
         ]);
+    }
 
-        if($this->is_override)
-        {
-            if(auth()->user()->branch->autorization_code == $this->code)
-            {
-                $this->authorization_modal = false;
-                        if($this->excess_amount > 0) {
-             $this->save_pay_modal = true;
-            }else{
-                $this->dialog()->confirm([
+    /**
+     * Called by Override button. Sets override flag then follows same flow.
+     */
+    public function overrideTransfer()
+    {
+        $this->validateFields();
+        $this->is_override = true;
+
+        // Follow same flow: handle excess/payment first, then auth last
+        $this->proceedToExcessOrAuth();
+    }
+
+    /**
+     * Called after normal buttons or after payment validation in confirmSave.
+     * Handles: rate excess modal → then auth (if override) or confirm dialog.
+     */
+    public function proceedToExcessOrAuth()
+    {
+        // If downgrade has rate excess → show save_pay_modal first
+        if ($this->excess_amount > 0) {
+            $this->save_pay_modal = true;
+            return;
+        }
+
+        // No rate excess → go to auth or confirm
+        $this->proceedToAuthOrSave();
+    }
+
+    /**
+     * Called after rate excess decision (from save_pay_modal confirm button)
+     * or directly if no rate excess.
+     */
+    public function proceedToAuthOrSave()
+    {
+        $this->save_pay_modal = false;
+
+        if ($this->is_override) {
+            $this->code = null;
+            $this->authorization_modal = true;
+        } else {
+            $this->dialog()->confirm([
                 'title' => 'Are you Sure?',
-                'description' => 'transfer guest to new room?',
+                'description' => 'Transfer guest to new room?',
                 'icon' => 'question',
                 'accept' => [
                     'label' => 'Confirm Transfer',
                     'method' => 'saveTransfer',
-                    'params' => $this->is_override,
                 ],
                 'reject' => [
                     'label' => 'Cancel',
                 ],
             ]);
-            }
-            }else{
-                $this->authorization_modal = true;
-                $this->code = null;
-                $this->dialog()->error(
-                    $title = 'Oops',
-                    $description = 'Wrong authorization code.'
-                );
-            }
-        }else{
-        if($this->excess_amount > 0) {
-             $this->save_pay_modal = true;
-        }else{
-            $this->dialog()->confirm([
-            'title' => 'Are you Sure?',
-            'description' => 'transfer guest to new room?',
-            'icon' => 'question',
-            'accept' => [
-                'label' => 'Confirm Transfer',
-                'method' => 'saveTransfer',
-                'params' => $this->is_override,
-            ],
-            'reject' => [
-                'label' => 'Cancel',
-            ],
-        ]);
-        }
         }
     }
 
-    public function overrideTransfer()
+    /**
+     * Called from authorization modal confirm button.
+     */
+    public function validateCodeAndSave()
     {
-         $this->validate([
-            'selected_type_id' => 'required',
-            'selected_floor_id' => 'required',
-            'selected_room_id' => 'required',
-            'selected_status' => 'required',
-            'selected_reason' => 'required',
-        ], [
-            'selected_type_id.required' => 'Please select a room type.',
-            'selected_floor_id.required' => 'Please select a floor.',
-            'selected_room_id.required' => 'Please select a room.',
-            'selected_status.required' => 'Please select a status.',
-            'selected_reason.required' => 'Please select a reason for transfer.',
-        ]);
+        if (auth()->user()->branch->autorization_code != $this->code) {
+            $this->code = null;
+            $this->dialog()->error('Oops', 'Wrong authorization code.');
+            return;
+        }
 
-        $this->authorization_modal = true;
-        $this->is_override = true;
+        $this->authorization_modal = false;
+        $this->saveTransfer();
+    }
+
+    /**
+     * Called by Save, Save & Pay, Pay with Deposit buttons (normal flow, not override).
+     */
+    public function confirmSave($type)
+    {
+        $this->validateFields();
+        $this->save_type = $type;
+        $this->change_modal = false;
+        $this->payment_excess = 0;
+
+        if ($type === 'pay_deposit') {
+            if ($this->available_deposit < $this->payable_amount) {
+                $this->dialog()->error('Insufficient Deposit', 'Guest deposit balance is not enough.');
+                return;
+            }
+            $this->deposit_pay_modal = true;
+            return;
+        }
+
+        if ($type === 'save_pay' && $this->payable_amount > 0) {
+            if (!$this->amount_paid || !is_numeric($this->amount_paid) || $this->amount_paid <= 0) {
+                $this->dialog()->error('Oops!', 'Please enter the amount paid.');
+                return;
+            }
+
+            $this->amount_paid = (float) $this->amount_paid;
+
+            if ($this->amount_paid > $this->payable_amount) {
+                $this->payment_excess = $this->amount_paid - $this->payable_amount;
+                $this->change_modal = true;
+                return;
+            } elseif ($this->amount_paid < $this->payable_amount) {
+                $this->dialog()->error('Oops!', 'Amount paid is less than the total payable amount.');
+                return;
+            }
+        }
+
+        $this->proceedToExcessOrAuth();
+    }
+
+    /**
+     * Called from change_modal (payment excess) confirm button.
+     * Payment excess already decided, now proceed to rate excess or auth.
+     */
+    public function confirmPaymentExcess()
+    {
+        $this->change_modal = false;
+        $this->proceedToExcessOrAuth();
+    }
+
+    public function confirmDepositPay()
+    {
+        $this->deposit_pay_modal = false;
+        $this->proceedToExcessOrAuth();
     }
 
     public function saveTransfer()
@@ -232,32 +313,17 @@ class TransferRoom extends Component
         )->first();
         $reason = TransferReason::find($this->selected_reason);
         DB::beginTransaction();
-        $users = User::role('frontdesk')->get();
-
-            $threshold = now()->subMinutes(5)->timestamp;
-
-            $onlineUsers = [];
-
-            foreach ($users as $user) {
-                if ($this->isUserOnline($user, $threshold)) {
-                    $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
-                }
-            }
-
-            $shiftLogId = collect($onlineUsers)->where('frontdesk_id', auth()->user()->id)->first()->id ?? null;
         $transaction = Transaction::create([
             'branch_id' => auth()->user()->branch_id,
-            'shift_log_id' => $shiftLogId,
             'checkin_detail_id' => $check_in_detail->id,
             'cash_drawer_id' => auth()->user()->cash_drawer_id,
             'room_id' => $this->selected_room_id,
             'guest_id' => $this->guest->id,
             'floor_id' => $this->selected_floor_id,
             'transaction_type_id' => 7,
-            'assigned_frontdesk_id' => json_encode($this->assigned_frontdesk),
+            'assigned_frontdesk_id' => json_encode([auth()->id(), auth()->user()->name]),
             'description' => 'Room Transfer',
-            // 'payable_amount' => $this->payable_amount,
-            'payable_amount' => 0,
+            'payable_amount' => $this->payable_amount,
             'paid_amount' => 0,
             'change_amount' => 0,
             'deposit_amount' => 0,
@@ -281,29 +347,16 @@ class TransferRoom extends Component
 
         if($this->save_excess)
         {
-            $users = User::role('frontdesk')->get();
-
-            $threshold = now()->subMinutes(5)->timestamp;
-
-            $onlineUsers = [];
-
-            foreach ($users as $user) {
-                if ($this->isUserOnline($user, $threshold)) {
-                    $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
-                }
-            }
-
-            $shiftLogId = collect($onlineUsers)->where('frontdesk_id', auth()->user()->id)->first()->id ?? null;
              Transaction::create([
                 'branch_id' => auth()->user()->branch_id,
-                'shift_log_id' => $shiftLogId,
                 'checkin_detail_id' => $check_in_detail->id,
                 'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $this->guest->room_id,
                 'guest_id' => $this->guest->id,
                 'floor_id' => Room::where('id', $this->guest->room_id)->first()->floor->id,
                 'transaction_type_id' => 2,
-                'assigned_frontdesk_id' => json_encode($this->assigned_frontdesk),
+                'deposit_type' => 'guest',
+                'assigned_frontdesk_id' => json_encode([auth()->id(), auth()->user()->name]),
                 'description' => 'Deposit',
                 'payable_amount' => $this->excess_amount,
                 'paid_amount' => $this->excess_amount,
@@ -325,10 +378,6 @@ class TransferRoom extends Component
                 'transaction_date' => now()->toDateString(),
                 'transaction_type' => 'deposit',
                 'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
-            ]);
-
-             CheckinDetail::where('guest_id', $this->guest->id)->update([
-                'total_deposit' => $this->guest->total_deposit + $this->excess_amount,
             ]);
 
         }
@@ -361,15 +410,6 @@ class TransferRoom extends Component
 
         $new_room = Room::where('id',  $this->selected_room_id)->first();
 
-        $transaction = Transaction::where('checkin_detail_id', $check_in_detail->id)->where('description', 'Guest Check In')->first();
-        $transaction->update([
-            'remarks' => 'Guest Checked In at room #' . $new_room->number,
-            'payable_amount' => $this->new_room_rate,
-            'paid_amount' => $this->new_room_rate,
-            'change_amount' => 0,
-            'paid_at' => Carbon::now()->toDateTimeString()
-        ]);
-
         TransferedGuestReport::create([
             'checkin_detail_id' => $check_in_detail->id,
             'previous_room_id' => $check_in_detail->room_id,
@@ -399,6 +439,62 @@ class TransferRoom extends Component
         ]);
         DB::commit();
 
+        // Handle payment based on save_type
+        if ($this->save_type === 'save_pay') {
+            $transaction->update([
+                'paid_at' => now(),
+                'paid_amount' => $this->amount_paid ?? $transaction->payable_amount,
+                'change_amount' => $this->payment_excess,
+            ]);
+
+            // If payment excess and save_excess checked, create guest deposit
+            if ($this->payment_excess > 0 && $this->save_excess) {
+                Transaction::create([
+                    'branch_id' => auth()->user()->branch_id,
+                    'checkin_detail_id' => $check_in_detail->id,
+                    'cash_drawer_id' => auth()->user()->cash_drawer_id,
+                    'room_id' => $check_in_detail->room_id,
+                    'guest_id' => $check_in_detail->guest_id,
+                    'floor_id' => $check_in_detail->room->floor_id,
+                    'transaction_type_id' => 2,
+                    'deposit_type' => 'guest',
+                    'assigned_frontdesk_id' => json_encode([auth()->id(), auth()->user()->name]),
+                    'description' => 'Deposit',
+                    'payable_amount' => $this->payment_excess,
+                    'paid_amount' => $this->payment_excess,
+                    'deposit_amount' => $this->payment_excess,
+                    'paid_at' => now(),
+                    'remarks' => 'Deposit From Excess Payment (Transfer)',
+                    'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
+                ]);
+            }
+        } elseif ($this->save_type === 'pay_deposit') {
+            $payable = $transaction->payable_amount;
+            $transaction->update([
+                'paid_at' => now(),
+                'paid_amount' => $payable,
+            ]);
+
+            Transaction::create([
+                'branch_id' => auth()->user()->branch_id,
+                'checkin_detail_id' => $check_in_detail->id,
+                'cash_drawer_id' => auth()->user()->cash_drawer_id,
+                'room_id' => $check_in_detail->room_id,
+                'guest_id' => $check_in_detail->guest_id,
+                'floor_id' => $check_in_detail->room->floor_id,
+                'transaction_type_id' => 5,
+                'assigned_frontdesk_id' => json_encode([auth()->id(), auth()->user()->name]),
+                'description' => 'Cashout',
+                'payable_amount' => $payable,
+                'paid_amount' => $payable,
+                'change_amount' => 0,
+                'deposit_amount' => 0,
+                'paid_at' => now(),
+                'remarks' => 'Deposit used to pay ' . $transaction->description,
+                'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
+            ]);
+        }
+
         $this->dialog()->success(
             $title = 'Success',
             $description = 'Guest has been transferred successfully.'
@@ -415,7 +511,6 @@ class TransferRoom extends Component
         return redirect()->route('frontdesk.guest-transaction', ['id' => $this->guest->id]);
     }
 
-    private function isUserOnline($user, $threshold) { return $user->sessions() ->where('last_activity', '>=', $threshold) ->exists(); }
     public function render()
     {
         return view('livewire.frontdesk.monitoring.transfer-room');

@@ -65,6 +65,7 @@ class GuestTransaction extends Component
     public $deduction_amount;
     public $total_deposit;
     public $deposit_remote_and_key;
+    public $deposit_remote_and_key_render = 0;
     public $deposit_except_remote_and_key;
     // public $check_in_details;
 
@@ -97,6 +98,7 @@ class GuestTransaction extends Component
     public $amenities_type;
 
     //Damage Charges
+    public $items = [];
     public $item_id_damage;
     public $item_price_damage;
     public $additional_amount_damage;
@@ -174,35 +176,11 @@ class GuestTransaction extends Component
     }
     public function render()
     {
-        $this->deposit_except_remote_and_key = Transaction::where(
-            'branch_id',
-            auth()->user()->branch_id
-        )
-            ->where('guest_id', $this->guest_id)
-            ->where('transaction_type_id', 2)
-            ->where(
-                'remarks',
-                '!=',
-                'Deposit From Check In (Room Key & TV Remote)'
-            )
-            ->sum('payable_amount');
-
-        $check_in_detail = CheckinDetail::where(
-            'guest_id',
-            $this->guest_id
-        )->first();
-        $this->total_deposit =
-            $this->deposit_except_remote_and_key -
-            $check_in_detail->total_deduction;
-
-        $this->deposit_remote_and_key = Transaction::where(
-            'branch_id',
-            auth()->user()->branch_id
-        )
-            ->where('guest_id', $this->guest_id)
-            ->where('transaction_type_id', 2)
-            ->where('remarks', 'Deposit From Check In (Room Key & TV Remote)')
-            ->sum('payable_amount');
+        $check_in_detail = CheckinDetail::where('guest_id', $this->guest_id)->where('is_check_out', false)->first();
+        $this->deposit_except_remote_and_key = (float) ($check_in_detail?->deposit_balance ?? 0);
+        $this->deposit_remote_and_key_render = (float) ($check_in_detail?->room_deposit_balance ?? 0);
+        $this->total_deposit = $this->deposit_except_remote_and_key;
+        $this->deposit_remote_and_key = $this->deposit_remote_and_key_render;
         return view('livewire.frontdesk.monitoring.guest-transaction', [
             'transactions' => TransactionType::whereHas('transactions', function($query) {
                 $query->where('branch_id', auth()->user()->branch_id)
@@ -246,27 +224,8 @@ class GuestTransaction extends Component
             'guest_id',
             $this->guest_id
         )->first();
-        $this->deposit_remote_and_key = Transaction::where(
-            'branch_id',
-            auth()->user()->branch_id
-        )
-            ->where('guest_id', $this->guest_id)
-            ->where('transaction_type_id', 2)
-            ->where('remarks', 'Deposit From Check In (Room Key & TV Remote)')
-            ->sum('payable_amount');
-
-        $this->deposit_except_remote_and_key = Transaction::where(
-            'branch_id',
-            auth()->user()->branch_id
-        )
-            ->where('guest_id', $this->guest_id)
-            ->where('transaction_type_id', 2)
-            ->where(
-                'remarks',
-                '!=',
-                'Deposit From Check In (Room Key & TV Remote)'
-            )
-            ->sum('payable_amount');
+        $this->deposit_remote_and_key = (float) ($this->check_in_details?->room_deposit_balance ?? 0);
+        $this->deposit_except_remote_and_key = (float) ($this->check_in_details?->deposit_balance ?? 0);
     }
 
     public function addNewDeposit()
@@ -292,7 +251,6 @@ class GuestTransaction extends Component
                 'guest_id',
                 $this->guest_id
             )->first();
-            $current_deposit = $this->check_in_details->total_deposit;
             $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
@@ -315,6 +273,7 @@ class GuestTransaction extends Component
                 'guest_id' => $this->check_in_details->guest_id,
                 'floor_id' => $this->check_in_details->room->floor_id,
                 'transaction_type_id' => 2,
+                'deposit_type' => 'guest',
                 'assigned_frontdesk_id' => json_encode(
                     $this->assigned_frontdesk
                 ),
@@ -328,10 +287,6 @@ class GuestTransaction extends Component
                 'remarks' => 'Guest Deposit: ' . $this->deposit_remarks,
                 'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
             ]);
-            $this->check_in_details->update([
-                'total_deposit' => $current_deposit + $this->deposit_amount,
-            ]);
-
             ActivityLog::create([
                 'branch_id' => auth()->user()->branch_id,
                 'user_id' => auth()->user()->id,
@@ -780,15 +735,13 @@ class GuestTransaction extends Component
             $this->validate([
                 'deduction_amount' =>
                     'required|lte:' .
-                    ($this->deposit_except_remote_and_key -
-                        $check_in_detail->total_deduction),
+                    $check_in_detail->deposit_balance,
             ]);
             DB::beginTransaction();
             $check_in_detail = CheckinDetail::where(
                 'guest_id',
                 $this->guest_id
             )->first();
-            $current_deduction = $check_in_detail->total_deduction;
             $users = User::role('frontdesk')->get();
 
             $threshold = now()->subMinutes(5)->timestamp;
@@ -828,10 +781,6 @@ class GuestTransaction extends Component
                 'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
             ]);
 
-            $check_in_detail->update([
-                'total_deduction' =>
-                    $current_deduction + $this->deduction_amount,
-            ]);
             ActivityLog::create([
                 'branch_id' => auth()->user()->branch_id,
                 'user_id' => auth()->user()->id,
@@ -1825,6 +1774,7 @@ class GuestTransaction extends Component
                 'paid_at' => now(),
                 'override_at' => null,
                 'remarks' => 'Deposit from paying ' . $transaction->description,
+                'deposit_type' => 'guest',
                 'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
             ]);
 
@@ -1838,11 +1788,6 @@ class GuestTransaction extends Component
             'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
         ]);
 
-            $transaction->guest->checkInDetail->update([
-                'total_deposit' =>
-                    $transaction->guest->checkInDetail->total_deposit +
-                    $this->pay_excess,
-            ]);
         }
 
         ActivityLog::create([
@@ -1870,9 +1815,7 @@ class GuestTransaction extends Component
         $transaction = Transaction::where('id', $transaction_id)->first();
         $this->pay_transaction_id = $transaction->id;
         $this->pay_transaction_amount = $transaction->payable_amount;
-        $this->render_deposit =
-            $transaction->guest->checkInDetail->total_deposit -
-            $transaction->guest->checkInDetail->total_deduction;
+        $this->render_deposit = $transaction->guest->checkInDetail->deposit_balance;
         $this->payWithDeposit_modal = true;
     }
 
@@ -1941,12 +1884,6 @@ class GuestTransaction extends Component
                 'transaction_date' => now()->toDateString(),
                 'transaction_type' => 'Payment from deposit - '.$transaction->description,
                 'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
-            ]);
-
-            $transaction->guest->checkInDetail->update([
-                'total_deduction' =>
-                    $transaction->guest->checkInDetail->total_deduction +
-                    $this->pay_transaction_amount,
             ]);
 
             ActivityLog::create([
@@ -2032,9 +1969,7 @@ class GuestTransaction extends Component
     {
         $guest = Guest::where('id', $this->guest_id)->first();
         $this->pay_transaction_amount = $total;
-        $this->render_deposit =
-            $guest->checkInDetail->total_deposit -
-            $guest->checkInDetail->total_deduction;
+        $this->render_deposit = $guest->checkInDetail->deposit_balance;
 
         $this->payWithDeposit_modal = true;
     }
@@ -2100,12 +2035,6 @@ class GuestTransaction extends Component
                 'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
             ]);
 
-        $transaction->guest->checkInDetail->update([
-            'total_deduction' =>
-                $transaction->guest->checkInDetail->total_deduction +
-                $this->pay_transaction_amount,
-        ]);
-
         ActivityLog::create([
             'branch_id' => auth()->user()->branch_id,
             'user_id' => auth()->user()->id,
@@ -2145,15 +2074,13 @@ class GuestTransaction extends Component
     public function claimAllDeposit()
     {
         $guest = Guest::where('id', $this->guest_id)->first();
+        $guest_deposit_balance = (float) ($guest->checkInDetail->deposit_balance ?? 0);
+        $room_deposit_balance = (float) ($guest->checkInDetail->room_deposit_balance ?? 0);
+
         if ($this->is_checkout) {
-            $balance =
-                $this->deposit_remote_and_key +
-                ($this->deposit_except_remote_and_key -
-                    $guest->checkInDetail->total_deduction);
+            $balance = $guest_deposit_balance + $room_deposit_balance;
         } else {
-            $balance =
-                $this->deposit_except_remote_and_key -
-                $guest->checkInDetail->total_deduction;
+            $balance = $guest_deposit_balance;
         }
 
         $transaction = Transaction::where(
@@ -2163,10 +2090,6 @@ class GuestTransaction extends Component
             ->where('guest_id', $this->guest_id)
             ->first();
         DB::beginTransaction();
-        $guest->checkInDetail->update([
-            'total_deduction' =>
-                $guest->checkInDetail->total_deduction + $balance,
-        ]);
 
         if (!$this->is_checkout) {
             $users = User::role('frontdesk')->get();

@@ -322,6 +322,7 @@ class Reservation extends Component implements Tables\Contracts\HasTable, \Filam
             'guest_id' => $guest->id,
             'floor_id' => $room->floor_id,
             'transaction_type_id' => 2,
+            'deposit_type' => 'room_key',
             'assigned_frontdesk_id' => $assignedFrontdesk,
             'description' => 'Deposit',
             'payable_amount' => 0,

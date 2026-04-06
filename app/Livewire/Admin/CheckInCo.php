@@ -174,6 +174,7 @@ class CheckInCo extends Component
             'guest_id' => $guest->id,
             'floor_id' => $room->floor_id,
             'transaction_type_id' => 2,
+            'deposit_type' => 'room_key',
             'assigned_frontdesk_id' => auth()->user()->hasRole('frontdesk') ? json_encode($assigned_frontdesk) : json_encode([1, 'Admin']),
             'description' => 'Deposit',
             'payable_amount' => 0,

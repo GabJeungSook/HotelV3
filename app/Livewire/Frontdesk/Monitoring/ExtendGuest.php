@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use App\Models\Rate;
 use App\Models\Room;
 use App\Models\Guest;
-use App\Models\User;
 use App\Models\Branch;
 use Livewire\Component;
 use App\Models\ActivityLog;
@@ -39,6 +38,14 @@ class ExtendGuest extends Component
     public $extended_amount;
     public $total_amount;
     public $new_rate;
+    public $save_type = 'save';
+    public $available_deposit = 0;
+    public $amount_paid;
+    public $excess_amount = 0;
+    public $save_excess = false;
+    public $change_modal = false;
+    public $deposit_pay_modal = false;
+    public $pay_modal = false;
     public function mount($record)
     {
         $this->assigned_frontdesk = auth()->user()->assigned_frontdesks;
@@ -99,6 +106,7 @@ class ExtendGuest extends Component
         $this->initial_amount = 0;
         $this->extended_amount = 0;
         $this->total_amount = 0;
+        $this->available_deposit = $this->guest->checkInDetail->deposit_balance ?? 0;
     }
 
     public function updatedExtensionRateId()
@@ -117,23 +125,49 @@ class ExtendGuest extends Component
                     ->whereHas('stayingHour', function ($query) {
                         $query->where('number', $this->extended_rate->hour);
                     })->first();
+
+                // Fallback: next higher rate if no exact match
+                if (!$rate) {
+                    $extHour = $this->extended_rate->hour;
+                    $rate = Rate::where('rates.branch_id', auth()->user()->branch_id)
+                        ->where('rates.type_id', $this->rate->type_id)
+                        ->whereHas('stayingHour', fn($q) => $q->where('number', '>=', $extHour))
+                        ->join('staying_hours', 'rates.staying_hour_id', '=', 'staying_hours.id')
+                        ->orderBy('staying_hours.number', 'asc')
+                        ->select('rates.*')
+                        ->first();
+                }
+
                 $this->initial_amount = $rate?->amount ?? 0;
                 $this->extended_amount = 0;
                 $this->total_amount = $this->initial_amount + $this->extended_amount;
             }
-            // Priority 2: Extension crosses cycle boundary
-            elseif ($current >= $this->extension_time_reset) {
+            // Priority 2: Extension crosses cycle boundary (strictly over, not exact)
+            elseif ($current > $this->extension_time_reset) {
                 $total_current_hours = $this->current_time_alloted + $this->extended_rate->hour;
                 $total_current_hours = $total_current_hours - $this->extension_time_reset;
                 if ($total_current_hours > $this->extension_time_reset) {
                     $total_current_hours = $this->extension_time_reset;
                 }
 
+                // Find exact rate match, or next higher rate if no exact match
                 $rate = Rate::where('branch_id', auth()->user()->branch_id)
                     ->where('type_id', $this->rate->type_id)
                     ->whereHas('stayingHour', function ($query) use ($total_current_hours) {
                         $query->where('number', $total_current_hours);
                     })->first();
+
+                if (!$rate) {
+                    $rate = Rate::where('rates.branch_id', auth()->user()->branch_id)
+                        ->where('rates.type_id', $this->rate->type_id)
+                        ->whereHas('stayingHour', function ($query) use ($total_current_hours) {
+                            $query->where('number', '>=', $total_current_hours);
+                        })
+                        ->join('staying_hours', 'rates.staying_hour_id', '=', 'staying_hours.id')
+                        ->orderBy('staying_hours.number', 'asc')
+                        ->select('rates.*')
+                        ->first();
+                }
 
                 $extend_hour = $this->extension_time_reset - $this->current_time_alloted;
                 $extend = ExtensionRate::where('branch_id', auth()->user()->branch_id)
@@ -151,6 +185,61 @@ class ExtendGuest extends Component
             }
         }
 
+    }
+
+    public function openPayModal()
+    {
+        $this->amount_paid = null;
+        $this->pay_modal = true;
+    }
+
+    public function confirmSave($type)
+    {
+        $this->save_type = $type;
+        $this->change_modal = false;
+        $this->excess_amount = 0;
+        $this->save_excess = false;
+
+        if ($type === 'pay_deposit') {
+            if ($this->available_deposit < $this->total_amount) {
+                $this->dialog()->error(
+                    $title = 'Insufficient Deposit',
+                    $description = 'Guest deposit balance is not enough to cover this transaction.'
+                );
+                return;
+            }
+            $this->deposit_pay_modal = true;
+            return;
+        }
+
+        if ($type === 'save_pay') {
+            if (!$this->amount_paid || !is_numeric($this->amount_paid) || $this->amount_paid <= 0) {
+                $this->dialog()->error('Oops!', 'Please enter the amount paid.');
+                return;
+            }
+            $this->amount_paid = (float) $this->amount_paid;
+            $this->pay_modal = false;
+
+            if ($this->amount_paid > $this->total_amount) {
+                $this->excess_amount = $this->amount_paid - $this->total_amount;
+                $this->change_modal = true;
+            } elseif ($this->amount_paid < $this->total_amount) {
+                $this->pay_modal = true;
+                $this->dialog()->error('Oops!', 'Amount paid is less than the total payable amount.');
+            } else {
+                $this->saveExtend();
+            }
+            return;
+        }
+
+        // For 'save' type, just save directly
+        $this->saveExtend();
+    }
+
+    public function confirmDepositPay()
+    {
+        $this->deposit_pay_modal = false;
+        $this->saveExtend();
     }
 
     public function saveExtend()
@@ -174,31 +263,15 @@ class ExtendGuest extends Component
                 ->where('id', $this->extension_rate_id)
                 ->first();
              DB::beginTransaction();
-             $users = User::role('frontdesk')->get();
-
-            $threshold = now()->subMinutes(5)->timestamp;
-
-            $onlineUsers = [];
-
-            foreach ($users as $user) {
-                if ($this->isUserOnline($user, $threshold)) {
-                    $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
-                }
-            }
-
-            $shiftLogId = collect($onlineUsers)->where('frontdesk_id', auth()->user()->id)->first()->id ?? null;
                 $transaction = Transaction::create([
                     'branch_id' => $check_in_detail->guest->branch_id,
-                    'shift_log_id' => $shiftLogId,
                     'checkin_detail_id' => $check_in_detail->id,
                     'cash_drawer_id' => auth()->user()->cash_drawer_id,
                     'room_id' => $check_in_detail->room_id,
                     'guest_id' => $check_in_detail->guest_id,
                     'floor_id' => $check_in_detail->room->floor_id,
                     'transaction_type_id' => 6,
-                    'assigned_frontdesk_id' => json_encode(
-                        $this->assigned_frontdesk
-                    ),
+                    'assigned_frontdesk_id' => json_encode([auth()->id(), auth()->user()->name]),
                     'description' => 'Extension',
                     'payable_amount' => $this->total_amount,
                     'paid_amount' => 0,
@@ -214,17 +287,16 @@ class ExtendGuest extends Component
                     'extension_id' => $rate->id,
                     'hours' => $rate->hour,
                     'amount' => $this->total_amount,
-                    'frontdesk_ids' => json_encode($this->assigned_frontdesk),
+                    'frontdesk_ids' => json_encode([auth()->id(), auth()->user()->name]),
                 ]);
                  $cycle_hours = $check_in_detail->number_of_hours;
                  $extension_hours = $rate->hour;
                  $total_hours = $cycle_hours + $extension_hours;
 
-                 $next_extension_is_original = false;
                  while ($total_hours >= $this->extension_time_reset) {
                     $total_hours = $total_hours - $this->extension_time_reset;
-                    $next_extension_is_original = true;
                  }
+                 $next_extension_is_original = ($total_hours == 0);
 
                  $check_in_detail->update([
                     'number_of_hours' => $total_hours,
@@ -255,20 +327,6 @@ class ExtendGuest extends Component
                 //     $shift_schedule = 'PM';
                 // }
 
-                $decode_frontdesk = json_decode(
-                auth()->user()->assigned_frontdesks,
-                true
-                );
-
-                // $extended_guest = ExtendedGuestReport::where('branch_id', auth()->user()->branch_id)->where('checkin_details_id', $check_in_detail->id)->first();
-
-                //  if($extended_guest != null)
-                // {
-                //     $extended_guest->update([
-                //     'number_of_extension' => $extended_guest->number_of_extension + 1,
-                //     'total_hours' => $extended_guest->total_hours + $rate->hour,
-                //     ]);
-                // }else{
                     ExtendedGuestReport::create([
                         'branch_id' => auth()->user()->branch_id,
                         'room_id' =>  $check_in_detail->room_id,
@@ -276,10 +334,9 @@ class ExtendGuest extends Component
                         'number_of_extension' => 1,
                         'total_hours' => $rate->hour,
                         'shift' => $shift_schedule,
-                        'frontdesk_id' => $decode_frontdesk[0],
-                        'partner_name' => $decode_frontdesk[1],
+                        'frontdesk_id' => auth()->id(),
+                        'partner_name' => auth()->user()->name,
                     ]);
-                // }
 
                 ActivityLog::create([
                 'branch_id' => auth()->user()->branch_id,
@@ -288,13 +345,62 @@ class ExtendGuest extends Component
                 'description' => 'Added new extension of ₱' . $this->total_amount . ' for guest ' . $check_in_detail->guest->name,
                 ]);
              DB::commit();
-            // if($this->extend_type === 'savePay')
-            // {
-            //     $this->payTransaction($transaction->id);
-            // }elseif($this->extend_type === 'savePayDeposit')
-            // {
-            //     $this->payWithDeposit($transaction->id);
-            // }else{
+
+            // Handle payment based on save_type
+            if ($this->save_type === 'save_pay') {
+                $transaction->update([
+                    'paid_at' => now(),
+                    'paid_amount' => $this->amount_paid ?? $transaction->payable_amount,
+                    'change_amount' => $this->excess_amount,
+                ]);
+
+                if ($this->excess_amount > 0 && $this->save_excess) {
+                    Transaction::create([
+                        'branch_id' => auth()->user()->branch_id,
+                        'checkin_detail_id' => $check_in_detail->id,
+                        'cash_drawer_id' => auth()->user()->cash_drawer_id,
+                        'room_id' => $check_in_detail->room_id,
+                        'guest_id' => $check_in_detail->guest_id,
+                        'floor_id' => $check_in_detail->room->floor_id,
+                        'transaction_type_id' => 2,
+                        'deposit_type' => 'guest',
+                        'assigned_frontdesk_id' => json_encode([auth()->id(), auth()->user()->name]),
+                        'description' => 'Deposit',
+                        'payable_amount' => $this->excess_amount,
+                        'paid_amount' => $this->excess_amount,
+                        'deposit_amount' => $this->excess_amount,
+                        'paid_at' => now(),
+                        'remarks' => 'Deposit From Excess Payment',
+                        'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
+                    ]);
+                }
+            } elseif ($this->save_type === 'pay_deposit') {
+                $payable = $transaction->payable_amount;
+                $transaction->update([
+                    'paid_at' => now(),
+                    'paid_amount' => $payable,
+                ]);
+
+                Transaction::create([
+                    'branch_id' => auth()->user()->branch_id,
+                    'checkin_detail_id' => $check_in_detail->id,
+                    'cash_drawer_id' => auth()->user()->cash_drawer_id,
+                    'room_id' => $check_in_detail->room_id,
+                    'guest_id' => $check_in_detail->guest_id,
+                    'floor_id' => $check_in_detail->room->floor_id,
+                    'transaction_type_id' => 5,
+                    'assigned_frontdesk_id' => json_encode([auth()->id(), auth()->user()->name]),
+                    'description' => 'Cashout',
+                    'payable_amount' => $payable,
+                    'paid_amount' => $payable,
+                    'change_amount' => 0,
+                    'deposit_amount' => 0,
+                    'paid_at' => now(),
+                    'remarks' => 'Deposit used to pay ' . $transaction->description,
+                    'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
+                ]);
+            }
+
                 $this->dialog()->success(
                     $title = 'Success',
                     $description = 'Extend successfully saved'
@@ -303,7 +409,6 @@ class ExtendGuest extends Component
                 return redirect()->route('frontdesk.guest-transaction', [
                     'id' => $this->guest->id,
                 ]);
-            //}
          }
     }
 
@@ -311,7 +416,6 @@ class ExtendGuest extends Component
     {
         return redirect()->route('frontdesk.guest-transaction', ['id' => $this->guest->id]);
     }
-    private function isUserOnline($user, $threshold) { return $user->sessions() ->where('last_activity', '>=', $threshold) ->exists(); }
     public function render()
     {
         return view('livewire.frontdesk.monitoring.extend-guest');

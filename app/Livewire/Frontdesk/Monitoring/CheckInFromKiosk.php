@@ -150,17 +150,11 @@ class CheckInFromKiosk extends Component
 
         $rate = Rate::where('id', $this->guest->rate_id)->first()->stayingHour->number;
         $room_number = Room::where('id', $this->guest->room_id)->first()->number;
-        $assigned_frontdesk = auth()->user()->assigned_frontdesks;
          //update guest
          $this->guest->static_amount = $this->total;
          $this->guest->has_discount = $this->has_discount;
          $this->guest->discount_amount = $this->discount_amount;
          $this->guest->save();
-
-         $decode_frontdesk = json_decode(
-            $assigned_frontdesk,
-            true
-        );
 
         $extension_time_reset = Branch::where(
             'id',
@@ -168,16 +162,15 @@ class CheckInFromKiosk extends Component
         )->first()->extension_time_reset;
 
          $number_of_hours = $rate;
-         $next_extension_is_original = false;
          while ($number_of_hours >= $extension_time_reset) {
              $number_of_hours -= $extension_time_reset;
-             $next_extension_is_original = true;
          }
+         $next_extension_is_original = ($number_of_hours == 0);
 
          //save check-in details
          $checkin = CheckinDetail::create([
             'guest_id' => $this->guest->id,
-            'frontdesk_id' => $decode_frontdesk[0],
+            'frontdesk_id' => auth()->id(),
             'type_id' => $this->guest->type_id,
             'room_id' => $this->guest->room_id,
             'rate_id' => $this->guest->rate_id,
@@ -198,31 +191,16 @@ class CheckInFromKiosk extends Component
             'next_extension_is_original' => $next_extension_is_original ? 1 : 0,
         ]);
 
-        $users = User::role('frontdesk')->get();
-
-            $threshold = now()->subMinutes(5)->timestamp;
-
-            $onlineUsers = [];
-
-            foreach ($users as $user) {
-                if ($this->isUserOnline($user, $threshold)) {
-                    $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
-                }
-            }
-
-            $shiftLogId = collect($onlineUsers)->where('frontdesk_id', auth()->user()->id)->first()->id ?? null;
-
         //create transaction for check-in
          Transaction::create([
             'branch_id' => auth()->user()->branch_id,
-            'shift_log_id' => $shiftLogId,
             'checkin_detail_id' => $checkin->id,
             'cash_drawer_id' => auth()->user()->cash_drawer_id,
             'room_id' => $this->guest->room_id,
             'guest_id' => $this->guest->id,
             'floor_id' => Room::where('id', $this->guest->room_id)->first()->floor->id,
             'transaction_type_id' => 1,
-            'assigned_frontdesk_id' => json_encode($assigned_frontdesk),
+            'assigned_frontdesk_id' => json_encode([auth()->id(), auth()->user()->name]),
             'description' => 'Guest Check In',
             'payable_amount' => $this->room_static_amount,
             'paid_amount' => $this->amountPaid,
@@ -245,29 +223,16 @@ class CheckInFromKiosk extends Component
             'transaction_type' => 'check-in',
             'shift' => (now()->hour >= 8 && now()->hour < 20) ? 'AM' : 'PM',
         ]);
-        $users = User::role('frontdesk')->get();
-
-            $threshold = now()->subMinutes(5)->timestamp;
-
-            $onlineUsers = [];
-
-            foreach ($users as $user) {
-                if ($this->isUserOnline($user, $threshold)) {
-                    $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
-                }
-            }
-
-            $shiftLogId = collect($onlineUsers)->where('frontdesk_id', auth()->user()->id)->first()->id ?? null;
         Transaction::create([
             'branch_id' => auth()->user()->branch_id,
-            'shift_log_id' => $shiftLogId,
             'checkin_detail_id' => $checkin->id,
             'cash_drawer_id' => auth()->user()->cash_drawer_id,
             'room_id' => $this->guest->room_id,
             'guest_id' => $this->guest->id,
             'floor_id' => Room::where('id', $this->guest->room_id)->first()->floor->id,
             'transaction_type_id' => 2,
-            'assigned_frontdesk_id' => json_encode($assigned_frontdesk),
+            'deposit_type' => 'room_key',
+            'assigned_frontdesk_id' => json_encode([auth()->id(), auth()->user()->name]),
             'description' => 'Deposit',
             'payable_amount' => $this->additional_charges,
             'paid_amount' => $this->amountPaid,
@@ -291,29 +256,16 @@ class CheckInFromKiosk extends Component
         ]);
 
         if ($this->save_excess) {
-            $users = User::role('frontdesk')->get();
-
-            $threshold = now()->subMinutes(5)->timestamp;
-
-            $onlineUsers = [];
-
-            foreach ($users as $user) {
-                if ($this->isUserOnline($user, $threshold)) {
-                    $onlineUsers[] = $user->shiftLogs()->whereNull('time_out')->latest()->first();
-                }
-            }
-
-            $shiftLogId = collect($onlineUsers)->where('frontdesk_id', auth()->user()->id)->first()->id ?? null;
             Transaction::create([
                 'branch_id' => auth()->user()->branch_id,
-                'shift_log_id' => $shiftLogId,
                 'checkin_detail_id' => $checkin->id,
                 'cash_drawer_id' => auth()->user()->cash_drawer_id,
                 'room_id' => $this->guest->room_id,
                 'guest_id' => $this->guest->id,
                 'floor_id' => Room::where('id', $this->guest->room_id)->first()->floor->id,
                 'transaction_type_id' => 2,
-                'assigned_frontdesk_id' => json_encode($assigned_frontdesk),
+                'deposit_type' => 'guest',
+                'assigned_frontdesk_id' => json_encode([auth()->id(), auth()->user()->name]),
                 'description' => 'Deposit',
                 'payable_amount' => $this->excess_amount,
                 'paid_amount' => $this->amountPaid,
@@ -360,19 +312,14 @@ class CheckInFromKiosk extends Component
         //     $shift_schedule = 'PM';
         // }
 
-         $decode_frontdesk = json_decode(
-            auth()->user()->assigned_frontdesks,
-            true
-        );
-
          NewGuestReport::create([
             'branch_id' => auth()->user()->branch_id,
             'checkin_details_id' => $checkin->id,
             'room_id' => $checkin->room_id,
             'shift_date' => $shift_date,
             'shift' => $shift_schedule,
-            'frontdesk_id' => $decode_frontdesk[0],
-            'partner_name' => $decode_frontdesk[1],
+            'frontdesk_id' => auth()->id(),
+            'partner_name' => auth()->user()->name,
         ]);
 
         $this->amountPaid = null;

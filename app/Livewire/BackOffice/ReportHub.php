@@ -45,6 +45,10 @@ class ReportHub extends Component
                 'label' => 'Extended Guest Report',
                 'component' => 'back-office.reports.extended-guest-report',
             ],
+            'big-boss' => [
+                'label' => 'Big Boss Report',
+                'component' => 'back-office.reports.big-boss-report',
+            ],
             'inventory' => [
                 'label' => 'Inventory Report',
                 'component' => 'back-office.inventory-report',

@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Kiosk;
 
-use App\Models\Floor;
 use App\Models\Room;
 use Livewire\Component;
 use WireUi\Traits\WireUiActions;
@@ -11,9 +10,8 @@ class CheckOut extends Component
 {
     use WireUiActions;
     public $steps;
-    public $floors = [];
-    public $branchId;
-    public $floor_id, $room_id;
+    public $room_id;
+    public $room_number;
     public $qr_code;
     public $guest;
     public $checkInDetail;
@@ -24,42 +22,39 @@ class CheckOut extends Component
 
     public function mount()
     {
-        $this->floors = Floor::where('branch_id', auth()->user()->branch_id)->get();
         $this->steps = 1;
     }
     public function render()
     {
-        // $query = Room::where('status', 'Occupied')
-        // ->withWhereHas('latestCheckInDetail.guest', function ($q) {
-        //     $q->where('has_kiosk_check_out', 1);
-        // })
-        // ->orderBy('number', 'asc');
-
-        // if (!empty($this->floor_id)) {
-        //     $query->where('floor_id', $this->floor_id);
-        // }
-
-
-        return view('livewire.kiosk.check-out', [
-            'rooms' => Room::where('branch_id', auth()->user()->branch_id)
-                ->where('status', 'Occupied')
-                ->when($this->floor_id, function ($query) {
-                    return $query->where('floor_id', $this->floor_id);
-                })
-                ->whereHas('latestCheckInDetail.guest', function ($q) {
-                    $q->where('has_kiosk_check_out', 0);
-                })
-                ->with([
-                    'latestCheckInDetail.guest.type'
-                ])
-                ->orderBy('number', 'asc')
-                ->get(),
-        ]);
+        return view('livewire.kiosk.check-out');
     }
 
-    public function selectRoom($room_id)
+    public function findRoom()
     {
-        $this->room_id = $room_id;
+        $this->validate([
+            'room_number' => 'required',
+        ], [
+            'room_number.required' => 'Please enter your room number.',
+        ]);
+
+        $room = Room::where('branch_id', auth()->user()->branch_id)
+            ->where('number', $this->room_number)
+            ->where('status', 'Occupied')
+            ->whereHas('latestCheckInDetail.guest', function ($q) {
+                $q->where('has_kiosk_check_out', 0);
+            })
+            ->first();
+
+        if ($room) {
+            $this->room_id = $room->id;
+            $this->steps = 2;
+        } else {
+            $this->dialog()->error(
+                $title = 'Room Not Found',
+                $description = 'No occupied room found with that number. Please check and try again.'
+            );
+            $this->room_number = null;
+        }
     }
 
     public function validateQR()
@@ -99,8 +94,11 @@ class CheckOut extends Component
     }
 
 
-      public function backRoom()
+    public function backRoom()
     {
-        $this->floor_id = null;
+        $this->room_id = null;
+        $this->room_number = null;
+        $this->qr_code = null;
+        $this->steps = 1;
     }
 }

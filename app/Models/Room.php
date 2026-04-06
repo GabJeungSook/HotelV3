@@ -52,16 +52,21 @@ class Room extends Model
 
     public function latestGuest()
     {
-        return $this->hasOne(Guest::class)->latestOfMany(); // uses created_at by default
+        return $this->hasOne(Guest::class)->latestOfMany();
     }
 
     public function latestCheckInDetail()
     {
-        return $this->hasOne(CheckinDetail::class)->ofMany([
-            'created_at' => 'max',
-        ], function ($query) {
-            $query->where('is_check_out', false);
-        });
+        return $this->hasOne(CheckinDetail::class)
+            ->where('is_check_out', false)
+            ->latestOfMany();
+    }
+
+    public function activeCheckInDetail()
+    {
+        return $this->hasOne(CheckinDetail::class)
+            ->where('is_check_out', false)
+            ->latest();
     }
 
     public function checkInDetail()

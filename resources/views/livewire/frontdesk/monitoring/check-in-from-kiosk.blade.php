@@ -14,7 +14,7 @@
             </div>
             <div>
                 <label class="block font-medium mb-1">Contact Number</label>
-                <div class="p-2 bg-gray-100 rounded-md">{{ $guest->contact == 'N/A' ? 'N/A' : '09' . $guest->contact }}</div>
+                <div class="p-2 bg-gray-100 rounded-md">{{ $guest->contact }}</div>
             </div>
             <div>
                 <label class="block font-medium mb-1">Room Number</label>
@@ -42,7 +42,7 @@
                 <span class="text-gray-800 font-medium">₱ {{ number_format($guest->static_amount, 2) }}</span>
             </div>
             <div class="flex justify-between text-xl mb-2">
-                <span class="text-gray-600">Additional Charges:</span>
+                <span class="text-gray-600">Room Deposit:</span>
                 <span class="text-gray-800 font-medium">₱ {{ number_format($additional_charges, 2) }}</span>
             </div>
              @if($has_discount)
@@ -105,7 +105,7 @@
             <div>
                 @if ($rate->has_discount)
                 <label class="inline-flex items-center">
-                    <input type="checkbox" wire:model="has_discount" class="form-checkbox rounded text-[#1877F2] focus:ring-[#1877F2] border-gray-300" />
+                    <input type="checkbox" wire:model.live="has_discount" class="form-checkbox rounded text-[#1877F2] focus:ring-[#1877F2] border-gray-300" />
                     <span class="ml-2 text-sm text-gray-700">Grant Discount</span>
                 </label>
                 @endif
@@ -150,9 +150,9 @@
                         <label class="inline-flex flex-col items-start pt-5">
                             <span class="flex items-center">
                                 <input type="checkbox" wire:model="save_excess" class="form-checkbox rounded text-[#1877F2] focus:ring-[#1877F2] border-gray-300" />
-                                <span class="ml-2 text-lg text-gray-700">Save excess amount</span>
+                                <span class="ml-2 text-lg text-gray-700">Save as Guest Deposit</span>
                             </span>
-                            <span class="text-xs text-gray-600 mt-1 ml-6">Save this amount as a deposit to the guest's account.</span>
+                            <span class="text-xs text-gray-600 mt-1 ml-6">Store the excess amount as a guest deposit (refundable on checkout).</span>
                         </label>
                     </div>
               </dl>

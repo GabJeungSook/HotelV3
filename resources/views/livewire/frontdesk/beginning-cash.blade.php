@@ -57,10 +57,10 @@
                 <div class="w-48">
                     <div class="relative">
                         
-                        @if($current_shift)
+                        @if($previous_snapshot)
                         <div>
-                            <span class="inline-block h-5 w-48 rounded font-mono">₱ {{ number_format($current_shift->beginning_cash, 2) }}</span>
-                            <p class="text-xs text-gray-500">Beginning cash of {{$current_shift->frontdesk->name}}</p>
+                            <span class="inline-block h-5 w-48 rounded font-mono">₱ {{ number_format($previous_snapshot->closing_cash, 2) }}</span>
+                            <p class="text-xs text-gray-500">Previous shift closing cash</p>
                         </div>
                         @else
                          <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 font-semibold">

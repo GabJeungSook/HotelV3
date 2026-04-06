@@ -17,7 +17,7 @@
     </p>
 
     <div class="mt-8">
-      <a href="{{ route('kiosk.dashboard') }}"
+      <a href="{{ route('kiosk.house-rules') }}"
         class="block w-full py-3 rounded-xl font-semibold text-white bg-[#009EF5] hover:bg-[#0080cc] shadow-lg shadow-[#009EF5]/25 transition-all duration-200">
         Back to Home
       </a>

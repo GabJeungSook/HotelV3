@@ -44,18 +44,15 @@ class CheckOutGuest extends Component
     public function mount($record)
     {
         $this->record = Guest::find($record);
-        $this->deposit_remote_and_key = Transaction::where('branch_id', auth()->user()->branch_id)
+        $check_in_detail = CheckinDetail::where('guest_id', $this->record->id)->first();
+
+        $this->deposit_remote_and_key = (float) Transaction::where('branch_id', auth()->user()->branch_id)
             ->where('guest_id', $this->record->id)
             ->where('transaction_type_id', 2)
-            ->where('remarks', 'Deposit From Check In (Room Key & TV Remote)')
-            ->first()
-            ?->deposit_amount ?? 0;
-        $this->deposit_except_remote_and_key = Transaction::where('branch_id', auth()->user()->branch_id)
-            ->where('guest_id', $this->record->id)
-            ->where('transaction_type_id', 2)
-            ->where('remarks', '!=', 'Deposit From Check In (Room Key & TV Remote)')
-            ->first()
-            ?->deposit_amount ?? 0;
+            ->where('deposit_type', 'room_key')
+            ->sum('payable_amount');
+
+        $this->deposit_except_remote_and_key = (float) ($check_in_detail?->deposit_balance ?? 0);
 
         $this->assigned_frontdesk = auth()->user()->assigned_frontdesks;
 
@@ -346,7 +343,7 @@ class CheckOutGuest extends Component
         }elseif($this->roomKeyHandedOver == 'No' && $this->has_damaged_remote_and_key){
             $this->claimableDeposits = $this->record->transactions()
             ->where('transaction_type_id', 2)
-            ->where('remarks', '!=', 'Deposit From Check In (Room Key & TV Remote)')
+            ->where('deposit_type', 'guest')
             ->get();
         }else {
             $this->claimableDeposits = $this->record->transactions()->where('transaction_type_id', 2)->get();

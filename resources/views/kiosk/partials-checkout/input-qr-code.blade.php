@@ -15,7 +15,7 @@
       autofocus autocomplete="off" placeholder="QR Code" />
 
     <div class="flex justify-center gap-3 mt-8">
-      <button x-on:click="step--" wire:click="backRoom"
+      <button wire:click="backRoom"
         class="px-6 py-3 rounded-xl font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 transition-all duration-200">
         Back
       </button>

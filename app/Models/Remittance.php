@@ -24,4 +24,9 @@ class Remittance extends Model
     {
         return $this->belongsTo(Branch::class);
     }
+
+    public function shiftSession()
+    {
+        return $this->belongsTo(ShiftSession::class);
+    }
 }

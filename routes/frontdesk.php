@@ -87,6 +87,34 @@ Route::prefix('frontdesk')
             return view('frontdesk.select-frontdesk');
             }
         })->name('frontdesk.extend-guest');
+        Route::get('/damage-charges/{id}', function ($id) {
+            if (auth()->user()->cash_drawer_id != null) {
+                return view('frontdesk.monitoring.damage-charges', ['id' => $id]);
+            } else {
+                return view('frontdesk.select-frontdesk');
+            }
+        })->name('frontdesk.damage-charges');
+        Route::get('/amenities/{id}', function ($id) {
+            if (auth()->user()->cash_drawer_id != null) {
+                return view('frontdesk.monitoring.amenities', ['id' => $id]);
+            } else {
+                return view('frontdesk.select-frontdesk');
+            }
+        })->name('frontdesk.amenities');
+        Route::get('/food-beverages/{id}', function ($id) {
+            if (auth()->user()->cash_drawer_id != null) {
+                return view('frontdesk.monitoring.food-beverages', ['id' => $id]);
+            } else {
+                return view('frontdesk.select-frontdesk');
+            }
+        })->name('frontdesk.food-beverages');
+        Route::get('/guest-deposit/{id}', function ($id) {
+            if (auth()->user()->cash_drawer_id != null) {
+                return view('frontdesk.monitoring.guest-deposit', ['id' => $id]);
+            } else {
+                return view('frontdesk.select-frontdesk');
+            }
+        })->name('frontdesk.guest-deposit');
          Route::get('/transfer-room/{record}', function ($record) {
             if (auth()->user()->cash_drawer_id != null) {
             return view('frontdesk.monitoring.transfer-room', ['record' => $record]);

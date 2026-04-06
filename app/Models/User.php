@@ -123,4 +123,21 @@ class User extends Authenticatable
     // {
     //     return $this->hasMany(AssignedFrontdesk::class);
     // }
+
+    public function shiftMemberships()
+    {
+        return $this->hasMany(ShiftMember::class);
+    }
+
+    public function currentShiftSession()
+    {
+        return $this->hasOneThrough(
+            ShiftSession::class,
+            ShiftMember::class,
+            'user_id',
+            'id',
+            'id',
+            'shift_session_id'
+        )->where('shift_sessions.status', 'open');
+    }
 }

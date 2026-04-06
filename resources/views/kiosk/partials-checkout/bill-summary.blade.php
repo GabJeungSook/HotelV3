@@ -99,7 +99,7 @@
         CONFIRM CHECK-OUT
       </button>
 
-      <button x-on:click="step--" wire:click="backRoom"
+      <button wire:click="backRoom"
         class="w-full py-3 rounded-xl font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 transition-all duration-200">
         Back
       </button>

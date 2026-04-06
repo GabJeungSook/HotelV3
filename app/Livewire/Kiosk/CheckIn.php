@@ -9,6 +9,7 @@ use App\Models\Rate;
 use App\Models\Floor;
 use App\Models\Guest;
 use App\Models\StayingHour;
+use App\Models\CheckinDetail;
 use App\Models\TemporaryCheckInKiosk;
 use App\Models\TemporaryReserved;
 use App\Models\DiscountConfiguration;
@@ -264,6 +265,8 @@ class CheckIn extends Component
             DB::commit();
             $this->showQr = true;
 
+            event(new \App\Events\CheckInEvent(auth()->user()->branch_id));
+
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
@@ -272,7 +275,7 @@ class CheckIn extends Component
 
     public function redirectToHome()
     {
-        return redirect()->route('kiosk.dashboard');
+        return redirect()->route('kiosk.house-rules');
     }
 
     public function render()
@@ -281,6 +284,11 @@ class CheckIn extends Component
 
         $excludedRoomIds = TemporaryCheckInKiosk::where('branch_id', $branchId)->pluck('room_id')
             ->merge(TemporaryReserved::where('branch_id', $branchId)->pluck('room_id'))
+            ->merge(
+                CheckinDetail::where('is_check_out', false)
+                    ->whereHas('room', fn ($q) => $q->where('branch_id', $branchId))
+                    ->pluck('room_id')
+            )
             ->toArray();
 
         $rooms = collect();

@@ -24,4 +24,9 @@ class Expense extends Model
     {
         return $this->belongsTo(ShiftLog::class, 'shift_log_id');
     }
+
+    public function shiftSession()
+    {
+        return $this->belongsTo(ShiftSession::class);
+    }
 }
