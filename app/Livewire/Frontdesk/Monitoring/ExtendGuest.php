@@ -78,7 +78,7 @@ class ExtendGuest extends Component
         $this->current_time_alloted = $this->guest->checkInDetail()->first()->number_of_hours;
 
         $stayingHourIds = Rate::where('branch_id', auth()->user()->branch_id)
-            ->where('type_id', $this->rate->type_id)
+            ->where('room_id', $this->room->id)
             ->distinct()
             ->pluck('staying_hour_id');
 
@@ -121,7 +121,7 @@ class ExtendGuest extends Component
             if (($this->current_time_alloted == 0)
                 && $this->guest->checkInDetail()->first()->next_extension_is_original == true) {
                 $rate = Rate::where('branch_id', auth()->user()->branch_id)
-                    ->where('type_id', $this->rate->type_id)
+                    ->where('room_id', $this->room->id)
                     ->whereHas('stayingHour', function ($query) {
                         $query->where('number', $this->extended_rate->hour);
                     })->first();
@@ -130,7 +130,7 @@ class ExtendGuest extends Component
                 if (!$rate) {
                     $extHour = $this->extended_rate->hour;
                     $rate = Rate::where('rates.branch_id', auth()->user()->branch_id)
-                        ->where('rates.type_id', $this->rate->type_id)
+                        ->where('rates.room_id', $this->room->id)
                         ->whereHas('stayingHour', fn($q) => $q->where('number', '>=', $extHour))
                         ->join('staying_hours', 'rates.staying_hour_id', '=', 'staying_hours.id')
                         ->orderBy('staying_hours.number', 'asc')
@@ -152,14 +152,14 @@ class ExtendGuest extends Component
 
                 // Find exact rate match, or next higher rate if no exact match
                 $rate = Rate::where('branch_id', auth()->user()->branch_id)
-                    ->where('type_id', $this->rate->type_id)
+                    ->where('room_id', $this->room->id)
                     ->whereHas('stayingHour', function ($query) use ($total_current_hours) {
                         $query->where('number', $total_current_hours);
                     })->first();
 
                 if (!$rate) {
                     $rate = Rate::where('rates.branch_id', auth()->user()->branch_id)
-                        ->where('rates.type_id', $this->rate->type_id)
+                        ->where('rates.room_id', $this->room->id)
                         ->whereHas('stayingHour', function ($query) use ($total_current_hours) {
                             $query->where('number', '>=', $total_current_hours);
                         })

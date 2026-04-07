@@ -20,7 +20,10 @@ class ManageStayingHours extends Component implements Tables\Contracts\HasTable,
 
     protected function getTableQuery(): Builder
     {
-        return StayingHour::query();
+        if (auth()->user()->hasRole('superadmin')) {
+            return StayingHour::query();
+        }
+        return StayingHour::query()->where('branch_id', auth()->user()->branch_id);
     }
 
     protected function getTableColumns(): array

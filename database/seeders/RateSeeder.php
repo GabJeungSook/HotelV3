@@ -2,105 +2,47 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Rate;
+use App\Models\Room;
+use App\Models\StayingHour;
 use App\Models\ExtensionRate;
 
 class RateSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
     public function run()
     {
-        Rate::create([
-            'branch_id' => 1,
-            'staying_hour_id' => 1,
-            'type_id' => 1,
-            'amount' => 224,
-            'is_available' => 1,
-        ]);
-        Rate::create([
-            'branch_id' => 1,
-            'staying_hour_id' => 2,
-            'type_id' => 1,
-            'amount' => 336,
-            'is_available' => 1,
-        ]);
-        Rate::create([
-            'branch_id' => 1,
-            'staying_hour_id' => 4,
-            'type_id' => 1,
-            'amount' => 560,
-            'is_available' => 1,
-        ]);
+        // Amount mapping: type_id => [staying_hour_id => amount]
+        // staying_hour_id: 1=6h, 2=12h, 4=24h (no rates for 18h, matching V2)
+        $amounts = [
+            1 => [1 => 224, 2 => 336, 4 => 560],   // Single size Bed
+            2 => [1 => 280, 2 => 392, 4 => 616],   // Double size Bed
+            3 => [1 => 336, 2 => 448, 4 => 672],   // Twin size Bed
+        ];
 
-        Rate::create([
-            'branch_id' => 1,
-            'staying_hour_id' => 1,
-            'type_id' => 2,
-            'amount' => 280,
-            'is_available' => 1,
-        ]);
-        Rate::create([
-            'branch_id' => 1,
-            'staying_hour_id' => 2,
-            'type_id' => 2,
-            'amount' => 392,
-            'is_available' => 1,
-        ]);
-        Rate::create([
-            'branch_id' => 1,
-            'staying_hour_id' => 4,
-            'type_id' => 2,
-            'amount' => 616,
-            'is_available' => 1,
-        ]);
+        $rooms = Room::where('branch_id', 1)->get();
 
-        Rate::create([
-            'branch_id' => 1,
-            'staying_hour_id' => 1,
-            'type_id' => 3,
-            'amount' => 336,
-            'is_available' => 1,
-        ]);
-        Rate::create([
-            'branch_id' => 1,
-            'staying_hour_id' => 2,
-            'type_id' => 3,
-            'amount' => 448,
-            'is_available' => 1,
-        ]);
-        Rate::create([
-            'branch_id' => 1,
-            'staying_hour_id' => 4,
-            'type_id' => 3,
-            'amount' => 672,
-            'is_available' => 1,
-        ]);
+        foreach ($rooms as $room) {
+            if (!isset($amounts[$room->type_id])) {
+                continue;
+            }
 
-        ExtensionRate::create([
-            'branch_id' => 1,
-            'hour' => 6,
-            'amount' => 112,
-        ]);
-        ExtensionRate::create([
-            'branch_id' => 1,
-            'hour' => 12,
-            'amount' => 224,
-        ]);
-        ExtensionRate::create([
-            'branch_id' => 1,
-            'hour' => 18,
-            'amount' => 336,
-        ]);
-        ExtensionRate::create([
-            'branch_id' => 1,
-            'hour' => 24,
-            'amount' => 448,
-        ]);
+            foreach ($amounts[$room->type_id] as $stayingHourId => $amount) {
+                Rate::create([
+                    'branch_id' => 1,
+                    'room_id' => $room->id,
+                    'staying_hour_id' => $stayingHourId,
+                    'type_id' => $room->type_id,
+                    'amount' => $amount,
+                    'is_available' => 1,
+                ]);
+            }
+        }
+
+        // Extension rates for Branch 1
+        ExtensionRate::create(['branch_id' => 1, 'hour' => 6, 'amount' => 112]);
+        ExtensionRate::create(['branch_id' => 1, 'hour' => 12, 'amount' => 224]);
+        ExtensionRate::create(['branch_id' => 1, 'hour' => 18, 'amount' => 336]);
+        ExtensionRate::create(['branch_id' => 1, 'hour' => 24, 'amount' => 448]);
     }
 }

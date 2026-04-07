@@ -12,9 +12,9 @@ Route::prefix('admin')
         Route::get('/manage-frontdesk', function () {
             return view('admin.manage-frontdesk');
         })->name('admin.manage-frontdesk');
-        // Route::get('/rates', function () {
-        //     return view('admin.manage.rate');
-        // })->name('admin.rate');
+        Route::get('/rates', function () {
+            return view('admin.manage.rate');
+        })->name('admin.rate');
         Route::get('/floors', function () {
             return view('admin.manage.floor');
         })->name('admin.floor');
@@ -62,4 +62,12 @@ Route::prefix('admin')
          Route::get('/manage-cash-drawers', function () {
             return view('admin.manage.cash-drawers');
         })->name('admin.cash-drawers');
+
+        Route::get('/food/category', function () {
+            return view('frontdesk.food.category');
+        })->name('frontdesk.food-category');
+
+        Route::get('/food/inventory/{id}', function ($id) {
+            return view('frontdesk.food.inventory', ['record' => $id]);
+        })->name('frontdesk.food-inventories');
     });

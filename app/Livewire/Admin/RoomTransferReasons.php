@@ -21,7 +21,10 @@ class RoomTransferReasons extends Component implements Tables\Contracts\HasTable
 
     protected function getTableQuery(): Builder
     {
-        return TransferReason::query();
+        if (auth()->user()->hasRole('superadmin')) {
+            return TransferReason::query();
+        }
+        return TransferReason::query()->where('branch_id', auth()->user()->branch_id);
     }
 
      protected function getTableColumns(): array

@@ -58,7 +58,7 @@
                     <option selected>No Room Available</option>
                   </x-native-select>
                 @else
-                <x-native-select label="Room" wire:model="selected_room_id">
+                <x-native-select label="Room" wire:model.live="selected_room_id">
                     <option selected hidden>Select One</option>
                     @forelse ($rooms as $room)
                       <option value="{{ $room->id }}">{{ $room->numberWithFormat() }}</option>
