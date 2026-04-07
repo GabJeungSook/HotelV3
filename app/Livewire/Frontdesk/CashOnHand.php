@@ -28,12 +28,13 @@ class CashOnHand extends Component
     public $description;
     public $code;
     public $current_session;
+    public $active_member_count = 0;
+    public $is_last_member = false;
 
     public function mount()
     {
         $user = auth()->user();
 
-        // Find the current open shift session for this user's drawer
         $this->current_session = ShiftSession::where('branch_id', $user->branch_id)
             ->where('cash_drawer_id', $user->cash_drawer_id)
             ->where('status', 'open')
@@ -44,6 +45,12 @@ class CashOnHand extends Component
         }
 
         $sessionId = $this->current_session->id;
+
+        $this->active_member_count = ShiftMember::where('shift_session_id', $sessionId)
+            ->whereNull('left_at')
+            ->count();
+
+        $this->is_last_member = $this->active_member_count <= 1;
 
         // Total sales transactions (exclude deposits type 2 and cashouts type 5)
         $this->total_transactions = (float) Transaction::where('shift_session_id', $sessionId)
@@ -73,9 +80,9 @@ class CashOnHand extends Component
         $this->validate([
             'remittance' => 'required|numeric|min:0',
         ], [
-            'remittance.required' => 'Please enter the ending cash amount.',
-            'remittance.numeric' => 'The ending cash must be a valid number.',
-            'remittance.min' => 'The ending cash cannot be negative.',
+            'remittance.required' => 'Please enter the cash on hand amount.',
+            'remittance.numeric' => 'The cash on hand must be a valid number.',
+            'remittance.min' => 'The cash on hand cannot be negative.',
         ]);
 
         $this->logout_modal = true;
@@ -104,8 +111,10 @@ class CashOnHand extends Component
         DB::beginTransaction();
 
         try {
-            $session = ShiftSession::where('branch_id', auth()->user()->branch_id)
-                ->where('cash_drawer_id', auth()->user()->cash_drawer_id)
+            $user = auth()->user();
+
+            $session = ShiftSession::where('branch_id', $user->branch_id)
+                ->where('cash_drawer_id', $user->cash_drawer_id)
                 ->where('status', 'open')
                 ->lockForUpdate()
                 ->first();
@@ -116,29 +125,38 @@ class CashOnHand extends Component
                 return;
             }
 
-            // Set closing cash and close the session
-            $session->update([
-                'closing_cash' => $this->remittance,
-                'closed_at' => now(),
-                'status' => 'closed',
-            ]);
-
-            // Calculate and write the shift snapshot
-            $snapshotService = new ShiftSnapshotService();
-            $snapshotService->createSnapshot($session);
-
-            // Close all shift members
-            ShiftMember::where('shift_session_id', $session->id)
+            // Count active members BEFORE marking this user as left
+            $activeMemberCount = ShiftMember::where('shift_session_id', $session->id)
                 ->whereNull('left_at')
-                ->update(['left_at' => now()]);
+                ->count();
 
-            // Deactivate cash drawer
-            CashDrawer::where('id', $session->cash_drawer_id)->update(['is_active' => false]);
+            // Mark THIS user's membership as ended
+            ShiftMember::where('shift_session_id', $session->id)
+                ->where('user_id', $user->id)
+                ->whereNull('left_at')
+                ->update([
+                    'left_at' => now(),
+                    'cash_at_leave' => $this->remittance,
+                ]);
 
-            // Clear cash_drawer_id for all members of this session
-            $memberUserIds = ShiftMember::where('shift_session_id', $session->id)
-                ->pluck('user_id');
-            \App\Models\User::whereIn('id', $memberUserIds)->update(['cash_drawer_id' => null]);
+            // Clear this user's cash_drawer_id
+            $user->update(['cash_drawer_id' => null]);
+
+            // If this was the LAST active member → close the entire session
+            if ($activeMemberCount <= 1) {
+                $session->update([
+                    'closing_cash' => $this->remittance,
+                    'closed_at' => now(),
+                    'status' => 'closed',
+                ]);
+
+                // Create shift snapshot
+                $snapshotService = new ShiftSnapshotService();
+                $snapshotService->createSnapshot($session);
+
+                // Deactivate cash drawer
+                CashDrawer::where('id', $session->cash_drawer_id)->update(['is_active' => false]);
+            }
 
             DB::commit();
 

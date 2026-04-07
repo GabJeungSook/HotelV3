@@ -15,11 +15,13 @@ class ShiftMember extends Model
         'role',
         'joined_at',
         'left_at',
+        'cash_at_leave',
     ];
 
     protected $casts = [
         'joined_at' => 'datetime',
         'left_at' => 'datetime',
+        'cash_at_leave' => 'decimal:2',
     ];
 
     public function shiftSession()

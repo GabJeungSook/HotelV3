@@ -116,6 +116,15 @@
                 <div class="flex justify-between py-2">
                     <div class="w-full divide-y divide-gray-400 ">
                         <span class="text-xl font-semibold mb-8">Are you sure you want to end your shift?</span>
+                        @if($is_last_member)
+                          <div class="mt-3 p-3 rounded-md bg-red-50 border border-red-200 text-sm text-red-700">
+                            You are the last active member. This will <strong>close the entire shift session</strong>, create the shift report, and release the cash drawer.
+                          </div>
+                        @else
+                          <div class="mt-3 p-3 rounded-md bg-blue-50 border border-blue-200 text-sm text-blue-700">
+                            Your partner is still on shift. Your cash count will be recorded but the session will remain open.
+                          </div>
+                        @endif
                         {{-- <dl class="mt-2 text-sm lg:col-span-5 lg:mt-0">
                             <div class="flex justify-between py-2">
                                 <dt class="text-gray-600 text-lg font-bold">Total Cash on Drawer:</dt>
